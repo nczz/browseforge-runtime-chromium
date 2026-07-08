@@ -1,0 +1,79 @@
+module browseforge.stealth.mojom;
+
+import "url/mojom/origin.mojom";
+
+struct BrowserIdentity {
+  string family;
+  int32 major;
+  string full_version;
+  array<string> brands;
+  string user_agent;
+};
+
+struct PlatformIdentity {
+  string os;
+  string arch;
+  string platform;
+  string platform_ch;
+  bool mobile;
+  string bitness;
+  string model;
+};
+
+struct LocaleIdentity {
+  string timezone;
+  string locale;
+  string accept_language;
+};
+
+struct HardwareIdentity {
+  int32 hardware_concurrency;
+  int32 device_memory_gb;
+};
+
+struct ScreenIdentity {
+  int32 width;
+  int32 height;
+  int32 avail_width;
+  int32 avail_height;
+  double dpr;
+  int32 color_depth;
+};
+
+struct GpuIdentity {
+  string vendor;
+  string renderer;
+  string angle_backend;
+};
+
+struct WebRtcPolicy {
+  string mode;
+  string proxy_region;
+  bool direct_ip_redaction;
+};
+
+struct StoragePolicy {
+  int32 quota_mb;
+  bool persistent;
+};
+
+struct PersonaSnapshot {
+  string schema_version;
+  string runtime_id;
+  uint64 seed;
+  string persona_id_hash;
+  string origin_salt_key;
+  BrowserIdentity browser;
+  PlatformIdentity platform;
+  LocaleIdentity locale;
+  HardwareIdentity hardware;
+  ScreenIdentity screen;
+  GpuIdentity gpu;
+  WebRtcPolicy webrtc;
+  StoragePolicy storage;
+};
+
+interface BrowseForgeStealthHost {
+  GetPersonaSnapshot() => (PersonaSnapshot snapshot);
+  GetOriginSaltKey(url.mojom.Origin origin) => (string origin_salt_key);
+};

@@ -121,6 +121,8 @@ func bindLaunchFlags(fs *flag.FlagSet) (*launcher.Config, *string, *bool, *strin
 	fs.IntVar(&cfg.Fingerprint.StorageQuotaMB, "fingerprint-storage-quota", 0, "storage quota MB")
 	fs.StringVar(&cfg.Fingerprint.FontsDir, "fingerprint-fonts-dir", "", "fonts directory")
 	fs.StringVar(&cfg.Fingerprint.WebRTCIP, "fingerprint-webrtc-ip", "", "WebRTC IP policy")
+	fs.StringVar(&cfg.Fingerprint.NativeConfigPath, "fingerprint-native-config", "", "BrowseForge native stealth persona config path")
+	fs.StringVar(&cfg.Fingerprint.NativeMode, "fingerprint-native-mode", "", "BrowseForge native stealth mode")
 	fs.StringVar(&cfg.Proxy.Server, "proxy-server", "", "proxy server URI")
 	fs.StringVar(&cfg.Proxy.ExitIP, "proxy-exit-ip", "", "redacted/known proxy exit IP for WebRTC coherence")
 	fs.StringVar(&cfg.RemoteDebugging.Address, "remote-debugging-address", "127.0.0.1", "remote debugging bind address")
@@ -169,6 +171,12 @@ func mergeConfig(dst *launcher.Config, flags launcher.Config) {
 	}
 	if flags.Fingerprint.WebRTCIP != "" {
 		dst.Fingerprint.WebRTCIP = flags.Fingerprint.WebRTCIP
+	}
+	if flags.Fingerprint.NativeConfigPath != "" {
+		dst.Fingerprint.NativeConfigPath = flags.Fingerprint.NativeConfigPath
+	}
+	if flags.Fingerprint.NativeMode != "" {
+		dst.Fingerprint.NativeMode = flags.Fingerprint.NativeMode
 	}
 	if flags.Proxy.Server != "" {
 		dst.Proxy.Server = flags.Proxy.Server

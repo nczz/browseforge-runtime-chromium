@@ -1,0 +1,26 @@
+# BrowseForge Chromium source patch scaffold for //browseforge/stealth.
+# This file is intended to be copied into the pinned Chromium checkout before gn gen.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojom("mojom") {
+  sources = [ "public/mojom/stealth.mojom" ]
+}
+
+source_set("stealth") {
+  sources = [
+    "persona_resolver.cc",
+    "persona_resolver.h",
+    "persona_snapshot.cc",
+    "persona_snapshot.h",
+    "stealth_switches.cc",
+    "stealth_switches.h",
+  ]
+
+  public_deps = [ ":mojom" ]
+
+  deps = [
+    "//base",
+    "//url",
+  ]
+}

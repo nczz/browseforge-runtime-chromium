@@ -20,6 +20,44 @@
       ],
       "upstream_status": "unmodified_baseline",
       "notes": "No anti-detect browser engine patches are claimed. This patchset exists to bind wrapper/build/detector evidence to a concrete Chromium source ref before patch work begins."
+    },
+    {
+      "patchset_id": "scaffold-browseforge-stealth-substrate",
+      "title": "BrowseForge native stealth substrate scaffold for Chromium M150",
+      "surface": "stealth_substrate",
+      "files_touched": [
+        "browser/stealth/BUILD.gn",
+        "browser/stealth/stealth_switches.h",
+        "browser/stealth/stealth_switches.cc",
+        "browser/stealth/persona_snapshot.h",
+        "browser/stealth/persona_snapshot.cc",
+        "browser/stealth/persona_resolver.h",
+        "browser/stealth/persona_resolver.cc",
+        "browser/stealth/public/mojom/stealth.mojom",
+        "internal/stealth/persona.go",
+        "internal/launcher/config.go",
+        "cmd/browseforge-runtime-chromium/main.go"
+      ],
+      "symbols_touched": [
+        "browseforge::stealth::PersonaSnapshot",
+        "browseforge::stealth::PersonaResolver",
+        "browseforge.stealth.mojom.BrowseForgeStealthHost",
+        "launcher.FingerprintConfig.NativeConfigPath",
+        "launcher.FingerprintConfig.NativeMode"
+      ],
+      "risk_level": "medium",
+      "detectors_addressed": [
+        "sannysoft",
+        "creepjs",
+        "browserleaks"
+      ],
+      "tests": [
+        "go test ./...",
+        "python3 -m unittest discover -s tests",
+        "python3 scripts/validate.py"
+      ],
+      "upstream_status": "not_applied_waiting_for_chromium_checkout",
+      "notes": "Defines the fail-closed persona snapshot contract, native switch names, and internal Mojo projection interface. It does not claim detector pass until copied into the pinned Chromium checkout and wired to browser/renderer/network subsystems."
     }
   ],
   "required_patch_metadata": [

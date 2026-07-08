@@ -20,6 +20,9 @@ const automationControlledArg = "--disable-blink-features=AutomationControlled"
 
 const webrtcIPHandlingArg = "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
 
+const stealthConfigArg = "--browseforge-stealth-config"
+const stealthModeArg = "--browseforge-stealth-mode"
+
 type Config struct {
 	BrowserBinary   string            `json:"browser_binary"`
 	UserDataDir     string            `json:"user_data_dir"`
@@ -43,6 +46,8 @@ type FingerprintConfig struct {
 	StorageQuotaMB      int    `json:"storage_quota_mb"`
 	FontsDir            string `json:"fonts_dir"`
 	WebRTCIP            string `json:"webrtc_ip"`
+	NativeConfigPath    string `json:"native_config_path"`
+	NativeMode          string `json:"native_mode"`
 }
 
 type ProxyConfig struct {
@@ -77,6 +82,8 @@ var managedArgPrefixes = []string{
 	"--disable-blink-features",
 	"--force-webrtc-ip-handling-policy",
 	"--webrtc-ip-handling-policy",
+	stealthConfigArg,
+	stealthModeArg,
 }
 
 func LoadConfig(path string) (Config, error) {
@@ -173,6 +180,16 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if webrtcIP != "" {
 		args = append(args, "--fingerprint-webrtc-ip="+webrtcIP)
+	}
+	if c.Fingerprint.NativeConfigPath != "" {
+		nativeConfigPath, err := filepath.Abs(c.Fingerprint.NativeConfigPath)
+		if err != nil {
+			return CommandPlan{}, fmt.Errorf("resolve fingerprint native config path: %w", err)
+		}
+		args = append(args, stealthConfigArg+"="+nativeConfigPath)
+	}
+	if c.Fingerprint.NativeMode != "" {
+		args = append(args, stealthModeArg+"="+c.Fingerprint.NativeMode)
 	}
 	if c.NoSandbox {
 		args = append(args, "--no-sandbox")

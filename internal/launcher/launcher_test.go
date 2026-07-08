@@ -36,10 +36,31 @@ func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
 }
 
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
-	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only"}}
+	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
 	if err == nil {
 		t.Fatal("expected managed arg collision")
+	}
+}
+
+func TestBuildPlanAddsNativeStealthConfig(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			NativeConfigPath: filepath.Join("testdata", "persona.json"),
+			NativeMode:       "strict",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(plan.Args, "\n")
+	if !strings.Contains(joined, stealthConfigArg+"=") {
+		t.Fatalf("missing native stealth config arg: %v", plan.Args)
+	}
+	if !strings.Contains(joined, stealthModeArg+"=strict") {
+		t.Fatalf("missing native stealth mode arg: %v", plan.Args)
 	}
 }
 

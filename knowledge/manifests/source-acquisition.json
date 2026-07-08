@@ -10,33 +10,51 @@
     "reproducibility_note": "The selected ref and commit are recorded. A release-grade source acquisition must fetch this ref and record the Chromium DEPS file hash plus gclient sync metadata before building.",
     "local_paths_checked": [
       {
+        "path": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
+        "exists": false,
+        "purpose": "external_checkout_target"
+      },
+      {
         "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/src",
-        "exists": false
+        "exists": false,
+        "purpose": "must_remain_empty_no_large_source_inside_repo"
       },
       {
         "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/upstream",
-        "exists": false
+        "exists": false,
+        "purpose": "must_remain_empty_no_large_source_inside_repo"
       },
       {
         "path": "/Users/chun/Projects/browser-source-intel/chromium",
-        "exists": false
+        "exists": false,
+        "purpose": "prior_search_path"
       }
     ]
   },
   "toolchain": {
-    "fetch": null,
-    "gclient": null,
-    "gn": null,
-    "ninja": null,
-    "autoninja": null,
-    "status": "missing_chromium_checkout_toolchain",
+    "fetch": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/fetch",
+    "gclient": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gclient",
+    "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
+    "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
+    "autoninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/autoninja",
+    "status": "depot_tools_installed_checkout_fetching",
     "missing_prerequisites": [
-      "depot_tools/fetch",
-      "depot_tools/gclient",
-      "GN",
-      "Ninja/autoninja",
-      "local Chromium checkout for refs/tags/150.0.7871.101"
-    ]
+      "local Chromium checkout for refs/tags/150.0.7871.101",
+      "gclient DEPS sync for selected ref",
+      "GN output directory for BrowseForgeDev"
+    ],
+    "automation": {
+      "script": "scripts/chromium_source.py",
+      "default_workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
+      "default_git_cache": "/Users/chun/Projects/browser-source/git-cache",
+      "safe_default": "plan/check only; acquire requires --execute",
+      "first_steps": [
+        "python3 scripts/chromium_source.py plan",
+        "python3 scripts/chromium_source.py check",
+        "python3 scripts/chromium_source.py acquire --execute --step prepare-workdir --step clone-depot-tools",
+        "python3 scripts/chromium_source.py acquire --execute --step fetch-chromium"
+      ]
+    }
   },
   "local_dogfood_binary": {
     "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
