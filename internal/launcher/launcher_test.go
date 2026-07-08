@@ -35,6 +35,22 @@ func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			Platform: "Win32",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsArg(plan.Args, "--fingerprint-platform=Win32") {
+		t.Fatalf("missing platform arg: %v", plan.Args)
+	}
+}
+
 func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
