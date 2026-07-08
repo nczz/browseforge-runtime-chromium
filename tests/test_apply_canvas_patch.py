@@ -116,6 +116,7 @@ class ApplyCanvasPatchTests(unittest.TestCase):
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('"fingerprint-canvas-noise"', patched)
         self.assertIn('BrowseForgeApplyCanvasNoise(&image_data_pixmap)', patched)
+        self.assertIn("UNSAFE_TODO(static_cast<uint8_t*>(pixmap->writable_addr())", patched)
 
     def test_patches_canvas_encoding_readback(self) -> None:
         patched = apply_canvas_patch.patch_image_data_buffer_cc(IMAGE_DATA_BUFFER_FIXTURE)

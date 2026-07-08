@@ -54,6 +54,31 @@ def patch_base_context(text: str) -> str:
         if BASE_NAMESPACE_ANCHOR not in patched:
             raise SystemExit("base_rendering_context_2d.cc namespace anchor not found")
         patched = patched.replace(BASE_NAMESPACE_ANCHOR, BASE_NAMESPACE_ANCHOR + CANVAS_NOISE_HELPER, 1)
+    base_unsafe_migrations = [
+        (
+            "uint8_t* row = static_cast<uint8_t*>(pixmap->writable_addr()) +\n"
+            "                   static_cast<size_t>(y) * pixmap->rowBytes();",
+            "uint8_t* row = UNSAFE_TODO(static_cast<uint8_t*>(pixmap->writable_addr()) +\n"
+            "                               static_cast<size_t>(y) * pixmap->rowBytes());",
+        ),
+        (
+            "uint8_t* pixel = row + static_cast<size_t>(x) * bytes_per_pixel;",
+            "uint8_t* pixel = UNSAFE_TODO(row + static_cast<size_t>(x) * bytes_per_pixel);",
+        ),
+        (
+            "const int value = static_cast<int>(pixel[channel]) +\n"
+            "                          BrowseForgeCanvasNoiseDelta(seed, noise_index);",
+            "const int value = static_cast<int>(UNSAFE_TODO(pixel[channel])) +\n"
+            "                          BrowseForgeCanvasNoiseDelta(seed, noise_index);",
+        ),
+        (
+            "pixel[channel] = static_cast<uint8_t>(value < 0 ? 0 : value > 255 ? 255 : value);",
+            "UNSAFE_TODO(pixel[channel]) =\n"
+            "            static_cast<uint8_t>(value < 0 ? 0 : value > 255 ? 255 : value);",
+        ),
+    ]
+    for original, replacement in base_unsafe_migrations:
+        patched = patched.replace(original, replacement)
     if PATCHED_GET_IMAGE_DATA_RETURN not in patched:
         if ORIGINAL_GET_IMAGE_DATA_RETURN not in patched:
             raise SystemExit("BaseRenderingContext2D::getImageDataInternal anchor not found")
