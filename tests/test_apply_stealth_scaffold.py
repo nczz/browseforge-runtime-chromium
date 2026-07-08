@@ -26,10 +26,13 @@ class ApplyStealthScaffoldTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "src"
             (src / ".git").mkdir(parents=True)
+            (src / "BUILD.gn").write_text('group("gn_all") {\n  deps = [\n      "//url:url_unittests",\n  ]\n}\n', encoding="utf-8")
             copied = apply_stealth_scaffold.apply_scaffold(src)
 
             self.assertIn(Path("browseforge/stealth/BUILD.gn"), copied)
             self.assertIn(Path("browseforge/stealth/public/mojom/stealth.mojom"), copied)
+            self.assertIn(Path("BUILD.gn"), copied)
+            self.assertIn('"//browseforge/stealth"', (src / "BUILD.gn").read_text(encoding="utf-8"))
             self.assertTrue((src / "browseforge" / "stealth" / "persona_resolver.cc").is_file())
 
 

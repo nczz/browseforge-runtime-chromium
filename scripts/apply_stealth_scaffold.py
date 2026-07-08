@@ -8,6 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCAFFOLD = ROOT / "browser" / "stealth"
 DEFAULT_CHROMIUM_SRC = Path("/Users/chun/Projects/browser-source/browseforge-chromium/src")
+GN_ALL_DEP = '      "//browseforge/stealth",'
+GN_ALL_ANCHOR = '      "//url:url_unittests",'
+
 
 
 def validate_chromium_src(src: Path) -> None:
@@ -17,12 +20,27 @@ def validate_chromium_src(src: Path) -> None:
         raise SystemExit("Refusing to copy Chromium patch scaffold inside the runtime repository")
 
 
+def patch_root_build(src: Path) -> Path:
+    root_build = src / "BUILD.gn"
+    if not root_build.is_file():
+        raise SystemExit(f"Chromium root BUILD.gn is missing: {root_build}")
+    text = root_build.read_text(encoding="utf-8")
+    if GN_ALL_DEP in text:
+        return root_build
+    if GN_ALL_ANCHOR not in text:
+        raise SystemExit("Chromium root BUILD.gn gn_all deps anchor not found")
+    root_build.write_text(text.replace(GN_ALL_ANCHOR, f"{GN_ALL_DEP}\n{GN_ALL_ANCHOR}", 1), encoding="utf-8")
+    return root_build
+
+
 def apply_scaffold(src: Path) -> list[Path]:
     validate_chromium_src(src)
     dest = src / "browseforge" / "stealth"
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(SCAFFOLD, dest, dirs_exist_ok=True)
     copied = sorted(path.relative_to(src) for path in dest.rglob("*") if path.is_file())
+    patched = patch_root_build(src).relative_to(src)
+    copied = sorted([*copied, patched])
     if not copied:
         raise SystemExit("No stealth scaffold files copied")
     return copied

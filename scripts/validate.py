@@ -39,7 +39,9 @@ REQUIRED_FILES = [
     "build/package_runtime.py",
     "scripts/chromium_source.py",
     "scripts/apply_stealth_scaffold.py",
+    "scripts/chromium_docker.py",
     "scripts/detector_harness.py",
+    "docker/chromium-build.Dockerfile",
     "graph/schema/runtime-kg.schema.md",
     "graph/queries/development-readiness.cypher",
     "graph/queries/fingerprint-risk.cypher",
@@ -57,6 +59,7 @@ REQUIRED_FILES = [
     "tests/test_package_runtime.py",
     "tests/test_chromium_source.py",
     "tests/test_apply_stealth_scaffold.py",
+    "tests/test_chromium_docker.py",
     "internal/stealth/persona_test.go",
     "tests/test_stealth_scaffold.py",
 ]

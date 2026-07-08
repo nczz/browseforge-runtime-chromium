@@ -26,6 +26,7 @@
       "title": "BrowseForge native stealth substrate scaffold for Chromium M150",
       "surface": "stealth_substrate",
       "files_touched": [
+        "chromium/src/BUILD.gn",
         "browser/stealth/BUILD.gn",
         "browser/stealth/stealth_switches.h",
         "browser/stealth/stealth_switches.cc",
@@ -54,10 +55,14 @@
       "tests": [
         "go test ./...",
         "python3 -m unittest discover -s tests",
-        "python3 scripts/validate.py"
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py sync-linux-deps --execute",
+        "python3 scripts/chromium_docker.py install-linux-deps --execute",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //browseforge/stealth:stealth"
       ],
-      "upstream_status": "not_applied_waiting_for_chromium_checkout",
-      "notes": "Defines the fail-closed persona snapshot contract, native switch names, and internal Mojo projection interface. It does not claim detector pass until copied into the pinned Chromium checkout and wired to browser/renderer/network subsystems."
+      "upstream_status": "copied_to_external_checkout_and_linked_to_gn_all",
+      "notes": "Defines the fail-closed persona snapshot contract, native switch names, and internal Mojo projection interface. The scaffold is copied into the pinned Chromium checkout as //browseforge/stealth and linked from Chromium root gn_all so GN generates and checks the target. It does not claim detector pass until browser/renderer/network subsystems consume the native service."
     }
   ],
   "required_patch_metadata": [
