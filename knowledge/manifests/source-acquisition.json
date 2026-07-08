@@ -6,10 +6,12 @@
     "base_ref": "refs/tags/150.0.7871.101",
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "source_checkout_status": "checked_out_pinned_ref",
-    "deps_snapshot_status": "syncing_selected_ref",
+    "deps_snapshot_status": "synced_selected_ref",
     "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
+    "hooks_status": "completed",
+    "gn_generation_status": "blocked_missing_full_xcode_on_macos_host",
     "stealth_scaffold_status": "copied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded and checked out locally. A release-grade source acquisition must finish gclient sync for this ref and record hook/build metadata before building.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, and gclient sync/hooks completed. GN generation on the macOS host is blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; Linux/Docker build path remains the preferred next baseline path.",
     "local_paths_checked": [
       {
         "path": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
@@ -40,9 +42,9 @@
     "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
     "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
     "autoninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/autoninja",
-    "status": "pinned_checkout_ready_deps_syncing",
+    "status": "pinned_checkout_deps_synced_gn_blocked_by_host_xcode",
     "missing_prerequisites": [
-      "gclient DEPS sync for selected ref",
+      "full Xcode selected by xcode-select for macOS host GN generation or Linux/Docker build path",
       "GN output directory for BrowseForgeDev",
       "unpatched baseline Chromium build",
       "release artifact package"
