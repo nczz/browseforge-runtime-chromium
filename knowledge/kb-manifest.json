@@ -71,6 +71,57 @@
       "exclude": [],
       "sensitive": false,
       "index_targets": ["cross_repo_kg"]
+    },
+    {
+      "source_id": "cloakbrowser-reference",
+      "kind": "chromium_reference_runtime",
+      "repo": "browser-source-intel/CloakBrowser-v146.0.7680.177.4",
+      "ref": "local-index",
+      "path_globs": [
+        "README.md",
+        "browser/**/*.py",
+        "browser/**/*.js",
+        "docker/**/*.Dockerfile",
+        "docs/**/*.md"
+      ],
+      "exclude": ["out/**", "build/**", "dist/**", "node_modules/**"],
+      "sensitive": false,
+      "index_targets": ["reference_kb", "reference_kg", "cross_repo_kg"]
+    },
+    {
+      "source_id": "camoufox-reference",
+      "kind": "firefox_reference_runtime",
+      "repo": "browser-source-intel/Camoufox-v135.0.1-beta.24",
+      "ref": "local-index",
+      "path_globs": [
+        "README.md",
+        "docs/**/*.md",
+        "pythonlib/**/*.py",
+        "camoufox/**/*.py",
+        "scripts/**/*.py"
+      ],
+      "exclude": ["obj*/**", "build/**", "dist/**", "node_modules/**"],
+      "sensitive": false,
+      "index_targets": ["reference_kb", "reference_kg"]
+    },
+    {
+      "source_id": "chromium-upstream",
+      "kind": "upstream_browser_source",
+      "repo": "chromium/chromium",
+      "ref": "unselected",
+      "path_globs": [
+        "chrome/**",
+        "content/**",
+        "third_party/blink/**",
+        "gpu/**",
+        "media/**",
+        "net/**",
+        "services/network/**"
+      ],
+      "exclude": ["out/**", "build/**"],
+      "sensitive": false,
+      "index_targets": ["future_kb", "future_kg"],
+      "status": "missing_base_version"
     }
   ],
   "excluded_patterns": [

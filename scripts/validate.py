@@ -18,15 +18,19 @@ REQUIRED_FILES = [
     "knowledge/manifests/detectors.json",
     "knowledge/manifests/patchset.json",
     "knowledge/manifests/runtime-artifacts.json",
+    "knowledge/manifests/reference-sources.json",
+    "knowledge/manifests/platform-matrix.json",
     "graph/schema/runtime-kg.schema.md",
     "graph/queries/development-readiness.cypher",
     "graph/queries/fingerprint-risk.cypher",
     "graph/queries/cross-repo-impact.cypher",
+    "graph/queries/source-coverage.cypher",
     "docs/architecture.md",
     "docs/browseforge-integration.md",
     "docs/research-map.md",
     "docs/fingerprint-surfaces.md",
     "docs/release-readiness.md",
+    "docs/kb-kg-completeness-assessment.md",
 ]
 
 REQUIRED_DIRS = [
@@ -78,12 +82,27 @@ def main() -> None:
     if missing_detectors:
         raise SystemExit(f"missing detector ids: {missing_detectors}")
 
+    reference_sources = load_json("knowledge/manifests/reference-sources.json")
+    source_class_ids = {src["id"] for src in reference_sources["source_classes"]}
+    required_source_classes = {"browseforge-consumer", "cloakbrowser-reference", "camoufox-reference", "chromium-upstream", "detector-evidence"}
+    missing_source_classes = sorted(required_source_classes - source_class_ids)
+    if missing_source_classes:
+        raise SystemExit(f"missing reference source classes: {missing_source_classes}")
+
+    platform_matrix = load_json("knowledge/manifests/platform-matrix.json")
+    platform_ids = {platform["id"] for platform in platform_matrix["platforms"]}
+    required_platforms = {"linux-x64", "macos-arm64", "macos-x64", "windows-x64", "linux-arm64"}
+    missing_platforms = sorted(required_platforms - platform_ids)
+    if missing_platforms:
+        raise SystemExit(f"missing platform matrix ids: {missing_platforms}")
+
     query_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in [
         "graph/queries/development-readiness.cypher",
         "graph/queries/fingerprint-risk.cypher",
         "graph/queries/cross-repo-impact.cypher",
+        "graph/queries/source-coverage.cypher",
     ])
-    for token in ["RuntimeArtifact", "DetectorRun", "BrowseForgeConsumer", "FingerprintSurface"]:
+    for token in ["RuntimeArtifact", "DetectorRun", "BrowseForgeConsumer", "FingerprintSurface", "KnowledgeSource", "Platform"]:
         if token not in query_text:
             raise SystemExit(f"graph queries missing {token}")
 

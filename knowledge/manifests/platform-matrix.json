@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "purpose": "Cross-platform implementation and evidence matrix for BrowseForge Chromium runtime development.",
+  "platforms": [
+    {
+      "id": "linux-x64",
+      "priority": 1,
+      "status": "planned",
+      "required_evidence": [
+        "build succeeds",
+        "artifact checksum exists",
+        "Docker seed installs runtime",
+        "BrowseForge launches profile",
+        "REST smoke passes",
+        "MCP smoke passes",
+        "Playwright bind smoke passes",
+        "detector run exists"
+      ]
+    },
+    {
+      "id": "macos-arm64",
+      "priority": 2,
+      "status": "planned",
+      "required_evidence": [
+        "build succeeds",
+        "artifact checksum exists",
+        "app bundle layout documented",
+        "codesign/notarization decision exists",
+        "BrowseForge launches profile",
+        "detector run exists"
+      ]
+    },
+    {
+      "id": "macos-x64",
+      "priority": 3,
+      "status": "planned",
+      "required_evidence": [
+        "build succeeds",
+        "artifact checksum exists",
+        "BrowseForge launches profile",
+        "detector run exists"
+      ]
+    },
+    {
+      "id": "windows-x64",
+      "priority": 4,
+      "status": "planned",
+      "required_evidence": [
+        "build succeeds",
+        "artifact checksum exists",
+        "installer/portable layout documented",
+        "code signing decision exists",
+        "BrowseForge launches profile",
+        "detector run exists"
+      ]
+    },
+    {
+      "id": "linux-arm64",
+      "priority": 5,
+      "status": "deferred",
+      "required_evidence": [
+        "Docker/KasmVNC runtime validation",
+        "browser engine support confirmed",
+        "detector run exists"
+      ]
+    }
+  ],
+  "global_release_requirements": [
+    "runtime manifest validates",
+    "artifact manifest has SHA-256 values",
+    "SBOM/provenance generated",
+    "detector evidence has no unaccepted high/critical findings",
+    "BrowseForge compatibility test passes",
+    "knowledge graph contains RuntimeArtifact, Platform, DetectorRun, FingerprintSurface, Risk, and Mitigation links"
+  ]
+}
