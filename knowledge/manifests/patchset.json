@@ -401,6 +401,42 @@
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built",
       "notes": "When --fingerprint-plugins-pdf is enabled/true/1, Blink exposes Chromium's fixed five-entry PDF plugin list, the matching application/pdf and text/pdf mimeTypes, and navigator.pdfViewerEnabled even when PDF plugin data is unavailable in the embedded build. When disabled/false/0, those APIs report no PDF plugin. Invalid, empty, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run."
+    },
+    {
+      "patchset_id": "surface-webrtc-ice-candidate-native-override",
+      "title": "BrowseForge WebRTC ICE candidate native IP override for Chromium M150",
+      "surface": "webrtc",
+      "files_touched": [
+        "scripts/apply_webrtc_patch.py",
+        "tests/test_apply_webrtc_patch.py",
+        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/modules/peerconnection/rtc_ice_candidate.cc"
+      ],
+      "symbols_touched": [
+        "blink::RTCIceCandidate::candidate",
+        "blink::RTCIceCandidate::address",
+        "blink::RTCIceCandidate::relatedAddress",
+        "blink::RTCIceCandidate::toJSONForBinding",
+        "BrowseForgeWebRTCIPOverride",
+        "BrowseForgeWebRTCCandidateOverride",
+        "launcher.FingerprintConfig.WebRTCIP"
+      ],
+      "risk_level": "high",
+      "detectors_addressed": [
+        "browserleaks",
+        "browserscan",
+        "creepjs"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_webrtc_patch",
+        "python3 scripts/apply_webrtc_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/peerconnection:peerconnection"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "When --fingerprint-webrtc-ip contains a bounded IPv4/IPv6 literal, Blink rewrites surfaced RTCIceCandidate candidate strings, address, relatedAddress, and toJSON().candidate to that value. Empty, auto, invalid, or absent values preserve upstream Chromium behavior; the launcher still applies Chromium disable_non_proxied_udp policy by default and maps proxy exit_ip to --fingerprint-webrtc-ip. This is a DOM-surfacing mitigation, not a complete network-stack relay guarantee; release detector pass still requires a patched Chromium artifact and live WebRTC detector evidence."
     }
   ],
   "required_patch_metadata": [
