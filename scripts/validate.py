@@ -40,6 +40,7 @@ REQUIRED_FILES = [
     "scripts/chromium_source.py",
     "scripts/apply_stealth_scaffold.py",
     "scripts/chromium_docker.py",
+    "scripts/package_linux_runtime.py",
     "scripts/apply_webdriver_patch.py",
     "scripts/apply_hardware_patch.py",
     "scripts/apply_screen_patch.py",
