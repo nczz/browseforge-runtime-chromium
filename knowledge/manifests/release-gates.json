@@ -20,7 +20,7 @@
     {
       "gate_id": "packaging-contract-tests",
       "status": "passed",
-      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging and checksums."
+      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging, checksums, non-placeholder SPDX-2.3-style SBOM metadata, file hashes/sizes, and source/patchset provenance hashes."
     },
     {
       "gate_id": "browseforge-adapter-merged",
@@ -45,7 +45,7 @@
     {
       "gate_id": "sbom-provenance-release-assets",
       "status": "blocked",
-      "blocker": "Dogfood package produced manifest/checksums/SBOM/provenance mechanics, but release-grade SBOM/provenance requires a real Chromium artifact plus Chromium DEPS snapshot/source checkout metadata."
+      "blocker": "Packaging now emits non-placeholder SPDX-2.3-style SBOM metadata, input file hashes, source-acquisition/patchset manifest hashes, and git commit provenance for packaged inputs; release-grade SBOM/provenance still requires a real patched Chromium artifact plus Chromium DEPS/source checkout metadata from the release build."
     }
   ]
 }
