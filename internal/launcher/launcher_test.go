@@ -35,6 +35,22 @@ func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsTimezoneFingerprintArg(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			Timezone: "Asia/Taipei",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsArg(plan.Args, "--fingerprint-timezone=Asia/Taipei") {
+		t.Fatalf("missing timezone arg: %v", plan.Args)
+	}
+}
+
 func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
