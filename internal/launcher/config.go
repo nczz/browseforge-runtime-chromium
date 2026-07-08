@@ -44,6 +44,8 @@ type FingerprintConfig struct {
 	DeviceMemoryGB      int    `json:"device_memory_gb"`
 	ScreenWidth         int    `json:"screen_width"`
 	ScreenHeight        int    `json:"screen_height"`
+	ScreenAvailWidth    int    `json:"screen_avail_width"`
+	ScreenAvailHeight   int    `json:"screen_avail_height"`
 	StorageQuotaMB      int    `json:"storage_quota_mb"`
 	FontsDir            string `json:"fonts_dir"`
 	WebRTCIP            string `json:"webrtc_ip"`
@@ -161,6 +163,12 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.ScreenHeight > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-height=%d", c.Fingerprint.ScreenHeight))
+	}
+	if c.Fingerprint.ScreenAvailWidth > 0 {
+		args = append(args, fmt.Sprintf("--fingerprint-screen-avail-width=%d", c.Fingerprint.ScreenAvailWidth))
+	}
+	if c.Fingerprint.ScreenAvailHeight > 0 {
+		args = append(args, fmt.Sprintf("--fingerprint-screen-avail-height=%d", c.Fingerprint.ScreenAvailHeight))
 	}
 	if c.Fingerprint.StorageQuotaMB > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-storage-quota=%d", c.Fingerprint.StorageQuotaMB))

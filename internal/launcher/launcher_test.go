@@ -54,6 +54,27 @@ func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			ScreenWidth:       1920,
+			ScreenHeight:      1080,
+			ScreenAvailWidth:  1900,
+			ScreenAvailHeight: 1040,
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"--fingerprint-screen-width=1920", "--fingerprint-screen-height=1080", "--fingerprint-screen-avail-width=1900", "--fingerprint-screen-avail-height=1040"} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing screen arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
