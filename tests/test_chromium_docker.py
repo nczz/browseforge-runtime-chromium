@@ -32,7 +32,7 @@ class ChromiumDockerPlanTests(unittest.TestCase):
             check=False,
         )
 
-    def test_plan_exposes_build_chrome_command_for_deps_image(self) -> None:
+    def test_plan_exposes_run_hooks_and_build_chrome_commands_for_deps_image(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             workdir = Path(td) / "chromium"
             git_cache = Path(td) / "git-cache"
@@ -53,7 +53,15 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertEqual(0, completed.returncode, completed.stderr)
         payload = json.loads(completed.stdout)
         build_chrome = payload["commands"]["build-chrome"]
+        run_hooks = payload["commands"]["run-hooks"]
         self.assertEqual("bf-test:deps", payload["deps_image"])
+        self.assertIn("bf-test:deps", run_hooks)
+        self.assertIn(f"{workdir}:/work/chromium", run_hooks)
+        self.assertEqual("/work/chromium/src", run_hooks[run_hooks.index("-w") + 1])
+        self.assertEqual(
+            ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && cd /work/chromium && gclient runhooks"],
+            run_hooks[-3:],
+        )
         self.assertIn("bf-test:deps", build_chrome)
         self.assertIn(f"{workdir}:/work/chromium", build_chrome)
         self.assertEqual("/work/chromium/src", build_chrome[build_chrome.index("-w") + 1])
@@ -99,6 +107,21 @@ class ChromiumDockerPlanTests(unittest.TestCase):
 
         self.assertNotEqual(0, completed.returncode)
         self.assertIn("build-chrome requires --execute", completed.stderr + completed.stdout)
+
+    def test_run_hooks_requires_execute_before_running_docker(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            completed = self._run_script(
+                "run-hooks",
+                "--workdir",
+                str(Path(td) / "chromium"),
+                "--git-cache",
+                str(Path(td) / "git-cache"),
+                "--out-dir",
+                "out/BrowseForgeLinuxDocker",
+            )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("run-hooks requires --execute", completed.stderr + completed.stdout)
 
     def test_plan_mounts_external_workdir_and_runtime_readonly(self) -> None:
         with tempfile.TemporaryDirectory() as td:

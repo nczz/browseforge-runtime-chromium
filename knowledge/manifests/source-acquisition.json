@@ -117,6 +117,7 @@
         "python3 scripts/chromium_docker.py check-container --execute",
         "python3 scripts/chromium_docker.py sync-linux-deps --execute",
         "python3 scripts/chromium_docker.py install-linux-deps --execute",
+        "python3 scripts/chromium_docker.py run-hooks --execute",
         "python3 scripts/chromium_docker.py gn-gen --execute",
         "python3 scripts/chromium_docker.py build-chrome --execute"
       ]

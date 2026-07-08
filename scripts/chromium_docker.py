@@ -115,6 +115,7 @@ def build_plan(
             "check-container": base_run + ["bash", "-lc", "python3 --version && git --version && gclient help >/dev/null && test -f DEPS"],
             "sync-linux-deps": base_run + ["bash", "-lc", "cd /work/chromium && gclient sync --nohooks --with_branch_heads --with_tags"],
             "install-linux-deps": ["bash", "-lc", install_script],
+            "run-hooks": deps_run + ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && cd /work/chromium && gclient runhooks"],
             "gn-gen": deps_run + ["bash", "-lc", f"./buildtools/linux64/gn gen {out_dir} --args='{gn_args}'"],
             "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -C {out_dir} chrome"],
         },
@@ -156,7 +157,7 @@ def run_command(command: Sequence[str]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium Linux/Docker build helper")
-    parser.add_argument("command", choices=["plan", "check", "build-image", "check-container", "sync-linux-deps", "install-linux-deps", "gn-gen", "build-chrome"])
+    parser.add_argument("command", choices=["plan", "check", "build-image", "check-container", "sync-linux-deps", "install-linux-deps", "run-hooks", "gn-gen", "build-chrome"])
     parser.add_argument("--workdir", type=Path, default=DEFAULT_WORKDIR)
     parser.add_argument("--image", default=DEFAULT_IMAGE)
     parser.add_argument("--git-cache", type=Path, default=DEFAULT_GIT_CACHE)
