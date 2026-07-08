@@ -11,7 +11,7 @@ COMMAND_LINE_INCLUDE = '#include "base/command_line.h"\n'
 INCLUDE_ANCHOR = '#include "base/byte_size.h"\n'
 NAMESPACE_ANCHOR = 'namespace blink {\n\n'
 
-WEBGL_HELPER = '''String BrowseForgeWebGLStringOverride(const char* switch_name) {\n  const std::string value =\n      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(switch_name);\n  if (value.empty() || value.size() > 256) {\n    return String();\n  }\n  for (char c : value) {\n    if (c < 0x20 || c > 0x7e) {\n      return String();\n    }\n  }\n  return String::FromUTF8(value);\n}\n\n'''
+WEBGL_HELPER = '''String BrowseForgeWebGLStringOverride(const char* switch_name) {\n  const std::string value =\n      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(switch_name);\n  if (value.empty() || value.size() > 256) {\n    return String();\n  }\n  for (char c : value) {\n    if (c < 0x20 || c > 0x7e) {\n      return String();\n    }\n  }\n  return String::FromUtf8(value);\n}\n\n'''
 
 ORIGINAL_RENDERER_CASE = '''    case WebGLDebugRendererInfo::kUnmaskedRendererWebgl:\n      if (ExtensionEnabled(kWebGLDebugRendererInfoName)) {\n        return WebGLAny(script_state,\n                        String(ContextGL()->GetString(GL_RENDERER)));\n      }\n'''
 PATCHED_RENDERER_CASE = '''    case WebGLDebugRendererInfo::kUnmaskedRendererWebgl:\n      if (ExtensionEnabled(kWebGLDebugRendererInfoName)) {\n        String override =\n            BrowseForgeWebGLStringOverride("fingerprint-webgl-renderer");\n        if (!override.empty()) {\n          return WebGLAny(script_state, override);\n        }\n        return WebGLAny(script_state,\n                        String(ContextGL()->GetString(GL_RENDERER)));\n      }\n'''

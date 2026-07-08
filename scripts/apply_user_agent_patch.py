@@ -27,7 +27,7 @@ USER_AGENT_HELPER = '''String BrowseForgeNavigatorUserAgentOverride() {
       return String();
     }
   }
-  return String::FromUTF8(user_agent);
+  return String::FromUtf8(user_agent);
 }
 
 '''
