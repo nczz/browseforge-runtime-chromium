@@ -3,55 +3,359 @@
   "$id": "https://github.com/nczz/browseforge-runtime-chromium/detectors/evidence-schema.json",
   "title": "Sanitized detector evidence",
   "type": "object",
-  "required": ["runtime_id", "runtime_version", "detector", "tested_at", "environment", "results", "sanitization"],
+  "required": [
+    "schema_version",
+    "run_id",
+    "evidence_id",
+    "runtime_id",
+    "runtime_version",
+    "artifact_id",
+    "detector",
+    "tested_at",
+    "harness",
+    "target",
+    "matrix",
+    "status",
+    "failure_mode",
+    "results",
+    "sanitization",
+    "storage",
+    "kg"
+  ],
   "properties": {
-    "runtime_id": {"type": "string"},
-    "runtime_version": {"type": "string"},
+    "schema_version": {
+      "const": "1.1"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^detrun_[a-z0-9][a-z0-9._-]*$"
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^evidence_[a-z0-9][a-z0-9._-]*$"
+    },
+    "runtime_id": {
+      "const": "browseforge-chromium"
+    },
+    "runtime_version": {
+      "type": "string"
+    },
+    "artifact_id": {
+      "type": "string"
+    },
     "detector": {
       "type": "object",
-      "required": ["name", "url"],
+      "required": [
+        "detector_id",
+        "name",
+        "url",
+        "category",
+        "manifest_ref"
+      ],
       "properties": {
-        "name": {"type": "string"},
-        "url": {"type": "string"}
+        "detector_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "manifest_ref": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
-    "tested_at": {"type": "string", "format": "date-time"},
-    "environment": {
+    "tested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "harness": {
       "type": "object",
-      "required": ["host_os", "container", "browser_family"],
+      "required": [
+        "name",
+        "version",
+        "mode"
+      ],
       "properties": {
-        "host_os": {"type": "string"},
-        "container": {"type": "boolean"},
-        "browser_family": {"const": "chromium"},
-        "proxy_region": {"type": "string"},
-        "gpu_mode": {"type": "string"}
+        "name": {
+          "const": "browseforge-detector-harness"
+        },
+        "version": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "manual_ingest",
+            "synthetic_fixture",
+            "live_collect"
+          ]
+        }
       },
       "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "platform",
+        "browser_family",
+        "browser_version",
+        "host_os",
+        "arch",
+        "container"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string"
+        },
+        "browser_family": {
+          "const": "chromium"
+        },
+        "browser_version": {
+          "type": "string"
+        },
+        "host_os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "container": {
+          "type": "boolean"
+        },
+        "gpu_mode": {
+          "type": "string"
+        },
+        "proxy_region_redacted": {
+          "type": "string"
+        },
+        "locale_profile": {
+          "type": "string"
+        },
+        "timezone_profile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "matrix": {
+      "type": "object",
+      "required": [
+        "matrix_key",
+        "display_mode",
+        "network_mode",
+        "container",
+        "proxy",
+        "required"
+      ],
+      "properties": {
+        "matrix_key": {
+          "type": "string"
+        },
+        "display_mode": {
+          "enum": [
+            "headed",
+            "headless",
+            "unknown"
+          ]
+        },
+        "network_mode": {
+          "enum": [
+            "direct",
+            "proxy",
+            "unknown"
+          ]
+        },
+        "container": {
+          "type": "boolean"
+        },
+        "proxy": {
+          "enum": [
+            "none",
+            "redacted",
+            "public_test_infra"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed",
+        "warning",
+        "error",
+        "skipped",
+        "not_tested"
+      ]
+    },
+    "failure_mode": {
+      "enum": [
+        "none",
+        "schema_invalid",
+        "manifest_mismatch",
+        "unsupported_matrix",
+        "missing_artifact",
+        "detector_unreachable",
+        "detector_changed_schema",
+        "timeout",
+        "navigation_error",
+        "browser_launch_failed",
+        "browser_crash",
+        "parse_error",
+        "evidence_unsanitized",
+        "blocked_external_account",
+        "manual_not_run",
+        "unknown"
+      ]
     },
     "results": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["surface", "status", "finding", "evidence_ref"],
+        "required": [
+          "surface",
+          "status",
+          "severity",
+          "finding",
+          "evidence_ref"
+        ],
         "properties": {
-          "surface": {"type": "string"},
-          "status": {"enum": ["pass", "warn", "fail", "not_tested"]},
-          "finding": {"type": "string"},
-          "mitigation": {"type": "string"},
-          "evidence_ref": {"type": "string"}
+          "surface": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "warn",
+              "fail",
+              "not_tested",
+              "accepted_risk"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "finding": {
+            "type": "string"
+          },
+          "mitigation": {
+            "type": "string"
+          },
+          "accepted_risk_id": {
+            "type": "string"
+          },
+          "detector_check": {
+            "type": "string"
+          },
+          "normalized_values": {
+            "type": "object"
+          },
+          "raw_value_hash": {
+            "type": "string"
+          },
+          "evidence_ref": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
     },
     "sanitization": {
       "type": "object",
-      "required": ["ip_redacted", "credentials_redacted", "profiles_redacted"],
+      "required": [
+        "ip_redacted",
+        "credentials_redacted",
+        "profiles_redacted",
+        "tokens_redacted",
+        "cookies_storage_redacted",
+        "screenshot_metadata_redacted",
+        "raw_capture_committed",
+        "sanitizer_version"
+      ],
       "properties": {
-        "ip_redacted": {"type": "boolean"},
-        "credentials_redacted": {"type": "boolean"},
-        "profiles_redacted": {"type": "boolean"},
-        "notes": {"type": "string"}
+        "ip_redacted": {
+          "type": "boolean"
+        },
+        "credentials_redacted": {
+          "type": "boolean"
+        },
+        "profiles_redacted": {
+          "type": "boolean"
+        },
+        "tokens_redacted": {
+          "type": "boolean"
+        },
+        "cookies_storage_redacted": {
+          "type": "boolean"
+        },
+        "screenshot_metadata_redacted": {
+          "type": "boolean"
+        },
+        "raw_capture_committed": {
+          "type": "boolean"
+        },
+        "sanitizer_version": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "storage": {
+      "type": "object",
+      "required": [
+        "evidence_path",
+        "sha256"
+      ],
+      "properties": {
+        "evidence_path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "raw_capture_path": {
+          "type": "string"
+        },
+        "raw_capture_sha256": {
+          "type": "string"
+        },
+        "summary_path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "kg": {
+      "type": "object",
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array"
+        },
+        "edges": {
+          "type": "array"
+        }
       },
       "additionalProperties": false
     }

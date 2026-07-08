@@ -2,9 +2,26 @@
   "schema_version": "1.0",
   "runtime_id": "browseforge-chromium",
   "base_project": "Chromium",
-  "base_version": "unselected",
-  "base_ref": "unselected",
-  "patchsets": [],
+  "base_version": "150.0.7871.101",
+  "base_ref": "refs/tags/150.0.7871.101",
+  "patchsets": [
+    {
+      "patchset_id": "unpatched-baseline-m150-150.0.7871.101",
+      "title": "Unpatched Chromium M150.150.0.7871.101 baseline for wrapper/build/detector integration",
+      "surface": "none",
+      "files_touched": [],
+      "symbols_touched": [],
+      "risk_level": "low",
+      "detectors_addressed": [],
+      "tests": [
+        "wrapper argument tests",
+        "detector harness schema tests",
+        "package script smoke"
+      ],
+      "upstream_status": "unmodified_baseline",
+      "notes": "No anti-detect browser engine patches are claimed. This patchset exists to bind wrapper/build/detector evidence to a concrete Chromium source ref before patch work begins."
+    }
+  ],
   "required_patch_metadata": [
     "patch_id",
     "title",
@@ -21,5 +38,15 @@
     "high_risk_patch_requires_detector_evidence": true,
     "critical_risk_patch_requires_release_owner_approval": true,
     "patch_without_surface_is_invalid": true
-  }
+  },
+  "base_branch_position": 1639810,
+  "source_acquisition": {
+    "method": "depot_tools fetch --git-cache chromium; checkout selected_ref; gclient sync; gclient runhooks",
+    "no_large_download_in_repo": true,
+    "cache_policy": "Use external GIT_CACHE_PATH and Chromium out/ directories; never commit src/out/build outputs.",
+    "checkout_ref": "refs/tags/150.0.7871.101",
+    "checkout_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d"
+  },
+  "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+  "linux_published_stable": "150.0.7871.100"
 }

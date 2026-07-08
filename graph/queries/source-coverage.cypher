@@ -12,8 +12,8 @@ RETURN p.runtime_id AS runtime_id,
 
 // Detector evidence coverage by surface
 MATCH (s:FingerprintSurface)
-OPTIONAL MATCH (s)<-[:CHECKS_SURFACE]-(d:Detector)<-[:RAN_DETECTOR]-(run:DetectorRun)
-RETURN s.surface_id AS surface,
+OPTIONAL MATCH (s)<-[:CHECKS_SURFACE]-(d:Detector)<-[:RUNS_DETECTOR]-(run:DetectorRun)
+RETURN s.key AS surface,
        count(DISTINCT d) AS detector_count,
        count(DISTINCT run) AS runtime_run_count,
        CASE WHEN count(DISTINCT run) = 0 THEN 'missing_runtime_evidence' ELSE 'covered' END AS status
@@ -21,8 +21,8 @@ ORDER BY status DESC, surface;
 
 // Platform artifact coverage
 MATCH (platform:Platform)
-OPTIONAL MATCH (artifact:RuntimeArtifact)-[:BUILT_FOR]->(platform)
-RETURN platform.platform_id AS platform,
+OPTIONAL MATCH (artifact:RuntimeArtifact)-[:TARGETS_PLATFORM]->(platform)
+RETURN platform.key AS platform,
        count(DISTINCT artifact) AS artifact_count,
        CASE WHEN count(DISTINCT artifact) = 0 THEN 'missing_artifact' ELSE 'covered' END AS status
 ORDER BY platform;

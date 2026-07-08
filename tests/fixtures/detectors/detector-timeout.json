@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.1",
+  "run_id": "detrun_v0.1.0-alpha.0_linux-x64_sannysoft_timeout",
+  "evidence_id": "evidence_v0.1.0-alpha.0_linux-x64_sannysoft_timeout",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "artifact_id": "unpackaged:linux-x64:v0.1.0-alpha.0",
+  "detector": {
+    "detector_id": "sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/",
+    "category": "automation",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft"
+  },
+  "tested_at": "2026-07-08T00:00:00Z",
+  "harness": {
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0",
+    "mode": "synthetic_fixture"
+  },
+  "target": {
+    "platform": "linux-x64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.100",
+    "host_os": "linux",
+    "arch": "x64",
+    "container": false,
+    "gpu_mode": "unknown",
+    "proxy_region_redacted": "none",
+    "locale_profile": "zh-TW",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "matrix": {
+    "matrix_key": "linux-x64:sannysoft:headed:direct:host",
+    "display_mode": "headed",
+    "network_mode": "direct",
+    "container": false,
+    "proxy": "none",
+    "required": true
+  },
+  "status": "error",
+  "failure_mode": "timeout",
+  "results": [
+    {
+      "surface": "automation_signals",
+      "status": "not_tested",
+      "severity": "info",
+      "finding": "Detector timed out before surface evidence was collected.",
+      "evidence_ref": "fixture"
+    }
+  ],
+  "sanitization": {
+    "ip_redacted": true,
+    "credentials_redacted": true,
+    "profiles_redacted": true,
+    "tokens_redacted": true,
+    "cookies_storage_redacted": true,
+    "screenshot_metadata_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "0.1.0",
+    "notes": "synthetic sanitized fixture"
+  },
+  "storage": {
+    "evidence_path": "tests/fixtures/detectors/valid-evidence.json",
+    "sha256": "fixture"
+  },
+  "kg": {
+    "nodes": [],
+    "edges": []
+  }
+}

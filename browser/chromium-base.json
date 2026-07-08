@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "decision": "Use exact Chromium/Chrome Stable tag refs/tags/150.0.7871.101 as the high-water M150 desktop stable source baseline; record Linux-published 150.0.7871.100 as cross-platform drift evidence.",
+  "selected_version": "150.0.7871.101",
+  "selected_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+  "branch_position": 1639810,
+  "source": "Chromium strategy audit: Chrome desktop Stable observed as 150.0.7871.100/.101; Gitiles tag 150.0.7871.101 commit 51b83660c3609f271ccbbd65785bf7e50a21312d is selected as single source ref.",
+  "acquisition": {
+    "method": "depot_tools fetch --git-cache chromium; checkout selected_ref; gclient sync; gclient runhooks",
+    "no_large_download_in_repo": true,
+    "cache_policy": "Use external GIT_CACHE_PATH and Chromium out/ directories; never commit src/out/build outputs."
+  },
+  "build_strategy": {
+    "first_platform": "linux-x64",
+    "gn_args": [
+      "is_official_build=true",
+      "is_debug=false",
+      "symbol_level=0",
+      "blink_symbol_level=0",
+      "v8_symbol_level=0"
+    ],
+    "builder": "autoninja -C out/Release chrome"
+  },
+  "open_blockers": [
+    "Chromium source checkout not present locally",
+    "No patchset implemented",
+    "No browser artifact produced",
+    "No detector evidence for selected ref"
+  ],
+  "selected_tag": "refs/tags/150.0.7871.101",
+  "linux_published_stable": "150.0.7871.100"
+}

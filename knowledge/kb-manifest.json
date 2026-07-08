@@ -12,40 +12,66 @@
       "kind": "runtime_contract",
       "repo": "nczz/browseforge-runtime-chromium",
       "ref": "main",
-      "path_globs": ["contracts/**/*.json"],
+      "path_globs": [
+        "contracts/**/*.json"
+      ],
       "exclude": [],
       "sensitive": false,
-      "index_targets": ["kb", "kg"]
+      "index_targets": [
+        "kb",
+        "kg"
+      ]
     },
     {
       "source_id": "runtime-repo-docs",
       "kind": "docs",
       "repo": "nczz/browseforge-runtime-chromium",
       "ref": "main",
-      "path_globs": ["README.md", "SECURITY.md", "docs/**/*.md"],
+      "path_globs": [
+        "README.md",
+        "SECURITY.md",
+        "docs/**/*.md"
+      ],
       "exclude": [],
       "sensitive": false,
-      "index_targets": ["kb"]
+      "index_targets": [
+        "kb"
+      ]
     },
     {
       "source_id": "runtime-repo-detectors",
       "kind": "detector_evidence_contract",
       "repo": "nczz/browseforge-runtime-chromium",
       "ref": "main",
-      "path_globs": ["detectors/**/*.json"],
-      "exclude": ["detectors/raw/**"],
+      "path_globs": [
+        "detectors/**/*.json"
+      ],
+      "exclude": [
+        "detectors/raw/**"
+      ],
       "sensitive": false,
-      "index_targets": ["kb", "kg"]
+      "index_targets": [
+        "kb",
+        "kg"
+      ]
     },
     {
       "source_id": "runtime-repo-graph",
       "kind": "knowledge_graph_framework",
       "repo": "nczz/browseforge-runtime-chromium",
       "ref": "main",
-      "path_globs": ["graph/**/*.md", "graph/**/*.cypher"],
-      "exclude": ["graph/exports/**"],
+      "path_globs": [
+        "graph/**/*.md",
+        "graph/**/*.cypher"
+      ],
+      "exclude": [
+        "graph/exports/**"
+      ],
       "sensitive": false,
-      "index_targets": ["kb", "kg"]
+      "index_targets": [
+        "kb",
+        "kg"
+      ]
     },
     {
       "source_id": "browseforge-consumer-contract",
@@ -70,7 +96,9 @@
       ],
       "exclude": [],
       "sensitive": false,
-      "index_targets": ["cross_repo_kg"]
+      "index_targets": [
+        "cross_repo_kg"
+      ]
     },
     {
       "source_id": "cloakbrowser-reference",
@@ -84,9 +112,18 @@
         "docker/**/*.Dockerfile",
         "docs/**/*.md"
       ],
-      "exclude": ["out/**", "build/**", "dist/**", "node_modules/**"],
+      "exclude": [
+        "out/**",
+        "build/**",
+        "dist/**",
+        "node_modules/**"
+      ],
       "sensitive": false,
-      "index_targets": ["reference_kb", "reference_kg", "cross_repo_kg"]
+      "index_targets": [
+        "reference_kb",
+        "reference_kg",
+        "cross_repo_kg"
+      ]
     },
     {
       "source_id": "camoufox-reference",
@@ -100,15 +137,23 @@
         "camoufox/**/*.py",
         "scripts/**/*.py"
       ],
-      "exclude": ["obj*/**", "build/**", "dist/**", "node_modules/**"],
+      "exclude": [
+        "obj*/**",
+        "build/**",
+        "dist/**",
+        "node_modules/**"
+      ],
       "sensitive": false,
-      "index_targets": ["reference_kb", "reference_kg"]
+      "index_targets": [
+        "reference_kb",
+        "reference_kg"
+      ]
     },
     {
       "source_id": "chromium-upstream",
       "kind": "upstream_browser_source",
       "repo": "chromium/chromium",
-      "ref": "unselected",
+      "ref": "refs/tags/150.0.7871.101",
       "path_globs": [
         "chrome/**",
         "content/**",
@@ -118,10 +163,17 @@
         "net/**",
         "services/network/**"
       ],
-      "exclude": ["out/**", "build/**"],
+      "exclude": [
+        "out/**",
+        "build/**"
+      ],
       "sensitive": false,
-      "index_targets": ["future_kb", "future_kg"],
-      "status": "missing_base_version"
+      "index_targets": [
+        "future_kb",
+        "future_kg"
+      ],
+      "status": "selected_not_indexed",
+      "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d"
     }
   ],
   "excluded_patterns": [

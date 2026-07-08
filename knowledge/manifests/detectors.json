@@ -6,60 +6,253 @@
       "name": "SannySoft",
       "url": "https://bot.sannysoft.com/",
       "category": "automation",
-      "surfaces": ["automation", "webdriver", "plugins", "languages", "webgl", "canvas"],
-      "run_modes": ["headed", "docker", "proxy", "direct"],
+      "surfaces": [
+        "automation",
+        "webdriver",
+        "plugins",
+        "languages",
+        "webgl",
+        "canvas"
+      ],
       "pass_threshold": "all critical checks pass",
-      "privacy_notes": "sanitize IP and screenshot metadata before commit"
+      "privacy_notes": "sanitize IP and screenshot metadata before commit",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "direct",
+          "proxy"
+        ],
+        "container_modes": [
+          "docker"
+        ]
+      },
+      "canonical_surfaces": [
+        "automation_signals",
+        "canvas",
+        "locale",
+        "webgl"
+      ],
+      "surface_aliases": {
+        "automation": "automation_signals",
+        "webdriver": "automation_signals",
+        "plugins": "automation_signals",
+        "languages": "locale"
+      },
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     },
     {
       "detector_id": "browserleaks",
       "name": "BrowserLeaks",
       "url": "https://browserleaks.com/",
       "category": "fingerprint_consistency",
-      "surfaces": ["canvas", "webgl", "audio", "fonts", "webrtc", "client_hints", "screen"],
-      "run_modes": ["headed", "docker", "proxy", "direct"],
+      "surfaces": [
+        "canvas",
+        "webgl",
+        "audio",
+        "fonts",
+        "webrtc",
+        "client_hints",
+        "screen"
+      ],
       "pass_threshold": "no high-confidence mismatch for claimed identity",
-      "privacy_notes": "commit summarized values only"
+      "privacy_notes": "commit summarized values only",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "direct",
+          "proxy"
+        ],
+        "container_modes": [
+          "docker"
+        ]
+      },
+      "canonical_surfaces": [
+        "audio",
+        "canvas",
+        "client_hints",
+        "fonts",
+        "screen",
+        "webgl",
+        "webrtc"
+      ],
+      "surface_aliases": {},
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     },
     {
       "detector_id": "creepjs",
       "name": "CreepJS",
       "url": "https://abrahamjuliot.github.io/creepjs/",
       "category": "cross_surface_consistency",
-      "surfaces": ["automation", "features", "webgl", "audio", "fonts", "timezone", "locale"],
-      "run_modes": ["headed", "docker", "proxy"],
+      "surfaces": [
+        "automation",
+        "features",
+        "webgl",
+        "audio",
+        "fonts",
+        "timezone",
+        "locale"
+      ],
       "pass_threshold": "no unaccepted high/critical bot-likeness regression",
-      "privacy_notes": "redact visitor identifiers"
+      "privacy_notes": "redact visitor identifiers",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "proxy"
+        ],
+        "container_modes": [
+          "docker"
+        ]
+      },
+      "canonical_surfaces": [
+        "audio",
+        "automation_signals",
+        "fonts",
+        "locale",
+        "permissions",
+        "timezone",
+        "webgl"
+      ],
+      "surface_aliases": {
+        "automation": "automation_signals",
+        "features": "permissions"
+      },
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     },
     {
       "detector_id": "pixelscan",
       "name": "Pixelscan",
       "url": "https://pixelscan.net/fingerprint-check",
       "category": "consistency",
-      "surfaces": ["fonts", "platform", "timezone", "proxy_ip_coherence", "webgl"],
-      "run_modes": ["headed", "docker", "proxy"],
+      "surfaces": [
+        "fonts",
+        "platform",
+        "timezone",
+        "proxy_ip_coherence",
+        "webgl"
+      ],
       "pass_threshold": "consistent result or accepted warning with root cause",
-      "privacy_notes": "redact network identifiers"
+      "privacy_notes": "redact network identifiers",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "proxy"
+        ],
+        "container_modes": [
+          "docker"
+        ]
+      },
+      "canonical_surfaces": [
+        "client_hints",
+        "fonts",
+        "proxy_ip_coherence",
+        "timezone",
+        "webgl"
+      ],
+      "surface_aliases": {
+        "platform": "client_hints"
+      },
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     },
     {
       "detector_id": "iphey",
       "name": "iphey",
       "url": "https://iphey.com/",
       "category": "trustworthiness",
-      "surfaces": ["proxy_ip_coherence", "timezone", "locale", "automation"],
-      "run_modes": ["headed", "proxy"],
+      "surfaces": [
+        "proxy_ip_coherence",
+        "timezone",
+        "locale",
+        "automation"
+      ],
       "pass_threshold": "trustworthy or accepted risk",
-      "privacy_notes": "redact account and IP details"
+      "privacy_notes": "redact account and IP details",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "proxy"
+        ],
+        "container_modes": []
+      },
+      "canonical_surfaces": [
+        "automation_signals",
+        "locale",
+        "proxy_ip_coherence",
+        "timezone"
+      ],
+      "surface_aliases": {
+        "automation": "automation_signals"
+      },
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     },
     {
       "detector_id": "browserscan",
       "name": "BrowserScan",
       "url": "https://www.browserscan.net/",
       "category": "authenticity_score",
-      "surfaces": ["webgl", "audio", "storage_quota", "incognito", "proxy_ip_coherence"],
-      "run_modes": ["headed", "docker", "proxy"],
+      "surfaces": [
+        "webgl",
+        "audio",
+        "storage_quota",
+        "incognito",
+        "proxy_ip_coherence"
+      ],
       "pass_threshold": "no unaccepted high/critical authenticity deduction",
-      "privacy_notes": "redact IP and session identifiers"
+      "privacy_notes": "redact IP and session identifiers",
+      "required": true,
+      "risk_tier": "required",
+      "matrix": {
+        "display_modes": [
+          "headed"
+        ],
+        "network_modes": [
+          "proxy"
+        ],
+        "container_modes": [
+          "docker"
+        ]
+      },
+      "canonical_surfaces": [
+        "audio",
+        "proxy_ip_coherence",
+        "storage_quota",
+        "webgl"
+      ],
+      "surface_aliases": {
+        "incognito": "storage_quota"
+      },
+      "expected_evidence": [
+        "sanitized_json_summary"
+      ]
     }
   ]
 }

@@ -38,8 +38,11 @@
       "knowledge_graph_project": null,
       "role": "Final source of truth for Blink, GPU, WebRTC, network, storage, permissions, headless, and platform build behavior.",
       "required_before_implementation": true,
-      "status": "missing",
-      "blocking_reason": "No exact Chromium base version/ref has been selected or indexed."
+      "status": "selected_not_indexed",
+      "blocking_reason": "Exact Chromium base is selected, but Chromium source has not been downloaded or indexed because it is a large external checkout.",
+      "base_version": "150.0.7871.101",
+      "base_ref": "refs/tags/150.0.7871.101",
+      "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d"
     },
     {
       "id": "detector-evidence",
@@ -62,10 +65,10 @@
     "Cross-platform build dependency matrix"
   ],
   "release_blockers": [
-    "missing Chromium base version",
     "missing runtime artifact checksums",
     "missing detector evidence",
     "missing SBOM/provenance",
-    "missing BrowseForge integration test evidence"
+    "missing BrowseForge integration test evidence",
+    "missing indexed Chromium source checkout"
   ]
 }

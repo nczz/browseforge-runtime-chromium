@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "release_candidate_required_gates": [
+    {
+      "gate_id": "chromium-base-selected",
+      "status": "passed",
+      "evidence": "knowledge/manifests/patchset.json base_version/base_ref/base_commit selected for refs/tags/150.0.7871.101"
+    },
+    {
+      "gate_id": "wrapper-contract-tests",
+      "status": "passed",
+      "evidence": "go test ./... covers proxy/WebRTC policy, managed extra arg collision, profile lock, dry-run command generation"
+    },
+    {
+      "gate_id": "detector-harness-contract-tests",
+      "status": "passed",
+      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, KG JSONL edges"
+    },
+    {
+      "gate_id": "packaging-contract-tests",
+      "status": "passed",
+      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging and checksums"
+    },
+    {
+      "gate_id": "chromium-source-indexed",
+      "status": "blocked",
+      "blocker": "Chromium source checkout is a large external dependency and has not been downloaded/indexed in this repo."
+    },
+    {
+      "gate_id": "runtime-artifact-produced",
+      "status": "blocked",
+      "blocker": "No actual patched Chromium binary exists; runtime-artifacts.json remains empty by design until build succeeds."
+    },
+    {
+      "gate_id": "browseforge-adapter-merged",
+      "status": "blocked",
+      "blocker": "BrowseForge registry/download/Docker/session surfaces still need code changes for browseforge-chromium."
+    },
+    {
+      "gate_id": "live-detector-evidence",
+      "status": "blocked",
+      "blocker": "No live detector run can execute until a real runtime binary exists."
+    },
+    {
+      "gate_id": "sbom-provenance-release-assets",
+      "status": "blocked",
+      "blocker": "Packaging script creates contract-level SBOM/provenance for test inputs; release-grade SBOM/provenance requires real Chromium artifact and DEPS snapshot."
+    }
+  ]
+}
