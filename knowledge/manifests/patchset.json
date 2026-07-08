@@ -329,6 +329,42 @@
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built",
       "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers DOM User-Agent and navigator.userAgentData values; release detector pass still requires a patched Chromium artifact and live detector run."
+    },
+    {
+      "patchset_id": "surface-storage-quota-native-override",
+      "title": "BrowseForge StorageManager quota native override for Chromium M150",
+      "surface": "storage_quota",
+      "files_touched": [
+        "scripts/apply_storage_quota_patch.py",
+        "tests/test_apply_storage_quota_patch.py",
+        "scripts/validate.py",
+        "internal/launcher/launcher_test.go",
+        "chromium/src/third_party/blink/renderer/modules/quota/storage_manager.cc",
+        "chromium/src/third_party/blink/renderer/modules/buckets/storage_bucket.cc"
+      ],
+      "symbols_touched": [
+        "blink::StorageManager::estimate",
+        "blink::StorageBucket::DidGetEstimate",
+        "BrowseForgeStorageQuotaOverrideOrDefault",
+        "launcher.FingerprintConfig.StorageQuotaMB"
+      ],
+      "risk_level": "medium",
+      "detectors_addressed": [
+        "browserleaks",
+        "creepjs",
+        "browserscan"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_storage_quota_patch",
+        "python3 scripts/apply_storage_quota_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/quota:quota",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/buckets:buckets"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "When --fingerprint-storage-quota contains a bounded positive megabyte value, navigator.storage.estimate() and StorageBucket.estimate() report that quota in bytes while preserving the real usage value and clamping quota to at least usage. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run."
     }
   ],
   "required_patch_metadata": [
