@@ -103,6 +103,7 @@ class ApplyAudioPatchTests(unittest.TestCase):
         self.assertIn('#include "base/containers/span.h"', patched)
         self.assertIn('BrowseForgeApplyAudioNoise(array->AsSpan())', patched)
         self.assertIn('BrowseForgeApplyAudioByteNoise(array->AsSpan())', patched)
+        self.assertIn('[[maybe_unused]] void BrowseForgeApplyAudioByteNoise', patched)
 
     def test_patch_is_idempotent(self) -> None:
         patched_buffer_once = apply_audio_patch.patch_audio_buffer(AUDIO_BUFFER_FIXTURE)

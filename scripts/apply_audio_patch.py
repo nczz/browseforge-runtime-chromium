@@ -15,7 +15,7 @@ ANALYSER_INCLUDE_ANCHOR = '#include "third_party/blink/renderer/bindings/modules
 AUDIO_BUFFER_NAMESPACE_ANCHOR = "namespace {\n\n"
 ANALYSER_NAMESPACE_ANCHOR = "namespace blink {\n\n"
 
-AUDIO_NOISE_HELPER = '''uint32_t BrowseForgeAudioNoiseSeed() {\n  const std::string value = base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(\n      "fingerprint-audio-noise");\n  uint32_t seed = 0;\n  bool has_digit = false;\n  for (char c : value) {\n    if (c < '0' || c > '9') {\n      return 0;\n    }\n    has_digit = true;\n    seed = seed * 10u + static_cast<uint32_t>(c - '0');\n  }\n  return has_digit && seed != 0 ? seed : 0;\n}\n\nfloat BrowseForgeAudioNoiseDelta(uint32_t seed, uint32_t index) {\n  uint32_t x = seed ^ (index * 747796405u);\n  x ^= x >> 16;\n  x *= 2891336453u;\n  x ^= x >> 13;\n  const int32_t centered = static_cast<int32_t>(x % 2001u) - 1000;\n  return static_cast<float>(centered) * 0.000000001f;\n}\n\nvoid BrowseForgeApplyAudioNoise(base::span<float> samples) {\n  const uint32_t seed = BrowseForgeAudioNoiseSeed();\n  if (!seed) {\n    return;\n  }\n  for (size_t i = 0; i < samples.size(); ++i) {\n    samples[i] += BrowseForgeAudioNoiseDelta(seed, static_cast<uint32_t>(i));\n  }\n}\n\nvoid BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples) {\n  const uint32_t seed = BrowseForgeAudioNoiseSeed();\n  if (!seed) {\n    return;\n  }\n  for (size_t i = 0; i < samples.size(); ++i) {\n    const int delta = BrowseForgeAudioNoiseDelta(seed, static_cast<uint32_t>(i)) > 0 ? 1 : -1;\n    const int value = static_cast<int>(samples[i]) + delta;\n    samples[i] = static_cast<uint8_t>(value < 0 ? 0 : value > 255 ? 255 : value);\n  }\n}\n\n'''
+AUDIO_NOISE_HELPER = '''uint32_t BrowseForgeAudioNoiseSeed() {\n  const std::string value = base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(\n      "fingerprint-audio-noise");\n  uint32_t seed = 0;\n  bool has_digit = false;\n  for (char c : value) {\n    if (c < '0' || c > '9') {\n      return 0;\n    }\n    has_digit = true;\n    seed = seed * 10u + static_cast<uint32_t>(c - '0');\n  }\n  return has_digit && seed != 0 ? seed : 0;\n}\n\nfloat BrowseForgeAudioNoiseDelta(uint32_t seed, uint32_t index) {\n  uint32_t x = seed ^ (index * 747796405u);\n  x ^= x >> 16;\n  x *= 2891336453u;\n  x ^= x >> 13;\n  const int32_t centered = static_cast<int32_t>(x % 2001u) - 1000;\n  return static_cast<float>(centered) * 0.000000001f;\n}\n\nvoid BrowseForgeApplyAudioNoise(base::span<float> samples) {\n  const uint32_t seed = BrowseForgeAudioNoiseSeed();\n  if (!seed) {\n    return;\n  }\n  for (size_t i = 0; i < samples.size(); ++i) {\n    samples[i] += BrowseForgeAudioNoiseDelta(seed, static_cast<uint32_t>(i));\n  }\n}\n\n[[maybe_unused]] void BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples) {\n  const uint32_t seed = BrowseForgeAudioNoiseSeed();\n  if (!seed) {\n    return;\n  }\n  for (size_t i = 0; i < samples.size(); ++i) {\n    const int delta = BrowseForgeAudioNoiseDelta(seed, static_cast<uint32_t>(i)) > 0 ? 1 : -1;\n    const int value = static_cast<int>(samples[i]) + delta;\n    samples[i] = static_cast<uint8_t>(value < 0 ? 0 : value > 255 ? 255 : value);\n  }\n}\n\n'''
 
 ORIGINAL_GET_CHANNEL = '''NotShared<DOMFloat32Array> AudioBuffer::getChannelData(unsigned channel_index) {\n  if (channel_index >= channels_.size()) {\n    return NotShared<DOMFloat32Array>(nullptr);\n  }\n\n  return NotShared<DOMFloat32Array>(channels_[channel_index].Get());\n}\n'''
 PATCHED_GET_CHANNEL = '''NotShared<DOMFloat32Array> AudioBuffer::getChannelData(unsigned channel_index) {\n  if (channel_index >= channels_.size()) {\n    return NotShared<DOMFloat32Array>(nullptr);\n  }\n\n  DOMFloat32Array* channel_data = channels_[channel_index].Get();\n  if (!BrowseForgeAudioNoiseSeed()) {\n    return NotShared<DOMFloat32Array>(channel_data);\n  }\n\n  DOMFloat32Array* noisy_data = DOMFloat32Array::CreateOrNull(channel_data->length());\n  if (!noisy_data) {\n    return NotShared<DOMFloat32Array>(channel_data);\n  }\n  noisy_data->AsSpan().copy_from(channel_data->AsSpan());\n  BrowseForgeApplyAudioNoise(noisy_data->AsSpan());\n  return NotShared<DOMFloat32Array>(noisy_data);\n}\n'''
@@ -55,6 +55,10 @@ def patch_audio_buffer(text: str) -> str:
         if AUDIO_BUFFER_NAMESPACE_ANCHOR not in patched:
             raise SystemExit("audio_buffer.cc namespace anchor not found")
         patched = patched.replace(AUDIO_BUFFER_NAMESPACE_ANCHOR, AUDIO_BUFFER_NAMESPACE_ANCHOR + AUDIO_NOISE_HELPER, 1)
+    patched = patched.replace(
+        "\nvoid BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples)",
+        "\n[[maybe_unused]] void BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples)",
+    )
     for original, replacement, label in [
         (ORIGINAL_GET_CHANNEL, PATCHED_GET_CHANNEL, "AudioBuffer::getChannelData"),
         (ORIGINAL_COPY_FROM, PATCHED_COPY_FROM, "AudioBuffer::copyFromChannel"),
@@ -74,6 +78,10 @@ def patch_analyser(text: str) -> str:
         if ANALYSER_NAMESPACE_ANCHOR not in patched:
             raise SystemExit("analyser_node.cc namespace anchor not found")
         patched = patched.replace(ANALYSER_NAMESPACE_ANCHOR, ANALYSER_NAMESPACE_ANCHOR + "namespace {\n\n" + AUDIO_NOISE_HELPER + "}  // namespace\n\n", 1)
+    patched = patched.replace(
+        "\nvoid BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples)",
+        "\n[[maybe_unused]] void BrowseForgeApplyAudioByteNoise(base::span<uint8_t> samples)",
+    )
     for original, replacement, label in [
         (ORIGINAL_FLOAT_FREQ, PATCHED_FLOAT_FREQ, "AnalyserNode::getFloatFrequencyData"),
         (ORIGINAL_BYTE_FREQ, PATCHED_BYTE_FREQ, "AnalyserNode::getByteFrequencyData"),
