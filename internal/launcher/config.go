@@ -57,6 +57,7 @@ type FingerprintConfig struct {
 	ScreenAvailWidth    int    `json:"screen_avail_width"`
 	ScreenAvailHeight   int    `json:"screen_avail_height"`
 	StorageQuotaMB      int    `json:"storage_quota_mb"`
+	PluginsPDF          string `json:"plugins_pdf"`
 	FontsDir            string `json:"fonts_dir"`
 	WebRTCIP            string `json:"webrtc_ip"`
 	NativeConfigPath    string `json:"native_config_path"`
@@ -214,6 +215,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.StorageQuotaMB > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-storage-quota=%d", c.Fingerprint.StorageQuotaMB))
+	}
+	if c.Fingerprint.PluginsPDF != "" {
+		args = append(args, "--fingerprint-plugins-pdf="+c.Fingerprint.PluginsPDF)
 	}
 	if c.Fingerprint.FontsDir != "" {
 		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)
