@@ -39,6 +39,7 @@ type FingerprintConfig struct {
 	Seed                uint32 `json:"seed"`
 	Timezone            string `json:"timezone"`
 	Locale              string `json:"locale"`
+	AcceptLanguage      string `json:"accept_language"`
 	Platform            string `json:"platform"`
 	HardwareConcurrency int    `json:"hardware_concurrency"`
 	DeviceMemoryGB      int    `json:"device_memory_gb"`
@@ -148,6 +149,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.Locale != "" {
 		args = append(args, "--fingerprint-locale="+c.Fingerprint.Locale)
+	}
+	if c.Fingerprint.AcceptLanguage != "" {
+		args = append(args, "--fingerprint-accept-language="+c.Fingerprint.AcceptLanguage)
 	}
 	if c.Fingerprint.Platform != "" {
 		args = append(args, "--fingerprint-platform="+c.Fingerprint.Platform)

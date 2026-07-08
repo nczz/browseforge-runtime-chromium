@@ -51,6 +51,25 @@ func TestBuildPlanAddsTimezoneFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsLocaleFingerprintArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			Locale:         "zh-TW",
+			AcceptLanguage: "zh-TW,zh;q=0.9,en;q=0.8",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"--fingerprint-locale=zh-TW", "--fingerprint-accept-language=zh-TW,zh;q=0.9,en;q=0.8"} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing locale arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
