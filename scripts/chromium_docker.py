@@ -117,7 +117,7 @@ def build_plan(
             "install-linux-deps": ["bash", "-lc", install_script],
             "run-hooks": deps_run + ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && cd /work/chromium && gclient runhooks"],
             "gn-gen": deps_run + ["bash", "-lc", f"./buildtools/linux64/gn gen {out_dir} --args='{gn_args}'"],
-            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -C {out_dir} chrome"],
+            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C {out_dir} chrome"],
         },
     )
 

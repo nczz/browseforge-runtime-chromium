@@ -65,7 +65,7 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn("bf-test:deps", build_chrome)
         self.assertIn(f"{workdir}:/work/chromium", build_chrome)
         self.assertEqual("/work/chromium/src", build_chrome[build_chrome.index("-w") + 1])
-        self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
+        self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
 
     def test_check_reports_chrome_output_binary_status(self) -> None:
         env = os.environ.copy()
