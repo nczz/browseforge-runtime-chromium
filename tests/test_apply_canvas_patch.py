@@ -123,6 +123,8 @@ class ApplyCanvasPatchTests(unittest.TestCase):
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('BrowseForgeMakeNoisyCanvasPixmap', patched)
         self.assertIn('EncodeImage(mime_type, quality, &result)', patched)
+        self.assertIn("UNSAFE_TODO(static_cast<uint8_t*>(pixmap->writable_addr())", patched)
+        self.assertIn("UNSAFE_TODO(std::memcpy(dest_row, source_row,", patched)
 
     def test_patch_is_idempotent(self) -> None:
         base_once = apply_canvas_patch.patch_base_context(BASE_CONTEXT_FIXTURE)
