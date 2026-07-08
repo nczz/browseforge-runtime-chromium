@@ -193,6 +193,22 @@ func TestBuildPlanAddsPluginsPDFFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsAudioNoiseFingerprintArg(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			AudioNoise: 17,
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsArg(plan.Args, "--fingerprint-audio-noise=17") {
+		t.Fatalf("missing audio noise arg: %v", plan.Args)
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
