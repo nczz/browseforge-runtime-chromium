@@ -38,6 +38,7 @@ REQUIRED_FILES = [
     "browser/stealth/public/mojom/stealth.mojom",
     "build/package_runtime.py",
     "scripts/chromium_source.py",
+    "scripts/apply_stealth_scaffold.py",
     "scripts/detector_harness.py",
     "graph/schema/runtime-kg.schema.md",
     "graph/queries/development-readiness.cypher",
@@ -55,6 +56,7 @@ REQUIRED_FILES = [
     "tests/test_detector_harness.py",
     "tests/test_package_runtime.py",
     "tests/test_chromium_source.py",
+    "tests/test_apply_stealth_scaffold.py",
     "internal/stealth/persona_test.go",
     "tests/test_stealth_scaffold.py",
 ]
