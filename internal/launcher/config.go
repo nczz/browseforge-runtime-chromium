@@ -59,6 +59,7 @@ type FingerprintConfig struct {
 	StorageQuotaMB      int    `json:"storage_quota_mb"`
 	PluginsPDF          string `json:"plugins_pdf"`
 	AudioNoise          int    `json:"audio_noise"`
+	CanvasNoise         int    `json:"canvas_noise"`
 	FontsDir            string `json:"fonts_dir"`
 	WebRTCIP            string `json:"webrtc_ip"`
 	NativeConfigPath    string `json:"native_config_path"`
@@ -124,8 +125,8 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.RemoteDebugging.Port < 0 || c.RemoteDebugging.Port > 65535 {
 		return fmt.Errorf("remote_debugging.port must be 0..65535")
 	}
-	if c.Fingerprint.StorageQuotaMB < 0 || c.Fingerprint.AudioNoise < 0 {
-		return errors.New("fingerprint.storage_quota_mb and fingerprint.audio_noise must be >= 0")
+	if c.Fingerprint.StorageQuotaMB < 0 || c.Fingerprint.AudioNoise < 0 || c.Fingerprint.CanvasNoise < 0 {
+		return errors.New("fingerprint.storage_quota_mb, fingerprint.audio_noise, and fingerprint.canvas_noise must be >= 0")
 	}
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
@@ -222,6 +223,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.AudioNoise > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-audio-noise=%d", c.Fingerprint.AudioNoise))
+	}
+	if c.Fingerprint.CanvasNoise > 0 {
+		args = append(args, fmt.Sprintf("--fingerprint-canvas-noise=%d", c.Fingerprint.CanvasNoise))
 	}
 	if c.Fingerprint.FontsDir != "" {
 		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)

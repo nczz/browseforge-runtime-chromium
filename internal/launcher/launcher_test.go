@@ -209,6 +209,22 @@ func TestBuildPlanAddsAudioNoiseFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsCanvasNoiseFingerprintArg(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			CanvasNoise: 23,
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsArg(plan.Args, "--fingerprint-canvas-noise=23") {
+		t.Fatalf("missing canvas noise arg: %v", plan.Args)
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
