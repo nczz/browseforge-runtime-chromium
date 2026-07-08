@@ -63,6 +63,38 @@
       ],
       "upstream_status": "copied_to_external_checkout_and_linked_to_gn_all",
       "notes": "Defines the fail-closed persona snapshot contract, native switch names, and internal Mojo projection interface. The scaffold is copied into the pinned Chromium checkout as //browseforge/stealth and linked from Chromium root gn_all so GN generates and checks the target. It does not claim detector pass until browser/renderer/network subsystems consume the native service."
+    },
+    {
+      "patchset_id": "surface-webdriver-native-gate",
+      "title": "BrowseForge navigator.webdriver native gate for Chromium M150",
+      "surface": "automation_webdriver",
+      "files_touched": [
+        "scripts/apply_webdriver_patch.py",
+        "tests/test_apply_webdriver_patch.py",
+        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/core/frame/navigator.cc"
+      ],
+      "symbols_touched": [
+        "blink::Navigator::webdriver",
+        "BrowseForgeShouldHideWebDriver",
+        "launcher.FingerprintConfig.NativeMode"
+      ],
+      "risk_level": "medium",
+      "detectors_addressed": [
+        "sannysoft",
+        "creepjs"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_webdriver_patch",
+        "python3 scripts/apply_webdriver_patch.py --check",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core",
+        "go test ./...",
+        "python3 -m unittest discover -s tests",
+        "python3 scripts/validate.py"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "When --browseforge-stealth-mode is present and not 'off', blink::Navigator::webdriver returns false before Chromium's AutomationControlled/probe override path. Without BrowseForge stealth mode the upstream behavior is preserved. This is source-level patch evidence only; release detector pass still requires a patched Chromium artifact and live detector run."
     }
   ],
   "required_patch_metadata": [

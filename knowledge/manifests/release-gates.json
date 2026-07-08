@@ -29,8 +29,8 @@
     },
     {
       "gate_id": "chromium-source-indexed",
-      "status": "blocked",
-      "blocker": "The selected Chromium source checkout is absent and depot_tools/fetch/gclient/gn/ninja/autoninja are not installed locally; source-acquisition.json records checked paths and missing toolchain."
+      "status": "passed",
+      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver patches."
     },
     {
       "gate_id": "runtime-artifact-produced",
@@ -40,7 +40,7 @@
     {
       "gate_id": "live-detector-evidence",
       "status": "blocked",
-      "blocker": "Local SannySoft dogfood no longer reports WebDriver and local CreepJS WebRTC smoke shows host/stun candidates blocked, but release-grade evidence remains blocked by CreepJS headless-likeness, missing patched Chromium artifact, BrowserLeaks/Pixelscan/iphey/BrowserScan coverage, proxy/IP coherence, and target persona scoring."
+      "blocker": "Source-level navigator.webdriver patch is applied in the external Chromium checkout, but no patched Chromium binary or live detector matrix exists yet; release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required."
     },
     {
       "gate_id": "sbom-provenance-release-assets",
