@@ -29,6 +29,7 @@ class DockerPlan:
     platform: str
     out_dir: str
     gn_args: str
+    output_binary: str
     commands: dict[str, list[str]]
 
 
@@ -108,12 +109,14 @@ def build_plan(
         platform=platform,
         out_dir=out_dir,
         gn_args=gn_args,
+        output_binary=str(src / out_dir / "chrome"),
         commands={
             "build-image": ["docker", "build", "--platform", platform, "-f", str(DOCKERFILE), "-t", image, str(ROOT)],
             "check-container": base_run + ["bash", "-lc", "python3 --version && git --version && gclient help >/dev/null && test -f DEPS"],
             "sync-linux-deps": base_run + ["bash", "-lc", "cd /work/chromium && gclient sync --nohooks --with_branch_heads --with_tags"],
             "install-linux-deps": ["bash", "-lc", install_script],
             "gn-gen": deps_run + ["bash", "-lc", f"./buildtools/linux64/gn gen {out_dir} --args='{gn_args}'"],
+            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -C {out_dir} chrome"],
         },
     )
 
@@ -138,6 +141,8 @@ def check(plan: DockerPlan) -> dict[str, object]:
         "chromium_src_exists": Path(plan.chromium_src_dir).is_dir(),
         "chromium_deps_exists": (Path(plan.chromium_src_dir) / "DEPS").is_file(),
         "out_args_exists": (Path(plan.chromium_src_dir) / plan.out_dir / "args.gn").is_file(),
+        "output_binary": plan.output_binary,
+        "output_binary_exists": Path(plan.output_binary).is_file(),
     }
 
 
@@ -151,7 +156,7 @@ def run_command(command: Sequence[str]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium Linux/Docker build helper")
-    parser.add_argument("command", choices=["plan", "check", "build-image", "check-container", "sync-linux-deps", "install-linux-deps", "gn-gen"])
+    parser.add_argument("command", choices=["plan", "check", "build-image", "check-container", "sync-linux-deps", "install-linux-deps", "gn-gen", "build-chrome"])
     parser.add_argument("--workdir", type=Path, default=DEFAULT_WORKDIR)
     parser.add_argument("--image", default=DEFAULT_IMAGE)
     parser.add_argument("--git-cache", type=Path, default=DEFAULT_GIT_CACHE)

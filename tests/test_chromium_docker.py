@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +21,85 @@ spec.loader.exec_module(chromium_docker)
 
 
 class ChromiumDockerPlanTests(unittest.TestCase):
+    def _run_script(self, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *args],
+            cwd=ROOT,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+
+    def test_plan_exposes_build_chrome_command_for_deps_image(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workdir = Path(td) / "chromium"
+            git_cache = Path(td) / "git-cache"
+            completed = self._run_script(
+                "plan",
+                "--workdir",
+                str(workdir),
+                "--image",
+                "bf-test",
+                "--git-cache",
+                str(git_cache),
+                "--platform",
+                "linux/amd64",
+                "--out-dir",
+                "out/BrowseForgeLinuxDocker",
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        build_chrome = payload["commands"]["build-chrome"]
+        self.assertEqual("bf-test:deps", payload["deps_image"])
+        self.assertIn("bf-test:deps", build_chrome)
+        self.assertIn(f"{workdir}:/work/chromium", build_chrome)
+        self.assertEqual("/work/chromium/src", build_chrome[build_chrome.index("-w") + 1])
+        self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
+
+    def test_check_reports_chrome_output_binary_status(self) -> None:
+        env = os.environ.copy()
+        env["PATH"] = ""
+        with tempfile.TemporaryDirectory() as td:
+            workdir = Path(td) / "chromium"
+            src = workdir / "src"
+            output_binary = src / "out" / "BrowseForgeLinuxDocker" / "chrome"
+            output_binary.parent.mkdir(parents=True)
+            output_binary.write_bytes(b"chrome")
+            completed = self._run_script(
+                "check",
+                "--workdir",
+                str(workdir),
+                "--git-cache",
+                str(Path(td) / "git-cache"),
+                "--out-dir",
+                "out/BrowseForgeLinuxDocker",
+                env=env,
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(str(output_binary), payload["status"]["output_binary"])
+        self.assertIs(payload["status"]["output_binary_exists"], True)
+        self.assertEqual(str(output_binary), payload["plan"]["output_binary"])
+
+    def test_build_chrome_requires_execute_before_running_docker(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            completed = self._run_script(
+                "build-chrome",
+                "--workdir",
+                str(Path(td) / "chromium"),
+                "--git-cache",
+                str(Path(td) / "git-cache"),
+                "--out-dir",
+                "out/BrowseForgeLinuxDocker",
+            )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("build-chrome requires --execute", completed.stderr + completed.stdout)
+
     def test_plan_mounts_external_workdir_and_runtime_readonly(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             workdir = Path(td) / "chromium"
@@ -28,7 +111,10 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn(f"{workdir}:/work/chromium", gn)
         self.assertIn(f"{workdir.parent / 'git-cache'}:{workdir.parent / 'git-cache'}", gn)
         self.assertIn(f"{ROOT}:/work/runtime:ro", gn)
-        self.assertIn("PATH=/opt/depot_tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", gn)
+        path_env = next(value.removeprefix("PATH=") for value in gn if value.startswith("PATH="))
+        path_entries = path_env.split(":")
+        self.assertEqual("/opt/depot_tools", path_entries[0])
+        self.assertNotEqual("/work/chromium/depot_tools", path_entries[0])
         self.assertIn("./buildtools/linux64/gn", gn[-1])
         self.assertIn("sync-linux-deps", plan.commands)
         self.assertEqual("bf-test:deps", plan.deps_image)
@@ -42,7 +128,8 @@ class ChromiumDockerPlanTests(unittest.TestCase):
             src.mkdir(parents=True)
             (src / "DEPS").write_text("deps = {}\n", encoding="utf-8")
             plan = chromium_docker.build_plan(workdir=workdir)
-            status = chromium_docker.check(plan)
+            with mock.patch.object(chromium_docker, "docker_image_exists", return_value=False):
+                status = chromium_docker.check(plan)
 
         self.assertTrue(status["dockerfile_exists"])
         self.assertTrue(status["chromium_src_exists"])

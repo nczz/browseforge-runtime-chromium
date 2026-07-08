@@ -35,7 +35,7 @@
     {
       "gate_id": "runtime-artifact-produced",
       "status": "blocked",
-      "blocker": "No patched Chromium binary exists; the only packaged artifact is a local dogfood bundle using installed Google Chrome 150.0.7871.49 and is explicitly not release-grade."
+      "blocker": "No patched Chromium binary exists yet; build automation now exposes an explicit Docker deps-image `build-chrome` command for `autoninja -C out/BrowseForgeLinuxDocker chrome`, but the command has not produced a release-grade patched chrome binary/package."
     },
     {
       "gate_id": "live-detector-evidence",

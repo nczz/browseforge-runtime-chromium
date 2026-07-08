@@ -61,7 +61,7 @@
     "missing_prerequisites": [
       "full Xcode selected by xcode-select for macOS host GN generation",
       "unpatched baseline Chromium build",
-      "release artifact package"
+      "patched Chromium chrome build"
     ],
     "automation": {
       "source_script": "scripts/chromium_source.py",
@@ -117,7 +117,8 @@
         "python3 scripts/chromium_docker.py check-container --execute",
         "python3 scripts/chromium_docker.py sync-linux-deps --execute",
         "python3 scripts/chromium_docker.py install-linux-deps --execute",
-        "python3 scripts/chromium_docker.py gn-gen --execute"
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "python3 scripts/chromium_docker.py build-chrome --execute"
       ]
     }
   },
