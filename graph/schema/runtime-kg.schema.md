@@ -40,24 +40,27 @@ The runtime knowledge graph models source, artifacts, anti-detect surfaces, dete
 (RuntimeProvider)-[:BUILDS_ON]->(ChromiumBase)
 (RuntimeProvider)-[:HAS_WRAPPER]->(Wrapper)
 (RuntimeProvider)-[:HAS_PATCHSET]->(PatchSet)
+(RuntimeProvider)-[:DECLARES_CAPABILITY]->(Capability)
+(RuntimeProvider)-[:REFERENCES_SOURCE]->(KnowledgeSource)
 (PatchSet)-[:INCLUDES_PATCH]->(Patch)
-(Patch)-[:TOUCHES_FILE]->(SourceFile)
-(Patch)-[:TOUCHES_SYMBOL]->(Symbol)
-(RuntimeProvider)-[:PRODUCES_ARTIFACT]->(RuntimeArtifact)
+(Patch)-[:MODIFIES_SOURCE]->(SourceFile)
+(Patch)-[:MODIFIES_SOURCE]->(Symbol)
+(Patch)-[:CONTROLS_SURFACE]->(FingerprintSurface)
+(RuntimeProvider)<-[:GENERATED_FROM]-(RuntimeArtifact)
 (RuntimeArtifact)-[:TARGETS_PLATFORM]->(Platform)
-(RuntimeArtifact)-[:DECLARES_CAPABILITY]->(Capability)
+(RuntimeArtifact)-[:BUILT_FOR]->(Platform)
 ```
 
 ### Anti-detection
 
 ```text
-(Patch)-[:MODIFIES_SURFACE]->(FingerprintSurface)
 (RuntimeFlag)-[:CONTROLS_SURFACE]->(FingerprintSurface)
 (Detector)-[:CHECKS_SURFACE]->(FingerprintSurface)
 (DetectorRun)-[:RUNS_DETECTOR]->(Detector)
-(DetectorRun)-[:TESTS_ARTIFACT]->(RuntimeArtifact)
+(DetectorRun)-[:TARGETS_ARTIFACT]->(RuntimeArtifact)
+(DetectorRun)-[:PRODUCES_EVIDENCE]->(EvidenceArtifact)
 (DetectorRun)-[:OBSERVED_RISK]->(Risk)
-(EvidenceArtifact)-[:EVIDENCES]->(DetectorRun)
+(EvidenceArtifact)-[:SUPPORTS_GATE]->(ReleaseGate)
 (Mitigation)-[:MITIGATES]->(Risk)
 (Patch)-[:ADDRESSES_RISK]->(Risk)
 ```
@@ -98,10 +101,11 @@ Initial seed nodes must include:
 
 ## Generated exports
 
-Graph materializations are generated from source manifests and should be published as release artifacts unless intentionally small:
+Graph materializations are generated from source manifests and should be published as release artifacts unless intentionally small. The source-controlled seed files represent contract and blocker state; they are not live detector evidence and must not be used as release proof:
 
 ```text
 graph.db.zst
 generated/kg/runtime.graph.jsonl
 generated/kg/runtime.ttl
+generated/kg/detector-evidence.jsonl
 ```

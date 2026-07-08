@@ -56,13 +56,30 @@
       ]
     },
     {
+      "source_id": "runtime-repo-manifests",
+      "kind": "runtime_evidence_manifests",
+      "repo": "nczz/browseforge-runtime-chromium",
+      "ref": "main",
+      "path_globs": [
+        "knowledge/manifests/*.json"
+      ],
+      "exclude": [],
+      "sensitive": false,
+      "index_targets": [
+        "kb",
+        "kg"
+      ]
+    },
+    {
       "source_id": "runtime-repo-graph",
       "kind": "knowledge_graph_framework",
       "repo": "nczz/browseforge-runtime-chromium",
       "ref": "main",
       "path_globs": [
         "graph/**/*.md",
-        "graph/**/*.cypher"
+        "graph/**/*.cypher",
+        "generated/kg/*.jsonl",
+        "generated/kg/*.ttl"
       ],
       "exclude": [
         "graph/exports/**"
@@ -197,6 +214,8 @@
   "generated_outputs": {
     "knowledge_export": "release artifact: knowledge-export.jsonl",
     "graph_export": "release artifact: graph.db.zst",
+    "runtime_graph_seed": "generated/kg/runtime.graph.jsonl",
+    "runtime_graph_ttl": "generated/kg/runtime.ttl",
     "detector_summary": "release artifact: detector-summary.json"
   }
 }

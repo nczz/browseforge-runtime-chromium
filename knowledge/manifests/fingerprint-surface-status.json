@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "scope": "local_dogfood_only",
+  "release_grade": false,
+  "updated_from": [
+    "detectors/local-sannysoft-dogfood.sanitized.json",
+    "knowledge/manifests/local-dogfood.json"
+  ],
+  "surfaces": [
+    {
+      "surface": "automation_signals",
+      "status": "failed",
+      "severity": "high",
+      "evidence": "SannySoft local dogfood direct-host run reported WebDriver present and navigator.webdriver=true.",
+      "release_blocker": true
+    },
+    {
+      "surface": "webgl",
+      "status": "warn_unscored",
+      "severity": "medium",
+      "evidence": "Local dogfood captured host Apple/ANGLE WebGL renderer; no target persona comparison was performed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "locale",
+      "status": "observed",
+      "severity": "info",
+      "evidence": "Local dogfood captured zh-TW language; no cross-surface proxy/timezone score was performed.",
+      "release_blocker": false
+    },
+    {
+      "surface": "proxy_ip_coherence",
+      "status": "not_tested",
+      "severity": "high",
+      "evidence": "No proxy detector run was executed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "fonts",
+      "status": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font run was executed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "audio",
+      "status": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS/BrowserScan audio run was executed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "storage_quota",
+      "status": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserScan storage/incognito run was executed.",
+      "release_blocker": true
+    }
+  ],
+  "decision": "Keep live-detector-evidence release gate blocked. Dogfood proved wiring and exposed automation detection; it did not prove anti-detect readiness."
+}

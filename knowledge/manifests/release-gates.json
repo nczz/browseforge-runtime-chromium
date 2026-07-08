@@ -34,8 +34,8 @@
     },
     {
       "gate_id": "browseforge-adapter-merged",
-      "status": "passed",
-      "evidence": "BrowseForge commit 7b43fb4 adds browseforge-chromium registry descriptor, generic Chromium runtime settings, concrete session runtime_id reporting, Docker seed path, and adapter regressions."
+      "status": "blocked",
+      "blocker": "Registry/config settings and Docker seed loop exist, but current BrowseForge source still needs browseforge-chromium manager dispatch, default/config generation, install/status/doctor/capabilities, and end-to-end launch smoke evidence."
     },
     {
       "gate_id": "live-detector-evidence",

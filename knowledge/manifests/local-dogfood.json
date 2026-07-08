@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "scope": "local_dogfood_only",
+  "release_grade": false,
+  "base_dir": "/tmp/browseforge-dogfood",
+  "browseforge": {
+    "config": "/tmp/browseforge-dogfood/config.json",
+    "port": "19380",
+    "binary_path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "binary_version_output": "Google Chrome 150.0.7871.49"
+  },
+  "observations": [
+    {
+      "check": "config_validate",
+      "status": "passed",
+      "command": "go run ./cmd/server --base-dir /tmp/browseforge-dogfood config validate --json",
+      "observed": {
+        "ok": true
+      }
+    },
+    {
+      "check": "launch_session",
+      "status": "passed",
+      "profile_id": "prof_e20aac5782fd",
+      "session_id": "sess_prof_e20aac5782fd",
+      "observed_runtime_id": "browseforge-chromium"
+    },
+    {
+      "check": "profile_isolation",
+      "status": "passed",
+      "profiles": [
+        "prof_e20aac5782fd",
+        "prof_fae03da6b502"
+      ],
+      "method": "Set localStorage.bfDogfoodProbe in profile one after navigating both sessions to the same BrowseForge origin; profile two returned null."
+    },
+    {
+      "check": "playwright_bind",
+      "status": "passed",
+      "command": "go run ./tmp/playwright_bind_smoke.go <redacted-ws-endpoint>",
+      "observed": {
+        "connected": true,
+        "contexts": 1,
+        "pages": 1,
+        "title": "BrowseForge"
+      }
+    }
+  ],
+  "limitations": [
+    "Uses installed local Google Chrome, not a patched BrowseForge Chromium artifact.",
+    "Does not prove detector pass or anti-detect resistance.",
+    "Does not satisfy release gates for Chromium source indexing, artifact production, live detector evidence, or SBOM/provenance."
+  ],
+  "packaging": {
+    "status": "passed_dogfood_only",
+    "archive": "dist/dogfood/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+    "sha256": "fb05b846133d0e3b8dbe28a872938338f598520ab57ac25ccf82ed906b75829b",
+    "checksums_file": "dist/dogfood/checksums.txt",
+    "stage_manifest": "dist/dogfood/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/artifact-manifest.json",
+    "sbom": "dist/dogfood/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
+    "provenance": "dist/dogfood/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/provenance.json",
+    "release_grade": false,
+    "reason": "Archive packages local Google Chrome plus wrapper for dogfood mechanics only; it is not a patched Chromium runtime release artifact."
+  }
+}

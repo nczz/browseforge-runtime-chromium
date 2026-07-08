@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/reference-sources.json",
     "knowledge/manifests/platform-matrix.json",
     "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "build/package_runtime.py",
     "scripts/detector_harness.py",
@@ -33,6 +34,8 @@ REQUIRED_FILES = [
     "graph/queries/fingerprint-risk.cypher",
     "graph/queries/cross-repo-impact.cypher",
     "graph/queries/source-coverage.cypher",
+    "generated/kg/runtime.graph.jsonl",
+    "generated/kg/runtime.ttl",
     "docs/architecture.md",
     "docs/browseforge-integration.md",
     "docs/research-map.md",
@@ -59,6 +62,20 @@ REQUIRED_DIRS = [
 def load_json(path: str) -> object:
     with (ROOT / path).open("r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def load_jsonl(path: str) -> list[dict]:
+    records = []
+    with (ROOT / path).open("r", encoding="utf-8") as fh:
+        for line_no, line in enumerate(fh, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError as exc:
+                raise SystemExit(f"{path}:{line_no}: invalid JSONL: {exc}") from exc
+    return records
 
 
 def main() -> None:
@@ -145,9 +162,31 @@ def main() -> None:
     for token in ["RuntimeArtifact", "DetectorRun", "BrowseForgeConsumer", "FingerprintSurface", "KnowledgeSource", "Platform", "RUNS_DETECTOR", "TARGETS_PLATFORM"]:
         if token not in query_text:
             raise SystemExit(f"graph queries missing {token}")
-    for stale_token in ["RAN_DETECTOR", "BUILT_FOR", "platform_id"]:
+    for stale_token in ["RAN_DETECTOR", "platform_id"]:
         if stale_token in query_text:
             raise SystemExit(f"graph queries contain stale schema token {stale_token}")
+
+    graph_records = load_jsonl("generated/kg/runtime.graph.jsonl")
+    node_labels = {record.get("label") for record in graph_records if record.get("record_type") == "node"}
+    edge_labels = {record.get("label") for record in graph_records if record.get("record_type") == "edge"}
+    required_node_labels = {
+        "RuntimeProvider", "RuntimeArtifact", "BrowseForgeConsumer", "FingerprintSurface", "Patch",
+        "SourceFile", "Symbol", "Detector", "DetectorRun", "EvidenceArtifact", "Platform",
+        "Capability", "ReleaseGate", "KnowledgeSource",
+    }
+    missing_node_labels = sorted(required_node_labels - node_labels)
+    if missing_node_labels:
+        raise SystemExit(f"generated KG missing node labels: {missing_node_labels}")
+    required_edge_labels = {
+        "REQUIRES_CAPABILITY", "DECLARES_CAPABILITY", "BUILT_FOR", "GENERATED_FROM",
+        "MODIFIES_SOURCE", "CONTROLS_SURFACE", "CHECKS_SURFACE", "RUNS_DETECTOR",
+        "TARGETS_ARTIFACT", "PRODUCES_EVIDENCE", "SUPPORTS_GATE", "REFERENCES_SOURCE",
+    }
+    missing_edge_labels = sorted(required_edge_labels - edge_labels)
+    if missing_edge_labels:
+        raise SystemExit(f"generated KG missing edge labels: {missing_edge_labels}")
+    if not any(record.get("label") == "RuntimeArtifact" and record.get("properties", {}).get("status") == "missing" for record in graph_records):
+        raise SystemExit("generated KG must represent the missing runtime artifact blocker explicitly")
 
     print("runtime framework validation ok")
 
