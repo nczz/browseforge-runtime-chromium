@@ -35,6 +35,25 @@ func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			HardwareConcurrency: 8,
+			DeviceMemoryGB:      16,
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"--fingerprint-hardware-concurrency=8", "--fingerprint-device-memory=16"} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing hardware arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()

@@ -41,6 +41,7 @@ type FingerprintConfig struct {
 	Locale              string `json:"locale"`
 	Platform            string `json:"platform"`
 	HardwareConcurrency int    `json:"hardware_concurrency"`
+	DeviceMemoryGB      int    `json:"device_memory_gb"`
 	ScreenWidth         int    `json:"screen_width"`
 	ScreenHeight        int    `json:"screen_height"`
 	StorageQuotaMB      int    `json:"storage_quota_mb"`
@@ -151,6 +152,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.HardwareConcurrency > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-hardware-concurrency=%d", c.Fingerprint.HardwareConcurrency))
+	}
+	if c.Fingerprint.DeviceMemoryGB > 0 {
+		args = append(args, fmt.Sprintf("--fingerprint-device-memory=%d", c.Fingerprint.DeviceMemoryGB))
 	}
 	if c.Fingerprint.ScreenWidth > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-width=%d", c.Fingerprint.ScreenWidth))
