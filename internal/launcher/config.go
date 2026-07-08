@@ -16,6 +16,10 @@ const (
 	WrapperVersion = "v0.1.0-alpha.0"
 )
 
+const automationControlledArg = "--disable-blink-features=AutomationControlled"
+
+const webrtcIPHandlingArg = "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
+
 type Config struct {
 	BrowserBinary   string            `json:"browser_binary"`
 	UserDataDir     string            `json:"user_data_dir"`
@@ -69,6 +73,10 @@ var managedArgPrefixes = []string{
 	"--fingerprint",
 	"--fingerprint-",
 	"--proxy-server",
+	"--enable-automation",
+	"--disable-blink-features",
+	"--force-webrtc-ip-handling-policy",
+	"--webrtc-ip-handling-policy",
 }
 
 func LoadConfig(path string) (Config, error) {
@@ -115,7 +123,7 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	if err != nil {
 		return CommandPlan{}, fmt.Errorf("resolve user_data_dir: %w", err)
 	}
-	args := []string{"--no-first-run", "--test-type", "--user-data-dir=" + userDataDir}
+	args := []string{"--no-first-run", "--test-type", automationControlledArg, webrtcIPHandlingArg, "--user-data-dir=" + userDataDir}
 	if c.RemoteDebugging.Address != "" {
 		args = append(args, "--remote-debugging-address="+c.RemoteDebugging.Address)
 	}

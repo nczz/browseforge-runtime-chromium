@@ -71,12 +71,42 @@
         "prof_b6817f39a644"
       ],
       "method": "Set cookie, localStorage, IndexedDB, Cache API entry, and service worker registration in profile one on http://127.0.0.1:19480; profile two on same origin returned no cookie, null localStorage, no IndexedDB database, empty Cache API keys, and zero service worker registrations."
+    },
+    {
+      "check": "local_sannysoft_detector",
+      "status": "warning",
+      "evidence": "detectors/local-sannysoft-dogfood.sanitized.json",
+      "observed": {
+        "detector": "sannysoft",
+        "webdriver": "missing_passed",
+        "webdriver_advanced": "passed",
+        "chrome_object": "present_passed",
+        "plugins_length": 5,
+        "language": "zh-TW",
+        "platform": "MacIntel",
+        "webgl": "host_apple_angle_unscored"
+      },
+      "notes": "Local dogfood SannySoft rerun no longer reports WebDriver; warning remains because this uses installed Google Chrome, direct network, no target persona score, and no full detector matrix."
+    },
+    {
+      "check": "local_creepjs_webrtc_smoke",
+      "status": "warning",
+      "observed": {
+        "detector": "creepjs",
+        "webdriver": "missing",
+        "webrtc_host_connection": "blocked",
+        "webrtc_stun_connection": "blocked",
+        "candidate_ip_committed": false,
+        "headless_likeness": "reported_by_detector"
+      },
+      "notes": "CreepJS local smoke confirms WebRTC candidate exposure is blocked after prefs/flag mitigation, but detector still reports headless-likeness; this is not release-grade pass evidence."
     }
   ],
   "limitations": [
     "Uses installed local Google Chrome, not a patched BrowseForge Chromium artifact.",
-    "Does not prove detector pass or anti-detect resistance.",
-    "Does not satisfy release gates for Chromium source indexing, artifact production, live detector evidence, or SBOM/provenance."
+    "Does not satisfy release gates for Chromium source indexing, artifact production, live detector evidence, or SBOM/provenance.",
+    "Local SannySoft dogfood WebDriver/automation check passed after mitigation, but this does not prove full anti-detect resistance.",
+    "Does not satisfy release gates for Chromium source indexing, artifact production, full live detector matrix, proxy coherence, or SBOM/provenance."
   ],
   "packaging": {
     "status": "passed_dogfood_only",

@@ -22,8 +22,21 @@ func TestBuildPlanAddsProxyWebRTCPolicy(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
+	cfg := Config{UserDataDir: t.TempDir()}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{automationControlledArg, webrtcIPHandlingArg} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing mitigation arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
-	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil"}}
+	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only"}}
 	_, err := cfg.BuildPlan()
 	if err == nil {
 		t.Fatal("expected managed arg collision")
@@ -56,4 +69,13 @@ func TestRunDryRunDoesNotRequireBrowserBinary(t *testing.T) {
 	if !strings.Contains(out.String(), "--fingerprint=42") {
 		t.Fatalf("dry-run output missing seed: %s", out.String())
 	}
+}
+
+func containsArg(args []string, want string) bool {
+	for _, arg := range args {
+		if arg == want {
+			return true
+		}
+	}
+	return false
 }

@@ -40,7 +40,7 @@
     {
       "gate_id": "live-detector-evidence",
       "status": "blocked",
-      "blocker": "Local SannySoft dogfood evidence exists but failed high-severity automation_signals because WebDriver was present; BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan and proxy coherence still require a real artifact/proxy-capable detector run."
+      "blocker": "Local SannySoft dogfood no longer reports WebDriver and local CreepJS WebRTC smoke shows host/stun candidates blocked, but release-grade evidence remains blocked by CreepJS headless-likeness, missing patched Chromium artifact, BrowserLeaks/Pixelscan/iphey/BrowserScan coverage, proxy/IP coherence, and target persona scoring."
     },
     {
       "gate_id": "sbom-provenance-release-assets",

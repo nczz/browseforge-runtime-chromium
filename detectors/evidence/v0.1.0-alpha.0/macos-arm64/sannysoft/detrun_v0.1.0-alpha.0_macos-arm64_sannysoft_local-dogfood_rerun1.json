@@ -1,0 +1,184 @@
+{
+  "artifact_id": "local-external-chrome:macos-arm64:150.0.7871.49",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "manual_ingest",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [
+      {
+        "edge": "RUNS_DETECTOR",
+        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "to": "sannysoft"
+      },
+      {
+        "edge": "TESTS_ARTIFACT",
+        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "to": "local-external-chrome:macos-arm64:150.0.7871.49"
+      },
+      {
+        "edge": "EVIDENCES",
+        "from": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "to": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1"
+      },
+      {
+        "edge": "CHECKS_SURFACE",
+        "from": "sannysoft",
+        "to": "automation_signals"
+      },
+      {
+        "edge": "CHECKS_SURFACE",
+        "from": "sannysoft",
+        "to": "canvas"
+      },
+      {
+        "edge": "CHECKS_SURFACE",
+        "from": "sannysoft",
+        "to": "locale"
+      },
+      {
+        "edge": "CHECKS_SURFACE",
+        "from": "sannysoft",
+        "to": "permissions"
+      },
+      {
+        "edge": "CHECKS_SURFACE",
+        "from": "sannysoft",
+        "to": "webgl"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "label": "DetectorRun",
+        "properties": {
+          "failure_mode": "none",
+          "matrix_key": "macos-arm64:sannysoft:headed:direct:host",
+          "status": "warning"
+        }
+      },
+      {
+        "id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "label": "EvidenceArtifact",
+        "properties": {
+          "path": "detectors/local-sannysoft-dogfood.sanitized.json",
+          "sanitized": true,
+          "sha256": "ac4340800360cea6ba124a3d31621d12c13dcb5b94405cfe8dce827f04cd5bc6"
+        }
+      }
+    ]
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:sannysoft:headed:direct:host",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": true
+  },
+  "results": [
+    {
+      "detector_check": "WebDriver/New, WebDriver Advanced, Chrome/New, Plugins, PHANTOM_*, SELENIUM_DRIVER",
+      "evidence_ref": "sanitized_dom_summary",
+      "finding": "SannySoft rerun reported WebDriver missing, WebDriver Advanced passed, Chrome present, plugins PluginArray passed, and Selenium/Phantom checks returned ok.",
+      "mitigation": "BrowseForge now owns --disable-blink-features=AutomationControlled, filters --enable-automation, and installs a context init script before detector navigation.",
+      "normalized_values": {
+        "chrome_runtime_object": false,
+        "navigator.webdriver": null,
+        "plugins_length": 5,
+        "webdriver_type": "undefined"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "WebGL Vendor, WebGL Renderer",
+      "evidence_ref": "sanitized_dom_summary",
+      "finding": "SannySoft observed host Apple/ANGLE WebGL renderer; this is coherent with macOS local dogfood but not scored against a generated target persona.",
+      "normalized_values": {
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "vendor": "Google Inc. (Apple)"
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "Languages/Old, PHANTOM_LANGUAGE",
+      "evidence_ref": "sanitized_dom_summary",
+      "finding": "SannySoft observed zh-TW language list in local dogfood capture.",
+      "normalized_values": {
+        "language": "zh-TW",
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en-US",
+          "en"
+        ]
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "Canvas1..Canvas5",
+      "evidence_ref": "sanitized_dom_summary",
+      "finding": "SannySoft canvas rows returned stable hashes in local dogfood; no cross-persona or cross-session canvas noise target was scored.",
+      "severity": "low",
+      "status": "warn",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "Permissions/New, HEADCHR_PERMISSIONS",
+      "evidence_ref": "sanitized_dom_summary",
+      "finding": "SannySoft permissions checks returned prompt/ok in local dogfood capture.",
+      "severity": "info",
+      "status": "pass",
+      "surface": "permissions"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Committed evidence is a sanitized REST/eval summary. Raw DOM, endpoint, token, profile/session identifiers, cookies/storage, screenshots, IPs, and local URLs were omitted or redacted.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "0.1.0",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1.json",
+    "sha256": "617cda7633e38bea68dc5adb35d810efc7e34eb4272afe41dac86cf341043bb4"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "Google Chrome 150.0.7871.49",
+    "container": false,
+    "gpu_mode": "host",
+    "host_os": "darwin",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "not_recorded"
+  },
+  "tested_at": "2026-07-08T07:09:36.554064Z"
+}

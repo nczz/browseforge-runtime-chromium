@@ -96,14 +96,14 @@ func launch(args []string) error {
 		if err != nil {
 			return err
 		}
-		mergeConfig(&loaded, cfg)
-		cfg = loaded
+		mergeConfig(&loaded, *cfg)
+		cfg = &loaded
 	}
-	return launcher.Run(context.Background(), cfg, launcher.RunOptions{DryRun: *dryRun})
+	return launcher.Run(context.Background(), *cfg, launcher.RunOptions{DryRun: *dryRun})
 }
 
-func bindLaunchFlags(fs *flag.FlagSet) (launcher.Config, *string, *bool, *stringList, *uint) {
-	cfg := launcher.Config{}
+func bindLaunchFlags(fs *flag.FlagSet) (*launcher.Config, *string, *bool, *stringList, *uint) {
+	cfg := &launcher.Config{}
 	var extras stringList
 	configPath := fs.String("config", "", "JSON launcher config")
 	dryRun := fs.Bool("dry-run-json", false, "print command JSON without launching")

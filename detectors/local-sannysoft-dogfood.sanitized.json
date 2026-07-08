@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
-  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood",
-  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood",
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
   "runtime_id": "browseforge-chromium",
   "runtime_version": "v0.1.0-alpha.0",
   "artifact_id": "local-external-chrome:macos-arm64:150.0.7871.49",
@@ -12,11 +12,11 @@
     "category": "automation",
     "manifest_ref": "knowledge/manifests/detectors.json#sannysoft"
   },
-  "tested_at": "2026-07-08T14:16:00+08:00",
+  "tested_at": "2026-07-08T07:09:36.554064Z",
   "harness": {
-    "name": "BrowseForge REST session + sanitized DOM summary",
+    "name": "browseforge-detector-harness",
     "version": "0.1.0",
-    "mode": "local_dogfood"
+    "mode": "manual_ingest"
   },
   "target": {
     "platform": "macos-arm64",
@@ -38,28 +38,67 @@
     "proxy": "none",
     "required": true
   },
-  "status": "failed",
-  "failure_mode": "automation_signal_detected",
+  "status": "warning",
+  "failure_mode": "none",
   "results": [
     {
       "surface": "automation_signals",
-      "status": "fail",
-      "severity": "high",
-      "finding": "SannySoft reported WebDriver present (failed); navigator.webdriver was true in sanitized local dogfood capture.",
+      "status": "pass",
+      "severity": "info",
+      "finding": "SannySoft rerun reported WebDriver missing, WebDriver Advanced passed, Chrome present, plugins PluginArray passed, and Selenium/Phantom checks returned ok.",
+      "mitigation": "BrowseForge now owns --disable-blink-features=AutomationControlled, filters --enable-automation, and installs a context init script before detector navigation.",
+      "detector_check": "WebDriver/New, WebDriver Advanced, Chrome/New, Plugins, PHANTOM_*, SELENIUM_DRIVER",
+      "normalized_values": {
+        "navigator.webdriver": null,
+        "webdriver_type": "undefined",
+        "plugins_length": 5,
+        "chrome_runtime_object": false
+      },
       "evidence_ref": "sanitized_dom_summary"
     },
     {
       "surface": "webgl",
       "status": "warn",
       "severity": "medium",
-      "finding": "Captured WebGL vendor/renderer indicated host Apple/ANGLE; not scored against a target persona in local dogfood mode.",
+      "finding": "SannySoft observed host Apple/ANGLE WebGL renderer; this is coherent with macOS local dogfood but not scored against a generated target persona.",
+      "detector_check": "WebGL Vendor, WebGL Renderer",
+      "normalized_values": {
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "vendor": "Google Inc. (Apple)"
+      },
       "evidence_ref": "sanitized_dom_summary"
     },
     {
       "surface": "locale",
       "status": "pass",
       "severity": "info",
-      "finding": "Detected browser language zh-TW in local dogfood capture.",
+      "finding": "SannySoft observed zh-TW language list in local dogfood capture.",
+      "detector_check": "Languages/Old, PHANTOM_LANGUAGE",
+      "normalized_values": {
+        "language": "zh-TW",
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en-US",
+          "en"
+        ]
+      },
+      "evidence_ref": "sanitized_dom_summary"
+    },
+    {
+      "surface": "canvas",
+      "status": "warn",
+      "severity": "low",
+      "finding": "SannySoft canvas rows returned stable hashes in local dogfood; no cross-persona or cross-session canvas noise target was scored.",
+      "detector_check": "Canvas1..Canvas5",
+      "evidence_ref": "sanitized_dom_summary"
+    },
+    {
+      "surface": "permissions",
+      "status": "pass",
+      "severity": "info",
+      "finding": "SannySoft permissions checks returned prompt/ok in local dogfood capture.",
+      "detector_check": "Permissions/New, HEADCHR_PERMISSIONS",
       "evidence_ref": "sanitized_dom_summary"
     }
   ],
@@ -72,33 +111,73 @@
     "screenshot_metadata_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "0.1.0",
-    "notes": "Raw detector DOM text was not committed; only detector-visible browser fields and coarse pass/fail indicators are retained."
+    "notes": "Committed evidence is a sanitized REST/eval summary. Raw DOM, endpoint, token, profile/session identifiers, cookies/storage, screenshots, IPs, and local URLs were omitted or redacted."
   },
   "storage": {
     "evidence_path": "detectors/local-sannysoft-dogfood.sanitized.json",
-    "sha256": "6ebbd651c49b00ebf06c9aadfe1616209a9659a37b0492e10eb0b9690b30ca57"
+    "sha256": "ac4340800360cea6ba124a3d31621d12c13dcb5b94405cfe8dce827f04cd5bc6"
   },
   "kg": {
     "nodes": [
       {
         "label": "DetectorRun",
-        "id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood"
+        "id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "properties": {
+          "status": "warning",
+          "failure_mode": "none",
+          "matrix_key": "macos-arm64:sannysoft:headed:direct:host"
+        }
       },
       {
         "label": "EvidenceArtifact",
-        "id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood"
+        "id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "properties": {
+          "path": "detectors/local-sannysoft-dogfood.sanitized.json",
+          "sha256": "ac4340800360cea6ba124a3d31621d12c13dcb5b94405cfe8dce827f04cd5bc6",
+          "sanitized": true
+        }
       }
     ],
     "edges": [
       {
-        "label": "RUNS_DETECTOR",
-        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood",
+        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "edge": "RUNS_DETECTOR",
         "to": "sannysoft"
       },
       {
-        "label": "PRODUCES_EVIDENCE",
-        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood",
-        "to": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood"
+        "from": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "edge": "TESTS_ARTIFACT",
+        "to": "local-external-chrome:macos-arm64:150.0.7871.49"
+      },
+      {
+        "from": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1",
+        "edge": "EVIDENCES",
+        "to": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1"
+      },
+      {
+        "from": "sannysoft",
+        "edge": "CHECKS_SURFACE",
+        "to": "automation_signals"
+      },
+      {
+        "from": "sannysoft",
+        "edge": "CHECKS_SURFACE",
+        "to": "canvas"
+      },
+      {
+        "from": "sannysoft",
+        "edge": "CHECKS_SURFACE",
+        "to": "locale"
+      },
+      {
+        "from": "sannysoft",
+        "edge": "CHECKS_SURFACE",
+        "to": "permissions"
+      },
+      {
+        "from": "sannysoft",
+        "edge": "CHECKS_SURFACE",
+        "to": "webgl"
       }
     ]
   }
