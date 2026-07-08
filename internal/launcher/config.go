@@ -60,6 +60,8 @@ type FingerprintConfig struct {
 	PluginsPDF          string `json:"plugins_pdf"`
 	AudioNoise          int    `json:"audio_noise"`
 	CanvasNoise         int    `json:"canvas_noise"`
+	WebGLVendor         string `json:"webgl_vendor"`
+	WebGLRenderer       string `json:"webgl_renderer"`
 	FontsDir            string `json:"fonts_dir"`
 	WebRTCIP            string `json:"webrtc_ip"`
 	NativeConfigPath    string `json:"native_config_path"`
@@ -226,6 +228,12 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.CanvasNoise > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-canvas-noise=%d", c.Fingerprint.CanvasNoise))
+	}
+	if c.Fingerprint.WebGLVendor != "" {
+		args = append(args, "--fingerprint-webgl-vendor="+c.Fingerprint.WebGLVendor)
+	}
+	if c.Fingerprint.WebGLRenderer != "" {
+		args = append(args, "--fingerprint-webgl-renderer="+c.Fingerprint.WebGLRenderer)
 	}
 	if c.Fingerprint.FontsDir != "" {
 		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)

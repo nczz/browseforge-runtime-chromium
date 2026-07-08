@@ -225,6 +225,28 @@ func TestBuildPlanAddsCanvasNoiseFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			WebGLVendor:   "Google Inc. (NVIDIA)",
+			WebGLRenderer: "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"--fingerprint-webgl-vendor=Google Inc. (NVIDIA)",
+		"--fingerprint-webgl-renderer=ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+	} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing WebGL arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
