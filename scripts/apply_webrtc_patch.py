@@ -11,7 +11,7 @@ COMMAND_LINE_INCLUDE = '#include "base/command_line.h"\n'
 INCLUDE_ANCHOR = '#include <utility>\n\n'
 NAMESPACE_ANCHOR = "namespace blink {\n\n"
 
-WEBRTC_HELPER = '''namespace {\n\nString BrowseForgeWebRTCIPOverride() {\n  const std::string ip = base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(\n      "fingerprint-webrtc-ip");\n  if (ip.empty() || ip == "auto" || ip.size() > 64) {\n    return String();\n  }\n  bool has_digit = false;\n  for (char c : ip) {\n    const bool valid = (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||\n                       (c >= 'a' && c <= 'f') || c == '.' || c == ':';\n    if (!valid) {\n      return String();\n    }\n    has_digit = has_digit || (c >= '0' && c <= '9');\n  }\n  return has_digit ? String::FromUtf8(ip) : String();\n}\n\nString BrowseForgeWebRTCCandidateOverride(const String& candidate,\n                                          const String& address) {\n  String ip = BrowseForgeWebRTCIPOverride();\n  if (ip.empty() || address.empty()) {\n    return candidate;\n  }\n  return candidate.Replace(address, ip);\n}\n\n}  // namespace\n\n'''
+WEBRTC_HELPER = '''namespace {\n\nString BrowseForgeWebRTCIPOverride() {\n  const std::string ip = base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(\n      "fingerprint-webrtc-ip");\n  if (ip.empty() || ip == "auto" || ip.size() > 64) {\n    return String();\n  }\n  bool has_digit = false;\n  for (char c : ip) {\n    const bool valid = (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||\n                       (c >= 'a' && c <= 'f') || c == '.' || c == ':';\n    if (!valid) {\n      return String();\n    }\n    has_digit = has_digit || (c >= '0' && c <= '9');\n  }\n  return has_digit ? String::FromUtf8(ip) : String();\n}\n\nString BrowseForgeWebRTCCandidateOverride(const String& candidate,\n                                          const String& address) {\n  String ip = BrowseForgeWebRTCIPOverride();\n  if (ip.empty() || address.empty()) {\n    return candidate;\n  }\n  String rewritten = candidate;\n  rewritten.Replace(address, ip);\n  return rewritten;\n}\n\n}  // namespace\n\n'''
 
 ORIGINAL_CANDIDATE = '''String RTCIceCandidate::candidate() const {\n  return platform_candidate_->Candidate();\n}\n'''
 PATCHED_CANDIDATE = '''String RTCIceCandidate::candidate() const {\n  return BrowseForgeWebRTCCandidateOverride(platform_candidate_->Candidate(),\n                                            platform_candidate_->Address());\n}\n'''
@@ -47,6 +47,12 @@ def patch_webrtc(text: str) -> str:
         if NAMESPACE_ANCHOR not in patched:
             raise SystemExit("rtc_ice_candidate.cc namespace anchor not found")
         patched = patched.replace(NAMESPACE_ANCHOR, NAMESPACE_ANCHOR + WEBRTC_HELPER, 1)
+    patched = patched.replace(
+        "  return candidate.Replace(address, ip);\n",
+        "  String rewritten = candidate;\n"
+        "  rewritten.Replace(address, ip);\n"
+        "  return rewritten;\n",
+    )
     replacements = [
         (ORIGINAL_CANDIDATE, PATCHED_CANDIDATE, "RTCIceCandidate::candidate"),
         (ORIGINAL_ADDRESS, PATCHED_ADDRESS, "RTCIceCandidate::address"),

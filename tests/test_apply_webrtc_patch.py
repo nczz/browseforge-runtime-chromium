@@ -51,6 +51,7 @@ class ApplyWebRTCPatchTests(unittest.TestCase):
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('GetSwitchValueASCII(\n      "fingerprint-webrtc-ip")', patched)
         self.assertIn('BrowseForgeWebRTCCandidateOverride(platform_candidate_->Candidate()', patched)
+        self.assertIn("String rewritten = candidate;", patched)
         self.assertIn('return ip.empty() ? platform_candidate_->Address() : ip;', patched)
         self.assertIn('result.AddString("candidate", candidate());', patched)
         self.assertIn('ip == "auto"', patched)
