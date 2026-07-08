@@ -559,6 +559,38 @@
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built",
       "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims."
+    },
+    {
+      "patchset_id": "surface-feature-parity-native-defaults",
+      "title": "BrowseForge Chromium feature inventory parity defaults for ContentIndex, ContactsManager, and NetInfo downlinkMax",
+      "surface": "permissions_features",
+      "files_touched": [
+        "scripts/apply_feature_parity_patch.py",
+        "tests/test_apply_feature_parity_patch.py",
+        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5"
+      ],
+      "symbols_touched": [
+        "RuntimeEnabledFeatures::ContentIndexEnabled",
+        "RuntimeEnabledFeatures::ContactsManagerEnabled",
+        "RuntimeEnabledFeatures::ContactsManagerExtraPropertiesEnabled",
+        "RuntimeEnabledFeatures::NetInfoDownlinkMaxEnabled"
+      ],
+      "risk_level": "high",
+      "detectors_addressed": [
+        "creepjs",
+        "pixelscan"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_feature_parity_patch",
+        "python3 scripts/apply_feature_parity_patch.py --check",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules:modules",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, and NetInfoDownlinkMax to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, and noDownlinkMax. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, and detector pass still require a patched Chromium artifact and live detector evidence."
     }
   ],
   "required_patch_metadata": [

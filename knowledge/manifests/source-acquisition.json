@@ -11,7 +11,7 @@
     "hooks_status": "completed",
     "gn_generation_status": "generated_linux_docker",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, and webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL source-level patches are applied in the external checkout. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, and webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity source-level patches are applied in the external checkout. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
     "local_paths_checked": [
       {
         "path": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
@@ -47,7 +47,8 @@
     "webrtc_patch_status": "applied_to_external_checkout",
     "audio_patch_status": "applied_to_external_checkout",
     "canvas_patch_status": "applied_to_external_checkout",
-    "webgl_patch_status": "applied_to_external_checkout"
+    "webgl_patch_status": "applied_to_external_checkout",
+    "feature_parity_patch_status": "applied_to_external_checkout"
   },
   "toolchain": {
     "fetch": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/fetch",
@@ -105,6 +106,8 @@
         "python3 scripts/apply_canvas_patch.py",
         "python3 scripts/apply_webgl_patch.py --check",
         "python3 scripts/apply_webgl_patch.py",
+        "python3 scripts/apply_feature_parity_patch.py --check",
+        "python3 scripts/apply_feature_parity_patch.py",
         "python3 scripts/chromium_docker.py plan",
         "python3 scripts/chromium_docker.py check",
         "python3 scripts/chromium_docker.py build-image --execute",
@@ -123,5 +126,5 @@
     "reason": "Existing local Chrome can exercise BrowseForge Chromium-family launch wiring, but it is not the selected Chromium base, not patched, and not a BrowseForge runtime release artifact."
   },
   "decision": "Proceed with source-level BrowseForge Chromium patching in the external checkout; keep release gates blocked until a real patched Chromium artifact, SBOM/provenance assets, and live detector matrix evidence exist.",
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, and webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL source-level patches are applied in the external checkout. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode."
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, and webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity source-level patches are applied in the external checkout. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode."
 }
