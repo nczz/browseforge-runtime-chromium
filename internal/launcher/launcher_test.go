@@ -247,6 +247,23 @@ func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsFontListFingerprintArg(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			Fonts: []string{"Segoe UI", "Calibri", "Consolas"},
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "--fingerprint-fonts-list=Segoe UI|Calibri|Consolas"
+	if !containsArg(plan.Args, want) {
+		t.Fatalf("missing font list arg %q: %v", want, plan.Args)
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()

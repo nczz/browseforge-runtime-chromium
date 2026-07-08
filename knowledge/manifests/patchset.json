@@ -591,6 +591,40 @@
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built",
       "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, and NetInfoDownlinkMax to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, and noDownlinkMax. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, and detector pass still require a patched Chromium artifact and live detector evidence."
+    },
+    {
+      "patchset_id": "surface-font-face-set-native-list-override",
+      "title": "BrowseForge FontFaceSet font availability native list override for Chromium M150",
+      "surface": "fonts",
+      "files_touched": [
+        "scripts/apply_fonts_patch.py",
+        "tests/test_apply_fonts_patch.py",
+        "scripts/validate.py",
+        "internal/launcher/config.go",
+        "internal/launcher/launcher_test.go",
+        "chromium/src/third_party/blink/renderer/core/css/font_face_set.cc"
+      ],
+      "symbols_touched": [
+        "blink::FontFaceSet::check",
+        "BrowseForgeFontFamilyAllowed",
+        "launcher.FingerprintConfig.Fonts"
+      ],
+      "risk_level": "high",
+      "detectors_addressed": [
+        "pixelscan",
+        "creepjs",
+        "browserleaks"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_fonts_patch",
+        "python3 scripts/apply_fonts_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence."
     }
   ],
   "required_patch_metadata": [

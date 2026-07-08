@@ -36,36 +36,37 @@ type Config struct {
 }
 
 type FingerprintConfig struct {
-	Seed                uint32 `json:"seed"`
-	Timezone            string `json:"timezone"`
-	Locale              string `json:"locale"`
-	AcceptLanguage      string `json:"accept_language"`
-	Platform            string `json:"platform"`
-	UserAgent           string `json:"user_agent"`
-	UAFullVersion       string `json:"ua_full_version"`
-	UAPlatform          string `json:"ua_platform"`
-	UAPlatformVersion   string `json:"ua_platform_version"`
-	UAArchitecture      string `json:"ua_architecture"`
-	UABitness           string `json:"ua_bitness"`
-	UAModel             string `json:"ua_model"`
-	UAMobile            bool   `json:"ua_mobile"`
-	UAWoW64             bool   `json:"ua_wow64"`
-	HardwareConcurrency int    `json:"hardware_concurrency"`
-	DeviceMemoryGB      int    `json:"device_memory_gb"`
-	ScreenWidth         int    `json:"screen_width"`
-	ScreenHeight        int    `json:"screen_height"`
-	ScreenAvailWidth    int    `json:"screen_avail_width"`
-	ScreenAvailHeight   int    `json:"screen_avail_height"`
-	StorageQuotaMB      int    `json:"storage_quota_mb"`
-	PluginsPDF          string `json:"plugins_pdf"`
-	AudioNoise          int    `json:"audio_noise"`
-	CanvasNoise         int    `json:"canvas_noise"`
-	WebGLVendor         string `json:"webgl_vendor"`
-	WebGLRenderer       string `json:"webgl_renderer"`
-	FontsDir            string `json:"fonts_dir"`
-	WebRTCIP            string `json:"webrtc_ip"`
-	NativeConfigPath    string `json:"native_config_path"`
-	NativeMode          string `json:"native_mode"`
+	Seed                uint32   `json:"seed"`
+	Timezone            string   `json:"timezone"`
+	Locale              string   `json:"locale"`
+	AcceptLanguage      string   `json:"accept_language"`
+	Platform            string   `json:"platform"`
+	UserAgent           string   `json:"user_agent"`
+	UAFullVersion       string   `json:"ua_full_version"`
+	UAPlatform          string   `json:"ua_platform"`
+	UAPlatformVersion   string   `json:"ua_platform_version"`
+	UAArchitecture      string   `json:"ua_architecture"`
+	UABitness           string   `json:"ua_bitness"`
+	UAModel             string   `json:"ua_model"`
+	UAMobile            bool     `json:"ua_mobile"`
+	UAWoW64             bool     `json:"ua_wow64"`
+	HardwareConcurrency int      `json:"hardware_concurrency"`
+	DeviceMemoryGB      int      `json:"device_memory_gb"`
+	ScreenWidth         int      `json:"screen_width"`
+	ScreenHeight        int      `json:"screen_height"`
+	ScreenAvailWidth    int      `json:"screen_avail_width"`
+	ScreenAvailHeight   int      `json:"screen_avail_height"`
+	StorageQuotaMB      int      `json:"storage_quota_mb"`
+	PluginsPDF          string   `json:"plugins_pdf"`
+	AudioNoise          int      `json:"audio_noise"`
+	CanvasNoise         int      `json:"canvas_noise"`
+	WebGLVendor         string   `json:"webgl_vendor"`
+	WebGLRenderer       string   `json:"webgl_renderer"`
+	FontsDir            string   `json:"fonts_dir"`
+	Fonts               []string `json:"fonts"`
+	WebRTCIP            string   `json:"webrtc_ip"`
+	NativeConfigPath    string   `json:"native_config_path"`
+	NativeMode          string   `json:"native_mode"`
 }
 
 type ProxyConfig struct {
@@ -241,6 +242,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 			return CommandPlan{}, fmt.Errorf("resolve fingerprint fonts dir: %w", err)
 		}
 		args = append(args, "--fingerprint-fonts-dir="+fontsDir)
+	}
+	if len(c.Fingerprint.Fonts) > 0 {
+		args = append(args, "--fingerprint-fonts-list="+strings.Join(c.Fingerprint.Fonts, "|"))
 	}
 	webrtcIP := c.Fingerprint.WebRTCIP
 	if c.Proxy.Server != "" {
