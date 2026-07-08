@@ -41,6 +41,15 @@ type FingerprintConfig struct {
 	Locale              string `json:"locale"`
 	AcceptLanguage      string `json:"accept_language"`
 	Platform            string `json:"platform"`
+	UserAgent           string `json:"user_agent"`
+	UAFullVersion       string `json:"ua_full_version"`
+	UAPlatform          string `json:"ua_platform"`
+	UAPlatformVersion   string `json:"ua_platform_version"`
+	UAArchitecture      string `json:"ua_architecture"`
+	UABitness           string `json:"ua_bitness"`
+	UAModel             string `json:"ua_model"`
+	UAMobile            bool   `json:"ua_mobile"`
+	UAWoW64             bool   `json:"ua_wow64"`
 	HardwareConcurrency int    `json:"hardware_concurrency"`
 	DeviceMemoryGB      int    `json:"device_memory_gb"`
 	ScreenWidth         int    `json:"screen_width"`
@@ -79,6 +88,7 @@ var managedArgPrefixes = []string{
 	"--user-data-dir",
 	"--remote-debugging-address",
 	"--remote-debugging-port",
+	"--user-agent",
 	"--fingerprint",
 	"--fingerprint-",
 	"--proxy-server",
@@ -155,6 +165,34 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.Platform != "" {
 		args = append(args, "--fingerprint-platform="+c.Fingerprint.Platform)
+	}
+	if c.Fingerprint.UserAgent != "" {
+		args = append(args, "--user-agent="+c.Fingerprint.UserAgent)
+		args = append(args, "--fingerprint-user-agent="+c.Fingerprint.UserAgent)
+	}
+	if c.Fingerprint.UAFullVersion != "" {
+		args = append(args, "--fingerprint-ua-full-version="+c.Fingerprint.UAFullVersion)
+	}
+	if c.Fingerprint.UAPlatform != "" {
+		args = append(args, "--fingerprint-ua-platform="+c.Fingerprint.UAPlatform)
+	}
+	if c.Fingerprint.UAPlatformVersion != "" {
+		args = append(args, "--fingerprint-ua-platform-version="+c.Fingerprint.UAPlatformVersion)
+	}
+	if c.Fingerprint.UAArchitecture != "" {
+		args = append(args, "--fingerprint-ua-architecture="+c.Fingerprint.UAArchitecture)
+	}
+	if c.Fingerprint.UABitness != "" {
+		args = append(args, "--fingerprint-ua-bitness="+c.Fingerprint.UABitness)
+	}
+	if c.Fingerprint.UAModel != "" {
+		args = append(args, "--fingerprint-ua-model="+c.Fingerprint.UAModel)
+	}
+	if c.Fingerprint.UAMobile {
+		args = append(args, "--fingerprint-ua-mobile=true")
+	}
+	if c.Fingerprint.UAWoW64 {
+		args = append(args, "--fingerprint-ua-wow64=true")
 	}
 	if c.Fingerprint.HardwareConcurrency > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-hardware-concurrency=%d", c.Fingerprint.HardwareConcurrency))

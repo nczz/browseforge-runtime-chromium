@@ -283,6 +283,52 @@
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built",
       "notes": "When --fingerprint-accept-language contains a bounded Accept-Language list, Blink uses it for navigator.language and navigator.languages; --fingerprint-locale is used as a fallback single-language value. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers DOM language APIs; HTTP Accept-Language header coherence remains a separate network/browser preference surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run."
+    },
+    {
+      "patchset_id": "surface-user-agent-native-overrides",
+      "title": "BrowseForge User-Agent and UA-CH native overrides for Chromium M150",
+      "surface": "user_agent",
+      "files_touched": [
+        "scripts/apply_user_agent_patch.py",
+        "tests/test_apply_user_agent_patch.py",
+        "scripts/validate.py",
+        "internal/launcher/config.go",
+        "internal/launcher/launcher_test.go",
+        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
+        "chromium/src/third_party/blink/renderer/core/frame/navigator_ua.cc"
+      ],
+      "symbols_touched": [
+        "blink::NavigatorBase::userAgent",
+        "blink::NavigatorUA::userAgentData",
+        "BrowseForgeNavigatorUserAgentOverride",
+        "BrowseForgeApplyUserAgentMetadataOverrides",
+        "launcher.FingerprintConfig.UserAgent",
+        "launcher.FingerprintConfig.UAFullVersion",
+        "launcher.FingerprintConfig.UAPlatform",
+        "launcher.FingerprintConfig.UAPlatformVersion",
+        "launcher.FingerprintConfig.UAArchitecture",
+        "launcher.FingerprintConfig.UABitness",
+        "launcher.FingerprintConfig.UAMobile",
+        "launcher.FingerprintConfig.UAWoW64"
+      ],
+      "risk_level": "high",
+      "detectors_addressed": [
+        "browserleaks",
+        "creepjs",
+        "pixelscan",
+        "browserscan",
+        "iphey"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_user_agent_patch",
+        "python3 scripts/apply_user_agent_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built",
+      "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers DOM User-Agent and navigator.userAgentData values; release detector pass still requires a patched Chromium artifact and live detector run."
     }
   ],
   "required_patch_metadata": [

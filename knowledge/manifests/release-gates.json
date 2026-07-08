@@ -30,7 +30,7 @@
     {
       "gate_id": "chromium-source-indexed",
       "status": "passed",
-      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale patches."
+      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent patches."
     },
     {
       "gate_id": "runtime-artifact-produced",
@@ -40,7 +40,7 @@
     {
       "gate_id": "live-detector-evidence",
       "status": "blocked",
-      "blocker": "Source-level navigator.webdriver, navigator.hardwareConcurrency, navigator.deviceMemory, Screen API dimension, navigator.platform, timezone, and navigator language patches are applied in the external Chromium checkout, but no patched Chromium binary or live detector matrix exists yet; release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required."
+      "blocker": "Source-level navigator.webdriver, navigator.hardwareConcurrency, navigator.deviceMemory, Screen API dimension, navigator.platform, timezone, navigator language, navigator.userAgent, and navigator.userAgentData patches are applied in the external Chromium checkout, but no patched Chromium binary or live detector matrix exists yet; release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required."
     },
     {
       "gate_id": "sbom-provenance-release-assets",

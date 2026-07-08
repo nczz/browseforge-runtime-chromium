@@ -86,6 +86,41 @@ func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanAddsUserAgentFingerprintArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			UserAgent:         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+			UAFullVersion:     "146.0.7680.177",
+			UAPlatform:        "Windows",
+			UAPlatformVersion: "19.0.0",
+			UAArchitecture:    "x86",
+			UABitness:         "64",
+			UAMobile:          true,
+			UAWoW64:           true,
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+		"--fingerprint-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+		"--fingerprint-ua-full-version=146.0.7680.177",
+		"--fingerprint-ua-platform=Windows",
+		"--fingerprint-ua-platform-version=19.0.0",
+		"--fingerprint-ua-architecture=x86",
+		"--fingerprint-ua-bitness=64",
+		"--fingerprint-ua-mobile=true",
+		"--fingerprint-ua-wow64=true",
+	} {
+		if !containsArg(plan.Args, want) {
+			t.Fatalf("missing user-agent arg %q: %v", want, plan.Args)
+		}
+	}
+}
+
 func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
@@ -127,7 +162,7 @@ func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
 }
 
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
-	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
+	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
 	if err == nil {
 		t.Fatal("expected managed arg collision")
