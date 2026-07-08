@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "detectors": [
+    {
+      "detector_id": "sannysoft",
+      "name": "SannySoft",
+      "url": "https://bot.sannysoft.com/",
+      "category": "automation",
+      "surfaces": ["automation", "webdriver", "plugins", "languages", "webgl", "canvas"],
+      "run_modes": ["headed", "docker", "proxy", "direct"],
+      "pass_threshold": "all critical checks pass",
+      "privacy_notes": "sanitize IP and screenshot metadata before commit"
+    },
+    {
+      "detector_id": "browserleaks",
+      "name": "BrowserLeaks",
+      "url": "https://browserleaks.com/",
+      "category": "fingerprint_consistency",
+      "surfaces": ["canvas", "webgl", "audio", "fonts", "webrtc", "client_hints", "screen"],
+      "run_modes": ["headed", "docker", "proxy", "direct"],
+      "pass_threshold": "no high-confidence mismatch for claimed identity",
+      "privacy_notes": "commit summarized values only"
+    },
+    {
+      "detector_id": "creepjs",
+      "name": "CreepJS",
+      "url": "https://abrahamjuliot.github.io/creepjs/",
+      "category": "cross_surface_consistency",
+      "surfaces": ["automation", "features", "webgl", "audio", "fonts", "timezone", "locale"],
+      "run_modes": ["headed", "docker", "proxy"],
+      "pass_threshold": "no unaccepted high/critical bot-likeness regression",
+      "privacy_notes": "redact visitor identifiers"
+    },
+    {
+      "detector_id": "pixelscan",
+      "name": "Pixelscan",
+      "url": "https://pixelscan.net/fingerprint-check",
+      "category": "consistency",
+      "surfaces": ["fonts", "platform", "timezone", "proxy_ip_coherence", "webgl"],
+      "run_modes": ["headed", "docker", "proxy"],
+      "pass_threshold": "consistent result or accepted warning with root cause",
+      "privacy_notes": "redact network identifiers"
+    },
+    {
+      "detector_id": "iphey",
+      "name": "iphey",
+      "url": "https://iphey.com/",
+      "category": "trustworthiness",
+      "surfaces": ["proxy_ip_coherence", "timezone", "locale", "automation"],
+      "run_modes": ["headed", "proxy"],
+      "pass_threshold": "trustworthy or accepted risk",
+      "privacy_notes": "redact account and IP details"
+    },
+    {
+      "detector_id": "browserscan",
+      "name": "BrowserScan",
+      "url": "https://www.browserscan.net/",
+      "category": "authenticity_score",
+      "surfaces": ["webgl", "audio", "storage_quota", "incognito", "proxy_ip_coherence"],
+      "run_modes": ["headed", "docker", "proxy"],
+      "pass_threshold": "no unaccepted high/critical authenticity deduction",
+      "privacy_notes": "redact IP and session identifiers"
+    }
+  ]
+}

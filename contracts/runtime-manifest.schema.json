@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nczz/browseforge-runtime-chromium/contracts/runtime-manifest.schema.json",
+  "title": "BrowseForge Chromium runtime manifest",
+  "type": "object",
+  "required": ["id", "name", "family", "version", "browseforge", "binary", "capabilities", "fingerprint"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "family": {
+      "const": "chromium"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planning", "experimental", "alpha", "beta", "stable"]
+    },
+    "browseforge": {
+      "type": "object",
+      "required": ["min_version", "runtime_id", "profile_field"],
+      "properties": {
+        "min_version": {"type": "string"},
+        "runtime_id": {"type": "string"},
+        "profile_field": {"const": "runtime_id"}
+      },
+      "additionalProperties": false
+    },
+    "binary": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["relative_path", "packaged"],
+        "properties": {
+          "relative_path": {"type": "string", "minLength": 1},
+          "packaged": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["persistent_context", "playwright_bind", "agent_web_sessions", "seed_fingerprint", "structured_config", "native_proxy", "webrtc_masking", "requires_external_binary"],
+      "additionalProperties": {"type": "boolean"}
+    },
+    "profile": {"type": "object"},
+    "fingerprint": {
+      "type": "object",
+      "required": ["seed_input", "surfaces"],
+      "properties": {
+        "seed_input": {"type": "string"},
+        "surfaces": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "artifacts": {"type": "object"}
+  },
+  "additionalProperties": false
+}

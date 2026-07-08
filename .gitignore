@@ -1,0 +1,52 @@
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Build outputs
+build/out/
+dist/
+artifacts/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.dmg
+*.exe
+*.app
+*.deb
+*.rpm
+
+# Browser source/build caches
+browser/upstream/
+browser/src/
+browser/out/
+.chromium-cache/
+.gclient_entries
+
+# Dependencies
+node_modules/
+vendor/
+
+# Runtime state and secrets
+profiles/
+data/
+logs/
+backups/
+*.log
+*.pid
+*.token
+*.secret
+.env
+.env.*
+!.env.example
+
+# Knowledge/runtime generated stores
+.pi/
+.knowledge/
+.codebase-memory/*.db
+.codebase-memory/*.sqlite
+
+# Keep compressed graph exports only when intentionally produced
+!.codebase-memory/graph.db.zst

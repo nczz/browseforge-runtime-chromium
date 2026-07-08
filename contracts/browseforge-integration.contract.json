@@ -1,0 +1,39 @@
+{
+  "contract_version": "v0.1.0",
+  "runtime_id": "browseforge-chromium",
+  "browseforge_min_version": "v2.0.0",
+  "required_browseforge_surfaces": [
+    "config.runtimes.<id>",
+    "GET /api/runtimes",
+    "POST /api/profiles",
+    "PUT /api/profiles/{id}",
+    "POST /api/profiles/import",
+    "POST /api/backup/restore",
+    "POST /api/sessions",
+    "MCP list_runtimes",
+    "MCP create_profile",
+    "MCP open_browser",
+    "workflow create_profile",
+    "dashboard runtime selector",
+    "browsers status",
+    "browsers install",
+    "Docker seed /app/browsers/<runtime>"
+  ],
+  "adapter_requirements": [
+    "runtime descriptor registered with chromium family",
+    "binary path resolved from config.runtimes.<id>.binary_path",
+    "profile create/update/import/restore stores runtime_id, not engine",
+    "launch path assembles deterministic profile-specific args without mutating unrelated runtimes",
+    "Playwright bind endpoint is reachable for launched sessions",
+    "browser cache version marker prevents stale seeded runtime reuse",
+    "smoke rest and smoke mcp pass under Docker"
+  ],
+  "release_blockers": [
+    "no runtime graph index",
+    "no detector baseline",
+    "no Docker smoke evidence",
+    "no profile migration/restore evidence",
+    "no Playwright bind evidence",
+    "unredacted secrets in detector reports"
+  ]
+}

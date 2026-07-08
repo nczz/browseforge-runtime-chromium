@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nczz/browseforge-runtime-chromium/detectors/evidence-schema.json",
+  "title": "Sanitized detector evidence",
+  "type": "object",
+  "required": ["runtime_id", "runtime_version", "detector", "tested_at", "environment", "results", "sanitization"],
+  "properties": {
+    "runtime_id": {"type": "string"},
+    "runtime_version": {"type": "string"},
+    "detector": {
+      "type": "object",
+      "required": ["name", "url"],
+      "properties": {
+        "name": {"type": "string"},
+        "url": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "tested_at": {"type": "string", "format": "date-time"},
+    "environment": {
+      "type": "object",
+      "required": ["host_os", "container", "browser_family"],
+      "properties": {
+        "host_os": {"type": "string"},
+        "container": {"type": "boolean"},
+        "browser_family": {"const": "chromium"},
+        "proxy_region": {"type": "string"},
+        "gpu_mode": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["surface", "status", "finding", "evidence_ref"],
+        "properties": {
+          "surface": {"type": "string"},
+          "status": {"enum": ["pass", "warn", "fail", "not_tested"]},
+          "finding": {"type": "string"},
+          "mitigation": {"type": "string"},
+          "evidence_ref": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "sanitization": {
+      "type": "object",
+      "required": ["ip_redacted", "credentials_redacted", "profiles_redacted"],
+      "properties": {
+        "ip_redacted": {"type": "boolean"},
+        "credentials_redacted": {"type": "boolean"},
+        "profiles_redacted": {"type": "boolean"},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

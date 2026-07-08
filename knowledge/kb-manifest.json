@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "knowledge_base": {
+    "name": "BrowseForge Chromium Runtime Knowledge Base",
+    "purpose": "Source-grounded knowledge base for the Chromium-family BrowseForge runtime, including contracts, architecture, wrapper scope, detector evidence, and graph framework.",
+    "owner": "nczz",
+    "visibility": "open-source-ready"
+  },
+  "sources": [
+    {
+      "source_id": "runtime-repo-contracts",
+      "kind": "runtime_contract",
+      "repo": "nczz/browseforge-runtime-chromium",
+      "ref": "main",
+      "path_globs": ["contracts/**/*.json"],
+      "exclude": [],
+      "sensitive": false,
+      "index_targets": ["kb", "kg"]
+    },
+    {
+      "source_id": "runtime-repo-docs",
+      "kind": "docs",
+      "repo": "nczz/browseforge-runtime-chromium",
+      "ref": "main",
+      "path_globs": ["README.md", "SECURITY.md", "docs/**/*.md"],
+      "exclude": [],
+      "sensitive": false,
+      "index_targets": ["kb"]
+    },
+    {
+      "source_id": "runtime-repo-detectors",
+      "kind": "detector_evidence_contract",
+      "repo": "nczz/browseforge-runtime-chromium",
+      "ref": "main",
+      "path_globs": ["detectors/**/*.json"],
+      "exclude": ["detectors/raw/**"],
+      "sensitive": false,
+      "index_targets": ["kb", "kg"]
+    },
+    {
+      "source_id": "runtime-repo-graph",
+      "kind": "knowledge_graph_framework",
+      "repo": "nczz/browseforge-runtime-chromium",
+      "ref": "main",
+      "path_globs": ["graph/**/*.md", "graph/**/*.cypher"],
+      "exclude": ["graph/exports/**"],
+      "sensitive": false,
+      "index_targets": ["kb", "kg"]
+    },
+    {
+      "source_id": "browseforge-consumer-contract",
+      "kind": "browseforge_contract",
+      "repo": "nczz/BrowseForge",
+      "ref": "v2.0.0",
+      "path_globs": [
+        "internal/runtime/runtime.go",
+        "internal/config/config.go",
+        "internal/profile/store.go",
+        "internal/browser/manager.go",
+        "internal/browser/launch_chromium.go",
+        "internal/browser/launch_helpers.go",
+        "internal/browser/download.go",
+        "internal/api/router.go",
+        "internal/mcp/server.go",
+        "internal/workflow/engine.go",
+        "docs/dual-browser-architecture.md",
+        "docs/anti-detection.md",
+        "docs/fingerprint-detection-report.md",
+        "docs/platform-support.md"
+      ],
+      "exclude": [],
+      "sensitive": false,
+      "index_targets": ["cross_repo_kg"]
+    }
+  ],
+  "excluded_patterns": [
+    "browser/src/**",
+    "browser/out/**",
+    "build/out/**",
+    "dist/**",
+    "artifacts/**",
+    "profiles/**",
+    "data/**",
+    "logs/**",
+    "backups/**",
+    "detectors/raw/**",
+    "**/*.zip",
+    "**/*.tar.gz",
+    "**/*.tgz",
+    "**/*.dmg",
+    "**/*.exe",
+    "**/*.app"
+  ],
+  "generated_outputs": {
+    "knowledge_export": "release artifact: knowledge-export.jsonl",
+    "graph_export": "release artifact: graph.db.zst",
+    "detector_summary": "release artifact: detector-summary.json"
+  }
+}

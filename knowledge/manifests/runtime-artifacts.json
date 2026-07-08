@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "artifacts": [],
+  "required_artifact_fields": [
+    "artifact_id",
+    "runtime_id",
+    "runtime_version",
+    "platform",
+    "os",
+    "arch",
+    "browser_version",
+    "source_ref",
+    "patchset_id",
+    "wrapper_version",
+    "download_url",
+    "sha256",
+    "size_bytes",
+    "signature",
+    "sbom_path",
+    "provenance_path",
+    "release_channel",
+    "browseforge_compatibility",
+    "created_at"
+  ],
+  "policy": {
+    "store_binaries_in_git": false,
+    "publish_binaries_as_release_assets": true,
+    "require_sha256": true,
+    "require_sbom": true,
+    "require_provenance": true
+  }
+}

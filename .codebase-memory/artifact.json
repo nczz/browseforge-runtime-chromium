@@ -1,0 +1,11 @@
+{
+    "schema_version": 1,
+    "commit": "HEAD",
+    "indexed_at": "2026-07-08T01:43:56Z",
+    "project": "Users-chun-Projects-browseforge-runtime-chromium",
+    "nodes": 263,
+    "edges": 272,
+    "original_size": 1310720,
+    "compressed_size": 35163,
+    "compression_level": 9
+}

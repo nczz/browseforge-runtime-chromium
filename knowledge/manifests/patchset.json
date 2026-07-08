@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "runtime_id": "browseforge-chromium",
+  "base_project": "Chromium",
+  "base_version": "unselected",
+  "base_ref": "unselected",
+  "patchsets": [],
+  "required_patch_metadata": [
+    "patch_id",
+    "title",
+    "surface",
+    "files_touched",
+    "symbols_touched",
+    "risk_level",
+    "detectors_addressed",
+    "tests",
+    "upstream_status",
+    "notes"
+  ],
+  "policy": {
+    "high_risk_patch_requires_detector_evidence": true,
+    "critical_risk_patch_requires_release_owner_approval": true,
+    "patch_without_surface_is_invalid": true
+  }
+}
