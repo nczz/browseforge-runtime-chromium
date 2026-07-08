@@ -45,6 +45,32 @@
         "pages": 1,
         "title": "BrowseForge"
       }
+    },
+    {
+      "check": "live_audit",
+      "status": "passed",
+      "observed": {
+        "runtimes": [
+          "browseforge-chromium",
+          "camoufox",
+          "cloakbrowser"
+        ],
+        "profile_id": "prof_2df7492a0b50",
+        "session_id": "sess_prof_2df7492a0b50",
+        "observed_runtime_id": "browseforge-chromium",
+        "playwright_bind_connected": true,
+        "playwright_bind_contexts": 1,
+        "playwright_bind_pages": 1
+      }
+    },
+    {
+      "check": "profile_isolation_full",
+      "status": "passed",
+      "profiles": [
+        "prof_2df7492a0b50",
+        "prof_b6817f39a644"
+      ],
+      "method": "Set cookie, localStorage, IndexedDB, Cache API entry, and service worker registration in profile one on http://127.0.0.1:19480; profile two on same origin returned no cookie, null localStorage, no IndexedDB database, empty Cache API keys, and zero service worker registrations."
     }
   ],
   "limitations": [
@@ -55,7 +81,7 @@
   "packaging": {
     "status": "passed_dogfood_only",
     "archive": "dist/dogfood/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
-    "sha256": "fb05b846133d0e3b8dbe28a872938338f598520ab57ac25ccf82ed906b75829b",
+    "sha256": "c3919e94db219c31f79c213210fc0fed6c75c567fadae566ba0210e5dded3c27",
     "checksums_file": "dist/dogfood/checksums.txt",
     "stage_manifest": "dist/dogfood/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/artifact-manifest.json",
     "sbom": "dist/dogfood/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",

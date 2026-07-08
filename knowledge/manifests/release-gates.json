@@ -5,47 +5,47 @@
     {
       "gate_id": "chromium-base-selected",
       "status": "passed",
-      "evidence": "knowledge/manifests/patchset.json base_version/base_ref/base_commit selected for refs/tags/150.0.7871.101"
+      "evidence": "knowledge/manifests/patchset.json and browser/chromium-base.json select refs/tags/150.0.7871.101 / 51b83660c3609f271ccbbd65785bf7e50a21312d."
     },
     {
       "gate_id": "wrapper-contract-tests",
       "status": "passed",
-      "evidence": "go test ./... covers proxy/WebRTC policy, managed extra arg collision, profile lock, dry-run command generation"
+      "evidence": "go test ./... covers proxy/WebRTC policy, managed extra arg collision, profile lock, dry-run command generation, and wrapper/browser package behavior."
     },
     {
       "gate_id": "detector-harness-contract-tests",
       "status": "passed",
-      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, KG JSONL edges"
+      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, and KG JSONL edges."
     },
     {
       "gate_id": "packaging-contract-tests",
       "status": "passed",
-      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging and checksums"
+      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging and checksums."
+    },
+    {
+      "gate_id": "browseforge-adapter-merged",
+      "status": "passed",
+      "evidence": "BrowseForge commit 76ec639 dispatches browseforge-chromium through the Chromium launcher; local dogfood evidence records GET/runtime config, profile create, session launch, RuntimeID reporting, profile isolation, and Playwright Bind connection."
     },
     {
       "gate_id": "chromium-source-indexed",
       "status": "blocked",
-      "blocker": "Chromium source checkout is a large external dependency and has not been downloaded/indexed in this repo."
+      "blocker": "The selected Chromium source checkout is absent and depot_tools/fetch/gclient/gn/ninja/autoninja are not installed locally; source-acquisition.json records checked paths and missing toolchain."
     },
     {
       "gate_id": "runtime-artifact-produced",
       "status": "blocked",
-      "blocker": "No actual patched Chromium binary exists; runtime-artifacts.json remains empty by design until build succeeds."
-    },
-    {
-      "gate_id": "browseforge-adapter-merged",
-      "status": "blocked",
-      "blocker": "Registry/config settings and Docker seed loop exist, but current BrowseForge source still needs browseforge-chromium manager dispatch, default/config generation, install/status/doctor/capabilities, and end-to-end launch smoke evidence."
+      "blocker": "No patched Chromium binary exists; the only packaged artifact is a local dogfood bundle using installed Google Chrome 150.0.7871.49 and is explicitly not release-grade."
     },
     {
       "gate_id": "live-detector-evidence",
       "status": "blocked",
-      "blocker": "No live detector run can execute until a real runtime binary exists."
+      "blocker": "Local SannySoft dogfood evidence exists but failed high-severity automation_signals because WebDriver was present; BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan and proxy coherence still require a real artifact/proxy-capable detector run."
     },
     {
       "gate_id": "sbom-provenance-release-assets",
       "status": "blocked",
-      "blocker": "Packaging script creates contract-level SBOM/provenance for test inputs; release-grade SBOM/provenance requires real Chromium artifact and DEPS snapshot."
+      "blocker": "Dogfood package produced manifest/checksums/SBOM/provenance mechanics, but release-grade SBOM/provenance requires a real Chromium artifact plus Chromium DEPS snapshot/source checkout metadata."
     }
   ]
 }

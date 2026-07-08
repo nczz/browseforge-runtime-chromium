@@ -3,60 +3,163 @@
   "runtime_id": "browseforge-chromium",
   "scope": "local_dogfood_only",
   "release_grade": false,
+  "allowed_status_values": [
+    "not_started",
+    "designed",
+    "implemented",
+    "detector_tested",
+    "accepted",
+    "blocked"
+  ],
   "updated_from": [
     "detectors/local-sannysoft-dogfood.sanitized.json",
     "knowledge/manifests/local-dogfood.json"
   ],
   "surfaces": [
     {
-      "surface": "automation_signals",
-      "status": "failed",
+      "surface": "UA",
+      "status": "detector_tested",
+      "result": "observed_unscored",
+      "severity": "medium",
+      "evidence": "SannySoft local dogfood observed Chrome UA through installed Google Chrome; no target persona coherence score was performed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "Client Hints",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/Pixelscan client-hints run was executed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "platform",
+      "status": "detector_tested",
+      "result": "observed_unscored",
+      "severity": "medium",
+      "evidence": "SannySoft local dogfood observed platform MacIntel through installed Chrome; no target persona coherence score was performed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "timezone",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No timezone/proxy-country coherence detector row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "locale",
+      "status": "detector_tested",
+      "result": "pass_observed",
+      "severity": "info",
+      "evidence": "Local dogfood captured zh-TW language; cross-surface proxy/timezone coherence was not scored.",
+      "release_blocker": false
+    },
+    {
+      "surface": "screen/window/DPR",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS screen/window/DPR row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "hardwareConcurrency/deviceMemory",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No detector row captured hardwareConcurrency/deviceMemory coherence.",
+      "release_blocker": true
+    },
+    {
+      "surface": "Canvas",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS canvas row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "WebGL vendor/renderer",
+      "status": "detector_tested",
+      "result": "warn_unscored",
+      "severity": "medium",
+      "evidence": "Local SannySoft dogfood captured host Apple/ANGLE WebGL renderer; no target persona comparison was performed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "AudioContext",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS/BrowserScan audio row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "fonts",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "WebRTC",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserLeaks/WebRTC or proxy-leak detector row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "permissions",
+      "status": "detector_tested",
+      "result": "observed_unscored",
+      "severity": "medium",
+      "evidence": "SannySoft local dogfood page exposed permissions prompt state in raw DOM summary, but no full CreepJS permissions row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "storage quota",
+      "status": "blocked",
+      "result": "not_tested",
+      "severity": "high",
+      "evidence": "No BrowserScan storage/incognito row was completed.",
+      "release_blocker": true
+    },
+    {
+      "surface": "automation/headless/CDP",
+      "status": "detector_tested",
+      "result": "fail",
       "severity": "high",
       "evidence": "SannySoft local dogfood direct-host run reported WebDriver present and navigator.webdriver=true.",
       "release_blocker": true
     },
     {
-      "surface": "webgl",
-      "status": "warn_unscored",
-      "severity": "medium",
-      "evidence": "Local dogfood captured host Apple/ANGLE WebGL renderer; no target persona comparison was performed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "locale",
-      "status": "observed",
-      "severity": "info",
-      "evidence": "Local dogfood captured zh-TW language; no cross-surface proxy/timezone score was performed.",
-      "release_blocker": false
-    },
-    {
-      "surface": "proxy_ip_coherence",
-      "status": "not_tested",
+      "surface": "proxy/IP coherence",
+      "status": "blocked",
+      "result": "not_tested",
       "severity": "high",
       "evidence": "No proxy detector run was executed.",
       "release_blocker": true
     },
     {
-      "surface": "fonts",
-      "status": "not_tested",
-      "severity": "high",
-      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font run was executed.",
-      "release_blocker": true
+      "surface": "profile persistence",
+      "status": "implemented",
+      "result": "pass_dogfood",
+      "severity": "info",
+      "evidence": "BrowseForge dogfood used distinct profile IDs and isolated same-origin localStorage across two sessions.",
+      "release_blocker": false
     },
     {
-      "surface": "audio",
-      "status": "not_tested",
+      "surface": "cross-platform drift",
+      "status": "blocked",
+      "result": "not_tested",
       "severity": "high",
-      "evidence": "No BrowserLeaks/CreepJS/BrowserScan audio run was executed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "storage_quota",
-      "status": "not_tested",
-      "severity": "high",
-      "evidence": "No BrowserScan storage/incognito run was executed.",
+      "evidence": "Only macOS arm64 local Chrome dogfood was exercised; no Linux/Windows detector evidence exists.",
       "release_blocker": true
     }
   ],
-  "decision": "Keep live-detector-evidence release gate blocked. Dogfood proved wiring and exposed automation detection; it did not prove anti-detect readiness."
+  "decision": "Keep live-detector-evidence release gate blocked. Dogfood proved BrowseForge wiring and exposed automation detection; it did not prove anti-detect readiness."
 }

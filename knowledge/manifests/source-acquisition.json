@@ -6,6 +6,8 @@
     "base_ref": "refs/tags/150.0.7871.101",
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "source_checkout_status": "missing",
+    "deps_snapshot_status": "unavailable_missing_checkout",
+    "reproducibility_note": "The selected ref and commit are recorded. A release-grade source acquisition must fetch this ref and record the Chromium DEPS file hash plus gclient sync metadata before building.",
     "local_paths_checked": [
       {
         "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/src",
@@ -27,7 +29,14 @@
     "gn": null,
     "ninja": null,
     "autoninja": null,
-    "status": "missing_chromium_checkout_toolchain"
+    "status": "missing_chromium_checkout_toolchain",
+    "missing_prerequisites": [
+      "depot_tools/fetch",
+      "depot_tools/gclient",
+      "GN",
+      "Ninja/autoninja",
+      "local Chromium checkout for refs/tags/150.0.7871.101"
+    ]
   },
   "local_dogfood_binary": {
     "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -36,5 +45,5 @@
     "release_grade": false,
     "reason": "Existing local Chrome can exercise BrowseForge Chromium-family launch wiring, but it is not the selected Chromium base, not patched, and not a BrowseForge runtime release artifact."
   },
-  "decision": "Proceed with local dogfood against the configured external Chrome binary only; keep release gates blocked until selected Chromium source and a real patched artifact exist."
+  "decision": "Proceed with local dogfood against the configured external Chrome binary only; keep release gates blocked until selected Chromium source, DEPS snapshot, and a real patched artifact exist."
 }
