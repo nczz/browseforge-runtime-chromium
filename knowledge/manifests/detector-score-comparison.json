@@ -19,8 +19,18 @@
     {
       "comparison_id": "creepjs_audio_headless_vs_headed",
       "detector_id": "creepjs",
-      "finding": "CreepJS audio metrics differ across headless/headed evidence; release-grade baseline comparison remains required.",
+      "drift_metrics": [
+        "trap"
+      ],
+      "finding": "CreepJS audio drift is isolated to the trap metric across headless/headed evidence; native AudioContext trap parity remains required.",
       "left_run_id": "detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260709",
+      "matching_metrics": [
+        "freq",
+        "gain",
+        "sum",
+        "time",
+        "unique"
+      ],
       "metric_deltas": {
         "freq": 0.0,
         "gain": 0.0,
@@ -31,7 +41,8 @@
       },
       "right_run_id": "detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260709",
       "status": "warning",
-      "surface": "audio"
+      "surface": "audio",
+      "trap_only_drift": true
     },
     {
       "comparison_id": "browserleaks_audio_headless_vs_headed",
@@ -167,7 +178,7 @@
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
   "evidence_count": 23,
   "gaps": [],
-  "generated_at": "2026-07-09T18:52:38.922659+00:00",
+  "generated_at": "2026-07-09T19:02:29.518974+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

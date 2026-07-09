@@ -597,6 +597,9 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
         headed = creepjs_audio["headed"]
         deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
         identical = all(abs(value) <= 1e-9 for value in deltas.values())
+        matching_metrics = sorted(metric for metric, delta in deltas.items() if abs(delta) <= 1e-9)
+        drift_metrics = sorted(metric for metric, delta in deltas.items() if abs(delta) > 1e-9)
+        trap_only_drift = drift_metrics == ["trap"]
         comparisons.append({
             "comparison_id": "creepjs_audio_headless_vs_headed",
             "detector_id": "creepjs",
@@ -605,7 +608,10 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
             "metric_deltas": deltas,
-            "finding": "CreepJS audio metrics match across headless/headed evidence." if identical else "CreepJS audio metrics differ across headless/headed evidence; release-grade baseline comparison remains required.",
+            "matching_metrics": matching_metrics,
+            "drift_metrics": drift_metrics,
+            "trap_only_drift": trap_only_drift,
+            "finding": "CreepJS audio metrics match across headless/headed evidence." if identical else ("CreepJS audio drift is isolated to the trap metric across headless/headed evidence; native AudioContext trap parity remains required." if trap_only_drift else "CreepJS audio metrics differ across headless/headed evidence; release-grade baseline comparison remains required."),
         })
     else:
         gaps.append({

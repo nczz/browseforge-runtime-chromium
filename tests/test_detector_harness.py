@@ -1584,7 +1584,50 @@ class DetectorHarnessTests(unittest.TestCase):
                 with self.subTest(metric=metric):
                     self.assertIsInstance(deltas[metric], (int, float))
                     self.assertNotIsInstance(deltas[metric], bool)
+            self.assertEqual(comparison["matching_metrics"], ["gain", "time", "unique"])
+            self.assertEqual(comparison["drift_metrics"], ["freq", "sum", "trap"])
+            self.assertIs(comparison["trap_only_drift"], False)
             self.assertIn("differ", comparison["finding"].lower())
+
+    def test_compare_scores_identifies_creepjs_trap_only_audio_drift(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            base_metrics = {
+                "sum": 100.0,
+                "gain": 2.0,
+                "freq": 300.0,
+                "time": 4.0,
+                "trap": 5.0,
+                "unique": 6.0,
+            }
+            for display_mode, label, trap_value in [
+                ("headless", "audio_headless_trap_only", 5.0),
+                ("headed_xvfb", "audio_headed_trap_only", 8.0),
+            ]:
+                metrics = {**base_metrics, "trap": trap_value}
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="creepjs",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.audio_score_result(
+                            detector_check=f"creepjs_{label}",
+                            metrics=metrics,
+                        )
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = self.score_comparison(payload, surface="audio", detector_id="creepjs")
+            self.assertEqual(comparison["drift_metrics"], ["trap"])
+            self.assertEqual(comparison["matching_metrics"], ["freq", "gain", "sum", "time", "unique"])
+            self.assertIs(comparison["trap_only_drift"], True)
+            self.assertIn("trap metric", comparison["finding"])
+
 
     def test_compare_scores_command_writes_browserleaks_audio_summary_deltas(self):
         with tempfile.TemporaryDirectory() as td:
