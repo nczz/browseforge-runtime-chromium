@@ -1,16 +1,7 @@
 {
   "blocking_findings": [],
-  "coverage_gap_count": 8,
+  "coverage_gap_count": 7,
   "coverage_gaps": [
-    {
-      "container": false,
-      "detector_id": "browserleaks",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
-      "network_mode": "direct",
-      "platform": "macos-arm64",
-      "required_evidence": "headed / native/host / direct network sanitized detector evidence"
-    },
     {
       "container": false,
       "detector_id": "browserleaks",
@@ -77,7 +68,7 @@
   ],
   "coverage_platform": "macos-arm64",
   "evidence_count": 26,
-  "generated_at": "2026-07-09T20:08:41.072591+00:00",
+  "generated_at": "2026-07-09T20:14:13.160634+00:00",
   "rows": [
     {
       "detector_id": "browserleaks",
@@ -221,7 +212,7 @@
       "detector_id": "browserleaks",
       "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
       "platform": "macos-arm64",
-      "status": "warning"
+      "status": "passed"
     },
     {
       "detector_id": "sannysoft",

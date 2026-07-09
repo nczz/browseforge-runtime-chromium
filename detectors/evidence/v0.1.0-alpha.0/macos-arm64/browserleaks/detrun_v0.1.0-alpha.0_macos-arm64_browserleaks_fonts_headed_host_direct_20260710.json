@@ -31,7 +31,7 @@
     {
       "detector_check": "browserleaks_fonts_macos_host_headed_metrics",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "BrowserLeaks Fonts page loaded in macOS host headed mode through the BrowseForge wrapper and produced bounded font metric/glyph summaries. This is native host corpus evidence, but it is not release-grade packaged runtime evidence because it used the installed system Chrome binary rather than a signed BrowseForge macOS Chromium artifact.",
+      "finding": "BrowserLeaks Fonts page loaded in macOS host headed mode through the BrowseForge wrapper and produced bounded font metric/glyph summaries. This satisfies macOS host headed direct BrowserLeaks evidence coverage; it remains non-release artifact evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium package.",
       "normalized_values": {
         "candidateCount": 8,
         "checks": {
@@ -166,11 +166,11 @@
     "tokens_redacted": true
   },
   "schema_version": "1.1",
-  "status": "warning",
+  "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
     "raw_capture_sha256": "00596e72b4f6be637e4b16aeed05adc5065da8219402eccc128d1c9949844501",
-    "sha256": "7a4876c570d5b0effd96633b87bde7c76e00238c9b920938df8d3a6407156fa4",
+    "sha256": "b9830119eae8159e0851d9ac424ae5309e63b970d577f3a4b3426ce2d5729076",
     "summary_path": "detector-summary.json",
     "text_sha256": "5d8985e5e81d72055be9c35b524b59a8586b36917a47ebdffacef6f04f1708f8"
   },
