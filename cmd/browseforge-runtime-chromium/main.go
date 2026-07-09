@@ -125,7 +125,7 @@ func bindLaunchFlags(fs *flag.FlagSet) (*launcher.Config, *string, *bool, *strin
 	fs.StringVar(&cfg.Fingerprint.NativeMode, "fingerprint-native-mode", "", "BrowseForge native stealth mode")
 	fs.StringVar(&cfg.Proxy.Server, "proxy-server", "", "proxy server URI")
 	fs.StringVar(&cfg.Proxy.ExitIP, "proxy-exit-ip", "", "redacted/known proxy exit IP for WebRTC coherence")
-	fs.StringVar(&cfg.RemoteDebugging.Address, "remote-debugging-address", "127.0.0.1", "remote debugging bind address")
+	fs.StringVar(&cfg.RemoteDebugging.Address, "remote-debugging-address", "", "remote debugging bind address")
 	fs.IntVar(&cfg.RemoteDebugging.Port, "remote-debugging-port", 0, "remote debugging port")
 	fs.BoolVar(&cfg.NoSandbox, "no-sandbox", false, "append --no-sandbox")
 	fs.Var(&extras, "extra-arg", "additional non-managed Chromium arg; repeatable")

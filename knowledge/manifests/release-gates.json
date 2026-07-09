@@ -1,51 +1,51 @@
 {
-  "schema_version": "1.0",
-  "runtime_id": "browseforge-chromium",
   "release_candidate_required_gates": [
     {
+      "evidence": "knowledge/manifests/patchset.json and browser/chromium-base.json select refs/tags/150.0.7871.101 / 51b83660c3609f271ccbbd65785bf7e50a21312d.",
       "gate_id": "chromium-base-selected",
-      "status": "passed",
-      "evidence": "knowledge/manifests/patchset.json and browser/chromium-base.json select refs/tags/150.0.7871.101 / 51b83660c3609f271ccbbd65785bf7e50a21312d."
+      "status": "passed"
     },
     {
+      "evidence": "go test ./... covers proxy/WebRTC policy, managed extra arg collision, profile lock, dry-run command generation, and wrapper/browser package behavior.",
       "gate_id": "wrapper-contract-tests",
-      "status": "passed",
-      "evidence": "go test ./... covers proxy/WebRTC policy, managed extra arg collision, profile lock, dry-run command generation, and wrapper/browser package behavior."
+      "status": "passed"
     },
     {
+      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, and KG JSONL edges.",
       "gate_id": "detector-harness-contract-tests",
-      "status": "passed",
-      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, and KG JSONL edges."
+      "status": "passed"
     },
     {
+      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging, checksums, non-placeholder SPDX-2.3-style SBOM metadata, file hashes/sizes, and source/patchset provenance hashes.",
       "gate_id": "packaging-contract-tests",
-      "status": "passed",
-      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging, checksums, non-placeholder SPDX-2.3-style SBOM metadata, file hashes/sizes, and source/patchset provenance hashes."
+      "status": "passed"
     },
     {
+      "evidence": "BrowseForge commit 76ec639 dispatches browseforge-chromium through the Chromium launcher; local dogfood evidence records GET/runtime config, profile create, session launch, RuntimeID reporting, profile isolation, and Playwright Bind connection.",
       "gate_id": "browseforge-adapter-merged",
-      "status": "passed",
-      "evidence": "BrowseForge commit 76ec639 dispatches browseforge-chromium through the Chromium launcher; local dogfood evidence records GET/runtime config, profile create, session launch, RuntimeID reporting, profile isolation, and Playwright Bind connection."
+      "status": "passed"
     },
     {
+      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority patches.",
       "gate_id": "chromium-source-indexed",
-      "status": "passed",
-      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts patches."
+      "status": "passed"
     },
     {
+      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8 and size 567794441 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools /json/version and SannySoft navigation completed using knowledge/manifests/linux-package-smoke.json.",
       "gate_id": "runtime-artifact-produced",
-      "status": "passed",
-      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 b491f854a5c3ce4f0e92039dfd5cbcebd6d1810ff401fe3249c79e8c842a0ae6 and size 567791234 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools /json/version using knowledge/manifests/linux-package-smoke.json."
+      "status": "passed"
     },
     {
+      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json. It verifies navigator.webdriver=false but fails locale/timezone, hardware, WebGL, and headless UA expectations; release-grade headed BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required.",
       "gate_id": "live-detector-evidence",
-      "status": "blocked",
-      "blocker": "A patched Linux x64 Chromium runtime artifact exists, but release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required for the source-level navigator.webdriver, navigator.hardwareConcurrency, navigator.deviceMemory, Screen API dimension, navigator.platform, timezone, navigator language, navigator.userAgent, navigator.userAgentData, StorageManager quota, navigator.plugins/pdfViewerEnabled, WebRTC ICE candidate, WebAudio output, Canvas readback, WebGL vendor/renderer, feature parity, and font availability patches."
+      "status": "failed"
     },
     {
+      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256.",
       "gate_id": "sbom-provenance-release-assets",
-      "status": "passed",
-      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256."
+      "status": "passed"
     }
-  ]
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
 }

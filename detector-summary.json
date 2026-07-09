@@ -1,0 +1,38 @@
+{
+  "blocking_findings": [
+    {
+      "finding": "Live detector context reported languages en-US and timezone UTC instead of configured zh-TW and Asia/Taipei.",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+      "severity": "high",
+      "surface": "locale"
+    },
+    {
+      "finding": "Live detector context reported host hardware values instead of configured hardware_concurrency=8 and device_memory=8.",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+      "severity": "high",
+      "surface": "hardware"
+    },
+    {
+      "finding": "Live detector context reported SwiftShader/Google WebGL instead of configured Intel vendor/renderer.",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+      "severity": "high",
+      "surface": "webgl"
+    }
+  ],
+  "evidence_count": 2,
+  "generated_at": "2026-07-09T03:15:42.956045+00:00",
+  "rows": [
+    {
+      "detector_id": "sannysoft",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+      "platform": "linux-x64",
+      "status": "failed"
+    },
+    {
+      "detector_id": "sannysoft",
+      "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1.json",
+      "platform": "macos-arm64",
+      "status": "warning"
+    }
+  ]
+}

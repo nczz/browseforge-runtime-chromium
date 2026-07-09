@@ -1,77 +1,27 @@
 {
-  "schema_version": "1.0",
-  "runtime_id": "browseforge-chromium",
   "chromium_base": {
-    "base_version": "150.0.7871.101",
-    "base_ref": "refs/tags/150.0.7871.101",
-    "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-    "source_checkout_status": "checked_out_pinned_ref",
-    "deps_snapshot_status": "synced_selected_ref_with_linux_deps",
-    "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
-    "hooks_status": "completed",
-    "gn_generation_status": "generated_linux_docker",
-    "stealth_scaffold_status": "copied_and_linked_to_gn_all",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
-    "local_paths_checked": [
-      {
-        "path": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
-        "exists": true,
-        "purpose": "external_checkout_target",
-        "head": "51b83660c3609f271ccbbd65785bf7e50a21312d"
-      },
-      {
-        "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/src",
-        "exists": false,
-        "purpose": "must_remain_empty_no_large_source_inside_repo"
-      },
-      {
-        "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/upstream",
-        "exists": false,
-        "purpose": "must_remain_empty_no_large_source_inside_repo"
-      },
-      {
-        "path": "/Users/chun/Projects/browser-source-intel/chromium",
-        "exists": false,
-        "purpose": "prior_search_path"
-      }
-    ],
-    "webdriver_patch_status": "applied_to_external_checkout",
-    "hardware_patch_status": "applied_to_external_checkout",
-    "screen_patch_status": "applied_to_external_checkout",
-    "platform_patch_status": "applied_to_external_checkout",
-    "timezone_patch_status": "applied_to_external_checkout",
-    "locale_patch_status": "applied_to_external_checkout",
-    "user_agent_patch_status": "applied_to_external_checkout",
-    "storage_quota_patch_status": "applied_to_external_checkout",
-    "plugins_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout",
     "audio_patch_status": "applied_to_external_checkout",
+    "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+    "base_ref": "refs/tags/150.0.7871.101",
+    "base_version": "150.0.7871.101",
     "canvas_patch_status": "applied_to_external_checkout",
-    "webgl_patch_status": "applied_to_external_checkout",
+    "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
+    "deps_snapshot_status": "synced_selected_ref_with_linux_deps",
     "feature_parity_patch_status": "applied_to_external_checkout",
     "fonts_patch_status": "applied_to_external_checkout",
+    "gn_generation_status": "generated_linux_docker",
+    "hardware_patch_status": "applied_to_external_checkout",
+    "hooks_status": "completed",
     "linux_x64_artifact": {
-      "status": "packaged_and_smoke_launched",
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "b491f854a5c3ce4f0e92039dfd5cbcebd6d1810ff401fe3249c79e8c842a0ae6",
-      "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+      "archive_sha256": "ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8",
+      "archive_size_bytes": 567794441,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
-      "browser_binary_sha256": "63345fc333beeb7a0a2ab0ef297e676db848fde3daf1d775f9ff339cd3630719",
-      "wrapper_binary_sha256": "54adff50117cb116059868a90aa5cb53343a617c8323757201993bc3fd746894",
-      "runtime_manifest_sha256": "f55cf45d17e3c92bbd686dc110cea99eb6a7aa4bae7e390d4eed8b7111c72513",
       "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+      "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
+      "browser_binary_sha256": "326829a6059e545d1b4009fe32b75095932ff15f59f52d111cb9d1766bd68f76",
+      "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
       "provenance": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-      "sbom": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "verification": [
-        "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-        "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
-      ],
-      "archive_size_bytes": 567791234,
-      "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "runtime_assets_included": [
         "icudtl.dat",
         "resources.pak",
@@ -87,31 +37,80 @@
         "snapshot_blob.bin",
         "headless_command_resources.pak",
         "locales/*.pak"
-      ]
-    }
-  },
-  "toolchain": {
-    "fetch": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/fetch",
-    "gclient": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gclient",
-    "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
-    "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
-    "autoninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/autoninja",
-    "status": "pinned_checkout_linux_docker_gn_generated",
-    "missing_prerequisites": [
-      "full Xcode selected by xcode-select for macOS host GN generation",
-      "unpatched baseline Chromium build"
+      ],
+      "runtime_manifest_sha256": "f55cf45d17e3c92bbd686dc110cea99eb6a7aa4bae7e390d4eed8b7111c72513",
+      "sbom": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
+      "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
+      "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+      "status": "packaged_smoke_launched_and_headless_detector_exercised",
+      "verification": [
+        "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+        "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
+        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
+      ],
+      "wrapper_binary_sha256": "7a6b746915de57daf1b899a4c49cbeb7045153c3ee3e017d965da1dfc2a8f992"
+    },
+    "local_paths_checked": [
+      {
+        "exists": true,
+        "head": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+        "path": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
+        "purpose": "external_checkout_target"
+      },
+      {
+        "exists": false,
+        "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/src",
+        "purpose": "must_remain_empty_no_large_source_inside_repo"
+      },
+      {
+        "exists": false,
+        "path": "/Users/chun/Projects/browseforge-runtime-chromium/browser/upstream",
+        "purpose": "must_remain_empty_no_large_source_inside_repo"
+      },
+      {
+        "exists": false,
+        "path": "/Users/chun/Projects/browser-source-intel/chromium",
+        "purpose": "prior_search_path"
+      }
     ],
+    "locale_patch_status": "applied_to_external_checkout",
+    "platform_patch_status": "applied_to_external_checkout",
+    "plugins_patch_status": "applied_to_external_checkout",
+    "process_priority_patch_status": "applied_to_external_checkout",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "screen_patch_status": "applied_to_external_checkout",
+    "source_checkout_status": "checked_out_pinned_ref",
+    "stealth_scaffold_status": "copied_and_linked_to_gn_all",
+    "storage_quota_patch_status": "applied_to_external_checkout",
+    "timezone_patch_status": "applied_to_external_checkout",
+    "user_agent_patch_status": "applied_to_external_checkout",
+    "webdriver_patch_status": "applied_to_external_checkout",
+    "webgl_patch_status": "applied_to_external_checkout",
+    "webrtc_patch_status": "applied_to_external_checkout"
+  },
+  "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; keep the live detector gate blocked until BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence exists.",
+  "local_dogfood_binary": {
+    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "reason": "Existing local Chrome can exercise BrowseForge Chromium-family launch wiring, but it is not the selected Chromium base, not patched, and not a BrowseForge runtime release artifact.",
+    "release_grade": false,
+    "status": "usable_for_local_dogfood_only",
+    "version_output": "Google Chrome 150.0.7871.49"
+  },
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "toolchain": {
     "automation": {
-      "source_script": "scripts/chromium_source.py",
       "apply_scaffold_script": "scripts/apply_stealth_scaffold.py",
-      "docker_script": "scripts/chromium_docker.py",
-      "dockerfile": "docker/chromium-build.Dockerfile",
-      "default_workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
       "default_git_cache": "/Users/chun/Projects/browser-source/git-cache",
+      "default_workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
       "docker_base_image": "browseforge/chromium-build:ubuntu22",
       "docker_deps_image": "browseforge/chromium-build:ubuntu22-deps",
       "docker_out_dir": "out/BrowseForgeLinuxDocker",
-      "safe_default": "plan/check only; acquire/docker commands require --execute",
+      "docker_script": "scripts/chromium_docker.py",
+      "dockerfile": "docker/chromium-build.Dockerfile",
       "first_steps": [
         "python3 scripts/chromium_source.py plan",
         "python3 scripts/chromium_source.py check",
@@ -149,6 +148,8 @@
         "python3 scripts/apply_feature_parity_patch.py",
         "python3 scripts/apply_fonts_patch.py --check",
         "python3 scripts/apply_fonts_patch.py",
+        "python3 scripts/apply_process_priority_patch.py --check",
+        "python3 scripts/apply_process_priority_patch.py",
         "python3 scripts/chromium_docker.py plan",
         "python3 scripts/chromium_docker.py check",
         "python3 scripts/chromium_docker.py build-image --execute",
@@ -159,16 +160,19 @@
         "python3 scripts/chromium_docker.py gn-gen --execute",
         "python3 scripts/chromium_docker.py build-chrome --execute",
         "python3 scripts/package_linux_runtime.py --execute"
-      ]
-    }
-  },
-  "local_dogfood_binary": {
-    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "version_output": "Google Chrome 150.0.7871.49",
-    "status": "usable_for_local_dogfood_only",
-    "release_grade": false,
-    "reason": "Existing local Chrome can exercise BrowseForge Chromium-family launch wiring, but it is not the selected Chromium base, not patched, and not a BrowseForge runtime release artifact."
-  },
-  "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; keep the live detector gate blocked until BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence exists.",
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode."
+      ],
+      "safe_default": "plan/check only; acquire/docker commands require --execute",
+      "source_script": "scripts/chromium_source.py"
+    },
+    "autoninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/autoninja",
+    "fetch": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/fetch",
+    "gclient": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gclient",
+    "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
+    "missing_prerequisites": [
+      "full Xcode selected by xcode-select for macOS host GN generation",
+      "unpatched baseline Chromium build"
+    ],
+    "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
+    "status": "pinned_checkout_linux_docker_gn_generated"
+  }
 }

@@ -1,7 +1,7 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "b491f854a5c3ce4f0e92039dfd5cbcebd6d1810ff401fe3249c79e8c842a0ae6",
-  "artifact_size_bytes": 567791234,
+  "artifact_sha256": "ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8",
+  "artifact_size_bytes": 567794441,
   "checks": [
     {
       "check": "archive_integrity",
@@ -58,6 +58,16 @@
         "websocket_debugger_url_present": true
       },
       "status": "passed"
+    },
+    {
+      "check": "sannysoft_headless_detector_navigation",
+      "command": "docker linux/amd64 packaged runtime + CDP navigate https://bot.sannysoft.com/",
+      "observed": {
+        "browser_crash_regression_fixed": true,
+        "devtools_navigation_completed": true,
+        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json"
+      },
+      "status": "passed_with_findings"
     }
   ],
   "limitations": [
@@ -71,5 +81,5 @@
   "runtime_version": "v0.1.0-alpha.0",
   "schema_version": "1.0",
   "scope": "packaged_runtime_smoke",
-  "tested_at": "2026-07-09T02:46:42.066094+00:00"
+  "tested_at": "2026-07-09T03:17:16.096416+00:00"
 }

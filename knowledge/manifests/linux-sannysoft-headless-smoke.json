@@ -1,0 +1,132 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_linux_x64_sannysoft_headless_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headless",
+    "matrix_key": "linux-x64:sannysoft:headless:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "webdriver",
+      "evidence_ref": "sanitized_text_excerpt",
+      "finding": "SannySoft page text reports WebDriver (New) missing and navigator.webdriver evaluated false. Chrome headless UA remains visible, so this is not release-grade headed evidence.",
+      "normalized_values": {
+        "navigator_webdriver": false,
+        "title": "Antibot"
+      },
+      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "severity": "low",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "languages_timezone",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live detector context reported languages en-US and timezone UTC instead of configured zh-TW and Asia/Taipei.",
+      "normalized_values": {
+        "languages": [
+          "en-US"
+        ],
+        "timezone": "UTC"
+      },
+      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "severity": "high",
+      "status": "fail",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "hardware_concurrency_device_memory",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live detector context reported host hardware values instead of configured hardware_concurrency=8 and device_memory=8.",
+      "normalized_values": {
+        "deviceMemory": 16,
+        "hardwareConcurrency": 18
+      },
+      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "severity": "high",
+      "status": "fail",
+      "surface": "hardware"
+    },
+    {
+      "detector_check": "webgl_vendor_renderer",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live detector context reported SwiftShader/Google WebGL instead of configured Intel vendor/renderer.",
+      "normalized_values": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "vendor": "Google Inc. (Google)"
+      },
+      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "severity": "high",
+      "status": "fail",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "user_agent",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live detector context exposed HeadlessChrome user-agent; headed detector matrix still required.",
+      "normalized_values": {
+        "userAgent_family": "HeadlessChrome/150"
+      },
+      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "severity": "medium",
+      "status": "warn",
+      "surface": "user_agent"
+    }
+  ],
+  "run_id": "detrun_linux_x64_sannysoft_headless_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw page text not committed; sanitized excerpt keeps no IP, cookie, storage, or screenshot data.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "manual-sannysoft-smoke-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "failed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+    "raw_capture_sha256": "495970a48e08dd1f0fe1bff792be630db21f6bbd14b51b79299510ebb48c4ffb",
+    "sha256": "pending",
+    "summary_path": "detector-summary.json"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headless swiftshader",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T03:15:00.768803+00:00"
+}
