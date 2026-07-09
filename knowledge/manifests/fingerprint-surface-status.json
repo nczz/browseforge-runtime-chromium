@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, and captures unscored WebAudio and FontFaceSet probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, and captures unscored WebAudio and FontFaceSet probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -126,9 +126,9 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs.",
+      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs. A macOS arm64 local host headless SannySoft collector additionally recorded navigator.webdriver=false but a HeadlessChrome UA token, so macOS headless host remains warning evidence only.",
       "release_blocker": false,
-      "result": "pass_linux_multi_detector_headed_webdriver_false_creepjs_scores_recorded",
+      "result": "warn_macos_headless_host_headlesschrome_recorded",
       "severity": "info",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"
@@ -176,6 +176,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headless_host_direct_20260709.json"
   ]
 }
