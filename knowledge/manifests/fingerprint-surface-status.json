@@ -78,10 +78,10 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported Intel Inc. / Intel Iris OpenGL Engine from configured fingerprint profile.",
-      "release_blocker": false,
-      "result": "pass_linux_sannysoft",
-      "severity": "info",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. BrowserLeaks WebGL collection now records sanitized extension-count, extension hash, parameter hash, and bounded parameter summary fields and flags SwiftShader/Google software rendering; shader precision, extension-profile parity, and rendered WebGL pixel output remain release-grade blockers.",
+      "release_blocker": true,
+      "result": "warn_webgl_strings_and_parameter_hashes_collected",
+      "severity": "medium",
       "status": "detector_tested",
       "surface": "WebGL vendor/renderer"
     },

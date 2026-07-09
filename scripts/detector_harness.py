@@ -890,6 +890,24 @@ def classify_browserleaks_fonts_probe(value: dict) -> tuple[str, str, str]:
         return "warning", f"BrowserLeaks Fonts page loaded, but sanitized font metric summary is missing fields: {missing}", "medium"
     return "warning", "BrowserLeaks Fonts page loaded and produced bounded font metric/glyph summaries; release-grade font corpus parity remains required.", "medium"
 
+def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
+    webgl = value.get("webgl") or {}
+    if not webgl.get("available", bool(webgl)):
+        return "warning", "BrowserLeaks WebGL page loaded, but the bounded WebGL probe is unavailable.", "medium"
+    required = {"vendor", "renderer"}
+    missing = sorted(field for field in required if not webgl.get(field))
+    if missing:
+        return "warning", f"BrowserLeaks WebGL page loaded, but sanitized WebGL summary is missing fields: {missing}", "medium"
+    renderer = str(webgl.get("renderer", ""))
+    vendor = str(webgl.get("vendor", ""))
+    if "SwiftShader" in renderer or "Google Inc. (Google)" in vendor:
+        return "warning", "BrowserLeaks WebGL bounded probe still exposes SwiftShader/Google software rendering; configured vendor/renderer evidence is required.", "high"
+    if not webgl.get("extensionSha256") or not webgl.get("parameterSha256"):
+        return "warning", "BrowserLeaks WebGL page reported vendor/renderer strings, but extension/parameter summary hashes are missing; release-grade WebGL coherence remains required.", "medium"
+    return "warning", "BrowserLeaks WebGL page reported sanitized vendor/renderer plus extension/parameter summary hashes; shader precision and rendered pixel coherence still require release-grade detector evidence.", "medium"
+
+
+
 def classify_browserleaks_webrtc_probe(value: dict) -> tuple[str, str, str]:
     webrtc = value.get("webrtc") or {}
     if not webrtc.get("available"):
@@ -913,6 +931,8 @@ def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
         return classify_browserleaks_audio_probe(value)
     if "/fonts" in page_url:
         return classify_browserleaks_fonts_probe(value)
+    if "/webgl" in page_url:
+        return classify_browserleaks_webgl_probe(value)
     if "/webrtc" in page_url:
         return classify_browserleaks_webrtc_probe(value)
     return classify_browserleaks_client_hints(value)
@@ -1202,12 +1222,44 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  const gl = (() => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!ctx) return null;
-    const ext = ctx.getExtension('WEBGL_debug_renderer_info');
-    return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
+  const gl = await (async () => {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!ctx) return {available: false, reason: 'webgl_context_unavailable'};
+      const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const hashText = async (text) => globalThis.crypto && globalThis.crypto.subtle
+        ? toHex(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))
+        : null;
+      const ext = ctx.getExtension('WEBGL_debug_renderer_info');
+      const extensions = (ctx.getSupportedExtensions && ctx.getSupportedExtensions() || []).sort();
+      const parameters = {
+        aliasedLineWidthRange: Array.from(ctx.getParameter(ctx.ALIASED_LINE_WIDTH_RANGE) || []),
+        aliasedPointSizeRange: Array.from(ctx.getParameter(ctx.ALIASED_POINT_SIZE_RANGE) || []),
+        maxCombinedTextureImageUnits: ctx.getParameter(ctx.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
+        maxCubeMapTextureSize: ctx.getParameter(ctx.MAX_CUBE_MAP_TEXTURE_SIZE),
+        maxFragmentUniformVectors: ctx.getParameter(ctx.MAX_FRAGMENT_UNIFORM_VECTORS),
+        maxRenderbufferSize: ctx.getParameter(ctx.MAX_RENDERBUFFER_SIZE),
+        maxTextureImageUnits: ctx.getParameter(ctx.MAX_TEXTURE_IMAGE_UNITS),
+        maxTextureSize: ctx.getParameter(ctx.MAX_TEXTURE_SIZE),
+        maxVaryingVectors: ctx.getParameter(ctx.MAX_VARYING_VECTORS),
+        maxVertexAttribs: ctx.getParameter(ctx.MAX_VERTEX_ATTRIBS),
+        maxVertexTextureImageUnits: ctx.getParameter(ctx.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+        maxVertexUniformVectors: ctx.getParameter(ctx.MAX_VERTEX_UNIFORM_VECTORS),
+        maxViewportDims: Array.from(ctx.getParameter(ctx.MAX_VIEWPORT_DIMS) || []),
+      };
+      return {
+        available: true,
+        vendor: ext ? ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL) : null,
+        renderer: ext ? ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL) : null,
+        extensionCount: extensions.length,
+        extensionSha256: await hashText(JSON.stringify(extensions)),
+        parameterSha256: await hashText(JSON.stringify(parameters)),
+        parameters,
+      };
+    } catch (err) {
+      return {available: false, reason: String(err && err.name || err)};
+    }
   })();
   return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, webgl: gl, webrtc};
 })()

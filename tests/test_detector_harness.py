@@ -347,6 +347,21 @@ class DetectorHarnessTests(unittest.TestCase):
         }
         return value
 
+    def browserleaks_webgl_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "BrowserLeaks - WebGL Report"
+        value["url"] = "https://browserleaks.com/webgl"
+        value["webgl"] = {
+            "available": True,
+            "vendor": "Intel Inc.",
+            "renderer": "Intel Iris OpenGL Engine",
+            "extensionCount": 42,
+            "extensionSha256": "1" * 64,
+            "parameterSha256": "2" * 64,
+        }
+        return value
+
+
     def browserleaks_webrtc_value(self):
         value = self.browserleaks_client_hints_value()
         value["title"] = "BrowserLeaks - WebRTC Leak Test"
@@ -462,6 +477,27 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("Fonts", finding)
         self.assertIn("font corpus", finding)
 
+    def test_classify_browserleaks_dispatches_webgl_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_webgl_value(),
+            "https://browserleaks.com/webgl",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("WebGL", finding)
+        self.assertIn("shader precision", finding)
+
+    def test_classify_browserleaks_webgl_flags_swiftshader(self):
+        value = self.browserleaks_webgl_value()
+        value["webgl"]["vendor"] = "Google Inc. (Google)"
+        value["webgl"]["renderer"] = "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+
+        status, finding, severity = self.harness_module.classify_browserleaks(value, "https://browserleaks.com/webgl")
+
+        self.assertEqual((status, severity), ("warning", "high"))
+        self.assertIn("SwiftShader", finding)
+
+
     def test_classify_browserleaks_dispatches_webrtc_page_without_claiming_release_pass(self):
         status, finding, severity = self.harness_module.classify_browserleaks(
             self.browserleaks_webrtc_value(),
@@ -496,12 +532,17 @@ class DetectorHarnessTests(unittest.TestCase):
         fonts = self.browserleaks_fonts_value()
         del fonts["fonts"]["metrics"]["glyphSha256"]
 
+        webgl = self.browserleaks_webgl_value()
+        del webgl["webgl"]["parameterSha256"]
+
+
         webrtc = self.browserleaks_webrtc_value()
         del webrtc["webrtc"]["candidateCount"]
 
         cases = [
             (audio, "https://browserleaks.com/javascript/audio", "sumAbs"),
             (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
+            (webgl, "https://browserleaks.com/webgl", "parameter"),
             (webrtc, "https://browserleaks.com/webrtc", "candidateCount"),
         ]
         for value, url, missing in cases:
