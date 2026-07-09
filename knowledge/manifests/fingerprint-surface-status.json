@@ -22,9 +22,9 @@
       "surface": "UA"
     },
     {
-      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke, iphey UA-CH smoke, BrowserScan UA-CH smoke, and CreepJS UA-CH smoke. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101.",
+      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke in headless and headed Docker/Xvfb modes, iphey UA-CH smoke, BrowserScan UA-CH smoke, and CreepJS UA-CH smoke. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101.",
       "release_blocker": false,
-      "result": "pass_linux_multi_detector_uach_with_browserleaks_headed",
+      "result": "pass_linux_multi_detector_uach_with_browserleaks_pixelscan_headed",
       "severity": "info",
       "status": "detector_tested",
       "surface": "Client Hints"
@@ -150,9 +150,9 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft and BrowserLeaks smokes now exist in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and native headed Linux/macOS detector matrix remains absent.",
+      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, and Pixelscan smokes now exist in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and native headed Linux/macOS detector matrix remains absent.",
       "release_blocker": true,
-      "result": "linux_headless_and_headed_xvfb_sannysoft_browserleaks_only",
+      "result": "linux_headless_and_headed_xvfb_sannysoft_browserleaks_pixelscan_only",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "cross-platform drift"
@@ -172,6 +172,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headed_docker_direct_20260709.json"
   ]
 }
