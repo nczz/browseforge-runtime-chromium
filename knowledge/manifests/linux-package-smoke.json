@@ -64,7 +64,8 @@
     },
     {
       "check": "sannysoft_headless_detector_navigation",
-      "command": "docker linux/amd64 packaged runtime + scripts/detector_harness.py collect --detector sannysoft",
+      "command": "docker linux/amd64 packaged runtime + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
+      "limitations": "Packaged Linux collector verified webdriver, locale/timezone, screen, storage, hardware, and WebGL values, but this in-container run still exposed HeadlessChrome in navigator.userAgent; release-grade UA evidence requires a rebuilt patched browser or renderer propagation fix.",
       "observed": {
         "browser_crash_regression_fixed": true,
         "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
@@ -88,13 +89,18 @@
           "width": 1920
         },
         "source_collector": "scripts/detector_harness.py collect",
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
         "timezone": "Asia/Taipei",
+        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
         "webgl": {
           "renderer": "Intel Iris OpenGL Engine",
           "vendor": "Intel Inc."
         }
       },
-      "status": "passed"
+      "status": "warning"
     }
   ],
   "limitations": [

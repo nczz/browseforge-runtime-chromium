@@ -349,7 +349,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
     time.sleep(wait_seconds)
     expr = """
-(() => {
+(async () => {
   const text = (document.body && document.body.innerText || '').slice(0, 12000);
   const title = document.title;
   const ua = navigator.userAgent;
@@ -366,6 +366,9 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     availHeight: screen.availHeight,
     devicePixelRatio: window.devicePixelRatio,
   };
+  const storageEstimate = navigator.storage && navigator.storage.estimate
+    ? await navigator.storage.estimate()
+    : null;
   const gl = (() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -373,7 +376,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     const ext = ctx.getExtension('WEBGL_debug_renderer_info');
     return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
   })();
-  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, webgl: gl};
+  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, webgl: gl};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)

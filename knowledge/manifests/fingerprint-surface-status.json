@@ -7,17 +7,17 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, hardware, and WebGL configured values, but full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values, but packaged Linux UA still exposes HeadlessChrome in the in-container collector and the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "scope": "source_level_linux_headless_detector_smoke_plus_local_dogfood",
   "surfaces": [
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported configured Chrome/150 UA without HeadlessChrome in navigator.userAgent and Browser.getVersion; full UA-CH detector matrix remains required.",
-      "release_blocker": false,
-      "result": "pass_linux_sannysoft",
-      "severity": "info",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected inside container reported navigator.webdriver=false but navigator.userAgent still contained HeadlessChrome; source UA patch or packaged Chrome rebuild remains required for release-grade UA.",
+      "release_blocker": true,
+      "result": "warn_headless_ua_in_packaged_container",
+      "severity": "medium",
       "status": "detector_tested",
       "surface": "UA"
     },
@@ -54,7 +54,7 @@
       "surface": "locale"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke collected by scripts/detector_harness.py reported screen 1920x1080, available screen 1920x1040, and DPR=1 from configured fingerprint profile.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported screen 1920x1080, available screen 1920x1040, and DPR=1 from configured fingerprint profile.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft",
       "severity": "info",
@@ -118,11 +118,11 @@
       "surface": "permissions"
     },
     {
-      "evidence": "No BrowserScan storage/incognito row was completed.",
-      "release_blocker": true,
-      "result": "not_tested",
-      "severity": "high",
-      "status": "blocked",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported navigator.storage.estimate quota 8589934592 bytes for configured 8192 MiB storage quota.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
       "surface": "storage quota"
     },
     {
