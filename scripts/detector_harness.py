@@ -467,7 +467,8 @@ def _collect_font_availability_records(evidence_rows: list[dict], detector_id: s
             })
     return records
 
-WEBGL_METADATA_FIELDS = ("extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256")
+WEBGL_REQUIRED_METADATA_FIELDS = ("extensionCount", "extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256")
+WEBGL_HASH_METADATA_FIELDS = ("extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256")
 
 
 def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
@@ -486,8 +487,9 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
                 "run_id": evidence["run_id"],
                 "vendor": values.get("vendor"),
                 "renderer": values.get("renderer"),
-                "hashes": {field: values.get(field) for field in WEBGL_METADATA_FIELDS},
-                "missing_metadata": [field for field in WEBGL_METADATA_FIELDS if not values.get(field)],
+                "extension_count": values.get("extensionCount"),
+                "hashes": {field: values.get(field) for field in WEBGL_HASH_METADATA_FIELDS},
+                "missing_metadata": [field for field in WEBGL_REQUIRED_METADATA_FIELDS if values.get(field) is None],
             })
     return records
 
@@ -655,7 +657,7 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
                 }
                 for record in incomplete_webgl
             ],
-            "finding": "WebGL comparison requires sanitized extension, parameter, shader precision, and rendered pixel hashes for each committed WebGL evidence row.",
+            "finding": "WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.",
         })
     complete_webgl = [record for record in webgl_records if not record["missing_metadata"]]
     browserleaks_webgl = next((record for record in complete_webgl if record["detector_id"] == "browserleaks"), None)
@@ -663,13 +665,15 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
     if browserleaks_webgl and comparison_peer:
         hash_matches = {
             field: browserleaks_webgl["hashes"][field] == comparison_peer["hashes"][field]
-            for field in WEBGL_METADATA_FIELDS
+            for field in WEBGL_HASH_METADATA_FIELDS
         }
+        extension_count_match = browserleaks_webgl["extension_count"] == comparison_peer["extension_count"]
+        extension_profile_match = extension_count_match and hash_matches["extensionSha256"]
         vendor_renderer_match = (
             browserleaks_webgl["vendor"] == comparison_peer["vendor"]
             and browserleaks_webgl["renderer"] == comparison_peer["renderer"]
         )
-        all_match = vendor_renderer_match and all(hash_matches.values())
+        all_match = vendor_renderer_match and extension_profile_match and all(hash_matches.values())
         comparisons.append({
             "comparison_id": "webgl_metadata_cross_detector",
             "surface": "webgl",
@@ -679,8 +683,10 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "right_detector_id": comparison_peer["detector_id"],
             "right_run_id": comparison_peer["run_id"],
             "vendor_renderer_match": vendor_renderer_match,
+            "extension_count_match": extension_count_match,
+            "extension_profile_match": extension_profile_match,
             "hash_matches": hash_matches,
-            "finding": "WebGL metadata hashes match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata hashes differ across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
+            "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata differs across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
         })
     else:
         gaps.append({
@@ -984,11 +990,10 @@ def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
     vendor = str(webgl.get("vendor", ""))
     if "SwiftShader" in renderer or "Google Inc. (Google)" in vendor:
         return "warning", "BrowserLeaks WebGL bounded probe still exposes SwiftShader/Google software rendering; configured vendor/renderer evidence is required.", "high"
-    metadata_fields = {"extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256"}
-    metadata_missing = sorted(field for field in metadata_fields if not webgl.get(field))
+    metadata_missing = sorted(field for field in WEBGL_REQUIRED_METADATA_FIELDS if webgl.get(field) is None)
     if metadata_missing:
         return "warning", f"BrowserLeaks WebGL page reported vendor/renderer strings, but sanitized WebGL metadata is missing fields: {metadata_missing}; release-grade WebGL coherence remains required.", "medium"
-    return "warning", "BrowserLeaks WebGL page reported sanitized vendor/renderer, extension, parameter, shader precision, and rendered pixel hashes; headed/native cross-detector coherence still requires release-grade evidence.", "medium"
+    return "warning", "BrowserLeaks WebGL page reported sanitized vendor/renderer, extension count/hash, parameter hash, shader precision hash, and rendered pixel hash; headed/native cross-detector coherence still requires release-grade evidence.", "medium"
 
 
 

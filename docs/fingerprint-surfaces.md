@@ -24,7 +24,7 @@ Chromium-family anti-detect work must treat fingerprinting as a consistency syst
 
 ## WebGL rule
 
-Incomplete WebGL spoofing is worse than no override. A release cannot claim WebGL support unless it proves coherence across strings, parameters, extensions, shader precision formats, and rendered pixel output for the target platform/GPU model.
+Incomplete WebGL spoofing is worse than no override. A release cannot claim WebGL support unless it proves coherence across strings, extension count/list hash, parameters, shader precision formats, and rendered pixel output for the target platform/GPU model.
 
 ## Evidence states
 

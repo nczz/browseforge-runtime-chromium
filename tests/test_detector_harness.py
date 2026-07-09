@@ -257,7 +257,7 @@ class DetectorHarnessTests(unittest.TestCase):
                 "precisionSha256": "3" * 64,
                 "pixelSha256": "4" * 64,
             }
-        values = {"vendor": vendor, "renderer": renderer, **hashes}
+        values = {"vendor": vendor, "renderer": renderer, "extensionCount": 42, **hashes}
         return {
             "detector_check": "webgl_metadata_probe",
             "evidence_ref": "sanitized_score_comparison_fixture",
@@ -1644,6 +1644,45 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual(comparison["status"], "pass")
             self.assertIs(comparison["vendor_renderer_match"], True)
             self.assertTrue(all(comparison["hash_matches"].values()))
+            self.assertIs(comparison["extension_count_match"], True)
+            self.assertIs(comparison["extension_profile_match"], True)
+
+    def test_compare_scores_warns_on_webgl_extension_profile_drift(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="webgl_browserleaks",
+                results=[self.webgl_score_result()],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headless",
+                label="webgl_pixelscan_drift",
+                results=[
+                    self.webgl_score_result(
+                        hashes={
+                            "extensionSha256": "9" * 64,
+                            "parameterSha256": "2" * 64,
+                            "precisionSha256": "3" * 64,
+                            "pixelSha256": "4" * 64,
+                        }
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = self.score_comparison(payload, surface="webgl", detectors={"browserleaks", "pixelscan"})
+            self.assertEqual(comparison["status"], "warning")
+            self.assertIs(comparison["extension_count_match"], True)
+            self.assertIs(comparison["extension_profile_match"], False)
+            self.assertIs(comparison["hash_matches"]["extensionSha256"], False)
 
     def test_compare_scores_reports_webgl_metadata_hash_gaps(self):
         with tempfile.TemporaryDirectory() as td:
