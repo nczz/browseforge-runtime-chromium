@@ -182,6 +182,93 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         message = str(raised.exception).lower()
         self.assertRegex(message, r"artifact|linux-x64|release", message)
 
+
+    def test_validate_rejects_passed_live_detector_gate_with_coverage_gaps(self) -> None:
+        """A passed live-detector-evidence gate cannot coexist with uncovered detector matrix cells."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_detector_summary(temp_root, coverage_gaps=self._coverage_gaps(1))
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertRegex(message, r"detector[- ]summary", message)
+        self.assertIn("live-detector", message)
+
+    def test_validate_rejects_detector_summary_coverage_gap_count_mismatch(self) -> None:
+        """coverage_gap_count must describe the actual coverage_gaps list, not stale bookkeeping."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_detector_summary(temp_root, coverage_gap_count=2, coverage_gaps=self._coverage_gaps(1))
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("coverage_gap_count", message)
+        self.assertIn("coverage_gaps", message)
+
+    def test_validate_rejects_detector_summary_coverage_gaps_missing_stable_fields(self) -> None:
+        """Every coverage gap must carry the stable matrix dimensions release review depends on."""
+        module = self._load_validate_module()
+        for missing_field in ["matrix_key", "platform", "detector_id", "display_mode", "network_mode", "container"]:
+            with self.subTest(missing_field=missing_field):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    coverage_gaps = self._coverage_gaps(1)
+                    coverage_gaps[0].pop(missing_field)
+                    self._write_detector_summary(temp_root, coverage_gaps=coverage_gaps)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertRegex(message, r"detector[- ]summary|coverage_gaps", message)
+                self.assertIn(missing_field, message)
+
+    def test_validate_rejects_passed_live_detector_gate_with_blocking_findings(self) -> None:
+        """A passed live-detector-evidence gate cannot coexist with detector blocking findings."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_detector_summary(
+                temp_root,
+                coverage_gaps=[],
+                blocking_findings=[{"finding_id": "canvas_mismatch", "severity": "blocking"}],
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("live-detector", message)
+        self.assertRegex(message, r"blocking[_ -]findings?", message)
+
+    def test_validate_allows_warning_live_detector_gate_with_current_coverage_gaps(self) -> None:
+        """The current warning gate posture with 13 gaps is coherent and reaches later artifact validation."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_release_gates(temp_root, live_detector_status="warning")
+            self._write_detector_summary(temp_root, coverage_gaps=self._coverage_gaps(13))
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertRegex(message, r"artifact|linux-x64|release", message)
+        self.assertNotRegex(message, r"detector[- ]summary|coverage_gap|live-detector", message)
+
+    def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
+        original_root = module.ROOT
+        try:
+            module.ROOT = temp_root
+            with self.assertRaises(SystemExit) as raised:
+                module.main()
+        finally:
+            module.ROOT = original_root
+        return str(raised.exception)
+
     def _write_minimal_validate_tree(self, root: Path, module: Any) -> None:
         for directory in module.REQUIRED_DIRS:
             (root / directory).mkdir(parents=True, exist_ok=True)
@@ -261,25 +348,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             root / "knowledge" / "manifests" / "platform-matrix.json",
             {"platforms": [{"id": platform_id} for platform_id in ["linux-x64", "macos-arm64", "macos-x64", "windows-x64", "linux-arm64"]]},
         )
-        self._write_json(
-            root / "knowledge" / "manifests" / "release-gates.json",
-            {
-                "release_candidate_required_gates": [
-                    {"gate_id": gate_id}
-                    for gate_id in [
-                        "chromium-base-selected",
-                        "wrapper-contract-tests",
-                        "detector-harness-contract-tests",
-                        "packaging-contract-tests",
-                        "chromium-source-indexed",
-                        "runtime-artifact-produced",
-                        "browseforge-adapter-merged",
-                        "live-detector-evidence",
-                        "sbom-provenance-release-assets",
-                    ]
-                ]
-            },
-        )
+        self._write_release_gates(root, live_detector_status="warning")
         self._write_json(
             root / "knowledge" / "manifests" / "detector-score-comparison.json",
             {
@@ -339,7 +408,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
         self._write_json(root / "knowledge" / "manifests" / "source-acquisition.json", {})
         self._write_json(root / "browser" / "chromium-base.json", {})
-        self._write_json(root / "detector-summary.json", {"rows": []})
+        self._write_detector_summary(root, coverage_gaps=[])
 
         query_text = " ".join(
             [
@@ -403,6 +472,68 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "edge", "label": "SUPPORTS_GATE", "from": "RuntimeProvider:browseforge-chromium", "to": "ReleaseGate:runtime-artifact-produced", "properties": {"status": "passed"}},
             {"record_type": "edge", "label": "REFERENCES_SOURCE", "from": "RuntimeProvider:browseforge-chromium", "to": "KnowledgeSource:chromium-upstream", "properties": {}},
         ]
+
+    def _write_release_gates(self, root: Path, *, live_detector_status: str) -> None:
+        self._write_json(
+            root / "knowledge" / "manifests" / "release-gates.json",
+            {
+                "release_candidate_required_gates": [
+                    {
+                        "gate_id": gate_id,
+                        "status": live_detector_status if gate_id == "live-detector-evidence" else "passed",
+                    }
+                    for gate_id in [
+                        "chromium-base-selected",
+                        "wrapper-contract-tests",
+                        "detector-harness-contract-tests",
+                        "packaging-contract-tests",
+                        "chromium-source-indexed",
+                        "runtime-artifact-produced",
+                        "browseforge-adapter-merged",
+                        "live-detector-evidence",
+                        "sbom-provenance-release-assets",
+                    ]
+                ]
+            },
+        )
+
+    def _write_detector_summary(
+        self,
+        root: Path,
+        *,
+        coverage_gaps: list[dict[str, Any]],
+        coverage_gap_count: int | None = None,
+        blocking_findings: list[dict[str, Any]] | None = None,
+    ) -> None:
+        self._write_json(
+            root / "detector-summary.json",
+            {
+                "blocking_findings": [] if blocking_findings is None else blocking_findings,
+                "coverage_gap_count": len(coverage_gaps) if coverage_gap_count is None else coverage_gap_count,
+                "coverage_gaps": coverage_gaps,
+                "rows": [],
+            },
+        )
+
+    def _coverage_gaps(self, count: int) -> list[dict[str, Any]]:
+        gaps: list[dict[str, Any]] = []
+        for detector_id in ["browserleaks", "browserscan", "creepjs", "iphey", "pixelscan", "sannysoft"]:
+            for network_mode, container_values in [("direct", [False]), ("proxy", [False, True])]:
+                for container in container_values:
+                    gaps.append(
+                        {
+                            "container": container,
+                            "detector_id": detector_id,
+                            "display_mode": "headed",
+                            "matrix_key": f"linux-x64:{detector_id}:headed:{network_mode}:{'container' if container else 'host'}",
+                            "network_mode": network_mode,
+                            "platform": "linux-x64",
+                        }
+                    )
+                    if len(gaps) == count:
+                        return gaps
+        self.fail(f"test fixture requested {count} detector coverage gaps but only {len(gaps)} are defined")
+        return gaps
 
     def _write_json(self, path: Path, payload: object) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

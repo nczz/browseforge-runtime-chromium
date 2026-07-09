@@ -19,6 +19,7 @@ REQUIRED_FILES = [
     "contracts/runtime-manifest.schema.json",
     "contracts/browseforge-integration.contract.json",
     "detectors/evidence-schema.json",
+    "detector-summary.json",
     "knowledge/kb-manifest.json",
     "knowledge/manifests/detectors.json",
     "knowledge/manifests/patchset.json",
@@ -206,6 +207,23 @@ def main() -> None:
     for gate_id in ["chromium-base-selected", "wrapper-contract-tests", "detector-harness-contract-tests", "packaging-contract-tests", "chromium-source-indexed", "runtime-artifact-produced", "browseforge-adapter-merged", "live-detector-evidence", "sbom-provenance-release-assets"]:
         if gate_id not in gate_ids:
             raise SystemExit(f"release gates missing {gate_id}")
+    gate_status = {gate["gate_id"]: gate.get("status") for gate in release_gates["release_candidate_required_gates"]}
+
+    detector_summary = load_json("detector-summary.json")
+    coverage_gaps = detector_summary.get("coverage_gaps", [])
+    coverage_gap_count = detector_summary.get("coverage_gap_count")
+    if coverage_gap_count != len(coverage_gaps):
+        raise SystemExit("detector summary coverage_gap_count must match coverage_gaps length")
+    required_gap_fields = {"matrix_key", "platform", "detector_id", "display_mode", "network_mode", "container"}
+    for gap in coverage_gaps:
+        missing_gap_fields = sorted(required_gap_fields - gap.keys())
+        if missing_gap_fields:
+            raise SystemExit(f"detector summary coverage gap missing fields: {missing_gap_fields}")
+    if gate_status.get("live-detector-evidence") == "passed" and (
+        coverage_gap_count or detector_summary.get("blocking_findings")
+    ):
+        raise SystemExit("live-detector-evidence gate cannot pass while detector summary has coverage gaps or blocking findings")
+
 
     score_comparison = load_json("knowledge/manifests/detector-score-comparison.json")
     if score_comparison.get("runtime_id") != "browseforge-chromium":
@@ -302,7 +320,6 @@ def main() -> None:
         if stale_linux_missing:
             raise SystemExit(f"generated KG still links {artifact['platform']} to missing artifact blockers")
 
-    detector_summary = load_json("detector-summary.json")
     for row in detector_summary.get("rows", []):
         path = ROOT / row["path"]
         evidence = load_json(path)
