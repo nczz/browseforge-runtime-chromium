@@ -28,6 +28,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/platform-matrix.json",
     "knowledge/manifests/release-gates.json",
     "knowledge/manifests/detector-score-comparison.json",
+    "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -181,7 +182,34 @@ def validate_evidence_schema_contract(evidence_schema: dict) -> None:
                 rel = path.relative_to(ROOT)
                 raise SystemExit(f"detector evidence {rel} storage key {storage_key!r} is not admitted by evidence schema")
 
-
+def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str, str | None]) -> None:
+    if surface_status.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("fingerprint surface status runtime_id must be browseforge-chromium")
+    allowed_statuses = set(surface_status.get("allowed_status_values", []))
+    if not allowed_statuses:
+        raise SystemExit("fingerprint surface status must declare allowed_status_values")
+    surfaces = surface_status.get("surfaces", [])
+    if not surfaces:
+        raise SystemExit("fingerprint surface status must contain surfaces")
+    required_fields = {"surface", "status", "release_blocker", "result", "evidence", "severity"}
+    release_blockers = []
+    for surface in surfaces:
+        missing_fields = sorted(required_fields - surface.keys())
+        if missing_fields:
+            raise SystemExit(f"fingerprint surface status entry missing fields: {missing_fields}")
+        if surface["status"] not in allowed_statuses:
+            raise SystemExit(f"fingerprint surface {surface['surface']} uses unknown status {surface['status']}")
+        if not isinstance(surface["release_blocker"], bool):
+            raise SystemExit(f"fingerprint surface {surface['surface']} release_blocker must be boolean")
+        if surface["release_blocker"]:
+            release_blockers.append(surface["surface"])
+    if surface_status.get("release_grade") is True and release_blockers:
+        raise SystemExit(f"fingerprint surface status cannot be release_grade with blockers: {sorted(release_blockers)}")
+    if gate_status.get("live-detector-evidence") == "passed" and release_blockers:
+        raise SystemExit(f"live-detector-evidence gate cannot pass while fingerprint surfaces block release: {sorted(release_blockers)}")
+    for source_path in surface_status.get("updated_from", []):
+        if not (ROOT / source_path).is_file():
+            raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")
 
 
 def main() -> None:
@@ -261,6 +289,9 @@ def main() -> None:
         if gate_id not in gate_ids:
             raise SystemExit(f"release gates missing {gate_id}")
     gate_status = {gate["gate_id"]: gate.get("status") for gate in release_gates["release_candidate_required_gates"]}
+
+    surface_status = load_json("knowledge/manifests/fingerprint-surface-status.json")
+    validate_surface_status_manifest(surface_status, gate_status)
 
     detector_summary = load_json("detector-summary.json")
     coverage_gaps = detector_summary.get("coverage_gaps", [])

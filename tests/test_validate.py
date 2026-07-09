@@ -303,6 +303,48 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("matrix.proxy", message)
         self.assertIn("not admitted", message)
 
+    def test_validate_rejects_release_grade_surface_status_with_blockers(self) -> None:
+        """Surface status cannot claim release-grade while any fingerprint surface remains a blocker."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_surface_status(temp_root, release_grade=True, release_blocker=True)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("fingerprint surface", message)
+        self.assertIn("release_grade", message)
+        self.assertIn("blockers", message)
+
+    def test_validate_rejects_passed_live_detector_gate_with_surface_blockers(self) -> None:
+        """A passed live-detector-evidence gate cannot coexist with release-blocking fingerprint surfaces."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_surface_status(temp_root, release_grade=False, release_blocker=True)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("live-detector", message)
+        self.assertIn("fingerprint surfaces", message)
+        self.assertIn("block release", message)
+
+    def test_validate_rejects_surface_status_missing_updated_source(self) -> None:
+        """Surface status provenance must point at committed evidence sources."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_surface_status(temp_root, updated_from=["detectors/evidence/missing.json"])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("fingerprint surface", message)
+        self.assertIn("missing evidence source", message)
+
 
     def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
@@ -420,6 +462,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"platforms": [{"id": platform_id} for platform_id in ["linux-x64", "macos-arm64", "macos-x64", "windows-x64", "linux-arm64"]]},
         )
         self._write_release_gates(root, live_detector_status="warning")
+        self._write_surface_status(root)
         self._write_json(
             root / "knowledge" / "manifests" / "detector-score-comparison.json",
             {
@@ -610,6 +653,34 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         return gaps
         self.fail(f"test fixture requested {count} detector coverage gaps but only {len(gaps)} are defined")
         return gaps
+
+    def _write_surface_status(
+        self,
+        root: Path,
+        *,
+        release_grade: bool = False,
+        release_blocker: bool = False,
+        updated_from: list[str] | None = None,
+    ) -> None:
+        self._write_json(
+            root / "knowledge" / "manifests" / "fingerprint-surface-status.json",
+            {
+                "allowed_status_values": ["not_started", "designed", "implemented", "detector_tested", "accepted", "blocked"],
+                "release_grade": release_grade,
+                "runtime_id": "browseforge-chromium",
+                "surfaces": [
+                    {
+                        "evidence": "fixture",
+                        "release_blocker": release_blocker,
+                        "result": "fixture_surface_status",
+                        "severity": "medium" if release_blocker else "info",
+                        "status": "detector_tested",
+                        "surface": "automation/headless/CDP",
+                    }
+                ],
+                "updated_from": [] if updated_from is None else updated_from,
+            },
+        )
 
     def _write_detector_evidence(
         self,
