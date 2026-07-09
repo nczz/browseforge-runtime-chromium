@@ -36,6 +36,17 @@ SURFACE_ALIASES = {
     "incognito": "storage_quota",
     "platform": "client_hints",
 }
+CANVAS_RAW_RESULT_FIELDS = {
+    "data_url",
+    "dataUrl",
+    "dataUrlSha256Input",
+    "image_data",
+    "imageData",
+    "pixels",
+    "pixel_data",
+    "raw_pixels",
+}
+
 
 def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
@@ -126,6 +137,10 @@ def validate_evidence_file(path: Path):
         surf = canonical_surface(result.get("surface", ""))
         if surf not in CANONICAL_SURFACES:
             errors.append(f"unknown surface: {result.get('surface')}")
+        if surf == "canvas":
+            raw_fields = sorted(CANVAS_RAW_RESULT_FIELDS.intersection(result))
+            if raw_fields:
+                return EXIT_SANITIZATION, [f"canvas sanitization failure: raw payload fields are not allowed: {', '.join(raw_fields)}"]
     sanitization = evidence.get("sanitization", {})
     for key in ["ip_redacted", "credentials_redacted", "profiles_redacted", "tokens_redacted", "cookies_storage_redacted", "screenshot_metadata_redacted"]:
         if sanitization.get(key) is not True:
@@ -444,6 +459,39 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     }
     return {available: true, checks: out};
   })();
+  const canvasProbe = await (async () => {
+    try {
+      const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return {available: false, reason: '2d_context_unavailable'};
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#123456');
+      gradient.addColorStop(1, '#fedcba');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(20, 120, 210, 0.73)';
+      ctx.font = '13px Arial';
+      ctx.fillText('BrowseForge Ω 測', 3, 21);
+      const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imageDataSha256 = crypto && crypto.subtle
+        ? toHex(await crypto.subtle.digest('SHA-256', image.data))
+        : null;
+      const dataUrl = canvas.toDataURL('image/png');
+      return {
+        available: true,
+        width: canvas.width,
+        height: canvas.height,
+        sampleCount: image.data.length,
+        imageDataSha256,
+        dataUrlSha256Input: dataUrl,
+      };
+    } catch (err) {
+      return {available: false, reason: String(err && err.name || err)};
+    }
+  })();
   const gl = (() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -451,7 +499,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     const ext = ctx.getExtension('WEBGL_debug_renderer_info');
     return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, webgl: gl};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, webgl: gl};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)
@@ -459,6 +507,10 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     elapsed = round(time.time() - started, 2)
     cdp.call("Target.closeTarget", {"targetId": target_id}, timeout=5)
     text = value.pop("text", "")
+    canvas = value.get("canvas")
+    if isinstance(canvas, dict) and isinstance(canvas.get("dataUrlSha256Input"), str):
+        data_url = canvas.pop("dataUrlSha256Input")
+        canvas["dataUrlSha256"] = hashlib.sha256(data_url.encode()).hexdigest()
     status, finding, severity = classify_sannysoft({**value, "text": text}) if detector_id == "sannysoft" else ("warning", "Detector loaded; manual review required.", "medium")
     value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
     value["text_excerpt"] = " ".join(text.split())[:800]

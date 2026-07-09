@@ -47,6 +47,19 @@
       "severity": "info",
       "finding": "No automation finding in sanitized fixture.",
       "evidence_ref": "fixture"
+    },
+    {
+      "surface": "canvas",
+      "status": "pass",
+      "severity": "info",
+      "finding": "Canvas probe sanitized to deterministic hashes and dimensions without raw image data.",
+      "evidence_ref": "fixture#canvas",
+      "fingerprint_hash": "9b513083963b19d7c64f5b9360065b1b7893ec3c481a4c9980200d1f58e268a1",
+      "data_url_sha256": "b0c187ab5cd3aff42f18324e9360d67f3c35100b753bc130d922b88ee62ed3eb",
+      "image_data_sha256": "0ac9eec836faf77dc0a4c63d1eb0c6f74b4c3a794372ee02b45f9a7ace597a21",
+      "width": 64,
+      "height": 32,
+      "sample_count": 8192
     }
   ],
   "sanitization": {

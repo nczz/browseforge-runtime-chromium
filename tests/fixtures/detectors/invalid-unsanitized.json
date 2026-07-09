@@ -47,10 +47,23 @@
       "severity": "info",
       "finding": "No automation finding in sanitized fixture.",
       "evidence_ref": "fixture"
+    },
+    {
+      "surface": "canvas",
+      "status": "pass",
+      "severity": "info",
+      "finding": "Unsanitized fixture carries raw canvas bytes and must be rejected.",
+      "evidence_ref": "fixture#canvas-raw",
+      "fingerprint_hash": "9b513083963b19d7c64f5b9360065b1b7893ec3c481a4c9980200d1f58e268a1",
+      "data_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB",
+      "image_data": [18, 52, 86, 255],
+      "width": 1,
+      "height": 1,
+      "sample_count": 4
     }
   ],
   "sanitization": {
-    "ip_redacted": false,
+    "ip_redacted": true,
     "credentials_redacted": true,
     "profiles_redacted": true,
     "tokens_redacted": true,

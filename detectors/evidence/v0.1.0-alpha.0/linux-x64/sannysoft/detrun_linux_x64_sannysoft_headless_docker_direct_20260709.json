@@ -231,6 +231,24 @@
       "severity": "low",
       "status": "pass",
       "surface": "client_hints"
+    },
+    {
+      "detector_check": "canvas_2d_probe",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live collector rendered a deterministic Canvas 2D probe in two fresh packaged Linux runtime launches; sanitized data URL and ImageData hashes matched across repeats, proving the patched artifact exercises the canvas readback path without committing raw image data. BrowserLeaks/CreepJS/Pixelscan canvas comparison remains required for release-grade claims.",
+      "normalized_values": {
+        "available": true,
+        "data_url_sha256": "535cf055133e79e229dabd182c9bf6f72676a9138a820e2b3537dd15d84c3be6",
+        "height": 32,
+        "image_data_sha256": "110fd4019954d900bb4f3e4f092b3c26b467fa1187b4c7b3d6315443f1a5b9c5",
+        "repeat_consistent": true,
+        "sample_count": 8192,
+        "width": 64
+      },
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
+      "severity": "low",
+      "status": "pass",
+      "surface": "canvas"
     }
   ],
   "run_id": "detrun_linux_x64_sannysoft_headless_docker_direct_20260709",
@@ -240,7 +258,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the rebuilt Linux runtime artifact after the UA-CH fullVersionList source fix and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
+    "notes": "Raw page text and canvas bytes are not committed; sanitized excerpts and hashes keep no IP, cookie, storage, screenshot, data URL, or pixel payload data. This run used the rebuilt Linux runtime artifact after the UA-CH fullVersionList source fix and collected SannySoft via loopback CDP inside the packaged Linux Chromium container.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-sannysoft-6",
@@ -251,8 +269,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "797205d861372881991e6f0e169a876ca1f7d2a6bb77e70c42136bf8356530b4",
-    "sha256": "ea38f1a9de3bb31d0f6b98f612eb2f906bb0d25658aac426a5ae974d3a44e4ba",
+    "raw_capture_sha256": "8f0903fcf982366c68ae47a7bdfa9971fbbe373eb56033bd659a511eecf75b28",
+    "sha256": "949cca66d15b084a56f2f07db883149650060fd1042fed8fdd10a8c20a5fe5a5",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -268,5 +286,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T05:10:01.834892+00:00"
+  "tested_at": "2026-07-09T05:30:38.272183+00:00"
 }

@@ -82,6 +82,15 @@
         },
         "browser_crash_regression_fixed": true,
         "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
+        "canvas": {
+          "available": true,
+          "data_url_sha256": "535cf055133e79e229dabd182c9bf6f72676a9138a820e2b3537dd15d84c3be6",
+          "height": 32,
+          "image_data_sha256": "110fd4019954d900bb4f3e4f092b3c26b467fa1187b4c7b3d6315443f1a5b9c5",
+          "repeat_consistent": true,
+          "sample_count": 8192,
+          "width": 64
+        },
         "deviceMemory": 8,
         "devtools_navigation_completed": true,
         "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
@@ -122,7 +131,7 @@
           "height": 1080,
           "width": 1920
         },
-        "source_collector": "scripts/detector_harness.py collect",
+        "source_collector": "scripts/detector_harness.py collect with sanitized canvas/audio/fonts/UA-CH probes",
         "storage": {
           "quota": 8589934592,
           "usage": 0

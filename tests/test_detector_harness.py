@@ -20,6 +20,9 @@ class DetectorHarnessTests(unittest.TestCase):
     def run_harness(self, *args):
         return subprocess.run([sys.executable, str(HARNESS), *args], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    def fixture_path(self, name):
+        return ROOT / "tests" / "fixtures" / "detectors" / name
+
     @classmethod
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
@@ -99,15 +102,68 @@ class DetectorHarnessTests(unittest.TestCase):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/valid-evidence.json")
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
+    def test_validate_accepts_canvas_evidence_with_only_sanitized_hashes(self):
+        fixture = self.fixture_path("valid-evidence.json")
+        code, errors = self.harness_module.validate_evidence_file(fixture)
+        self.assertEqual((code, errors), (0, []))
+
+        evidence = json.loads(fixture.read_text(encoding="utf-8"))
+        canvas = next((r for r in evidence["results"] if r.get("surface") == "canvas"), None)
+        self.assertIsNotNone(canvas)
+        self.assertEqual(
+            set(canvas),
+            {
+                "surface",
+                "status",
+                "severity",
+                "finding",
+                "evidence_ref",
+                "fingerprint_hash",
+                "data_url_sha256",
+                "image_data_sha256",
+                "width",
+                "height",
+                "sample_count",
+            },
+        )
+        self.assertEqual(canvas["status"], "pass")
+        self.assertEqual(canvas["width"], 64)
+        self.assertEqual(canvas["height"], 32)
+        self.assertEqual(canvas["sample_count"], 8192)
+        for field in ("fingerprint_hash", "data_url_sha256", "image_data_sha256"):
+            self.assertRegex(canvas[field], r"^[0-9a-f]{64}$")
+
+    def test_validate_rejects_canvas_raw_image_payload_fields(self):
+        fixture = self.fixture_path("invalid-unsanitized.json")
+        evidence = json.loads(fixture.read_text(encoding="utf-8"))
+        canvas = next((r for r in evidence["results"] if r.get("surface") == "canvas"), None)
+        self.assertIsNotNone(canvas)
+        self.assertIn("data_url", canvas)
+        self.assertIn("image_data", canvas)
+        for key in [
+            "ip_redacted",
+            "credentials_redacted",
+            "profiles_redacted",
+            "tokens_redacted",
+            "cookies_storage_redacted",
+            "screenshot_metadata_redacted",
+        ]:
+            self.assertIs(evidence["sanitization"][key], True)
+        self.assertIs(evidence["sanitization"]["raw_capture_committed"], False)
+
+        code, errors = self.harness_module.validate_evidence_file(fixture)
+        self.assertEqual(code, self.harness_module.EXIT_SANITIZATION)
+        self.assertRegex("\n".join(errors).lower(), r"(raw|data_url|image_data|canvas|sanitization)")
+
     def test_validate_rejects_unknown_detector(self):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/invalid-unknown-detector.json")
         self.assertEqual(proc.returncode, 1)
         self.assertIn("unknown detector_id", proc.stderr)
 
-    def test_validate_rejects_unsanitized_evidence(self):
+    def test_validate_cli_rejects_unsanitized_canvas_fixture(self):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/invalid-unsanitized.json")
         self.assertEqual(proc.returncode, 3)
-        self.assertIn("sanitization failure", proc.stderr)
+        self.assertRegex(proc.stderr.lower(), r"(raw|data_url|image_data|canvas|sanitization)")
 
     def test_detector_timeout_is_operational_error(self):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/detector-timeout.json")

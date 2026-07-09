@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux SannySoft smoke now passes UA, UA-CH fullVersionList, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures unscored WebAudio and FontFaceSet probes, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux SannySoft smoke now passes UA, UA-CH fullVersionList, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, and captures unscored WebAudio and FontFaceSet probes. Full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix remains incomplete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -70,10 +70,10 @@
       "surface": "hardwareConcurrency/deviceMemory"
     },
     {
-      "evidence": "SannySoft local dogfood rerun captured stable Canvas1..Canvas5 hashes; no generated target persona or cross-session noise comparison was performed.",
-      "release_blocker": true,
-      "result": "warn_unscored",
-      "severity": "low",
+      "evidence": "Packaged Linux SannySoft/CDP collector rendered a deterministic 64x32 Canvas 2D probe twice from fresh container launches with fingerprint.canvas_noise=23; sanitized data_url_sha256 and image_data_sha256 matched across repeats, and no raw data URL or pixel payload is committed.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft_canvas_probe_repeat_consistent",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "Canvas"
     },
