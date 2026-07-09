@@ -151,10 +151,12 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIsInstance(evidence, str)
         assert isinstance(evidence, str)
         for token in [
-            "ffee461",
+            "5dc2749",
             "--browseforge-stealth-config",
             "--browseforge-stealth-mode=enabled",
             "profile-scoped native stealth persona config",
+            "persona_id_hash",
+            "origin_salt_key",
         ]:
             self.assertIn(token, evidence)
 
