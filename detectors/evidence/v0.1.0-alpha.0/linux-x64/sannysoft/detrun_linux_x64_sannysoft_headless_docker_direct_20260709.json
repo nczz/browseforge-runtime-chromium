@@ -73,13 +73,21 @@
     {
       "detector_check": "webgl_vendor_renderer",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context reported configured Intel WebGL vendor and renderer instead of SwiftShader/Google.",
+      "finding": "SannySoft page context reported configured WebGL debug vendor/renderer plus sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash.",
       "normalized_values": {
+        "available": true,
+        "extensionCount": 35,
+        "extensionSha256": "fe647fce9cfb3d803ce51ca503e31be35575e4b23fec44a52cc445492483285e",
+        "parameterSha256": "a2df76668f8cdba6664b72c12640a65af4b971df07a5b304f925afa00ae506ae",
+        "pixelHeight": 16,
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "precisionSha256": "9d8d70c3ae44b595b82edfde9779a5c32c084fe87ab53c455cca173f4dca1d3b",
         "renderer": "Intel Iris OpenGL Engine",
         "vendor": "Intel Inc."
       },
       "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
-      "severity": "low",
+      "severity": "info",
       "status": "pass",
       "surface": "webgl"
     },
@@ -258,7 +266,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text and canvas bytes are not committed; sanitized excerpts and hashes keep no IP, cookie, storage, screenshot, data URL, or pixel payload data. This run used the rebuilt Linux runtime artifact after the UA-CH fullVersionList source fix and collected SannySoft via loopback CDP inside the packaged Linux Chromium container.",
+    "notes": "Raw page text and canvas bytes are not committed; sanitized excerpts and hashes keep no IP, cookie, storage, screenshot, data URL, or pixel payload data. This run used the rebuilt Linux runtime artifact after the UA-CH fullVersionList source fix and collected SannySoft via loopback CDP inside the packaged Linux Chromium container; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-sannysoft-6",
@@ -269,8 +277,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "8f0903fcf982366c68ae47a7bdfa9971fbbe373eb56033bd659a511eecf75b28",
-    "sha256": "949cca66d15b084a56f2f07db883149650060fd1042fed8fdd10a8c20a5fe5a5",
+    "raw_capture_sha256": "f02bf844867f1747fa05a821a941ef76ec9c1bc45194d79b0fcb8620ffdd29a3",
+    "sha256": "6d8c3521887b4d702226f862de5aef0822d1a3b21611a52bdce52783f9521ba6",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -286,5 +294,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T05:30:38.272183+00:00"
+  "tested_at": "2026-07-09T17:01:23.731872+00:00"
 }

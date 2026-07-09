@@ -152,8 +152,16 @@
     {
       "detector_check": "browserleaks_runtime_probe_webgl",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "BrowserLeaks page context reported configured WebGL debug vendor/renderer strings.",
+      "finding": "BrowserLeaks page context reported configured WebGL debug vendor/renderer plus sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash.",
       "normalized_values": {
+        "available": true,
+        "extensionCount": 35,
+        "extensionSha256": "fe647fce9cfb3d803ce51ca503e31be35575e4b23fec44a52cc445492483285e",
+        "parameterSha256": "a2df76668f8cdba6664b72c12640a65af4b971df07a5b304f925afa00ae506ae",
+        "pixelHeight": 16,
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "precisionSha256": "9d8d70c3ae44b595b82edfde9779a5c32c084fe87ab53c455cca173f4dca1d3b",
         "renderer": "Intel Iris OpenGL Engine",
         "vendor": "Intel Inc."
       },
@@ -193,7 +201,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw BrowserLeaks page text and browser storage are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only.",
+    "notes": "Raw BrowserLeaks page text and browser storage are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-browserleaks-client-hints-1",
@@ -204,8 +212,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "52a0cad7e841ee0e448bba7e4a5be2018635a8237e033a478057f8317b269743",
-    "sha256": "bcf3dbfbe88a5e8b03396688fd0f652570005bd610d29a2b7ccd6b9a9c12e014",
+    "raw_capture_sha256": "09c5b0b1743c06e65823b711e47baa78e5a7096ae8414656bf29ca04b92421bb",
+    "sha256": "e267e278bdf9c5241487bb1e39de3f099e94b7009a4e975f20cef4a86c83efdb",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -220,5 +228,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T08:50:28.630774+00:00"
+  "tested_at": "2026-07-09T17:01:23.731872+00:00"
 }

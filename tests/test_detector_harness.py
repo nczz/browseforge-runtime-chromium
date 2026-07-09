@@ -300,6 +300,12 @@ class DetectorHarnessTests(unittest.TestCase):
         self.fail(f"missing {surface} comparison in {payload['comparisons']!r}")
 
 
+    def collect_page_expression(self):
+        for const in self.harness_module.collect_page.__code__.co_consts:
+            if isinstance(const, str) and const.lstrip().startswith("(async"):
+                return const
+        self.fail("collect_page JavaScript expression constant not found")
+
     @classmethod
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
@@ -1239,6 +1245,12 @@ class DetectorHarnessTests(unittest.TestCase):
             ("CreepJS", "https://abrahamjuliot.github.io/creepjs/"),
         )
 
+
+    def test_collect_page_expression_escapes_sdp_newline_for_javascript(self):
+        expr = self.collect_page_expression()
+        self.assertIn("pc.localDescription.sdp.split('\\n')", expr)
+        self.assertNotIn("pc.localDescription.sdp.split('\n')", expr)
+
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
         unsupported_detector = "unknown-detector"
         self.assertNotIn(unsupported_detector, self.harness_module.SUPPORTED_COLLECTORS)
@@ -1646,6 +1658,10 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertTrue(all(comparison["hash_matches"].values()))
             self.assertIs(comparison["extension_count_match"], True)
             self.assertIs(comparison["extension_profile_match"], True)
+            self.assertFalse(
+                any(gap.get("gap_id") == "webgl_metadata_hashes_missing" for gap in payload["gaps"]),
+                payload["gaps"],
+            )
 
     def test_compare_scores_passes_pixelscan_audio_and_font_counterparts_when_headed_matches(self):
         with tempfile.TemporaryDirectory() as td:

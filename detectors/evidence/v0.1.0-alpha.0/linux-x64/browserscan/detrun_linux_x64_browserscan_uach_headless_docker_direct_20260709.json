@@ -152,8 +152,16 @@
     {
       "detector_check": "browserscan_runtime_probe_webgl",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "BrowserScan page context reported configured WebGL debug vendor/renderer strings.",
+      "finding": "BrowserScan page context reported configured WebGL debug vendor/renderer plus sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash.",
       "normalized_values": {
+        "available": true,
+        "extensionCount": 35,
+        "extensionSha256": "fe647fce9cfb3d803ce51ca503e31be35575e4b23fec44a52cc445492483285e",
+        "parameterSha256": "a2df76668f8cdba6664b72c12640a65af4b971df07a5b304f925afa00ae506ae",
+        "pixelHeight": 16,
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "precisionSha256": "9d8d70c3ae44b595b82edfde9779a5c32c084fe87ab53c455cca173f4dca1d3b",
         "renderer": "Intel Iris OpenGL Engine",
         "vendor": "Intel Inc."
       },
@@ -193,7 +201,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw BrowserScan page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only.",
+    "notes": "Raw BrowserScan page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-browserscan-uach-1",
@@ -204,8 +212,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "bcbdffeb7cf5477136bc96c2d3ab07f14f9f645a1d1e355816c76103f2d243d1",
-    "sha256": "53083de38167109846205c5f1819a2e8c41bb9e51d78053e5fd5083d36774723",
+    "raw_capture_sha256": "9b7c54ac0ab271603446f27a07308b3729fadd3828d1bd4a33437f9c0e137fdc",
+    "sha256": "93ebdf9eee55dc24788084b8ccf353e35846acdde1f2b86e88a54c1948c707db",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -220,5 +228,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T09:12:20.399409+00:00"
+  "tested_at": "2026-07-09T17:01:23.731872+00:00"
 }

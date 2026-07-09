@@ -152,8 +152,16 @@
     {
       "detector_check": "creepjs_runtime_probe_webgl",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "CreepJS page context reported configured WebGL debug vendor/renderer strings.",
+      "finding": "CreepJS page context reported configured WebGL debug vendor/renderer plus sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash.",
       "normalized_values": {
+        "available": true,
+        "extensionCount": 35,
+        "extensionSha256": "fe647fce9cfb3d803ce51ca503e31be35575e4b23fec44a52cc445492483285e",
+        "parameterSha256": "a2df76668f8cdba6664b72c12640a65af4b971df07a5b304f925afa00ae506ae",
+        "pixelHeight": 16,
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "precisionSha256": "9d8d70c3ae44b595b82edfde9779a5c32c084fe87ab53c455cca173f4dca1d3b",
         "renderer": "Intel Iris OpenGL Engine",
         "vendor": "Intel Inc."
       },
@@ -193,7 +201,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw CreepJS page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only.",
+    "notes": "Raw CreepJS page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-creepjs-uach-1",
@@ -204,8 +212,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "ae3a2af0780035b913b618c118b88f04b396e3c30ae95858fc44415d63c34bb0",
-    "sha256": "90eb101e5745228cb37bfa2b91533943e1b0ae517abfb1bee335f05e766c6ad8",
+    "raw_capture_sha256": "654cbba3d6640001a4ba29ebb91aa76935dc0bc8aa4d3e9fc103eabbfcf950bb",
+    "sha256": "08884cf5a70b061186a8973d0c599784a0ff2e0fc65374e5f0a5d50db996ffb5",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -220,5 +228,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T09:17:48.668383+00:00"
+  "tested_at": "2026-07-09T17:01:23.731872+00:00"
 }

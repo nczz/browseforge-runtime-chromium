@@ -750,7 +750,7 @@ def compare_scores(args):
         "comparisons": comparisons,
         "gaps": gaps,
         "baseline_gaps": baseline_gaps,
-        "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers, and complete WebGL metadata hashes remain required before WebGL parity claims.",
+        "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
     }
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -1291,7 +1291,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
           };
         });
         if (pc.localDescription && pc.localDescription.sdp) {
-          for (const line of pc.localDescription.sdp.split('\n')) {
+          for (const line of pc.localDescription.sdp.split('\\n')) {
             if (line.startsWith('a=candidate:')) trackCandidate(line.slice(2).trim());
           }
         }
