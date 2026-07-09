@@ -109,6 +109,19 @@
       "surface": "fonts"
     },
     {
+      "candidate_count_match": true,
+      "comparison_id": "browserleaks_fonts_headless_vs_headed",
+      "detector_id": "browserleaks",
+      "finding": "BrowserLeaks bounded font metric and glyph hashes match across headless/headed evidence.",
+      "font_list_match": true,
+      "glyph_sha256_match": true,
+      "left_run_id": "detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709",
+      "metrics_sha256_match": true,
+      "right_run_id": "detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
       "comparison_id": "pixelscan_fonts_headless_vs_headed",
       "detector_id": "pixelscan",
       "false_count_delta": 0,
@@ -141,9 +154,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 19,
+  "evidence_count": 20,
   "gaps": [],
-  "generated_at": "2026-07-09T18:11:24.429437+00:00",
+  "generated_at": "2026-07-09T18:20:55.061233+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

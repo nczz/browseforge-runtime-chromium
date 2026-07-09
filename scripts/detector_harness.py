@@ -679,6 +679,40 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "Font comparison requires sanitized BrowserLeaks and CreepJS font metric evidence.",
         })
 
+    browserleaks_fonts_by_display = {
+        record["display_mode"]: record
+        for record in font_records
+        if record["detector_id"] == "browserleaks"
+    }
+    if {"headless", "headed"} <= set(browserleaks_fonts_by_display):
+        headless = browserleaks_fonts_by_display["headless"]
+        headed = browserleaks_fonts_by_display["headed"]
+        same_fonts = headless["fonts"] == headed["fonts"]
+        same_glyph = bool(headless["glyph_sha256"] and headless["glyph_sha256"] == headed["glyph_sha256"])
+        same_metrics = bool(headless["metrics_sha256"] and headless["metrics_sha256"] == headed["metrics_sha256"])
+        all_match = same_fonts and same_glyph and same_metrics and headless["candidate_count"] == headed["candidate_count"]
+        comparisons.append({
+            "comparison_id": "browserleaks_fonts_headless_vs_headed",
+            "detector_id": "browserleaks",
+            "surface": "fonts",
+            "status": "pass" if all_match else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "candidate_count_match": headless["candidate_count"] == headed["candidate_count"],
+            "font_list_match": same_fonts,
+            "glyph_sha256_match": same_glyph,
+            "metrics_sha256_match": same_metrics,
+            "finding": "BrowserLeaks bounded font metric and glyph hashes match across headless/headed evidence." if all_match else "BrowserLeaks bounded font metric or glyph hashes differ across headless/headed evidence; release-grade font corpus parity remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "browserleaks_fonts_headless_vs_headed",
+            "surface": "fonts",
+            "detector_id": "browserleaks",
+            "missing": sorted({"headless", "headed"} - set(browserleaks_fonts_by_display)),
+            "finding": "BrowserLeaks font comparison requires both headless and headed sanitized font metric evidence.",
+        })
+
     pixelscan_fonts = {
         record["display_mode"]: record
         for record in _collect_font_availability_records(evidence_rows, "pixelscan")

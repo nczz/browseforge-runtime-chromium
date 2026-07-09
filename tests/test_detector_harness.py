@@ -2032,6 +2032,50 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIs(comparison["metrics_sha256_match"], False)
             self.assertIn("partial", comparison["finding"].lower())
 
+    def test_compare_scores_passes_browserleaks_fonts_when_headed_counterpart_matches(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            for display_mode, label in [
+                ("headless", "browserleaks_fonts_headless"),
+                ("headed_xvfb", "browserleaks_fonts_headed"),
+            ]:
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="browserleaks",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.font_score_result(
+                            detector_check=f"{label}_metrics",
+                            metrics_sha256="a" * 64,
+                            glyph_sha256="c" * 64,
+                        )
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = next(
+                (
+                    item
+                    for item in payload["comparisons"]
+                    if item.get("comparison_id") == "browserleaks_fonts_headless_vs_headed"
+                ),
+                None,
+            )
+            self.assertIsNotNone(comparison, payload["comparisons"])
+            self.assertEqual(comparison["status"], "pass")
+            self.assertIs(comparison["candidate_count_match"], True)
+            self.assertIs(comparison["font_list_match"], True)
+            self.assertIs(comparison["glyph_sha256_match"], True)
+            self.assertIs(comparison["metrics_sha256_match"], True)
+            self.assertNotIn(
+                "browserleaks_fonts_headless_vs_headed",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+
     def test_compare_scores_reports_gap_when_required_counterpart_evidence_is_missing(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
