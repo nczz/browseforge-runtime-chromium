@@ -36,7 +36,7 @@
       "status": "passed"
     },
     {
-      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json. scripts/detector_harness.py collect verifies navigator.webdriver=false, configured Chromium UA without HeadlessChrome, zh-TW languages, Asia/Taipei timezone, 1920x1080/1920x1040 screen, storage quota 8589934592 bytes, hardwareConcurrency/deviceMemory=8, and Intel WebGL vendor/renderer. Release-grade headed BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required.",
+      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json. scripts/detector_harness.py collect verifies navigator.webdriver=false, configured Chromium UA without HeadlessChrome, zh-TW languages, Asia/Taipei timezone, 1920x1080/1920x1040 screen, storage quota 8589934592 bytes, hardwareConcurrency/deviceMemory=8, Intel WebGL vendor/renderer, and an unscored OfflineAudioContext probe. Release-grade headed BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required.",
       "gate_id": "live-detector-evidence",
       "status": "warning"
     },

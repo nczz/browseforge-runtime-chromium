@@ -369,6 +369,43 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
   const storageEstimate = navigator.storage && navigator.storage.estimate
     ? await navigator.storage.estimate()
     : null;
+  const audio = await (async () => {
+    try {
+      const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!Offline) return {available: false, reason: 'offline_audio_context_unavailable'};
+      const ctx = new Offline(1, 44100, 44100);
+      const oscillator = ctx.createOscillator();
+      const compressor = ctx.createDynamicsCompressor();
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = 10000;
+      compressor.threshold.value = -50;
+      compressor.knee.value = 40;
+      compressor.ratio.value = 12;
+      compressor.attack.value = 0;
+      compressor.release.value = 0.25;
+      oscillator.connect(compressor);
+      compressor.connect(ctx.destination);
+      oscillator.start(0);
+      const buffer = await ctx.startRendering();
+      const data = buffer.getChannelData(0);
+      let sum = 0;
+      let sumAbs = 0;
+      for (let i = 0; i < data.length; i += 128) {
+        sum += data[i];
+        sumAbs += Math.abs(data[i]);
+      }
+      return {
+        available: true,
+        length: data.length,
+        sampleRate: buffer.sampleRate,
+        sum: Number(sum.toFixed(8)),
+        sumAbs: Number(sumAbs.toFixed(8)),
+        firstSamples: Array.from(data.slice(0, 8)).map((v) => Number(v.toFixed(8))),
+      };
+    } catch (err) {
+      return {available: false, reason: String(err && err.name || err)};
+    }
+  })();
   const gl = (() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -376,7 +413,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     const ext = ctx.getExtension('WEBGL_debug_renderer_info');
     return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
   })();
-  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, webgl: gl};
+  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, webgl: gl};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)

@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures an unscored WebAudio probe, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -86,11 +86,11 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "No BrowserLeaks/CreepJS/BrowserScan audio row was completed.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs values; BrowserLeaks/CreepJS audio fingerprint comparison remains required.",
       "release_blocker": true,
-      "result": "not_tested",
-      "severity": "high",
-      "status": "blocked",
+      "result": "warn_linux_sannysoft_unscored_audio_probe",
+      "severity": "medium",
+      "status": "detector_tested",
       "surface": "AudioContext"
     },
     {

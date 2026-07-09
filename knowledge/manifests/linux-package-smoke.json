@@ -67,6 +67,13 @@
       "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
       "limitations": "Packaged runtime launch smoke, not a release-grade live detector matrix. BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed/proxy coverage remains required.",
       "observed": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "sampleRate": 44100,
+          "sum": 7.2e-07,
+          "sumAbs": 0.00017846
+        },
         "browser_crash_regression_fixed": true,
         "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
         "deviceMemory": 8,
