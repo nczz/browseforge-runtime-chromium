@@ -174,6 +174,7 @@ def validate_evidence_file(path: Path):
         for result in evidence.get("results", []):
             if result.get("status") not in {"not_tested", "accepted_risk"}:
                 errors.append("operational detector failures cannot be encoded as fingerprint pass/fail")
+    errors.extend(validate_external_proxy_coherence(evidence))
     for result in evidence.get("results", []):
         surf = canonical_surface(result.get("surface", ""))
         if surf not in CANONICAL_SURFACES:
@@ -294,6 +295,29 @@ def observed_matrix_key(evidence: dict) -> tuple[str, str, str, bool]:
         str(matrix.get("network_mode", "")),
         bool(matrix.get("container")),
     )
+
+def validate_external_proxy_coherence(evidence: dict) -> list[str]:
+    matrix = evidence.get("matrix", {})
+    if matrix.get("network_mode") != "proxy":
+        return []
+    errors = []
+    proxy_mode = matrix.get("proxy")
+    if proxy_mode in {None, "", "none", "local-connect-observer"}:
+        errors.append("proxy matrix evidence requires redacted external proxy configuration")
+    target_proxy_region = evidence.get("target", {}).get("proxy_region_redacted")
+    if target_proxy_region in {None, "", "local-loopback-observer"}:
+        errors.append("proxy matrix evidence requires external proxy region/geolocation metadata")
+    for result in evidence.get("results", []):
+        if canonical_surface(result.get("surface", "")) != "proxy_ip_coherence":
+            continue
+        if result.get("status") != "pass":
+            continue
+        values = result.get("normalized_values", {})
+        if values.get("proxy_exit_region_redacted") and values.get("detector_geolocation_region_redacted"):
+            return errors
+    errors.append("proxy matrix evidence requires sanitized external proxy exit-IP/geolocation values")
+    return errors
+
 
 def required_matrix_evidence(display: str, network: str, container: bool) -> str:
     parts = [display, "Docker/container" if container else "native/host"]

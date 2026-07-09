@@ -127,6 +127,55 @@ class DetectorHarnessTests(unittest.TestCase):
         path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
 
+    def write_synthetic_validation_evidence(
+        self,
+        evidence_root,
+        *,
+        label,
+        network_mode,
+        matrix_proxy,
+        target_proxy_region_redacted,
+        results,
+        required=True,
+    ):
+        platform = "linux-x64"
+        detector_id = "sannysoft"
+        display_mode = "headed"
+        container = True
+        network_key = network_mode.replace("_", "-")
+        evidence = json.loads(self.fixture_path("valid-evidence.json").read_text(encoding="utf-8"))
+        path = evidence_root / detector_id / f"{label}.json"
+        evidence.update(
+            {
+                "run_id": f"detrun_validate_{label}",
+                "evidence_id": f"evidence_validate_{label}",
+                "artifact_id": f"unpackaged:{platform}:validate-test",
+                "runtime_version": "validate-test",
+                "target": {
+                    **evidence["target"],
+                    "platform": platform,
+                    "container": container,
+                    "proxy_region_redacted": target_proxy_region_redacted,
+                },
+                "matrix": {
+                    "matrix_key": f"{platform}:{detector_id}:{display_mode}:{network_key}:container",
+                    "display_mode": display_mode,
+                    "network_mode": network_mode,
+                    "container": container,
+                    "proxy": matrix_proxy,
+                    "required": required,
+                },
+                "status": "passed",
+                "failure_mode": "none",
+                "results": results,
+            }
+        )
+        path.parent.mkdir(parents=True, exist_ok=True)
+        evidence["storage"]["evidence_path"] = str(path)
+        path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return path
+
+
     def audio_score_result(self, *, detector_check, metrics):
         return {
             "detector_check": detector_check,
@@ -1445,6 +1494,104 @@ class DetectorHarnessTests(unittest.TestCase):
     def test_validate_accepts_valid_sanitized_fixture(self):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/valid-evidence.json")
         self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_validate_rejects_proxy_matrix_without_external_proxy_coherence(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = self.write_synthetic_validation_evidence(
+                Path(td),
+                label="proxy_matrix_local_observer",
+                network_mode="proxy",
+                matrix_proxy="local-connect-observer",
+                target_proxy_region_redacted="local-loopback-observer",
+                results=[
+                    {
+                        "surface": "proxy_ip_coherence",
+                        "status": "pass",
+                        "severity": "info",
+                        "finding": "Local CONNECT proxy routing observer is not external proxy/IP coherence evidence.",
+                        "evidence_ref": "synthetic#local-proxy-observer",
+                        "normalized_values": {
+                            "connect_count": 2,
+                            "observed_route_redacted": "loopback-connect-proxy",
+                        },
+                    }
+                ],
+            )
+
+            proc = self.run_harness("validate-evidence", str(path))
+
+            self.assertEqual(proc.returncode, self.harness_module.EXIT_SCHEMA)
+            stderr = proc.stderr.lower()
+            self.assertIn("redacted external proxy configuration", stderr)
+            self.assertIn("external proxy region/geolocation metadata", stderr)
+            self.assertIn("external proxy exit-ip/geolocation values", stderr)
+
+    def test_validate_accepts_proxy_matrix_with_sanitized_external_proxy_coherence(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = self.write_synthetic_validation_evidence(
+                Path(td),
+                label="proxy_matrix_external_coherence",
+                network_mode="proxy",
+                matrix_proxy="redacted",
+                target_proxy_region_redacted="redacted-region",
+                results=[
+                    {
+                        "surface": "proxy_ip_coherence",
+                        "status": "pass",
+                        "severity": "info",
+                        "finding": "Detector geolocation matched the sanitized external proxy exit region.",
+                        "evidence_ref": "synthetic#external-proxy-coherence",
+                        "normalized_values": {
+                            "proxy_exit_region_redacted": "redacted-region",
+                            "detector_geolocation_region_redacted": "redacted-region",
+                        },
+                    }
+                ],
+            )
+
+            proc = self.run_harness("validate-evidence", str(path))
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_validate_accepts_local_proxy_routing_without_proxy_matrix_credit(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            path = self.write_synthetic_validation_evidence(
+                evidence_root,
+                label="local_proxy_routing_observer",
+                network_mode="local_proxy",
+                matrix_proxy="local-connect-observer",
+                target_proxy_region_redacted="local-loopback-observer",
+                required=False,
+                results=[
+                    {
+                        "surface": "proxy_ip_coherence",
+                        "status": "pass",
+                        "severity": "info",
+                        "finding": "Local CONNECT proxy observed detector traffic; this proves routing only, not external proxy exit-IP/geolocation coherence.",
+                        "evidence_ref": "synthetic#local-proxy-routing",
+                        "normalized_values": {
+                            "connect_count": 2,
+                            "methods": {"CONNECT": 2},
+                            "ports": {"443": 2},
+                            "total_events": 2,
+                        },
+                    }
+                ],
+            )
+
+            validate_proc = self.run_harness("validate-evidence", str(path))
+
+            self.assertEqual(validate_proc.returncode, 0, validate_proc.stderr)
+
+            output = root / "summary.json"
+            summary_proc = self.run_harness("summary", "--evidence-root", str(evidence_root), "--output", str(output))
+
+            self.assertEqual(summary_proc.returncode, 0, summary_proc.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            gap_keys = {gap["matrix_key"] for gap in payload["coverage_gaps"]}
+            self.assertIn("linux-x64:sannysoft:headed:proxy:container", gap_keys)
 
     def test_validate_accepts_canvas_evidence_with_only_sanitized_hashes(self):
         fixture = self.fixture_path("valid-evidence.json")
