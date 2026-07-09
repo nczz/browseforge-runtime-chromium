@@ -109,6 +109,30 @@ REQUIRED_FILES = [
     "tests/test_stealth_scaffold.py",
 ]
 
+REQUIRED_GRAPH_MANIFEST_SOURCES = [
+    "contracts/runtime.manifest.json",
+    "contracts/browseforge-integration.contract.json",
+    "detectors/evidence-schema.json",
+    "detector-summary.json",
+    "knowledge/kb-manifest.json",
+    "knowledge/manifests/detectors.json",
+    "knowledge/manifests/patchset.json",
+    "knowledge/manifests/runtime-artifacts.json",
+    "knowledge/manifests/reference-sources.json",
+    "knowledge/manifests/platform-matrix.json",
+    "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/detector-score-comparison.json",
+    "knowledge/manifests/fingerprint-surface-status.json",
+    "knowledge/manifests/proxy-preflight.json",
+    "knowledge/manifests/native-artifact-preflight.json",
+    "knowledge/manifests/signing-policy.json",
+    "knowledge/manifests/source-acquisition.json",
+]
+
+
+def graph_manifest_node_id(path: str) -> str:
+    return f"Manifest:{path.replace('/', '-')}"
+
 REQUIRED_DIRS = [
     "browser",
     "wrapper",
@@ -671,7 +695,7 @@ def main() -> None:
     required_node_labels = {
         "RuntimeProvider", "RuntimeArtifact", "BrowseForgeConsumer", "FingerprintSurface", "Patch",
         "SourceFile", "Symbol", "Detector", "DetectorRun", "EvidenceArtifact", "Platform",
-        "Capability", "ReleaseGate", "KnowledgeSource",
+        "Capability", "ReleaseGate", "KnowledgeSource", "Manifest",
     }
     missing_node_labels = sorted(required_node_labels - node_labels)
     if missing_node_labels:
@@ -680,7 +704,7 @@ def main() -> None:
         "REQUIRES_CAPABILITY", "DECLARES_CAPABILITY", "BUILT_FOR", "GENERATED_FROM",
         "MODIFIES_SOURCE", "CONTROLS_SURFACE", "CHECKS_SURFACE", "RUNS_DETECTOR",
         "TARGETS_ARTIFACT", "TESTS_ARTIFACT", "PRODUCES_EVIDENCE", "SUPPORTS_GATE",
-        "REFERENCES_SOURCE",
+        "REFERENCES_SOURCE", "DECLARES_SOURCE",
     }
     missing_edge_labels = sorted(required_edge_labels - edge_labels)
     if missing_edge_labels:
@@ -718,6 +742,16 @@ def main() -> None:
         for record in graph_records
         if record.get("record_type") == "edge"
     }
+    for manifest_path in REQUIRED_GRAPH_MANIFEST_SOURCES:
+        node_id = graph_manifest_node_id(manifest_path)
+        node = graph_nodes.get(node_id)
+        if node is None:
+            raise SystemExit(f"generated KG missing Manifest node for {manifest_path}")
+        props = node.get("properties", {})
+        if props.get("manifest_id") != manifest_path or props.get("repo_path") != manifest_path:
+            raise SystemExit(f"generated KG Manifest {manifest_path} metadata drifted")
+        if (node_id, "DECLARES_SOURCE", "RuntimeProvider:browseforge-chromium") not in graph_edges:
+            raise SystemExit(f"generated KG Manifest {manifest_path} missing DECLARES_SOURCE edge")
     runtime_artifacts = load_json("knowledge/manifests/runtime-artifacts.json")
     source_acquisition = load_json("knowledge/manifests/source-acquisition.json")
     required_artifact_fields = set(runtime_artifacts.get("required_artifact_fields", []))

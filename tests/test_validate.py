@@ -22,6 +22,26 @@ LINUX_PLATFORM_NODE_ID = "Platform:linux-x64"
 
 
 class ValidateRuntimeGraphTests(unittest.TestCase):
+    REQUIRED_RUNTIME_GRAPH_MANIFEST_SOURCES = (
+        "contracts/runtime.manifest.json",
+        "contracts/browseforge-integration.contract.json",
+        "detectors/evidence-schema.json",
+        "detector-summary.json",
+        "knowledge/kb-manifest.json",
+        "knowledge/manifests/detectors.json",
+        "knowledge/manifests/patchset.json",
+        "knowledge/manifests/runtime-artifacts.json",
+        "knowledge/manifests/reference-sources.json",
+        "knowledge/manifests/platform-matrix.json",
+        "knowledge/manifests/release-gates.json",
+        "knowledge/manifests/detector-score-comparison.json",
+        "knowledge/manifests/fingerprint-surface-status.json",
+        "knowledge/manifests/proxy-preflight.json",
+        "knowledge/manifests/native-artifact-preflight.json",
+        "knowledge/manifests/signing-policy.json",
+        "knowledge/manifests/source-acquisition.json",
+    )
+
     def _load_graph(self, path: Path = GRAPH_PATH) -> list[dict[str, Any]]:
         records: list[dict[str, Any]] = []
         with path.open(encoding="utf-8") as fh:
@@ -72,6 +92,32 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         sys.modules["validate_under_test"] = module
         spec.loader.exec_module(module)
         return module
+
+    def _manifest_node_id(self, manifest_path: str) -> str:
+        return f"Manifest:{manifest_path.replace('/', '-')}"
+
+    def _runtime_graph_manifest_source_records(self) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]] = []
+        for manifest_path in self.REQUIRED_RUNTIME_GRAPH_MANIFEST_SOURCES:
+            node_id = self._manifest_node_id(manifest_path)
+            records.extend(
+                [
+                    {
+                        "record_type": "node",
+                        "label": "Manifest",
+                        "id": node_id,
+                        "properties": {"manifest_id": manifest_path, "repo_path": manifest_path},
+                    },
+                    {
+                        "record_type": "edge",
+                        "label": "DECLARES_SOURCE",
+                        "from": node_id,
+                        "to": "RuntimeProvider:browseforge-chromium",
+                        "properties": {},
+                    },
+                ]
+            )
+        return records
 
     def test_runtime_graph_promotes_packaged_linux_artifact_from_manifest(self) -> None:
         """The generated KG binds linux-x64 to the packaged release artifact, not the stale missing blocker."""
@@ -521,6 +567,85 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             output = self._run_validate_expect_success(module, temp_root)
 
         self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_accepts_runtime_graph_manifest_source_nodes_and_edges(self) -> None:
+        """Machine-readable manifest sources must remain declared in the generated KG."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            graph = self._load_graph(temp_root / "generated" / "kg" / "runtime.graph.jsonl")
+
+            for source_path in self.REQUIRED_RUNTIME_GRAPH_MANIFEST_SOURCES:
+                with self.subTest(source_path=source_path):
+                    manifest_node_id = self._manifest_node_id(source_path)
+                    self.assertIsNotNone(self._node_by_id(graph, manifest_node_id), f"missing Manifest node {source_path}")
+                    self.assertTrue(
+                        self._edges(
+                            graph,
+                            label="DECLARES_SOURCE",
+                            from_id=manifest_node_id,
+                            to_id="RuntimeProvider:browseforge-chromium",
+                        ),
+                        f"missing DECLARES_SOURCE edge for {source_path}",
+                    )
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_runtime_graph_missing_required_manifest_source_node(self) -> None:
+        """A gate/source manifest cannot disappear from the KG as an orphan DECLARES_SOURCE edge."""
+        missing_source_path = "knowledge/manifests/proxy-preflight.json"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            missing_node_id = self._manifest_node_id(missing_source_path)
+            graph_records = [
+                record
+                for record in self._minimal_graph_with_packaged_runtime_artifacts(temp_root, manifest["artifacts"])
+                if not (record.get("record_type") == "node" and record.get("id") == missing_node_id)
+            ]
+            self._write_runtime_graph_records(temp_root, graph_records)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("generated kg", message)
+        self.assertIn("manifest", message)
+        self.assertIn(missing_source_path, message)
+        self.assertIn("node", message)
+
+    def test_validate_rejects_runtime_graph_missing_required_manifest_source_edge(self) -> None:
+        """A Manifest node must explicitly DECLARES_SOURCE back to the runtime provider."""
+        missing_source_path = "knowledge/manifests/signing-policy.json"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            missing_node_id = self._manifest_node_id(missing_source_path)
+            graph_records = [
+                record
+                for record in self._minimal_graph_with_packaged_runtime_artifacts(temp_root, manifest["artifacts"])
+                if not (
+                    record.get("record_type") == "edge"
+                    and record.get("label") == "DECLARES_SOURCE"
+                    and record.get("from") == missing_node_id
+                    and record.get("to") == "RuntimeProvider:browseforge-chromium"
+                )
+            ]
+            self._write_runtime_graph_records(temp_root, graph_records)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("generated kg", message)
+        self.assertIn("manifest", message)
+        self.assertIn(missing_source_path, message)
+        self.assertIn("declare", message)
 
     def test_validate_rejects_runtime_graph_release_gate_node_drift_from_manifest(self) -> None:
         """Generated KG ReleaseGate status/evidence cannot drift from authoritative release-gates.json."""
@@ -1277,6 +1402,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
             *self._release_gate_graph_nodes(root),
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
+            *self._runtime_graph_manifest_source_records(),
             {"record_type": "edge", "label": "REQUIRES_CAPABILITY", "from": "BrowseForgeConsumer:browseforge-main", "to": "Capability:persistent_context", "properties": {}},
             {"record_type": "edge", "label": "DECLARES_CAPABILITY", "from": "RuntimeProvider:browseforge-chromium", "to": "Capability:persistent_context", "properties": {}},
             {"record_type": "edge", "label": "BUILT_FOR", "from": "RuntimeArtifact:missing-runtime-artifact", "to": LINUX_PLATFORM_NODE_ID, "properties": {"status": "missing_artifact"}},
@@ -1527,6 +1653,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
             *self._release_gate_graph_nodes(root),
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
+            *self._runtime_graph_manifest_source_records(),
             *[
                 {"record_type": "node", "label": "Platform", "id": f"Platform:{platform['id']}", "properties": self._platform_node_properties(platform)}
                 for platform in self._platform_matrix_platforms()

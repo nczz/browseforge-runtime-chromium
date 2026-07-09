@@ -574,3 +574,13 @@
 {"from": "DetectorRun:detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710", "label": "OBSERVED_SURFACE", "properties": {"status": "passed"}, "record_type": "edge", "to": "FingerprintSurface:automation_signals"}
 {"id": "Manifest:knowledge-manifests-native-artifact-preflight.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/native-artifact-preflight.json", "repo_path": "knowledge/manifests/native-artifact-preflight.json"}, "record_type": "node"}
 {"from": "Manifest:knowledge-manifests-native-artifact-preflight.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:contracts-browseforge-integration.contract.json", "label": "Manifest", "properties": {"manifest_id": "contracts/browseforge-integration.contract.json", "repo_path": "contracts/browseforge-integration.contract.json"}, "record_type": "node"}
+{"from": "Manifest:contracts-browseforge-integration.contract.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:detector-summary.json", "label": "Manifest", "properties": {"manifest_id": "detector-summary.json", "repo_path": "detector-summary.json"}, "record_type": "node"}
+{"from": "Manifest:detector-summary.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:knowledge-manifests-detector-score-comparison.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/detector-score-comparison.json", "repo_path": "knowledge/manifests/detector-score-comparison.json"}, "record_type": "node"}
+{"from": "Manifest:knowledge-manifests-detector-score-comparison.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:knowledge-manifests-proxy-preflight.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/proxy-preflight.json", "repo_path": "knowledge/manifests/proxy-preflight.json"}, "record_type": "node"}
+{"from": "Manifest:knowledge-manifests-proxy-preflight.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:knowledge-manifests-signing-policy.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/signing-policy.json", "repo_path": "knowledge/manifests/signing-policy.json"}, "record_type": "node"}
+{"from": "Manifest:knowledge-manifests-signing-policy.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
