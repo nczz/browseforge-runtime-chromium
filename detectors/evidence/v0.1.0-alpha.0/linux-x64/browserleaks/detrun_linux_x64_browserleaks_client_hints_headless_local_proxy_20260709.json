@@ -1,0 +1,157 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/client-hints"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect_local_proxy",
+    "name": "browseforge-detector-harness + local-connect-proxy",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headless",
+    "matrix_key": "linux-x64:browserleaks:headless:local-proxy:container",
+    "network_mode": "local_proxy",
+    "proxy": "local-connect-observer",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_local_proxy_routing",
+      "evidence_ref": "sanitized_proxy_observer_summary",
+      "finding": "BrowserLeaks Client Hints detector loaded while Chromium was configured with --proxy-server=<loopback-http-proxy>; the local CONNECT proxy observed BrowserLeaks HTTPS tunnel traffic. This proves runtime proxy routing, not external proxy exit-IP/geolocation coherence.",
+      "normalized_values": {
+        "connect_count": 11,
+        "hosts": {
+          "accounts.google.com": 3,
+          "android.clients.google.com": 1,
+          "browserleaks.com": 2,
+          "client-hints.browserleaks.org": 1,
+          "clients2.google.com": 1,
+          "content-autofill.googleapis.com": 1,
+          "mtalk.google.com": 2,
+          "www.google.com": 1
+        },
+        "methods": {
+          "CONNECT": 11,
+          "GET": 1
+        },
+        "ports": {
+          "443": 9,
+          "5228": 2,
+          "80": 1
+        },
+        "total_events": 12
+      },
+      "severity": "medium",
+      "status": "pass",
+      "surface": "proxy_ip_coherence"
+    },
+    {
+      "detector_check": "browserleaks_client_hints_via_local_proxy",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Client Hints still loaded with configured Linux Chromium UA-CH values during the local-proxy smoke.",
+      "normalized_values": {
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "x86",
+            "bitness": "64",
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "fullVersionList": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150.0.7871.101"
+              }
+            ],
+            "mobile": false,
+            "model": "",
+            "platform": "Linux",
+            "platformVersion": "6.8.0",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "url": "https://browserleaks.com/client-hints",
+        "webdriver": false
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "client_hints"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw detector page text, browser storage, request paths, request bodies, headers, cookies, IP literals, and proxy credentials are not committed; committed evidence stores sanitized CONNECT method/host/port counts and structured UA-CH values only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-local-proxy-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709.json",
+    "proxy_summary_sha256": "f3423a750a5569c89b43ff538cb1c8074eda5fd93277ef3578b7fe312fe8be03",
+    "raw_capture_sha256": "59b742528668a27175add9265478836b3baea9b6571c2c1f65cf0698e85b3c1b",
+    "sha256": "72988dcedaf1edb04ca162249c698db07778fcea2632caaa0165fe995a9cd96c",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "a62339858aeca1b036cadd161b46697379899df78340e8aecf993d492701b23c"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headless swiftshader",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "local-loopback-observer",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T11:00:16.238166+00:00"
+}

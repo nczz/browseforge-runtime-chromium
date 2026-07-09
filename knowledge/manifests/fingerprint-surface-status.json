@@ -134,11 +134,11 @@
       "surface": "automation/headless/CDP"
     },
     {
-      "evidence": "No proxy detector run was executed.",
+      "evidence": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. No external proxy exit-IP/geolocation detector run has been executed.",
       "release_blocker": true,
-      "result": "not_tested",
+      "result": "warn_linux_browserleaks_local_proxy_routing_only",
       "severity": "high",
-      "status": "blocked",
+      "status": "detector_tested",
       "surface": "proxy/IP coherence"
     },
     {
@@ -170,6 +170,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709.json"
   ]
 }
