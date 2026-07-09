@@ -551,16 +551,69 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  const fonts = (() => {
+  const fonts = await (async () => {
     const candidates = ['Arial', 'Calibri', 'Consolas', 'Courier New', 'DejaVu Sans', 'Noto Sans CJK TC', 'Segoe UI', 'Times New Roman'];
-    const out = {};
+    const checks = {};
+    const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const hashText = async (text) => crypto && crypto.subtle
+      ? toHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))
+      : null;
+    const hashBytes = async (bytes) => crypto && crypto.subtle
+      ? toHex(await crypto.subtle.digest('SHA-256', bytes))
+      : null;
     if (!document.fonts || !document.fonts.check) {
-      return {available: false, checks: out};
+      return {available: false, checks};
     }
     for (const name of candidates) {
-      out[name] = document.fonts.check(`16px "${name}"`);
+      checks[name] = document.fonts.check(`16px "${name}"`);
     }
-    return {available: true, checks: out};
+    const metricRows = [];
+    const sampleText = 'BrowseForge Ω 測 0123456789';
+    const span = document.createElement('span');
+    span.textContent = sampleText;
+    span.style.cssText = 'position:absolute;left:-9999px;top:-9999px;font-size:32px;line-height:normal;white-space:nowrap;';
+    document.body.appendChild(span);
+    try {
+      for (const name of candidates) {
+        span.style.fontFamily = `"${name}", Arial, sans-serif`;
+        const rect = span.getBoundingClientRect();
+        metricRows.push({
+          font: name,
+          width: Number(rect.width.toFixed(3)),
+          height: Number(rect.height.toFixed(3)),
+          check: Boolean(checks[name]),
+        });
+      }
+    } finally {
+      span.remove();
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 384;
+    canvas.height = 48;
+    const ctx = canvas.getContext('2d');
+    let glyphImageSha256 = null;
+    let glyphSampleCount = 0;
+    if (ctx) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#111';
+      ctx.font = '24px Arial';
+      ctx.fillText(sampleText, 4, 30);
+      const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      glyphSampleCount = image.data.length;
+      glyphImageSha256 = await hashBytes(image.data);
+    }
+    return {
+      available: true,
+      checks,
+      metrics: {
+        candidateCount: candidates.length,
+        metricRows,
+        metricsSha256: await hashText(JSON.stringify(metricRows)),
+        glyphSha256: glyphImageSha256,
+        glyphSampleCount,
+      },
+    };
   })();
   const canvasProbe = await (async () => {
     try {

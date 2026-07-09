@@ -535,6 +535,103 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertNotIn("ghp_abcdEFGH1234567890secret", metrics_payload)
         self.assertIsNone(self.harness_module.SENSITIVE_RE.search(metrics_payload))
 
+    def test_collect_page_preserves_sanitized_font_metrics_without_raw_payloads(self):
+        value = self.creepjs_client_hints_value()
+        value["text"] = self.creepjs_metrics_text()
+        value["fonts"] = {
+            "available": True,
+            "checks": {
+                "Arial": True,
+                "Courier New": True,
+            },
+            "metrics": {
+                "metricRows": [
+                    {"font": "Arial", "width": 126.5, "height": 19.0},
+                    {"font": "Courier New", "width": 144.25, "height": 17},
+                ],
+                "metricsSha256": "a" * 64,
+                "glyphSha256": "b" * 64,
+            },
+        }
+
+        class FakeCDP:
+            def __init__(self, page_value):
+                self.page_value = page_value
+
+            def call(self, method, params=None, *, session_id=None, timeout=20):
+                if method == "Target.createTarget":
+                    return {"targetId": "target-1"}, []
+                if method == "Target.attachToTarget":
+                    return {"sessionId": "session-1"}, []
+                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                    return {}, []
+                if method == "Runtime.evaluate":
+                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                raise AssertionError(f"unexpected CDP method: {method}")
+
+            def events_until(self, predicate, *, timeout=30):
+                return []
+
+        record = self.harness_module.collect_page(
+            FakeCDP(value),
+            "creepjs",
+            "CreepJS",
+            "https://abrahamjuliot.github.io/creepjs/",
+            wait_seconds=0,
+        )
+
+        font_metrics = record["observed"]["fonts"]["metrics"]
+        self.assertEqual(
+            font_metrics["metricRows"],
+            [
+                {"font": "Arial", "width": 126.5, "height": 19.0},
+                {"font": "Courier New", "width": 144.25, "height": 17},
+            ],
+        )
+        for row in font_metrics["metricRows"]:
+            with self.subTest(font=row["font"]):
+                for dimension in ("width", "height"):
+                    self.assertIsInstance(row[dimension], (int, float))
+                    self.assertNotIsInstance(row[dimension], bool)
+        for hash_field, expected_hash in (
+            ("metricsSha256", "a" * 64),
+            ("glyphSha256", "b" * 64),
+        ):
+            with self.subTest(hash_field=hash_field):
+                self.assertEqual(font_metrics[hash_field], expected_hash)
+                self.assertRegex(font_metrics[hash_field], r"^[0-9a-f]{64}$")
+
+        raw_payload_keys = {
+            "dataUrl",
+            "data_url",
+            "dataUrlSha256Input",
+            "imageData",
+            "image_data",
+            "pixels",
+            "pixel_data",
+            "raw_pixels",
+            "rawGlyphs",
+            "raw_glyphs",
+        }
+
+        def raw_keys_under(node, path="$"):
+            if isinstance(node, dict):
+                matches = []
+                for key, child in node.items():
+                    child_path = f"{path}.{key}"
+                    if key in raw_payload_keys:
+                        matches.append(child_path)
+                    matches.extend(raw_keys_under(child, child_path))
+                return matches
+            if isinstance(node, list):
+                matches = []
+                for index, child in enumerate(node):
+                    matches.extend(raw_keys_under(child, f"{path}[{index}]"))
+                return matches
+            return []
+
+        self.assertEqual(raw_keys_under(font_metrics), [])
+
     def test_collect_page_uses_browserleaks_classifier_without_raw_text_payload(self):
         value = self.browserleaks_client_hints_value()
         value["text"] = "BrowserLeaks Client Hints\nChromium 150.0.7871.101\nLinux x86 64"

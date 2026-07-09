@@ -1,0 +1,141 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "cross_surface_consistency",
+    "detector_id": "creepjs",
+    "manifest_ref": "knowledge/manifests/detectors.json#creepjs",
+    "name": "CreepJS",
+    "url": "https://abrahamjuliot.github.io/creepjs/"
+  },
+  "evidence_id": "evidence_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headless",
+    "matrix_key": "linux-x64:creepjs:font-metrics:headless:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "creepjs_font_metric_probe",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "CreepJS page context produced bounded font metric rows and aggregate metrics hash; raw DOM/canvas/font payloads are not committed.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 19,
+            "width": 241.859
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 19,
+            "width": 241.859
+          }
+        ],
+        "metricsSha256": "ff1c81f86b0aa5d9b51efcd53cfe62be42ed68555fee63d11c23c5b42d72ab72"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "creepjs_font_glyph_probe",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "CreepJS page context rendered a bounded glyph canvas probe and committed only aggregate SHA-256 and sample count.",
+      "normalized_values": {
+        "glyphSampleCount": 73728,
+        "glyphSha256": "a4497a76714c34ec4e0b277f80671473d6bad7dcedd1981a9738f62cc4441166"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    }
+  ],
+  "run_id": "detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw CreepJS page text, visitor identifiers, screenshots, raw glyph canvas data, raw pixels, and browser storage are not committed; committed evidence stores bounded metric rows and aggregate SHA-256 values only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-creepjs-font-metrics-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709.json",
+    "raw_capture_sha256": "55d5b8d638270210628f1ac04139cae4a4245b8ec14090f0677e1fb8a165230a",
+    "sha256": "f643a314141fb915dd00f93644cb8b18b0385e1b6d4dc6833641e331087613e2",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "ccd28da0089c578bca7cc289eec7d24da2ade29c1f373966856a17bcd79ad802"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headless swiftshader",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T10:49:13.267524+00:00"
+}
