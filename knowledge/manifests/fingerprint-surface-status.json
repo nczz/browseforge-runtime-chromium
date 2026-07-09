@@ -86,17 +86,17 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs values; BrowserLeaks/CreepJS audio fingerprint comparison remains required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. This proves source patch exercise and live detector-page JS visibility, but release-grade detector score comparison remains required.",
       "release_blocker": true,
-      "result": "warn_linux_sannysoft_unscored_audio_probe",
+      "result": "warn_linux_multi_detector_page_context_audio_probe",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke with fingerprint.fonts allowlist reported document.fonts.check() available=true for sampled desktop font families. Font metrics, glyph raster, and BrowserLeaks/CreepJS/Pixelscan font comparison remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks/CreepJS/Pixelscan font metric, glyph raster, and platform font corpus parity remain required.",
       "release_blocker": true,
-      "result": "warn_linux_sannysoft_font_availability_only",
+      "result": "warn_linux_multi_detector_page_context_font_availability",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "fonts"
@@ -126,9 +126,9 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported navigator.webdriver=false and WebDriver row missing/passed; broader CreepJS/headed headless-resistance evidence remains required.",
+      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; broader headed headless-resistance evidence remains required.",
       "release_blocker": true,
-      "result": "pass_linux_sannysoft_headless",
+      "result": "warn_linux_multi_detector_webdriver_false_headless_only",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"

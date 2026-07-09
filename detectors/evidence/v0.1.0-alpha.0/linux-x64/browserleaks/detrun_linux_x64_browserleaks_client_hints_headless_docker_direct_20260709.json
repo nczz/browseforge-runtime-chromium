@@ -84,6 +84,106 @@
       "severity": "low",
       "status": "pass",
       "surface": "client_hints"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_audio",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context produced sanitized OfflineAudioContext summary with deterministic sampleRate/length/sum fields; raw samples are limited to sanitized numeric summary.",
+      "normalized_values": {
+        "available": true,
+        "firstSamples": [
+          -6.1e-07,
+          4.4e-07,
+          -4.4e-07,
+          1.4e-07,
+          1e-08,
+          1.3e-07,
+          -3.3e-07,
+          8.7e-07
+        ],
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 7.2e-07,
+        "sumAbs": 0.00017846
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_fonts",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported document.fonts.check availability for sampled desktop font families; this is availability evidence, not glyph raster parity.",
+      "normalized_values": {
+        "available": true,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "true_count": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_canvas",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context rendered the sanitized 64x32 Canvas 2D probe and committed only SHA-256 digests and dimensions.",
+      "normalized_values": {
+        "available": true,
+        "dataUrlSha256": "535cf055133e79e229dabd182c9bf6f72676a9138a820e2b3537dd15d84c3be6",
+        "height": 32,
+        "imageDataSha256": "110fd4019954d900bb4f3e4f092b3c26b467fa1187b4c7b3d6315443f1a5b9c5",
+        "sampleCount": 8192,
+        "width": 64
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_webgl",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported configured WebGL debug vendor/renderer strings.",
+      "normalized_values": {
+        "renderer": "Intel Iris OpenGL Engine",
+        "vendor": "Intel Inc."
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_storage",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported navigator.storage.estimate quota from configured 8192 MiB persona.",
+      "normalized_values": {
+        "quota": 8589934592,
+        "usage": 0,
+        "usageDetails": {}
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "storage_quota"
+    },
+    {
+      "detector_check": "browserleaks_runtime_probe_automation",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
     }
   ],
   "run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709",
@@ -105,7 +205,7 @@
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json",
     "raw_capture_sha256": "52a0cad7e841ee0e448bba7e4a5be2018635a8237e033a478057f8317b269743",
-    "sha256": "40987da055765c837d6b7111b165b78c1a0400ee1bc3e4596d2bdb611a553dea",
+    "sha256": "bcf3dbfbe88a5e8b03396688fd0f652570005bd610d29a2b7ccd6b9a9c12e014",
     "summary_path": "detector-summary.json"
   },
   "target": {

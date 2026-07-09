@@ -84,6 +84,106 @@
       "severity": "low",
       "status": "pass",
       "surface": "client_hints"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_audio",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context produced sanitized OfflineAudioContext summary with deterministic sampleRate/length/sum fields; raw samples are limited to sanitized numeric summary.",
+      "normalized_values": {
+        "available": true,
+        "firstSamples": [
+          -6.1e-07,
+          4.4e-07,
+          -4.4e-07,
+          1.4e-07,
+          1e-08,
+          1.3e-07,
+          -3.3e-07,
+          8.7e-07
+        ],
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 7.2e-07,
+        "sumAbs": 0.00017846
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_fonts",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context reported document.fonts.check availability for sampled desktop font families; this is availability evidence, not glyph raster parity.",
+      "normalized_values": {
+        "available": true,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "true_count": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_canvas",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context rendered the sanitized 64x32 Canvas 2D probe and committed only SHA-256 digests and dimensions.",
+      "normalized_values": {
+        "available": true,
+        "dataUrlSha256": "535cf055133e79e229dabd182c9bf6f72676a9138a820e2b3537dd15d84c3be6",
+        "height": 32,
+        "imageDataSha256": "110fd4019954d900bb4f3e4f092b3c26b467fa1187b4c7b3d6315443f1a5b9c5",
+        "sampleCount": 8192,
+        "width": 64
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_webgl",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context reported configured WebGL debug vendor/renderer strings.",
+      "normalized_values": {
+        "renderer": "Intel Iris OpenGL Engine",
+        "vendor": "Intel Inc."
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_storage",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context reported navigator.storage.estimate quota from configured 8192 MiB persona.",
+      "normalized_values": {
+        "quota": 8589934592,
+        "usage": 0,
+        "usageDetails": {}
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "storage_quota"
+    },
+    {
+      "detector_check": "pixelscan_runtime_probe_automation",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
     }
   ],
   "run_id": "detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709",
@@ -105,7 +205,7 @@
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json",
     "raw_capture_sha256": "c191cd1d659d9a51cc2f372193134a7b970953a362dcb371adedc34b67f2e470",
-    "sha256": "7896a835b7f6d93c7a3b782fbfd7f8206c21ab1c70a77a3ec9ac570aba16249f",
+    "sha256": "e4a624e17c9dd14919cfc6949f6fe7057ab6d882c1603cb92f2a8cc55863fc35",
     "summary_path": "detector-summary.json"
   },
   "target": {
