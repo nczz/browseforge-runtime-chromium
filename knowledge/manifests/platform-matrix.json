@@ -59,12 +59,12 @@
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
-        "installer/portable layout documented",
+        "portable executable/DLL layout packaged",
         "code signing decision exists",
         "BrowseForge launches profile",
         "detector run exists"
       ],
-      "status": "planned"
+      "status": "packager_contract_defined"
     },
     {
       "id": "linux-arm64",

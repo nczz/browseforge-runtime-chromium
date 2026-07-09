@@ -187,16 +187,16 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
 
     def test_runtime_artifact_manifest_distinguishes_supported_contracts_from_artifacts(self) -> None:
-        """macos-arm64 has a packager contract, but artifacts still list only produced packages."""
+        """macos-arm64 and windows-x64 have packager contracts, but artifacts still list only produced packages."""
         with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
             manifest = json.load(fh)
 
-        self.assertEqual(["linux-x64", "macos-arm64"], manifest.get("supported_package_platforms"))
+        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], manifest.get("supported_package_platforms"))
         unsupported = manifest.get("unsupported_package_platforms")
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
-        self.assertNotIn("macos-arm64", unsupported)
-        self.assertIn("windows-x64", unsupported)
+        self.assertEqual({"macos-x64", "linux-arm64"}, set(unsupported))
+        self.assertNotIn("windows-x64", unsupported)
 
         artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
         self.assertEqual({"linux-x64"}, artifact_platforms)
@@ -209,7 +209,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             temp_root = Path(td)
             self._write_minimal_validate_tree(temp_root, module)
             manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
-            self.assertEqual(["linux-x64", "macos-arm64"], manifest["supported_package_platforms"])
+            self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], manifest["supported_package_platforms"])
             self.assertEqual({"linux-x64"}, {artifact["platform"] for artifact in manifest["artifacts"]})
             self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
 
@@ -227,27 +227,27 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             temp_root = Path(td)
             self._write_minimal_validate_tree(temp_root, module)
             manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
-            windows_artifact = dict(manifest["artifacts"][0])
-            windows_artifact.update(
+            unsupported_artifact = dict(manifest["artifacts"][0])
+            unsupported_artifact.update(
                 {
-                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
-                    "platform": "windows-x64",
-                    "os": "windows",
-                    "arch": "x64",
+                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+                    "platform": "linux-arm64",
+                    "os": "linux",
+                    "arch": "arm64",
                     "sha256": "2a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a",
                     "size_bytes": 567798166,
-                    "sbom_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
-                    "provenance_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
+                    "sbom_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/SBOM.json",
+                    "provenance_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/provenance.json",
                 }
             )
-            manifest["artifacts"].append(windows_artifact)
+            manifest["artifacts"].append(unsupported_artifact)
             self._write_json(temp_root / "knowledge" / "manifests" / "runtime-artifacts.json", manifest)
             self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
 
             message = self._run_validate_expect_exit(module, temp_root)
 
         self.assertIn("runtime asset contract", message)
-        self.assertIn("windows-x64", message)
+        self.assertIn("linux-arm64", message)
 
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
@@ -627,9 +627,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "provenance_path",
                     "release_channel",
                 ],
-                "supported_package_platforms": ["linux-x64", "macos-arm64"],
+                "supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"],
                 "unsupported_package_platforms": {
-                    "windows-x64": "missing Windows runtime asset contract",
+                    "linux-arm64": "missing Linux arm64 runtime asset contract",
+                    "macos-x64": "missing macOS x64 runtime asset contract",
                 },
             },
         )

@@ -28,6 +28,28 @@ REQUIRED_LINUX_RUNTIME_ASSETS = (
     "locales/en-US.pak",
 )
 
+REQUIRED_WINDOWS_RUNTIME_ASSETS = (
+    "chrome.exe",
+    "chrome.dll",
+    "chrome_elf.dll",
+    "icudtl.dat",
+    "resources.pak",
+    "chrome_100_percent.pak",
+    "chrome_200_percent.pak",
+    "chrome_crashpad_handler.exe",
+    "d3dcompiler_47.dll",
+    "dxcompiler.dll",
+    "dxil.dll",
+    "libEGL.dll",
+    "libGLESv2.dll",
+    "vk_swiftshader.dll",
+    "vulkan-1.dll",
+    "vk_swiftshader_icd.json",
+    "v8_context_snapshot.bin",
+    "snapshot_blob.bin",
+    "locales/en-US.pak",
+)
+
 MACOS_APP_BUNDLE_FILES = (
     "Contents/Info.plist",
     "Contents/MacOS/Chromium",
@@ -58,6 +80,25 @@ class PackageRuntimeTests(unittest.TestCase):
             asset = browser_dir / relative_path
             asset.parent.mkdir(parents=True, exist_ok=True)
             asset.write_bytes(f"runtime asset: {relative_path}\n".encode())
+
+
+    def _write_windows_portable_runtime(
+        self,
+        root: Path,
+        *,
+        browser_name: str = "chrome.exe",
+        omit: set[str] | None = None,
+    ) -> Path:
+        omitted = omit or set()
+        root.mkdir(parents=True, exist_ok=True)
+        browser = self._write_executable(root / browser_name, "#!/bin/sh\necho chrome\n")
+        for relative_path in REQUIRED_WINDOWS_RUNTIME_ASSETS:
+            if relative_path == "chrome.exe" or relative_path in omitted:
+                continue
+            asset = root / relative_path
+            asset.parent.mkdir(parents=True, exist_ok=True)
+            asset.write_bytes(f"windows runtime asset: {relative_path}\n".encode())
+        return browser
 
     def _write_macos_app_bundle(
         self,
@@ -181,9 +222,9 @@ class PackageRuntimeTests(unittest.TestCase):
         self.assertIn("linux-x64", platform_ids)
         self.assertIn("macos-arm64", platform_ids)
         self.assertIn("windows-x64", platform_ids)
-        self.assertEqual(["linux-x64", "macos-arm64"], data["supported_package_platforms"])
-        self.assertNotIn("macos-arm64", data["unsupported_package_platforms"])
-        self.assertIn("windows-x64", data["unsupported_package_platforms"])
+        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], data["supported_package_platforms"])
+        self.assertEqual({"macos-x64", "linux-arm64"}, set(data["unsupported_package_platforms"]))
+        self.assertNotIn("windows-x64", data["unsupported_package_platforms"])
 
     def test_package_requires_browser_binary(self):
         with tempfile.TemporaryDirectory() as td:
@@ -271,6 +312,90 @@ class PackageRuntimeTests(unittest.TestCase):
 
             self.assertEqual(manifest["browser_binary_sha256"], self._sha256(browser))
             self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
+
+
+    def test_package_windows_x64_requires_chrome_exe_browser_binary(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            browser_dir = tmp / "ChromiumPortable"
+            browser = self._write_windows_portable_runtime(browser_dir, browser_name="chromium.exe")
+            package = self._run_package(
+                tmp,
+                platform_id="windows-x64",
+                browser=browser,
+                browser_dir=browser_dir,
+                expect_success=False,
+            )
+
+            output = package["proc"].stderr + package["proc"].stdout
+            self.assertIn("windows browser binary must be chrome.exe", output)
+            self.assertIn("chromium.exe", output)
+
+    def test_package_windows_x64_preserves_portable_runtime_in_stage_manifest_sbom_and_zip(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            browser_dir = tmp / "ChromiumPortable"
+            browser = self._write_windows_portable_runtime(browser_dir)
+            package = self._run_package(tmp, platform_id="windows-x64", browser=browser, browser_dir=browser_dir)
+            stage = package["stage"]
+            manifest = json.loads((stage / "artifact-manifest.json").read_text())
+            provenance = json.loads((stage / "provenance.json").read_text())
+            sbom = json.loads((stage / "SBOM.json").read_text())
+            archive = Path(package["payload"]["archive"])
+
+            for name, metadata in {
+                "artifact-manifest.json": manifest,
+                "provenance.json": provenance,
+                "SBOM.json": sbom,
+            }.items():
+                self.assertEqual(metadata["platform"], "windows-x64", name)
+                self.assertEqual(metadata["os"], "windows", name)
+                self.assertEqual(metadata["arch"], "x64", name)
+
+            expected_files = {
+                relative_path: browser_dir / relative_path
+                for relative_path in REQUIRED_WINDOWS_RUNTIME_ASSETS
+            }
+            expected_files["browseforge-runtime-chromium.exe"] = package["wrapper"]
+            expected_files["runtime.manifest.json"] = ROOT / "contracts" / "runtime.manifest.json"
+
+            manifest_files = {entry["path"]: entry for entry in manifest["files"]}
+            sbom_files = {entry["path"]: entry for entry in sbom["files"]}
+            with zipfile.ZipFile(archive) as zf:
+                archive_names = set(zf.namelist())
+
+            for relative_path, source in expected_files.items():
+                staged = stage / relative_path
+                self.assertTrue(staged.is_file(), relative_path)
+                self.assertIn(relative_path, manifest_files)
+                self.assertIn(relative_path, sbom_files)
+                self.assertIn(f"{package['artifact_id']}/{relative_path}", archive_names)
+                self.assertEqual(manifest_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(manifest_files[relative_path]["size_bytes"], source.stat().st_size)
+                self.assertEqual(sbom_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(sbom_files[relative_path]["size"], source.stat().st_size)
+
+            self.assertEqual(manifest["browser_binary_sha256"], self._sha256(browser))
+            self.assertEqual(manifest["wrapper_binary_sha256"], self._sha256(package["wrapper"]))
+            self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
+            self.assertEqual(provenance["wrapper_binary_sha256"], self._sha256(package["wrapper"]))
+
+    def test_package_fails_clearly_when_windows_runtime_sidecar_is_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            browser_dir = tmp / "ChromiumPortable"
+            browser = self._write_windows_portable_runtime(browser_dir, omit={"chrome.dll"})
+            package = self._run_package(
+                tmp,
+                platform_id="windows-x64",
+                browser=browser,
+                browser_dir=browser_dir,
+                expect_success=False,
+            )
+
+            output = package["proc"].stderr + package["proc"].stdout
+            self.assertIn("missing file", output)
+            self.assertIn("chrome.dll", output)
 
     def test_package_creates_checksum_for_real_inputs(self):
         with tempfile.TemporaryDirectory() as td:

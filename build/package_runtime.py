@@ -36,7 +36,31 @@ LINUX_CHROMIUM_RUNTIME_DIRS = (
     'locales',
 )
 
-SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64'})
+WINDOWS_CHROMIUM_RUNTIME_FILES = (
+    'chrome.dll',
+    'chrome_elf.dll',
+    'icudtl.dat',
+    'resources.pak',
+    'chrome_100_percent.pak',
+    'chrome_200_percent.pak',
+    'chrome_crashpad_handler.exe',
+    'd3dcompiler_47.dll',
+    'dxcompiler.dll',
+    'dxil.dll',
+    'libEGL.dll',
+    'libGLESv2.dll',
+    'vk_swiftshader.dll',
+    'vulkan-1.dll',
+    'vk_swiftshader_icd.json',
+    'v8_context_snapshot.bin',
+    'snapshot_blob.bin',
+)
+
+WINDOWS_CHROMIUM_RUNTIME_DIRS = (
+    'locales',
+)
+
+SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64', 'windows-x64'})
 
 
 def sha256(path: Path) -> str:
@@ -147,6 +171,9 @@ def copy_required_linux_runtime_assets(browser: Path, stage: Path):
     source_dir = browser.parent
     for rel in LINUX_CHROMIUM_RUNTIME_FILES:
         copy_required_file(source_dir / rel, stage / rel)
+    copy_required_locale_assets(source_dir, stage)
+
+def copy_required_locale_assets(source_dir: Path, stage: Path):
     locales_dir = source_dir / 'locales'
     if not locales_dir.is_dir():
         raise SystemExit(f'missing directory: {locales_dir}')
@@ -157,6 +184,14 @@ def copy_required_linux_runtime_assets(browser: Path, stage: Path):
         raise SystemExit(f'missing locale pak files: {locales_dir}')
     for locale_file in locale_files:
         shutil.copy2(locale_file, staged_locales / locale_file.name)
+
+def copy_required_windows_runtime_assets(browser: Path, stage: Path):
+    if browser.name.lower() != 'chrome.exe':
+        raise SystemExit(f'windows browser binary must be chrome.exe: {browser}')
+    source_dir = browser.parent
+    for rel in WINDOWS_CHROMIUM_RUNTIME_FILES:
+        copy_required_file(source_dir / rel, stage / rel)
+    copy_required_locale_assets(source_dir, stage)
 
 
 def macos_app_bundle_root(browser: Path) -> Path:
@@ -200,8 +235,17 @@ def stage_platform_browser(platform_id: str, browser: Path, stage: Path) -> Path
         return staged_browser
     if platform_id == 'macos-arm64':
         return copy_required_macos_runtime_assets(browser, stage)
+    if platform_id == 'windows-x64':
+        staged_browser = stage / browser.name
+        shutil.copy2(browser, staged_browser)
+        copy_required_windows_runtime_assets(browser, stage)
+        return staged_browser
     supported = ', '.join(sorted(SUPPORTED_PACKAGE_PLATFORMS))
     raise SystemExit(f'unsupported package platform without runtime asset contract: {platform_id}; supported: {supported}')
+
+def staged_wrapper_name(platform_id: str) -> str:
+    return 'browseforge-runtime-chromium.exe' if platform_id == 'windows-x64' else 'browseforge-runtime-chromium'
+
 def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
     return stage_platform_browser(platform_id, browser, stage)
 def package(args):
@@ -220,7 +264,7 @@ def package(args):
     ensure_file(browser, executable=True)
     ensure_file(wrapper, executable=True)
     staged_browser = stage_platform_browser(platform_id, browser, stage)
-    staged_wrapper = stage / 'browseforge-runtime-chromium'
+    staged_wrapper = stage / staged_wrapper_name(platform_id)
     staged_runtime_manifest = stage / 'runtime.manifest.json'
     source_acquisition = Path(args.source_acquisition_manifest)
     patchset_manifest = Path(args.patchset_manifest)
