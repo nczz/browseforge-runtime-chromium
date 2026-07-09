@@ -1,0 +1,151 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "browserscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserscan",
+    "name": "BrowserScan",
+    "url": "https://www.browserscan.net/"
+  },
+  "evidence_id": "evidence_linux_x64_browserscan_uach_headed_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:browserscan:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserscan_headed_client_hints",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserScan loaded in headed Docker/Xvfb mode with configured Linux Chromium UA-CH high entropy values and fullVersionList.",
+      "normalized_values": {
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "x86",
+            "bitness": "64",
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "fullVersionList": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150.0.7871.101"
+              }
+            ],
+            "mobile": false,
+            "model": "",
+            "platform": "Linux",
+            "platformVersion": "6.8.0",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "url": "https://www.browserscan.net/"
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "browserscan_headed_webdriver",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserScan page context reported navigator.webdriver=false in headed Docker/Xvfb mode.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "browserscan_headed_screen",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserScan page context reported configured screen metrics in headed Docker/Xvfb mode.",
+      "normalized_values": {
+        "availHeight": 1040,
+        "availWidth": 1920,
+        "devicePixelRatio": 1,
+        "height": 1080,
+        "width": 1920
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "screen"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserScan page text, browser storage, network identifiers, and screenshots are not committed; committed evidence stores sanitized structured UA-CH/screen/automation values and raw capture SHA only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserscan-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709.json",
+    "raw_capture_sha256": "c70b9ec0f053ed2bfebec84aa8f3c61837658a57929f92835a76d255ad475144",
+    "sha256": "62cb40a27186f6d58117e72bcbc6999c2331387a60809069ca90311d7cbf6ba2",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "b5fc254114a6f4efa6a182ac3b2a8c2bdd4a0cd6e497999ce1cd4f6945b1c459"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb software",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T11:20:37.089120+00:00"
+}
