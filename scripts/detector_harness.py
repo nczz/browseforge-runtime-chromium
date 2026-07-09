@@ -19,9 +19,47 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HARNESS_VERSION = "0.1.0"
 SENSITIVE_RE = re.compile(r"(gh[pousr]_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]+|\b(?:\d{1,3}\.){3}\d{1,3}\b)")
+TEXT_EXCERPT_SENSITIVE_RE = re.compile(r"(gh[pousr]_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]+|\b[0-9a-fA-F]{32,}\b|\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\.local\b|\b(?:\d{1,3}\.){3}\d{1,3}\b)")
 
 def redact_sensitive_text(text: str) -> str:
-    return SENSITIVE_RE.sub("[REDACTED]", text)
+    return TEXT_EXCERPT_SENSITIVE_RE.sub("[REDACTED]", text)
+
+def _bounded_redacted_value(value: str, *, limit: int = 80) -> str:
+    normalized = " ".join(value.split())
+    return redact_sensitive_text(normalized[:limit])
+
+def _extract_percent(pattern: str, text: str) -> float | None:
+    match = re.search(pattern, text, re.IGNORECASE)
+    return float(match.group(1)) if match else None
+
+def _extract_float(pattern: str, text: str) -> float | None:
+    match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+    return float(match.group(1)) if match else None
+
+def extract_creepjs_metrics(text: str) -> dict:
+    metrics: dict[str, object] = {}
+    headless = {
+        "like_headless_percent": _extract_percent(r"\b(\d+(?:\.\d+)?)%\s+like\s+headless\b", text),
+        "headless_percent": _extract_percent(r"\b(\d+(?:\.\d+)?)%\s+headless\b", text),
+        "stealth_percent": _extract_percent(r"\b(\d+(?:\.\d+)?)%\s+stealth\b", text),
+    }
+    headless = {key: value for key, value in headless.items() if value is not None}
+    if headless:
+        metrics["headless"] = headless
+
+    audio: dict[str, float] = {}
+    for field in ("sum", "gain", "freq", "time", "trap", "unique"):
+        value = _extract_float(rf"^\s*{field}\s*:\s*(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\b", text)
+        if value is not None:
+            audio[field] = value
+    if audio:
+        metrics["audio"] = audio
+
+    fonts_match = re.search(r"\b(?:fonts\s+)?load(?:\s+count)?\s*(?:\((\d+)\)|:\s*(\d+))", text, re.IGNORECASE)
+    if fonts_match:
+        metrics["fonts"] = {"load_count": int(next(group for group in fonts_match.groups() if group))}
+
+    return metrics
 
 EXIT_SCHEMA = 1
 EXIT_COLLECT_UNAVAILABLE = 2
@@ -576,6 +614,10 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     if isinstance(canvas, dict) and isinstance(canvas.get("dataUrlSha256Input"), str):
         data_url = canvas.pop("dataUrlSha256Input")
         canvas["dataUrlSha256"] = hashlib.sha256(data_url.encode()).hexdigest()
+    if detector_id == "creepjs":
+        metrics = extract_creepjs_metrics(text)
+        if metrics:
+            value["detector_metrics"] = metrics
     if detector_id == "sannysoft":
         status, finding, severity = classify_sannysoft({**value, "text": text})
     elif detector_id == "browserleaks":

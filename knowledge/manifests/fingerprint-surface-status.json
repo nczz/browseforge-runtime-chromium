@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. This proves source patch exercise and live detector-page JS visibility, but release-grade detector score comparison remains required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector page metrics extraction now records detector-reported audio metric values from sanitized live page text. BrowserLeaks/CreepJS release-grade score comparison and native/headed matrix remain required.",
       "release_blocker": true,
-      "result": "warn_linux_multi_detector_page_context_audio_probe",
+      "result": "warn_linux_multi_detector_page_context_audio_plus_creepjs_metrics",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
@@ -126,9 +126,9 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft was verified in both headless and headed Docker/Xvfb display modes with configured UA omitting HeadlessChrome.",
+      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft was verified in both headless and headed Docker/Xvfb display modes with configured UA omitting HeadlessChrome; CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in headless Docker.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft_headless_and_headed_webdriver_false",
+      "result": "pass_linux_sannysoft_headless_and_headed_webdriver_false_creepjs_scores_recorded",
       "severity": "info",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"
@@ -168,6 +168,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/iphey/detrun_linux_x64_iphey_uach_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260709.json"
   ]
 }

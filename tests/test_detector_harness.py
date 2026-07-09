@@ -86,6 +86,26 @@ class DetectorHarnessTests(unittest.TestCase):
         value["url"] = "https://abrahamjuliot.github.io/creepjs/"
         return value
 
+    def creepjs_metrics_text(self):
+        return "\n".join(
+            [
+                "CreepJS fingerprint check",
+                "0% like headless",
+                "0% headless",
+                "0% stealth",
+                "Audio",
+                "sum: 124.04347527516074",
+                "gain: 0.0000000432",
+                "freq: 10000",
+                "time: 0.024",
+                "trap: 0",
+                "unique: 34",
+                "Fonts",
+                "Fonts load(137): detected",
+                "debug source 203.0.113.42 token ghp_abcdEFGH1234567890secret",
+            ]
+        )
+
 
     def test_classify_browserleaks_client_hints_accepts_configured_chromium_ua_ch(self):
         status, finding, severity = self.harness_module.classify_browserleaks_client_hints(
@@ -285,6 +305,48 @@ class DetectorHarnessTests(unittest.TestCase):
                 self.assertNotIn("iphey", finding)
                 self.assertNotIn("BrowserScan", finding)
 
+
+    def test_extract_creepjs_metrics_returns_bounded_scores_without_raw_text(self):
+        metrics = self.harness_module.extract_creepjs_metrics(self.creepjs_metrics_text())
+
+        self.assertEqual(
+            metrics,
+            {
+                "headless": {
+                    "like_headless_percent": 0.0,
+                    "headless_percent": 0.0,
+                    "stealth_percent": 0.0,
+                },
+                "audio": {
+                    "sum": 124.04347527516074,
+                    "gain": 0.0000000432,
+                    "freq": 10000.0,
+                    "time": 0.024,
+                    "trap": 0.0,
+                    "unique": 34.0,
+                },
+                "fonts": {"load_count": 137},
+            },
+        )
+        for percent in metrics["headless"].values():
+            self.assertGreaterEqual(percent, 0.0)
+            self.assertLessEqual(percent, 100.0)
+        for audio_value in metrics["audio"].values():
+            self.assertIsInstance(audio_value, float)
+        metrics_payload = json.dumps(metrics, sort_keys=True)
+        self.assertNotIn("CreepJS fingerprint check", metrics_payload)
+        self.assertNotIn("debug source", metrics_payload)
+        self.assertNotIn("203.0.113.42", metrics_payload)
+        self.assertNotIn("ghp_abcdEFGH1234567890secret", metrics_payload)
+        self.assertIsNone(self.harness_module.SENSITIVE_RE.search(metrics_payload))
+
+    def test_extract_creepjs_metrics_omits_missing_sections(self):
+        metrics = self.harness_module.extract_creepjs_metrics("CreepJS fingerprint check\n0% headless")
+
+        self.assertEqual(metrics, {"headless": {"headless_percent": 0.0}})
+        self.assertNotIn("audio", metrics)
+        self.assertNotIn("fonts", metrics)
+
     def test_collect_page_uses_pixelscan_classifier_without_raw_text_payload(self):
         value = self.pixelscan_client_hints_value()
         value["text"] = "Pixelscan fingerprint check\nChromium 150.0.7871.101\nLinux x86 64"
@@ -409,7 +471,7 @@ class DetectorHarnessTests(unittest.TestCase):
 
     def test_collect_page_uses_creepjs_classifier_without_raw_text_payload(self):
         value = self.creepjs_client_hints_value()
-        value["text"] = "CreepJS fingerprint check\nChromium 150.0.7871.101\nLinux x86 64"
+        value["text"] = self.creepjs_metrics_text()
 
         class FakeCDP:
             def __init__(self, page_value):
@@ -449,6 +511,29 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertNotIn("text", record["observed"])
         self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
         self.assertIn("CreepJS fingerprint check", record["observed"]["text_excerpt"])
+        metrics = record["observed"]["detector_metrics"]
+        self.assertEqual(metrics["headless"]["like_headless_percent"], 0.0)
+        self.assertEqual(metrics["headless"]["headless_percent"], 0.0)
+        self.assertEqual(metrics["headless"]["stealth_percent"], 0.0)
+        self.assertEqual(
+            metrics["audio"],
+            {
+                "sum": 124.04347527516074,
+                "gain": 0.0000000432,
+                "freq": 10000.0,
+                "time": 0.024,
+                "trap": 0.0,
+                "unique": 34.0,
+            },
+        )
+        self.assertEqual(metrics["fonts"]["load_count"], 137)
+        metrics_payload = json.dumps(metrics, sort_keys=True)
+        self.assertNotIn("text", metrics)
+        self.assertNotIn("CreepJS fingerprint check", metrics_payload)
+        self.assertNotIn("debug source", metrics_payload)
+        self.assertNotIn("203.0.113.42", metrics_payload)
+        self.assertNotIn("ghp_abcdEFGH1234567890secret", metrics_payload)
+        self.assertIsNone(self.harness_module.SENSITIVE_RE.search(metrics_payload))
 
     def test_collect_page_uses_browserleaks_classifier_without_raw_text_payload(self):
         value = self.browserleaks_client_hints_value()
@@ -531,6 +616,33 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertNotIn("203.0.113.42", excerpt)
         self.assertNotIn("ghp_abcdEFGH1234567890secret", excerpt)
         self.assertIsNone(self.harness_module.SENSITIVE_RE.search(excerpt))
+
+    def test_redact_sensitive_text_removes_creepjs_page_identifiers(self):
+        fp_id = "0123456789abcdef" * 4
+        host_candidate = "489cd75f-cdb2-416e-8693-b4fed20cd482.local"
+        ipv4_literal = "203.0.113.42"
+        github_token = "ghp_" + "abcdEFGH1234567890secret"
+        excerpt = (
+            f"CreepJS FP ID {fp_id} host connection candidate {host_candidate} "
+            f"from relay {ipv4_literal} using token {github_token}; detector prose stays harmless."
+        )
+
+        redacted = self.harness_module.redact_sensitive_text(excerpt)
+        for label in ("FP ID", "host connection", "candidate"):
+            with self.subTest(label=label):
+                if label not in redacted:
+                    self.fail(f"harmless label was removed: {label}")
+        for label, identifier in (
+            ("FP ID", fp_id),
+            ("UUID local host candidate", host_candidate),
+            ("IPv4 literal", ipv4_literal),
+            ("GitHub token", github_token),
+        ):
+            with self.subTest(label=label):
+                if identifier in redacted:
+                    self.fail(f"{label} was not redacted")
+        if self.harness_module.SENSITIVE_RE.search(redacted) is not None:
+            self.fail("redacted excerpt still matches the sensitive-value pattern")
 
     def test_classify_sannysoft_maps_automation_signals_to_statuses(self):
         cases = [
