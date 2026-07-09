@@ -408,6 +408,10 @@ def classify_browserscan_client_hints(value: dict) -> tuple[str, str, str]:
     status, finding, severity = classify_browserleaks_client_hints(value)
     return status, finding.replace("BrowserLeaks Client Hints", "BrowserScan fingerprint check"), severity
 
+def classify_creepjs_client_hints(value: dict) -> tuple[str, str, str]:
+    status, finding, severity = classify_browserleaks_client_hints(value)
+    return status, finding.replace("BrowserLeaks Client Hints", "CreepJS fingerprint check"), severity
+
 
 
 def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int):
@@ -579,6 +583,8 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         status, finding, severity = classify_iphey_client_hints({**value, "text": text})
     elif detector_id == "browserscan":
         status, finding, severity = classify_browserscan_client_hints({**value, "text": text})
+    elif detector_id == "creepjs":
+        status, finding, severity = classify_creepjs_client_hints({**value, "text": text})
     else:
         status, finding, severity = "warning", "Detector loaded; manual review required.", "medium"
     value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
@@ -601,6 +607,7 @@ SUPPORTED_COLLECTORS = {
     "pixelscan": ("Pixelscan", "https://pixelscan.net/fingerprint-check"),
     "iphey": ("iphey", "https://iphey.com/"),
     "browserscan": ("BrowserScan", "https://www.browserscan.net/"),
+    "creepjs": ("CreepJS", "https://abrahamjuliot.github.io/creepjs/"),
 }
 
 def collect(args):

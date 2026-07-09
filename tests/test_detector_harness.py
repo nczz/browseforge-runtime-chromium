@@ -80,6 +80,12 @@ class DetectorHarnessTests(unittest.TestCase):
         value["url"] = "https://www.browserscan.net/"
         return value
 
+    def creepjs_client_hints_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "CreepJS"
+        value["url"] = "https://abrahamjuliot.github.io/creepjs/"
+        return value
+
 
     def test_classify_browserleaks_client_hints_accepts_configured_chromium_ua_ch(self):
         status, finding, severity = self.harness_module.classify_browserleaks_client_hints(
@@ -235,6 +241,50 @@ class DetectorHarnessTests(unittest.TestCase):
                 self.assertNotIn("Pixelscan", finding)
                 self.assertNotIn("iphey", finding)
 
+    def test_classify_creepjs_client_hints_accepts_configured_chromium_ua_ch(self):
+        status, finding, severity = self.harness_module.classify_creepjs_client_hints(
+            self.creepjs_client_hints_value()
+        )
+
+        self.assertEqual((status, severity), ("passed", "low"))
+        self.assertIn("CreepJS", finding)
+        self.assertIn("Linux", finding)
+        self.assertNotIn("BrowserLeaks", finding)
+        self.assertNotIn("Pixelscan", finding)
+        self.assertNotIn("iphey", finding)
+        self.assertNotIn("BrowserScan", finding)
+
+    def test_classify_creepjs_client_hints_flags_missing_high_entropy_data(self):
+        missing_full_version = self.creepjs_client_hints_value()
+        del missing_full_version["uaData"]["highEntropy"]["fullVersionList"]
+        high_entropy_error = self.creepjs_client_hints_value()
+        high_entropy_error["uaData"].pop("highEntropy")
+        high_entropy_error["uaData"]["highEntropyError"] = "NotAllowedError"
+
+        cases = [
+            {
+                "name": "missing fullVersionList cannot prove the Chromium build",
+                "value": missing_full_version,
+                "finding": "fullVersionList",
+            },
+            {
+                "name": "high entropy collection error is surfaced",
+                "value": high_entropy_error,
+                "finding": "NotAllowedError",
+            },
+        ]
+        for case in cases:
+            with self.subTest(case["name"]):
+                status, finding, severity = self.harness_module.classify_creepjs_client_hints(case["value"])
+                self.assertIn(status, {"warning", "failed"})
+                self.assertIn(severity, {"medium", "high", "critical"})
+                self.assertIn("CreepJS", finding)
+                self.assertIn(case["finding"], finding)
+                self.assertNotIn("BrowserLeaks", finding)
+                self.assertNotIn("Pixelscan", finding)
+                self.assertNotIn("iphey", finding)
+                self.assertNotIn("BrowserScan", finding)
+
     def test_collect_page_uses_pixelscan_classifier_without_raw_text_payload(self):
         value = self.pixelscan_client_hints_value()
         value["text"] = "Pixelscan fingerprint check\nChromium 150.0.7871.101\nLinux x86 64"
@@ -357,6 +407,49 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
         self.assertIn("BrowserScan fingerprint check", record["observed"]["text_excerpt"])
 
+    def test_collect_page_uses_creepjs_classifier_without_raw_text_payload(self):
+        value = self.creepjs_client_hints_value()
+        value["text"] = "CreepJS fingerprint check\nChromium 150.0.7871.101\nLinux x86 64"
+
+        class FakeCDP:
+            def __init__(self, page_value):
+                self.page_value = page_value
+
+            def call(self, method, params=None, *, session_id=None, timeout=20):
+                if method == "Target.createTarget":
+                    return {"targetId": "target-1"}, []
+                if method == "Target.attachToTarget":
+                    return {"sessionId": "session-1"}, []
+                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                    return {}, []
+                if method == "Runtime.evaluate":
+                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                raise AssertionError(f"unexpected CDP method: {method}")
+
+            def events_until(self, predicate, *, timeout=30):
+                return []
+
+        record = self.harness_module.collect_page(
+            FakeCDP(value),
+            "creepjs",
+            "CreepJS",
+            "https://abrahamjuliot.github.io/creepjs/",
+            wait_seconds=0,
+        )
+
+        self.assertEqual(record["detector_id"], "creepjs")
+        self.assertEqual((record["status"], record["severity"]), ("passed", "low"))
+        self.assertEqual(record["failure_mode"], "none")
+        self.assertIn("CreepJS", record["finding"])
+        self.assertNotIn("BrowserLeaks", record["finding"])
+        self.assertNotIn("Pixelscan", record["finding"])
+        self.assertNotIn("iphey", record["finding"])
+        self.assertNotIn("BrowserScan", record["finding"])
+        self.assertIn("uaData", record["observed"])
+        self.assertNotIn("text", record["observed"])
+        self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
+        self.assertIn("CreepJS fingerprint check", record["observed"]["text_excerpt"])
+
     def test_collect_page_uses_browserleaks_classifier_without_raw_text_payload(self):
         value = self.browserleaks_client_hints_value()
         value["text"] = "BrowserLeaks Client Hints\nChromium 150.0.7871.101\nLinux x86 64"
@@ -452,16 +545,19 @@ class DetectorHarnessTests(unittest.TestCase):
             ("BrowserScan", "https://www.browserscan.net/"),
         )
 
-    def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
+    def test_supported_collectors_includes_creepjs(self):
         self.assertEqual(
-            self.harness_module.SUPPORTED_COLLECTORS.get("browserleaks"),
-            ("BrowserLeaks", "https://browserleaks.com/client-hints"),
+            self.harness_module.SUPPORTED_COLLECTORS.get("creepjs"),
+            ("CreepJS", "https://abrahamjuliot.github.io/creepjs/"),
         )
-        self.assertNotIn("creepjs", self.harness_module.SUPPORTED_COLLECTORS)
+
+    def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
+        unsupported_detector = "unknown-detector"
+        self.assertNotIn(unsupported_detector, self.harness_module.SUPPORTED_COLLECTORS)
         proc = self.run_harness(
             "collect",
             "--detector",
-            "creepjs",
+            unsupported_detector,
             "--cdp-url",
             "http://127.0.0.1:9",
             "--wait-seconds",
@@ -469,7 +565,7 @@ class DetectorHarnessTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, self.harness_module.EXIT_COLLECT_UNAVAILABLE)
         self.assertEqual(proc.stdout, "")
-        self.assertIn("collector not implemented for detector: creepjs", proc.stderr)
+        self.assertIn(f"collector not implemented for detector: {unsupported_detector}", proc.stderr)
 
     def test_list_targets_reads_current_manifest(self):
         proc = self.run_harness("list-targets")
