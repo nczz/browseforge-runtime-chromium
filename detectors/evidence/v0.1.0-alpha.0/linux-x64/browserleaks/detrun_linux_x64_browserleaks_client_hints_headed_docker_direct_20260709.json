@@ -1,0 +1,151 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/client-hints"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:browserleaks:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_headed_client_hints",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Client Hints loaded in headed Docker/Xvfb mode with configured Linux Chromium UA-CH high entropy values and fullVersionList.",
+      "normalized_values": {
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "x86",
+            "bitness": "64",
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "fullVersionList": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150.0.7871.101"
+              }
+            ],
+            "mobile": false,
+            "model": "",
+            "platform": "Linux",
+            "platformVersion": "6.8.0",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "url": "https://browserleaks.com/client-hints"
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "browserleaks_headed_webdriver",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported navigator.webdriver=false in headed Docker/Xvfb mode.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "browserleaks_headed_screen",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported configured screen metrics in headed Docker/Xvfb mode.",
+      "normalized_values": {
+        "availHeight": 1040,
+        "availWidth": 1920,
+        "devicePixelRatio": 1,
+        "height": 1080,
+        "width": 1920
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "screen"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserLeaks page text, browser storage, network identifiers, and screenshots are not committed; committed evidence stores sanitized structured UA-CH/screen/automation values and raw capture SHA only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709.json",
+    "raw_capture_sha256": "36986a9227b0d8c6980fadf47f22ce72b21fcb0d2677e867cb64c8e5a8713531",
+    "sha256": "642836c83ce7bd06388c4869cf33a02c9e180889ddbf894863db68b673692c8f",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "faae3f68a867df2d8bd9d989038afaa49087fb345e1c442f801c2ce0b6b5fbd7"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb software",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T11:06:02.974449+00:00"
+}
