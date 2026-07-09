@@ -51,7 +51,7 @@ func Run(ctx context.Context, cfg Config, opts RunOptions) error {
 	cmd.Stdout = opts.Stdout
 	cmd.Stderr = opts.Stderr
 	cmd.Env = os.Environ()
-	for k, v := range cfg.Env {
+	for k, v := range plan.Env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}
 	return cmd.Run()

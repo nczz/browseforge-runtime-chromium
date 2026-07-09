@@ -49,8 +49,27 @@ func TestBuildPlanAddsTimezoneFingerprintArg(t *testing.T) {
 	if !containsArg(plan.Args, "--fingerprint-timezone=Asia/Taipei") {
 		t.Fatalf("missing timezone arg: %v", plan.Args)
 	}
+	if plan.Env["TZ"] != "Asia/Taipei" {
+		t.Fatalf("missing timezone env: %v", plan.Env)
+	}
 }
 
+func TestBuildPlanPreservesExplicitTimezoneEnv(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Env:         map[string]string{"TZ": "Europe/Paris"},
+		Fingerprint: FingerprintConfig{
+			Timezone: "Asia/Taipei",
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Env["TZ"] != "Europe/Paris" {
+		t.Fatalf("overrode explicit timezone env: %v", plan.Env)
+	}
+}
 func TestBuildPlanAddsLocaleFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
@@ -318,6 +337,33 @@ func TestRunDryRunDoesNotRequireBrowserBinary(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "--fingerprint=42") {
 		t.Fatalf("dry-run output missing seed: %s", out.String())
+	}
+}
+
+func TestRunAppliesPlanEnvironment(t *testing.T) {
+	dir := t.TempDir()
+	outPath := filepath.Join(dir, "env.txt")
+	browser := filepath.Join(dir, "browser")
+	script := "#!/bin/sh\nprintenv TZ > " + outPath + "\n"
+	if err := os.WriteFile(browser, []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+	cfg := Config{
+		BrowserBinary: browser,
+		UserDataDir:   filepath.Join(dir, "profile"),
+		Fingerprint: FingerprintConfig{
+			Timezone: "Asia/Taipei",
+		},
+	}
+	if err := Run(t.Context(), cfg, RunOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(string(got)) != "Asia/Taipei" {
+		t.Fatalf("browser did not receive TZ: %q", got)
 	}
 }
 

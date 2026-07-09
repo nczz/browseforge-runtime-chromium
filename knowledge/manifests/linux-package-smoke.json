@@ -1,7 +1,7 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8",
-  "artifact_size_bytes": 567794441,
+  "artifact_sha256": "64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9",
+  "artifact_size_bytes": 567797341,
   "checks": [
     {
       "check": "archive_integrity",
@@ -31,6 +31,9 @@
       "observed": {
         "arch": "amd64",
         "browser_binary": "/runtime/chrome",
+        "env": {
+          "TZ": "Asia/Taipei"
+        },
         "os": "linux",
         "required_args_present": [
           "--fingerprint=4242",
@@ -64,8 +67,21 @@
       "command": "docker linux/amd64 packaged runtime + CDP navigate https://bot.sannysoft.com/",
       "observed": {
         "browser_crash_regression_fixed": true,
+        "deviceMemory": 8,
         "devtools_navigation_completed": true,
-        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json"
+        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+        "hardwareConcurrency": 8,
+        "languages": [
+          "zh-TW",
+          "zh;q=0.9",
+          "en;q=0.8"
+        ],
+        "navigator_webdriver": false,
+        "timezone": "Asia/Taipei",
+        "webgl": {
+          "renderer": "Intel Iris OpenGL Engine",
+          "vendor": "Intel Inc."
+        }
       },
       "status": "passed_with_findings"
     }

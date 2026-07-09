@@ -14,12 +14,12 @@
     "hooks_status": "completed",
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8",
-      "archive_size_bytes": 567794441,
+      "archive_sha256": "64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9",
+      "archive_size_bytes": 567797341,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
-      "browser_binary_sha256": "326829a6059e545d1b4009fe32b75095932ff15f59f52d111cb9d1766bd68f76",
+      "browser_binary_sha256": "2a6f5a577f44651250c344523e6008b339f7f35f19f76302b14724408bb177b5",
       "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
       "provenance": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
       "runtime_assets_included": [
@@ -42,7 +42,7 @@
       "sbom": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "status": "packaged_smoke_launched_and_headless_detector_exercised",
+      "status": "packaged_smoke_launched_and_headless_detector_exercised_after_switch_propagation",
       "verification": [
         "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
         "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
@@ -50,7 +50,7 @@
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
       ],
-      "wrapper_binary_sha256": "7a6b746915de57daf1b899a4c49cbeb7045153c3ee3e017d965da1dfc2a8f992"
+      "wrapper_binary_sha256": "028c03ab4685ceece1fe881669bbc2dfdac50a9f3067b60dea3a4e2d6cf304ad"
     },
     "local_paths_checked": [
       {
@@ -79,11 +79,12 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
     "storage_quota_patch_status": "applied_to_external_checkout",
+    "switch_propagation_patch_status": "applied_to_external_checkout",
     "timezone_patch_status": "applied_to_external_checkout",
     "user_agent_patch_status": "applied_to_external_checkout",
     "webdriver_patch_status": "applied_to_external_checkout",
@@ -98,7 +99,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {
@@ -150,6 +151,8 @@
         "python3 scripts/apply_fonts_patch.py",
         "python3 scripts/apply_process_priority_patch.py --check",
         "python3 scripts/apply_process_priority_patch.py",
+        "python3 scripts/apply_switch_propagation_patch.py --check",
+        "python3 scripts/apply_switch_propagation_patch.py",
         "python3 scripts/chromium_docker.py plan",
         "python3 scripts/chromium_docker.py check",
         "python3 scripts/chromium_docker.py build-image --execute",

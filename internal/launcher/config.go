@@ -150,6 +150,15 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	if err != nil {
 		return CommandPlan{}, fmt.Errorf("resolve user_data_dir: %w", err)
 	}
+	env := copyEnv(c.Env)
+	if c.Fingerprint.Timezone != "" {
+		if env == nil {
+			env = map[string]string{}
+		}
+		if _, exists := env["TZ"]; !exists {
+			env["TZ"] = c.Fingerprint.Timezone
+		}
+	}
 	args := []string{"--no-first-run", "--test-type", automationControlledArg, webrtcIPHandlingArg, "--user-data-dir=" + userDataDir}
 	if c.RemoteDebugging.Address != "" {
 		args = append(args, "--remote-debugging-address="+c.RemoteDebugging.Address)
@@ -281,8 +290,18 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 		BrowserBinary:  c.BrowserBinary,
 		UserDataDir:    userDataDir,
 		Args:           args,
-		Env:            c.Env,
+		Env:            env,
 	}, nil
+}
+func copyEnv(src map[string]string) map[string]string {
+	if len(src) == 0 {
+		return nil
+	}
+	dst := make(map[string]string, len(src))
+	for key, value := range src {
+		dst[key] = value
+	}
+	return dst
 }
 
 func hasManagedPrefix(arg string) bool {

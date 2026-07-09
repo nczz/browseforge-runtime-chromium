@@ -35,7 +35,7 @@
         "navigator_webdriver": false,
         "title": "Antibot"
       },
-      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
       "severity": "low",
       "status": "pass",
       "surface": "automation_signals"
@@ -43,52 +43,54 @@
     {
       "detector_check": "languages_timezone",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context reported languages en-US and timezone UTC instead of configured zh-TW and Asia/Taipei.",
+      "finding": "Live detector context reported configured languages and timezone after renderer switch propagation plus wrapper TZ environment propagation.",
       "normalized_values": {
         "languages": [
-          "en-US"
+          "zh-TW",
+          "zh;q=0.9",
+          "en;q=0.8"
         ],
-        "timezone": "UTC"
+        "timezone": "Asia/Taipei"
       },
-      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
-      "severity": "high",
-      "status": "fail",
+      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "severity": "low",
+      "status": "pass",
       "surface": "locale"
     },
     {
       "detector_check": "hardware_concurrency_device_memory",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context reported host hardware values instead of configured hardware_concurrency=8 and device_memory=8.",
+      "finding": "Live detector context reported configured hardwareConcurrency=8 and deviceMemory=8.",
       "normalized_values": {
-        "deviceMemory": 16,
-        "hardwareConcurrency": 18
+        "deviceMemory": 8,
+        "hardwareConcurrency": 8
       },
-      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
-      "severity": "high",
-      "status": "fail",
+      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "severity": "low",
+      "status": "pass",
       "surface": "hardware"
     },
     {
       "detector_check": "webgl_vendor_renderer",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context reported SwiftShader/Google WebGL instead of configured Intel vendor/renderer.",
+      "finding": "Live detector context reported configured Intel WebGL vendor and renderer instead of SwiftShader/Google.",
       "normalized_values": {
-        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
-        "vendor": "Google Inc. (Google)"
+        "renderer": "Intel Iris OpenGL Engine",
+        "vendor": "Intel Inc."
       },
-      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
-      "severity": "high",
-      "status": "fail",
+      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "severity": "low",
+      "status": "pass",
       "surface": "webgl"
     },
     {
       "detector_check": "user_agent",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context exposed HeadlessChrome user-agent; headed detector matrix still required.",
+      "finding": "Live detector context still exposed HeadlessChrome because this smoke intentionally runs the headless Docker matrix; headed live detector matrix remains required for release-grade UA evidence.",
       "normalized_values": {
         "userAgent_family": "HeadlessChrome/150"
       },
-      "raw_value_hash": "063f2764a660de33a2be4fd5e6cd308df060ad7281e06c0d7c52e39aed59d37f",
+      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
       "severity": "medium",
       "status": "warn",
       "surface": "user_agent"
@@ -101,19 +103,19 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text not committed; sanitized excerpt keeps no IP, cookie, storage, or screenshot data.",
+    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
-    "sanitizer_version": "manual-sannysoft-smoke-1",
+    "sanitizer_version": "manual-sannysoft-smoke-2",
     "screenshot_metadata_redacted": true,
     "tokens_redacted": true
   },
   "schema_version": "1.1",
-  "status": "failed",
+  "status": "warning",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "495970a48e08dd1f0fe1bff792be630db21f6bbd14b51b79299510ebb48c4ffb",
-    "sha256": "4dc3adb1071bd46f824adfaf634f3200b6a5769e2b3c76c310794ab08d93e451",
+    "raw_capture_sha256": "3ab2f506a5b47da1e792c73b776cf5b8709e70ab57e57853df5f09c832487455",
+    "sha256": "245c5ad37a463e3b7e62c3ee21034037c6f4d480db22e0686cd11c81b5d85fd2",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -121,6 +123,7 @@
     "browser_family": "chromium",
     "browser_version": "150.0.7871.101",
     "container": true,
+    "display_mode": "headless",
     "gpu_mode": "headless swiftshader",
     "host_os": "macOS Docker Desktop linux/amd64 emulation",
     "locale_profile": "zh-TW",
@@ -128,5 +131,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T03:15:00.768803+00:00"
+  "tested_at": "2026-07-09T03:43:30.855519+00:00"
 }
