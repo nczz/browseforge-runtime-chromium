@@ -57,8 +57,18 @@
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
   "evidence_count": 17,
-  "gaps": [],
-  "generated_at": "2026-07-09T13:50:22.921120+00:00",
+  "gaps": [
+    {
+      "detector_id": "browserleaks",
+      "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
+      "gap_id": "browserleaks_audio_headless_vs_headed",
+      "missing": [
+        "headed"
+      ],
+      "surface": "audio"
+    }
+  ],
+  "generated_at": "2026-07-09T14:30:08.137374+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

@@ -187,6 +187,17 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "audio",
         }
 
+    def browserleaks_audio_summary_result(self, *, detector_check, metrics):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized BrowserLeaks AudioContext summary evidence.",
+            "normalized_values": metrics,
+            "severity": "info",
+            "status": "pass",
+            "surface": "audio",
+        }
+
     def font_score_result(self, *, detector_check, metrics_sha256, glyph_sha256=None):
         values = {
             "candidateCount": 2,
@@ -1322,6 +1333,94 @@ class DetectorHarnessTests(unittest.TestCase):
                     self.assertIsInstance(deltas[metric], (int, float))
                     self.assertNotIsInstance(deltas[metric], bool)
             self.assertIn("differ", comparison["finding"].lower())
+
+    def test_compare_scores_command_writes_browserleaks_audio_summary_deltas(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="browserleaks_audio_headless",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="browserleaks_audio_headless_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.77295988,
+                            "sumAbs": 83.86503121,
+                        },
+                    )
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headed_xvfb",
+                label="browserleaks_audio_headed",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="browserleaks_audio_headed_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.77295988,
+                            "sumAbs": 84.01503121,
+                        },
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = self.score_comparison(payload, surface="audio", detector_id="browserleaks")
+            self.assertEqual(comparison["comparison_id"], "browserleaks_audio_headless_vs_headed")
+            self.assertEqual(comparison["status"], "warning")
+            self.assertEqual(comparison["metric_deltas"]["sampleRate"], 0)
+            self.assertEqual(comparison["metric_deltas"]["length"], 0)
+            self.assertAlmostEqual(comparison["metric_deltas"]["sumAbs"], 0.15)
+            self.assertIn("BrowserLeaks bounded AudioContext", comparison["finding"])
+
+    def test_compare_scores_reports_gap_when_browserleaks_audio_counterpart_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="browserleaks_audio_headless_only",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="browserleaks_audio_headless_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.77295988,
+                            "sumAbs": 83.86503121,
+                        },
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            gap = next(
+                (
+                    item
+                    for item in payload["gaps"]
+                    if item.get("surface") == "audio"
+                    and item.get("gap_id") == "browserleaks_audio_headless_vs_headed"
+                    and item.get("missing") == ["headed"]
+                ),
+                None,
+            )
+            self.assertIsNotNone(gap, payload["gaps"])
+            self.assertIn("BrowserLeaks audio comparison requires both headless and headed", gap["finding"])
 
     def test_compare_scores_recognizes_matching_font_glyphs_but_warns_on_metric_hash_drift(self):
         with tempfile.TemporaryDirectory() as td:

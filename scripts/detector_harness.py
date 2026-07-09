@@ -391,6 +391,27 @@ def _collect_audio_metric_records(evidence_rows: list[dict]) -> list[dict]:
             })
     return records
 
+def _collect_browserleaks_audio_probe_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        if detector.get("detector_id") != "browserleaks":
+            continue
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "audio":
+                continue
+            if not all(field in values for field in ("sampleRate", "length", "sum", "sumAbs")):
+                continue
+            records.append({
+                "detector_id": "browserleaks",
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "metrics": {key: values[key] for key in ("sampleRate", "length", "sum", "sumAbs")},
+            })
+    return records
+
+
 def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
     for evidence in evidence_rows:
@@ -449,6 +470,34 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "surface": "audio",
             "missing": sorted({"headless", "headed"} - set(creepjs_audio)),
             "finding": "CreepJS audio comparison requires both headless and headed sanitized evidence.",
+        })
+
+    browserleaks_audio = {
+        record["display_mode"]: record
+        for record in _collect_browserleaks_audio_probe_records(evidence_rows)
+    }
+    if {"headless", "headed"} <= set(browserleaks_audio):
+        headless = browserleaks_audio["headless"]
+        headed = browserleaks_audio["headed"]
+        deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
+        identical = all(abs(value) <= 1e-9 for value in deltas.values())
+        comparisons.append({
+            "comparison_id": "browserleaks_audio_headless_vs_headed",
+            "detector_id": "browserleaks",
+            "surface": "audio",
+            "status": "pass" if identical else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "metric_deltas": deltas,
+            "finding": "BrowserLeaks bounded AudioContext summaries match across headless/headed evidence." if identical else "BrowserLeaks bounded AudioContext summaries differ across headless/headed evidence; release-grade BrowserLeaks audio score baseline remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "browserleaks_audio_headless_vs_headed",
+            "surface": "audio",
+            "detector_id": "browserleaks",
+            "missing": sorted({"headless", "headed"} - set(browserleaks_audio)),
+            "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
         })
 
     font_records = _collect_font_metric_records(evidence_rows)
