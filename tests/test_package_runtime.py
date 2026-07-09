@@ -154,6 +154,22 @@ class PackageRuntimeTests(unittest.TestCase):
             self.assertTrue(Path(payload["archive"]).is_file())
             self.assertRegex((package["out"] / "checksums.txt").read_text(), r"^[0-9a-f]{64}  browseforge-runtime-chromium-")
 
+    def test_package_writes_target_os_and_arch_to_metadata_outputs(self):
+        with tempfile.TemporaryDirectory() as td:
+            package = self._run_package(Path(td))
+
+            expected_target = {"os": "linux", "arch": "x64"}
+            metadata_outputs = {
+                "artifact-manifest.json": json.loads((package["stage"] / "artifact-manifest.json").read_text()),
+                "provenance.json": json.loads((package["stage"] / "provenance.json").read_text()),
+                "SBOM.json": json.loads((package["stage"] / "SBOM.json").read_text()),
+            }
+
+            for name, metadata in metadata_outputs.items():
+                self.assertEqual(metadata["platform"], "linux-x64", name)
+                self.assertEqual(metadata["os"], expected_target["os"], name)
+                self.assertEqual(metadata["arch"], expected_target["arch"], name)
+
     def test_package_includes_linux_runtime_assets_in_stage_manifest_sbom_and_zip(self):
         with tempfile.TemporaryDirectory() as td:
             package = self._run_package(Path(td))

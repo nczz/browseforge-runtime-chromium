@@ -14,8 +14,8 @@
     "hooks_status": "completed",
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
-      "archive_size_bytes": 567798113,
+      "archive_sha256": "1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a",
+      "archive_size_bytes": 567798165,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
@@ -38,11 +38,11 @@
         "headless_command_resources.pak",
         "locales/*.pak"
       ],
-      "runtime_manifest_sha256": "f55cf45d17e3c92bbd686dc110cea99eb6a7aa4bae7e390d4eed8b7111c72513",
+      "runtime_manifest_sha256": "31edbfa3f37dc9f552a5c54d8f61e441513d6b2248a0d3acca6f299f97b643e4",
       "sbom": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "status": "packaged_smoke_launched_after_uach_full_version_rebuild",
+      "status": "packaged_smoke_launched_after_uach_full_version_rebuild_with_os_arch_metadata",
       "verification": [
         "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
         "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
@@ -50,7 +50,7 @@
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
       ],
-      "wrapper_binary_sha256": "eaa1d07a3b63f5cef95f0d1b291f6eacc4c51ce533639d8ae21b47d0790da94f"
+      "wrapper_binary_sha256": "c5363386ef27aa647c458d073f6bc72c8b504e320eee1f82911179fccf2d7328"
     },
     "local_paths_checked": [
       {
@@ -79,7 +79,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact. The rebuilt artifact live SannySoft smoke now reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
@@ -99,7 +99,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact. The rebuilt artifact live SannySoft smoke now reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {

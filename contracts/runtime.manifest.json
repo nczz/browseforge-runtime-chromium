@@ -1,48 +1,46 @@
 {
   "$schema": "./runtime-manifest.schema.json",
-  "id": "browseforge-chromium",
-  "name": "BrowseForge Chromium Runtime",
-  "family": "chromium",
-  "version": "v0.1.0-alpha.0",
-  "status": "planning",
-  "browseforge": {
-    "min_version": "v2.0.0",
-    "runtime_id": "browseforge-chromium",
-    "profile_field": "runtime_id"
+  "artifacts": {
+    "checksums": "checksums.txt",
+    "detector_summary": "detector-summary.json",
+    "graph_export": "graph.db.zst",
+    "knowledge_export": "knowledge-export.jsonl",
+    "release_prefix": "browseforge-runtime-chromium"
   },
   "binary": {
     "linux-x64": {
-      "relative_path": "chrome",
-      "packaged": false
+      "packaged": true,
+      "relative_path": "chrome"
     },
     "macos-arm64": {
-      "relative_path": "Chromium.app/Contents/MacOS/Chromium",
-      "packaged": false
+      "packaged": false,
+      "relative_path": "Chromium.app/Contents/MacOS/Chromium"
     },
     "macos-x64": {
-      "relative_path": "Chromium.app/Contents/MacOS/Chromium",
-      "packaged": false
+      "packaged": false,
+      "relative_path": "Chromium.app/Contents/MacOS/Chromium"
     },
     "windows-x64": {
-      "relative_path": "chrome.exe",
-      "packaged": false
+      "packaged": false,
+      "relative_path": "chrome.exe"
     }
   },
+  "browseforge": {
+    "min_version": "v2.0.0",
+    "profile_field": "runtime_id",
+    "runtime_id": "browseforge-chromium"
+  },
   "capabilities": {
+    "agent_web_sessions": true,
+    "native_proxy": true,
     "persistent_context": true,
     "playwright_bind": true,
-    "agent_web_sessions": true,
+    "requires_external_binary": true,
     "seed_fingerprint": true,
     "structured_config": true,
-    "native_proxy": true,
-    "webrtc_masking": true,
-    "requires_external_binary": true
+    "webrtc_masking": true
   },
-  "profile": {
-    "user_data_dir_policy": "one persistent user data directory per BrowseForge profile",
-    "lock_policy": "runtime must fail clearly or repair transient locks without corrupting profile data",
-    "migration_policy": "same-family Chromium profile migration may be supported only after explicit evidence"
-  },
+  "family": "chromium",
   "fingerprint": {
     "seed_input": "uint32",
     "surfaces": [
@@ -63,11 +61,13 @@
       "automation_signals"
     ]
   },
-  "artifacts": {
-    "release_prefix": "browseforge-runtime-chromium",
-    "checksums": "checksums.txt",
-    "knowledge_export": "knowledge-export.jsonl",
-    "graph_export": "graph.db.zst",
-    "detector_summary": "detector-summary.json"
-  }
+  "id": "browseforge-chromium",
+  "name": "BrowseForge Chromium Runtime",
+  "profile": {
+    "lock_policy": "runtime must fail clearly or repair transient locks without corrupting profile data",
+    "migration_policy": "same-family Chromium profile migration may be supported only after explicit evidence",
+    "user_data_dir_policy": "one persistent user data directory per BrowseForge profile"
+  },
+  "status": "alpha",
+  "version": "v0.1.0-alpha.0"
 }

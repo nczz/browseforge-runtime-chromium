@@ -31,7 +31,7 @@
       "status": "passed"
     },
     {
-      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027 and size 567798113 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools and SannySoft navigation completed using knowledge/manifests/linux-package-smoke.json.",
+      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a and size 567798165 bytes; artifact-manifest.json/provenance.json/SBOM.json include explicit os=linux and arch=x64 target metadata; packaged runtime.manifest.json records alpha status and linux-x64 packaged=true; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools and SannySoft navigation completed using knowledge/manifests/linux-package-smoke.json.",
       "gate_id": "runtime-artifact-produced",
       "status": "passed"
     },
@@ -41,7 +41,7 @@
       "status": "warning"
     },
     {
-      "evidence": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and manifests record sha256 05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027.",
+      "evidence": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; artifact/provenance/SBOM metadata carry platform linux-x64 plus os linux and arch x64; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and manifests record sha256 1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a.",
       "gate_id": "sbom-provenance-release-assets",
       "status": "passed"
     }

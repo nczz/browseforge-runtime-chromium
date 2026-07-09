@@ -53,6 +53,13 @@ def file_record(path: Path, *, root: Path | None = None) -> dict[str, object]:
 def optional_file_sha256(path: Path) -> str | None:
     return sha256(path) if path.is_file() else None
 
+def platform_os_arch(platform_id: str) -> tuple[str, str]:
+    parts = platform_id.split('-', 1)
+    if len(parts) != 2 or not all(parts):
+        raise SystemExit(f'invalid platform id: {platform_id}')
+    return parts[0], parts[1]
+
+
 def git_commit() -> str | None:
     proc = subprocess.run(
         ['git', 'rev-parse', 'HEAD'],
@@ -75,6 +82,8 @@ def build_sbom(manifest: dict[str, object]) -> dict[str, object]:
         'runtime_id': manifest['runtime_id'],
         'runtime_version': manifest['runtime_version'],
         'platform': manifest['platform'],
+        'os': manifest['os'],
+        'arch': manifest['arch'],
         'browser_version': manifest['browser_version'],
         'source_ref': manifest['source_ref'],
         'patchset_id': manifest['patchset_id'],
@@ -151,6 +160,7 @@ def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
         copy_required_linux_runtime_assets(browser, stage)
 def package(args):
     platform_id = args.platform
+    os_name, arch = platform_os_arch(platform_id)
     out_dir = Path(args.output_dir)
     stage = out_dir / 'stage' / f'browseforge-runtime-chromium-{args.runtime_version}-{platform_id}'
     if stage.exists():
@@ -176,6 +186,8 @@ def package(args):
         'runtime_id': 'browseforge-chromium',
         'runtime_version': args.runtime_version,
         'platform': platform_id,
+        'os': os_name,
+        'arch': arch,
         'browser_version': args.browser_version,
         'source_ref': args.source_ref,
         'patchset_id': args.patchset_id,
@@ -196,6 +208,8 @@ def package(args):
         'runtime_id': manifest['runtime_id'],
         'runtime_version': manifest['runtime_version'],
         'platform': manifest['platform'],
+        'os': manifest['os'],
+        'arch': manifest['arch'],
         'browser_version': manifest['browser_version'],
         'source_ref': manifest['source_ref'],
         'patchset_id': manifest['patchset_id'],
