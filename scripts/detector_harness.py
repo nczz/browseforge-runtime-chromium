@@ -396,6 +396,11 @@ def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
         return "warning", "BrowserLeaks Client Hints fullVersionList is present, but Chromium version is not full dotted version.", "medium"
     return "passed", "BrowserLeaks Client Hints loaded with configured Linux Chromium high entropy values and fullVersionList.", "low"
 
+def classify_pixelscan_client_hints(value: dict) -> tuple[str, str, str]:
+    status, finding, severity = classify_browserleaks_client_hints(value)
+    return status, finding.replace("BrowserLeaks Client Hints", "Pixelscan fingerprint check"), severity
+
+
 
 def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int):
     target, _ = cdp.call("Target.createTarget", {"url": "about:blank"})
@@ -560,6 +565,8 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         status, finding, severity = classify_sannysoft({**value, "text": text})
     elif detector_id == "browserleaks":
         status, finding, severity = classify_browserleaks_client_hints({**value, "text": text})
+    elif detector_id == "pixelscan":
+        status, finding, severity = classify_pixelscan_client_hints({**value, "text": text})
     else:
         status, finding, severity = "warning", "Detector loaded; manual review required.", "medium"
     value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
@@ -579,6 +586,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
 SUPPORTED_COLLECTORS = {
     "sannysoft": ("SannySoft", "https://bot.sannysoft.com/"),
     "browserleaks": ("BrowserLeaks", "https://browserleaks.com/client-hints"),
+    "pixelscan": ("Pixelscan", "https://pixelscan.net/fingerprint-check"),
 }
 
 def collect(args):

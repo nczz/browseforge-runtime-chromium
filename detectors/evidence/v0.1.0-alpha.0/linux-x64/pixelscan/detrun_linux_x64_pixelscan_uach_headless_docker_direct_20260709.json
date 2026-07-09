@@ -1,0 +1,124 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "pixelscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#pixelscan",
+    "name": "Pixelscan",
+    "url": "https://pixelscan.net/fingerprint-check"
+  },
+  "evidence_id": "evidence_linux_x64_pixelscan_uach_headless_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headless",
+    "matrix_key": "linux-x64:pixelscan:uach:headless:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "pixelscan_fingerprint_check_js_api",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint-check page loaded in the rebuilt packaged Linux runtime and navigator.userAgentData high entropy values matched the configured Linux Chromium persona, including fullVersionList Chromium 150.0.7871.101.",
+      "normalized_values": {
+        "available": true,
+        "fullVersionList_present": true,
+        "highEntropy": {
+          "architecture": "x86",
+          "bitness": "64",
+          "brands": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150"
+            }
+          ],
+          "fullVersionList": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150.0.7871.101"
+            }
+          ],
+          "mobile": false,
+          "model": "",
+          "platform": "Linux",
+          "platformVersion": "6.8.0",
+          "wow64": false
+        },
+        "lowEntropy": {
+          "brands": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150"
+            }
+          ],
+          "mobile": false,
+          "platform": "Linux"
+        },
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "url": "https://pixelscan.net/fingerprint-check"
+      },
+      "raw_value_hash": "ab1ccde0476174ce0d9521feb2a8b19b9ccba46e4e9facbd374227cf2a4dd109",
+      "severity": "low",
+      "status": "pass",
+      "surface": "client_hints"
+    }
+  ],
+  "run_id": "detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw Pixelscan page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-pixelscan-uach-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json",
+    "raw_capture_sha256": "c191cd1d659d9a51cc2f372193134a7b970953a362dcb371adedc34b67f2e470",
+    "sha256": "7896a835b7f6d93c7a3b782fbfd7f8206c21ab1c70a77a3ec9ac570aba16249f",
+    "summary_path": "detector-summary.json"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headless swiftshader",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T08:59:04.014958+00:00"
+}
