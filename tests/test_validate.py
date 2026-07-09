@@ -268,6 +268,42 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertRegex(message, r"artifact|linux-x64|release", message)
         self.assertNotRegex(message, r"detector[- ]summary|coverage_gap|live-detector", message)
 
+    def test_validate_rejects_evidence_schema_missing_committed_contract_values(self) -> None:
+        """The release validation gate keeps the evidence schema aligned with committed harness/matrix shapes."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            schema_path = temp_root / "detectors" / "evidence-schema.json"
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            schema["properties"]["matrix"]["properties"]["display_mode"]["enum"].remove("headed_xvfb")
+            self._write_json(schema_path, schema)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("evidence schema", message)
+        self.assertIn("matrix.display_mode", message)
+        self.assertIn("headed_xvfb", message)
+
+    def test_validate_rejects_committed_detector_evidence_value_not_admitted_by_schema(self) -> None:
+        """Committed detector evidence cannot drift beyond the schema enum/property contract."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_detector_evidence(
+                temp_root / "detectors" / "evidence" / "v0.1.0-alpha.0" / "linux-x64" / "sannysoft" / "bad-proxy.json",
+                matrix={"display_mode": "headed", "network_mode": "direct", "proxy": "unlisted-proxy"},
+                storage={"evidence_path": "detectors/evidence/bad-proxy.json", "sha256": "fixture"},
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("detector evidence", message)
+        self.assertIn("matrix.proxy", message)
+        self.assertIn("not admitted", message)
+
+
     def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
         try:
@@ -330,7 +366,33 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self._write_json(
             root / "detectors" / "evidence-schema.json",
             {
-                "properties": {"schema_version": {"const": "1.1"}},
+                "properties": {
+                    "schema_version": {"const": "1.1"},
+                    "harness": {
+                        "properties": {
+                            "name": {"enum": ["browseforge-detector-harness", "browseforge-detector-harness + local-connect-proxy"]},
+                            "mode": {"enum": ["manual_ingest", "synthetic_fixture", "live_collect", "live_collect_local_proxy"]},
+                        }
+                    },
+                    "matrix": {
+                        "properties": {
+                            "display_mode": {"enum": ["headed", "headed_xvfb", "headless", "unknown"]},
+                            "network_mode": {"enum": ["direct", "proxy", "local_proxy", "unknown"]},
+                            "proxy": {"enum": ["none", "redacted", "public_test_infra", "local-connect-observer"]},
+                        }
+                    },
+                    "storage": {
+                        "properties": {
+                            "evidence_path": {},
+                            "sha256": {},
+                            "raw_capture_path": {},
+                            "raw_capture_sha256": {},
+                            "proxy_summary_sha256": {},
+                            "text_sha256": {},
+                            "summary_path": {},
+                        }
+                    },
+                },
                 "required": ["run_id", "evidence_id", "artifact_id", "matrix", "status", "failure_mode", "storage", "kg"],
             },
         )
@@ -548,6 +610,25 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         return gaps
         self.fail(f"test fixture requested {count} detector coverage gaps but only {len(gaps)} are defined")
         return gaps
+
+    def _write_detector_evidence(
+        self,
+        path: Path,
+        *,
+        matrix: dict[str, Any],
+        storage: dict[str, Any],
+    ) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "harness": {"name": "browseforge-detector-harness", "mode": "live_collect"},
+            "matrix": {
+                "display_mode": matrix["display_mode"],
+                "network_mode": matrix["network_mode"],
+                "proxy": matrix["proxy"],
+            },
+            "storage": storage,
+        }
+        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
     def _write_json(self, path: Path, payload: object) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

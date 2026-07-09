@@ -132,6 +132,57 @@ def load_jsonl(path: str) -> list[dict]:
                 raise SystemExit(f"{path}:{line_no}: invalid JSONL: {exc}") from exc
     return records
 
+def validate_evidence_schema_contract(evidence_schema: dict) -> None:
+    properties = evidence_schema.get("properties", {})
+    harness_props = properties.get("harness", {}).get("properties", {})
+    matrix_props = properties.get("matrix", {}).get("properties", {})
+    storage_props = properties.get("storage", {}).get("properties", {})
+    required_enums = {
+        "harness.name": (harness_props.get("name", {}).get("enum") or [], {"browseforge-detector-harness", "browseforge-detector-harness + local-connect-proxy"}),
+        "harness.mode": (harness_props.get("mode", {}).get("enum") or [], {"manual_ingest", "synthetic_fixture", "live_collect", "live_collect_local_proxy"}),
+        "matrix.display_mode": (matrix_props.get("display_mode", {}).get("enum") or [], {"headed", "headed_xvfb", "headless", "unknown"}),
+        "matrix.network_mode": (matrix_props.get("network_mode", {}).get("enum") or [], {"direct", "proxy", "local_proxy", "unknown"}),
+        "matrix.proxy": (matrix_props.get("proxy", {}).get("enum") or [], {"none", "redacted", "public_test_infra", "local-connect-observer"}),
+    }
+    for field, (actual_values, required_values) in required_enums.items():
+        missing_values = sorted(required_values - set(actual_values))
+        if missing_values:
+            raise SystemExit(f"evidence schema {field} missing admitted values: {missing_values}")
+
+    required_storage_keys = {"evidence_path", "sha256", "raw_capture_path", "raw_capture_sha256", "proxy_summary_sha256", "text_sha256", "summary_path"}
+    missing_storage_keys = sorted(required_storage_keys - set(storage_props))
+    if missing_storage_keys:
+        raise SystemExit(f"evidence schema storage missing properties: {missing_storage_keys}")
+
+    admitted = {
+        "harness.name": set(harness_props["name"]["enum"]),
+        "harness.mode": set(harness_props["mode"]["enum"]),
+        "matrix.display_mode": set(matrix_props["display_mode"]["enum"]),
+        "matrix.network_mode": set(matrix_props["network_mode"]["enum"]),
+        "matrix.proxy": set(matrix_props["proxy"]["enum"]),
+    }
+    storage_keys = set(storage_props)
+    for path in sorted((ROOT / "detectors" / "evidence").glob("**/*.json")):
+        with path.open("r", encoding="utf-8") as fh:
+            evidence = json.load(fh)
+        values = {
+            "harness.name": evidence.get("harness", {}).get("name"),
+            "harness.mode": evidence.get("harness", {}).get("mode"),
+            "matrix.display_mode": evidence.get("matrix", {}).get("display_mode"),
+            "matrix.network_mode": evidence.get("matrix", {}).get("network_mode"),
+            "matrix.proxy": evidence.get("matrix", {}).get("proxy"),
+        }
+        for field, value in values.items():
+            if value not in admitted[field]:
+                rel = path.relative_to(ROOT)
+                raise SystemExit(f"detector evidence {rel} {field} value {value!r} is not admitted by evidence schema")
+        for storage_key in evidence.get("storage", {}):
+            if storage_key not in storage_keys:
+                rel = path.relative_to(ROOT)
+                raise SystemExit(f"detector evidence {rel} storage key {storage_key!r} is not admitted by evidence schema")
+
+
+
 
 def main() -> None:
     missing = [path for path in REQUIRED_FILES if not (ROOT / path).is_file()]
@@ -181,6 +232,8 @@ def main() -> None:
     for field in ["run_id", "evidence_id", "artifact_id", "matrix", "status", "failure_mode", "storage", "kg"]:
         if field not in evidence_schema["required"]:
             raise SystemExit(f"evidence schema missing required field {field}")
+    validate_evidence_schema_contract(evidence_schema)
+
 
     reference_sources = load_json("knowledge/manifests/reference-sources.json")
     source_class_ids = {src["id"] for src in reference_sources["source_classes"]}

@@ -34,7 +34,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - Detector score comparisons are generated from sanitized evidence and keep release-grade status false while baselines are partial.
 - `live-detector-evidence` cannot pass while `detector-summary.json` still has coverage gaps or blocking findings.
 - External proxy/IP coherence evidence must include sanitized proxy exit-region and detector geolocation-region fields; local CONNECT proxy routing evidence is accepted only as routing proof.
-- `detectors/evidence-schema.json` must admit every committed sanitized evidence harness, matrix, and storage shape, including headed Xvfb and routing-only local proxy observations.
+- `scripts/validate.py` enforces that `detectors/evidence-schema.json` admits every committed sanitized evidence harness, matrix, and storage shape, including headed Xvfb and routing-only local proxy observations.
 - Detector regressions block release unless explicitly accepted.
 
 ## Knowledge gates
