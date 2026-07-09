@@ -139,6 +139,25 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     edge_properties = edge.get("properties") or {}
                     self.assertNotEqual("blocked", edge_properties.get("status"), f"SUPPORTS_GATE edge to {gate_id} must not be blocked")
 
+    def test_browseforge_adapter_gate_tracks_native_stealth_config_commit(self) -> None:
+        graph = self._load_graph()
+        gate_node = self._node_by_id(graph, "ReleaseGate:browseforge-adapter-merged")
+        self.assertIsNotNone(gate_node)
+        assert gate_node is not None
+        properties = gate_node.get("properties")
+        self.assertIsInstance(properties, dict)
+        assert isinstance(properties, dict)
+        evidence = properties.get("evidence")
+        self.assertIsInstance(evidence, str)
+        assert isinstance(evidence, str)
+        for token in [
+            "ffee461",
+            "--browseforge-stealth-config",
+            "--browseforge-stealth-mode=enabled",
+            "profile-scoped native stealth persona config",
+        ]:
+            self.assertIn(token, evidence)
+
     def test_committed_detector_runs_do_not_keep_missing_artifact_placeholders(self) -> None:
         """Detectors with committed linux-x64 evidence must not keep no-artifact placeholders as evidence."""
         graph = self._load_graph()

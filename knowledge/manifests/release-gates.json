@@ -21,7 +21,7 @@
       "status": "passed"
     },
     {
-      "evidence": "BrowseForge commit 76ec639 dispatches browseforge-chromium through the Chromium launcher; local dogfood evidence records GET/runtime config, profile create, session launch, RuntimeID reporting, profile isolation, and Playwright Bind connection.",
+      "evidence": "BrowseForge commit ffee461 dispatches browseforge-chromium through the Chromium launcher and now writes a profile-scoped native stealth persona config passed with --browseforge-stealth-config plus --browseforge-stealth-mode=enabled; local dogfood evidence records GET/runtime config, profile create, session launch, RuntimeID reporting, profile isolation, and Playwright Bind connection.",
       "gate_id": "browseforge-adapter-merged",
       "status": "passed"
     },
