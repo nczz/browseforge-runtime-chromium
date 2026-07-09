@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures an unscored WebAudio probe, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures unscored WebAudio and FontFaceSet probes, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -94,11 +94,11 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font row was completed.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke with fingerprint.fonts allowlist reported document.fonts.check() available=true for sampled desktop font families. Font metrics, glyph raster, and BrowserLeaks/CreepJS/Pixelscan font comparison remain required.",
       "release_blocker": true,
-      "result": "not_tested",
-      "severity": "high",
-      "status": "blocked",
+      "result": "warn_linux_sannysoft_font_availability_only",
+      "severity": "medium",
+      "status": "detector_tested",
       "surface": "fonts"
     },
     {

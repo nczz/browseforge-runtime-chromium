@@ -153,6 +153,28 @@
       "severity": "medium",
       "status": "warning",
       "surface": "audio"
+    },
+    {
+      "detector_check": "font_face_set_check",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live collector checked document.fonts.check() for the configured font allowlist and common desktop families; all sampled families returned available. This proves FontFaceSet availability override exercise, but metric/glyph/raster coherence and BrowserLeaks/CreepJS/Pixelscan font comparison remain required.",
+      "normalized_values": {
+        "available": true,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        }
+      },
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
+      "severity": "medium",
+      "status": "warning",
+      "surface": "fonts"
     }
   ],
   "run_id": "detrun_linux_x64_sannysoft_headless_docker_direct_20260709",
@@ -162,10 +184,10 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the source-controlled Linux detector smoke config with fingerprint.user_agent and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
+    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the Linux detector smoke config with fingerprint.user_agent plus a fingerprint.fonts allowlist and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
-    "sanitizer_version": "source-detector-harness-sannysoft-3",
+    "sanitizer_version": "source-detector-harness-sannysoft-4",
     "screenshot_metadata_redacted": true,
     "tokens_redacted": true
   },
@@ -173,8 +195,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "5a9aa699232a81c12e6966a7673ed392ae5c1ad9f3bd0ed87da3ce28e97b2266",
-    "sha256": "7d8f19626fc6b94c97697347d810219a17ba16ebebe55460fec0120d4babf521",
+    "raw_capture_sha256": "d15e3f7b8ca40564ab31654f02bda15687a80a66369cb53cb21d46e405e811ef",
+    "sha256": "9f25aaa6aa3bed548ec58be32714243dabd5071e1e6e0a91269f11ea127ed5c6",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -190,5 +212,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T04:36:12.262362+00:00"
+  "tested_at": "2026-07-09T04:44:09.475421+00:00"
 }
