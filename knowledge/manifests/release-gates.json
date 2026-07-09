@@ -34,18 +34,18 @@
     },
     {
       "gate_id": "runtime-artifact-produced",
-      "status": "blocked",
-      "blocker": "No patched Chromium binary exists yet; build automation now exposes an explicit Docker deps-image `build-chrome` command for `autoninja -C out/BrowseForgeLinuxDocker chrome`, but the command has not produced a release-grade patched chrome binary/package."
+      "status": "passed",
+      "evidence": "python3 scripts/package_linux_runtime.py --execute produced dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 1e6638e61ac7994cb49a59c2883bf329b0f5cefc8ed130f5f386982841509af3 from patched Chromium chrome sha256 63345fc333beeb7a0a2ab0ef297e676db848fde3daf1d775f9ff339cd3630719 and wrapper sha256 eec42ecf6f0d53ae7573f13e7b4812293a53eea57c1e0a44743ca88f8882939a."
     },
     {
       "gate_id": "live-detector-evidence",
       "status": "blocked",
-      "blocker": "Source-level navigator.webdriver, navigator.hardwareConcurrency, navigator.deviceMemory, Screen API dimension, navigator.platform, timezone, navigator language, navigator.userAgent, navigator.userAgentData, and StorageManager quota and navigator.plugins/pdfViewerEnabled and WebRTC ICE candidate and WebAudio output and Canvas readback, WebGL vendor/renderer, feature parity, and font availability patches are applied in the external Chromium checkout, but no patched Chromium binary or live detector matrix exists yet; release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required."
+      "blocker": "A patched Linux x64 Chromium runtime artifact exists, but release-grade BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence remains required for the source-level navigator.webdriver, navigator.hardwareConcurrency, navigator.deviceMemory, Screen API dimension, navigator.platform, timezone, navigator language, navigator.userAgent, navigator.userAgentData, StorageManager quota, navigator.plugins/pdfViewerEnabled, WebRTC ICE candidate, WebAudio output, Canvas readback, WebGL vendor/renderer, feature parity, and font availability patches."
     },
     {
       "gate_id": "sbom-provenance-release-assets",
-      "status": "blocked",
-      "blocker": "Packaging now emits non-placeholder SPDX-2.3-style SBOM metadata, input file hashes, source-acquisition/patchset manifest hashes, and git commit provenance for packaged inputs; release-grade SBOM/provenance still requires a real patched Chromium artifact plus Chromium DEPS/source checkout metadata from the release build."
+      "status": "passed",
+      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, and patched chrome; python3 -m json.tool validated artifact-manifest.json/provenance.json/SBOM.json, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256."
     }
   ]
 }
