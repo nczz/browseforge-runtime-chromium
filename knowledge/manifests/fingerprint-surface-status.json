@@ -22,9 +22,9 @@
       "surface": "UA"
     },
     {
-      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke in headless and headed Docker/Xvfb modes, BrowserScan UA-CH smoke in headless and headed Docker/Xvfb modes, iphey UA-CH smoke, and CreepJS UA-CH smoke. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101.",
+      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke in headless and headed Docker/Xvfb modes, BrowserScan UA-CH smoke in headless and headed Docker/Xvfb modes, iphey UA-CH smoke, and CreepJS UA-CH smoke in headless and headed Docker/Xvfb modes. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101.",
       "release_blocker": false,
-      "result": "pass_linux_multi_detector_uach_with_browserleaks_pixelscan_browserscan_headed",
+      "result": "pass_linux_multi_detector_uach_with_creepjs_headed",
       "severity": "info",
       "status": "detector_tested",
       "surface": "Client Hints"
@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector page metrics extraction now records detector-reported audio metric values from sanitized live page text. BrowserLeaks/CreepJS release-grade score comparison and native/headed matrix remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector metrics extraction now records detector-reported audio metric values from sanitized live page text in both headless and headed Docker/Xvfb modes. BrowserLeaks/CreepJS release-grade score comparison and native headed matrix remain required.",
       "release_blocker": true,
-      "result": "warn_linux_multi_detector_page_context_audio_plus_creepjs_metrics",
+      "result": "warn_linux_multi_detector_page_context_audio_plus_creepjs_headless_headed_metrics",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
@@ -126,9 +126,9 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft was verified in both headless and headed Docker/Xvfb display modes with configured UA omitting HeadlessChrome; CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in headless Docker.",
+      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft_headless_and_headed_webdriver_false_creepjs_scores_recorded",
+      "result": "pass_linux_multi_detector_headed_webdriver_false_creepjs_scores_recorded",
       "severity": "info",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"
@@ -150,9 +150,9 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, and BrowserScan smokes now exist in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and native headed Linux/macOS detector matrix remains absent.",
+      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and native headed Linux/macOS detector matrix remains absent.",
       "release_blocker": true,
-      "result": "linux_headless_and_headed_xvfb_sannysoft_browserleaks_pixelscan_browserscan_only",
+      "result": "linux_headless_and_headed_xvfb_sannysoft_browserleaks_pixelscan_browserscan_creepjs_only",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "cross-platform drift"
@@ -174,6 +174,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_local_proxy_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260709.json"
   ]
 }
