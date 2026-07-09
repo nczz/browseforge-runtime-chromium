@@ -1,6 +1,6 @@
 {
-  "artifact_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
-  "artifact_size_bytes": 567801863,
+  "artifact_sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
+  "artifact_size_bytes": 567801878,
   "artifacts": [
     {
       "arch": "x64",
@@ -11,21 +11,21 @@
       },
       "browser_binary_sha256": "a083b5e98f8a3badee5f3b36441dce109e335e04ffa65fb1664cec72d8dbc82f",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-09T19:29:47.958666+00:00",
+      "created_at": "2026-07-10T13:33:50.425920+00:00",
       "download_url": "GitHub Release asset or GHCR artifact pending publication",
       "os": "linux",
-      "patchset_id": "surface-font-face-set-native-list-override",
+      "patchset_id": "surface-switch-propagation-native-audit",
       "platform": "linux-x64",
-      "provenance_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
       "release_channel": "alpha",
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
+      "sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 567801863,
+      "size_bytes": 567801878,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "cc9a21b79a9f26072e89a856fded61e9bf932f1083c0d1300e81de8bf052c823",
+      "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e",
       "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
@@ -71,5 +71,5 @@
     "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence",
     "macos-x64": "blocked until a committed macOS x64 runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence"
   },
-  "wrapper_binary_sha256": "cc9a21b79a9f26072e89a856fded61e9bf932f1083c0d1300e81de8bf052c823"
+  "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e"
 }

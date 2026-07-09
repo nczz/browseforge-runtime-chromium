@@ -11,7 +11,7 @@
     {
       "evidence": {
         "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-        "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+        "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
         "detector_summary": "detector-summary.json",
         "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json"
       },

@@ -15,6 +15,15 @@ apply_process_priority_patch = importlib.util.module_from_spec(spec)
 sys.modules["apply_process_priority_patch"] = apply_process_priority_patch
 spec.loader.exec_module(apply_process_priority_patch)
 
+
+def run_main_with_args(args: list[str]) -> int:
+    original_argv = sys.argv
+    try:
+        sys.argv = [str(SCRIPT), *args]
+        return apply_process_priority_patch.main()
+    finally:
+        sys.argv = original_argv
+
 PROCESS_LINUX_FIXTURE = '''#include "base/process/process.h"
 
 #include <errno.h>
@@ -68,15 +77,15 @@ class ApplyProcessPriorityPatchTests(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             self.assertIn("BrowseForge: setpriority failed", text)
 
-    def test_check_patch_validates_without_mutating_external_checkout_shape(self) -> None:
+    def test_check_mode_validates_without_mutating_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "src"
             path = src / apply_process_priority_patch.PROCESS_LINUX_CC
             path.parent.mkdir(parents=True)
             (src / ".git").mkdir()
             path.write_text(PROCESS_LINUX_FIXTURE, encoding="utf-8")
-            checked = apply_process_priority_patch.check_patch(src)
-            self.assertEqual([apply_process_priority_patch.PROCESS_LINUX_CC], checked)
+            result = run_main_with_args(["--chromium-src", str(src), "--check"])
+            self.assertEqual(0, result)
             self.assertEqual(PROCESS_LINUX_FIXTURE, path.read_text(encoding="utf-8"))
 
 

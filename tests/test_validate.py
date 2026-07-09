@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import contextlib
 import io
+import hashlib
 import importlib.util
 import json
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -250,6 +252,62 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("runtime asset contract", message)
         self.assertIn("linux-arm64", message)
+
+
+    def test_validate_rejects_runtime_artifact_manifest_with_stale_archive_metadata(self) -> None:
+        """runtime-artifacts.json cannot retain stale archive sha/size after the packaged zip changes."""
+        cases: list[tuple[str, str | int]] = [
+            ("sha256", "0" * 64),
+            ("size_bytes", 1),
+        ]
+        for field, stale_value in cases:
+            with self.subTest(field=field):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    manifest["artifacts"][0][field] = stale_value
+                    if field == "sha256":
+                        manifest["artifact_sha256"] = stale_value
+                    else:
+                        manifest["artifact_size_bytes"] = stale_value
+                    self._write_json(temp_root / "knowledge" / "manifests" / "runtime-artifacts.json", manifest)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertRegex(message, r"runtime[- ]artifacts?", message)
+                self.assertIn(field, message)
+                self.assertIn("drift", message)
+
+    def test_validate_rejects_source_acquisition_with_stale_packaged_artifact_metadata(self) -> None:
+        """source-acquisition.json cannot retain stale archive or packaged binary hashes."""
+        cases: list[tuple[str, str | int]] = [
+            ("archive_sha256", "0" * 64),
+            ("archive_size_bytes", 1),
+            ("browser_binary_sha256", "1" * 64),
+            ("wrapper_binary_sha256", "2" * 64),
+        ]
+        for field, stale_value in cases:
+            with self.subTest(field=field):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+                    source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+                    linux_artifact = source_acquisition["chromium_base"]["linux_x64_artifact"]
+                    linux_artifact[field] = stale_value
+                    self._write_json(source_acquisition_path, source_acquisition)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertRegex(message, r"source[- ]acquisition", message)
+                self.assertIn(field, message)
+                self.assertIn("drift", message)
 
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
@@ -658,6 +716,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self._write_json(
             root / "knowledge" / "manifests" / "runtime-artifacts.json",
             {
+                "artifact_sha256": "",
+                "artifact_size_bytes": 0,
                 "artifacts": [
                     {
                         "artifact_id": LINUX_ARTIFACT_ID,
@@ -670,13 +730,18 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
                         "patchset_id": "baseline",
                         "wrapper_version": "v0.1.0-alpha.0",
-                        "sha256": "1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a",
-                        "size_bytes": 567798165,
+                        "download_url": "test://browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+                        "sha256": "",
+                        "size_bytes": 0,
+                        "signature": "unsigned-test-artifact",
                         "sbom_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
                         "provenance_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-                        "release_channel": "dev",
+                        "release_channel": "alpha",
+                        "browseforge_compatibility": {"min_version": "v2.0.0", "profile_field": "runtime_id"},
+                        "created_at": "2026-07-09T00:00:00+00:00",
                     }
                 ],
+                "browser_binary_sha256": "",
                 "required_artifact_fields": [
                     "artifact_id",
                     "runtime_id",
@@ -688,20 +753,29 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "source_ref",
                     "patchset_id",
                     "wrapper_version",
+                    "download_url",
                     "sha256",
                     "size_bytes",
+                    "signature",
                     "sbom_path",
                     "provenance_path",
                     "release_channel",
+                    "browseforge_compatibility",
+                    "created_at",
+                    "browser_binary_sha256",
+                    "wrapper_binary_sha256",
                 ],
+                "runtime_id": "browseforge-chromium",
+                "schema_version": "1.0",
                 "supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"],
                 "unsupported_package_platforms": {
                     "linux-arm64": "missing Linux arm64 runtime asset contract",
                     "macos-x64": "missing macOS x64 runtime asset contract",
                 },
+                "wrapper_binary_sha256": "",
             },
         )
-        self._write_json(root / "knowledge" / "manifests" / "source-acquisition.json", {})
+        self._write_current_runtime_artifact_fixture(root)
         self._write_json(root / "browser" / "chromium-base.json", {})
         self._write_detector_summary(root, coverage_gaps=[])
 
@@ -774,6 +848,148 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIsInstance(manifest, dict)
         assert isinstance(manifest, dict)
         return manifest
+
+    def _write_current_runtime_artifact_fixture(self, root: Path) -> None:
+        manifest_path = root / "knowledge" / "manifests" / "runtime-artifacts.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        artifact = manifest["artifacts"][0]
+        artifact_id = artifact["artifact_id"]
+        stage_rel = Path("dist") / "stage" / artifact_id
+        stage = root / stage_rel
+        stage.mkdir(parents=True, exist_ok=True)
+
+        browser_path = stage / "chrome"
+        wrapper_path = stage / "browseforge-runtime"
+        runtime_manifest_path = stage / "runtime.manifest.json"
+        browser_path.write_bytes(b"browseforge chromium browser binary fixture\n")
+        wrapper_path.write_bytes(b"browseforge chromium wrapper binary fixture\n")
+        self._write_json(
+            runtime_manifest_path,
+            {
+                "browseforge": {"profile_field": "runtime_id"},
+                "family": "chromium",
+                "id": artifact["runtime_id"],
+                "version": artifact["runtime_version"],
+            },
+        )
+
+        browser_sha256 = self._sha256_file(browser_path)
+        wrapper_sha256 = self._sha256_file(wrapper_path)
+        runtime_manifest_sha256 = self._sha256_file(runtime_manifest_path)
+        patchset_manifest_sha256 = self._sha256_file(root / "knowledge" / "manifests" / "patchset.json")
+        artifact_manifest_rel = stage_rel / "artifact-manifest.json"
+        sbom_rel = stage_rel / "SBOM.json"
+        provenance_rel = stage_rel / "provenance.json"
+        artifact_manifest = {
+            **artifact,
+            "browser_binary_sha256": browser_sha256,
+            "files": [
+                {"path": "browseforge-runtime", "sha256": wrapper_sha256, "size_bytes": wrapper_path.stat().st_size},
+                {"path": "chrome", "sha256": browser_sha256, "size_bytes": browser_path.stat().st_size},
+                {
+                    "path": "runtime.manifest.json",
+                    "sha256": runtime_manifest_sha256,
+                    "size_bytes": runtime_manifest_path.stat().st_size,
+                },
+            ],
+            "git_commit": "validation-test-fixture",
+            "patchset_manifest_sha256": patchset_manifest_sha256,
+            "runtime_manifest_sha256": runtime_manifest_sha256,
+            "source_acquisition_sha256": None,
+            "wrapper_binary_sha256": wrapper_sha256,
+        }
+        provenance = {
+            "arch": artifact["arch"],
+            "browser_binary_sha256": browser_sha256,
+            "browser_version": artifact["browser_version"],
+            "builder": "tests/test_validate.py",
+            "created_at": artifact["created_at"],
+            "git_commit": "validation-test-fixture",
+            "os": artifact["os"],
+            "patchset_id": artifact["patchset_id"],
+            "patchset_manifest": "knowledge/manifests/patchset.json",
+            "patchset_manifest_sha256": patchset_manifest_sha256,
+            "platform": artifact["platform"],
+            "release_channel": artifact["release_channel"],
+            "runtime_id": artifact["runtime_id"],
+            "runtime_manifest_sha256": runtime_manifest_sha256,
+            "runtime_version": artifact["runtime_version"],
+            "source_acquisition_manifest": "knowledge/manifests/source-acquisition.json",
+            "source_acquisition_sha256": None,
+            "source_ref": artifact["source_ref"],
+            "wrapper_version": artifact["wrapper_version"],
+            "wrapper_binary_sha256": wrapper_sha256,
+        }
+        self._write_json(root / artifact_manifest_rel, artifact_manifest)
+        self._write_json(root / sbom_rel, {"SPDXID": "SPDXRef-DOCUMENT", "files": artifact_manifest["files"]})
+        self._write_json(root / provenance_rel, provenance)
+
+        archive_rel = Path("dist") / f"{artifact_id}.zip"
+        archive_path = root / archive_rel
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for file_path in sorted(stage.rglob("*")):
+                if file_path.is_file():
+                    archive.write(file_path, arcname=f"{stage.name}/{file_path.relative_to(stage).as_posix()}")
+        archive_sha256 = self._sha256_file(archive_path)
+        archive_size_bytes = archive_path.stat().st_size
+        (root / "dist" / "checksums.txt").write_text(f"{archive_sha256}  {archive_path.name}\n", encoding="utf-8")
+
+        artifact.update(
+            {
+                "browser_binary_sha256": browser_sha256,
+                "sha256": archive_sha256,
+                "size_bytes": archive_size_bytes,
+                "wrapper_binary_sha256": wrapper_sha256,
+            }
+        )
+        manifest.update(
+            {
+                "artifact_sha256": archive_sha256,
+                "artifact_size_bytes": archive_size_bytes,
+                "browser_binary_sha256": browser_sha256,
+                "wrapper_binary_sha256": wrapper_sha256,
+            }
+        )
+        self._write_json(manifest_path, manifest)
+        self._write_json(
+            root / "knowledge" / "manifests" / "source-acquisition.json",
+            {
+                "chromium_base": {
+                    "base_commit": artifact["source_ref"],
+                    "base_ref": f"refs/tags/{artifact['browser_version']}",
+                    "base_version": artifact["browser_version"],
+                    "linux_x64_artifact": {
+                        "archive": archive_rel.as_posix(),
+                        "archive_sha256": archive_sha256,
+                        "archive_size_bytes": archive_size_bytes,
+                        "artifact_id": artifact_id,
+                        "artifact_manifest": artifact_manifest_rel.as_posix(),
+                        "artifact_manifest_sha256": self._sha256_file(root / artifact_manifest_rel),
+                        "browser_binary_sha256": browser_sha256,
+                        "patchset_manifest_sha256": patchset_manifest_sha256,
+                        "provenance": provenance_rel.as_posix(),
+                        "provenance_sha256": self._sha256_file(root / provenance_rel),
+                        "runtime_manifest_sha256": runtime_manifest_sha256,
+                        "sbom": sbom_rel.as_posix(),
+                        "sbom_sha256": self._sha256_file(root / sbom_rel),
+                        "stage_dir": stage_rel.as_posix(),
+                        "status": "packaged",
+                        "wrapper_binary_sha256": wrapper_sha256,
+                    },
+                    "source_checkout_status": "checked_out_pinned_ref",
+                },
+                "runtime_id": "browseforge-chromium",
+                "schema_version": "1.0",
+            },
+        )
+
+    def _sha256_file(self, path: Path) -> str:
+        digest = hashlib.sha256()
+        with path.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
 
     def _write_runtime_graph_for_artifacts(self, root: Path, artifacts: list[dict[str, Any]]) -> None:
         graph_records = self._minimal_graph_with_packaged_runtime_artifacts(artifacts)

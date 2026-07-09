@@ -313,6 +313,7 @@ def package(args):
         'wrapper_binary_sha256': manifest['wrapper_binary_sha256'],
         'git_commit': manifest['git_commit'],
         'release_channel': manifest['release_channel'],
+        'wrapper_version': manifest['wrapper_version'],
         'created_at': created_at,
     }
     (stage / 'artifact-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')

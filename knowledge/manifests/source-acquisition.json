@@ -14,14 +14,14 @@
     "hooks_status": "completed",
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a",
-      "archive_size_bytes": 567798165,
+      "archive_sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
+      "archive_size_bytes": 567801878,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
-      "browser_binary_sha256": "cea4437f1d7e8a341ec66da9342da8d561072a169c324d1806c8582bd5edcf92",
+      "browser_binary_sha256": "a083b5e98f8a3badee5f3b36441dce109e335e04ffa65fb1664cec72d8dbc82f",
       "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-      "provenance": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
       "runtime_assets_included": [
         "icudtl.dat",
         "resources.pak",
@@ -39,18 +39,18 @@
         "locales/*.pak"
       ],
       "runtime_manifest_sha256": "31edbfa3f37dc9f552a5c54d8f61e441513d6b2248a0d3acca6f299f97b643e4",
-      "sbom": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "status": "packaged_smoke_launched_after_uach_full_version_rebuild_with_os_arch_metadata",
       "verification": [
         "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
         "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-        "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
+        "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json | python3 -m json.tool",
+        "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json | python3 -m json.tool",
+        "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json | python3 -m json.tool"
       ],
-      "wrapper_binary_sha256": "c5363386ef27aa647c458d073f6bc72c8b504e320eee1f82911179fccf2d7328"
+      "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e"
     },
     "local_paths_checked": [
       {

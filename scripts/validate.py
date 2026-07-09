@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -132,6 +134,75 @@ def load_jsonl(path: str) -> list[dict]:
             except json.JSONDecodeError as exc:
                 raise SystemExit(f"{path}:{line_no}: invalid JSONL: {exc}") from exc
     return records
+
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_archive_json(archive: Path, member: str) -> dict:
+    with zipfile.ZipFile(archive) as zf:
+        try:
+            data = zf.read(member)
+        except KeyError as exc:
+            raise SystemExit(f"artifact archive {archive.relative_to(ROOT)} missing {member}") from exc
+    try:
+        return json.loads(data)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"artifact archive {archive.relative_to(ROOT)} member {member} invalid JSON: {exc}") from exc
+
+
+def validate_runtime_artifact_consistency(runtime_artifacts: dict, source_acquisition: dict) -> None:
+    artifacts = runtime_artifacts.get("artifacts", [])
+    if not artifacts:
+        raise SystemExit("runtime-artifacts must list at least one packaged artifact")
+
+    source_linux = source_acquisition.get("chromium_base", {}).get("linux_x64_artifact", {})
+    for artifact in artifacts:
+        artifact_id = artifact["artifact_id"]
+        platform = artifact.get("platform")
+        archive_rel = Path("dist") / f"{artifact_id}.zip"
+        archive_path = ROOT / archive_rel
+        if not archive_path.is_file():
+            raise SystemExit(f"runtime artifact archive missing: {archive_rel.as_posix()}")
+
+        archive_sha = file_sha256(archive_path)
+        archive_size = archive_path.stat().st_size
+        if artifact.get("sha256") != archive_sha:
+            raise SystemExit(f"runtime artifact {artifact_id} sha256 drifted: {artifact.get('sha256')!r} != {archive_sha!r}")
+        if artifact.get("size_bytes") != archive_size:
+            raise SystemExit(f"runtime artifact {artifact_id} size_bytes drifted: {artifact.get('size_bytes')!r} != {archive_size!r}")
+
+        if platform == "linux-x64":
+            expected_archive = archive_rel.as_posix()
+            source_checks = {
+                "archive": expected_archive,
+                "archive_sha256": archive_sha,
+                "archive_size_bytes": archive_size,
+                "artifact_id": artifact_id,
+                "browser_binary_sha256": artifact.get("browser_binary_sha256"),
+                "wrapper_binary_sha256": artifact.get("wrapper_binary_sha256"),
+            }
+            for key, expected in source_checks.items():
+                if source_linux.get(key) != expected:
+                    raise SystemExit(f"source-acquisition linux_x64_artifact {key} drifted: {source_linux.get(key)!r} != {expected!r}")
+
+        archive_prefix = f"{artifact_id}/"
+        artifact_manifest = load_archive_json(archive_path, f"{archive_prefix}artifact-manifest.json")
+        provenance = load_archive_json(archive_path, f"{archive_prefix}provenance.json")
+
+        for key in [
+            "artifact_id", "runtime_id", "runtime_version", "platform", "os", "arch",
+            "browser_version", "source_ref", "patchset_id", "wrapper_version",
+            "release_channel", "browser_binary_sha256", "wrapper_binary_sha256",
+        ]:
+            if artifact_manifest.get(key) != artifact.get(key):
+                raise SystemExit(f"artifact archive {artifact_id} manifest {key} drifted: {artifact_manifest.get(key)!r} != {artifact.get(key)!r}")
+            if key != "artifact_id" and provenance.get(key) != artifact.get(key):
+                raise SystemExit(f"artifact archive {artifact_id} provenance {key} drifted: {provenance.get(key)!r} != {artifact.get(key)!r}")
 
 def validate_evidence_schema_contract(evidence_schema: dict) -> None:
     properties = evidence_schema.get("properties", {})
@@ -449,6 +520,7 @@ def main() -> None:
         if record.get("record_type") == "edge"
     }
     runtime_artifacts = load_json("knowledge/manifests/runtime-artifacts.json")
+    source_acquisition = load_json("knowledge/manifests/source-acquisition.json")
     required_artifact_fields = set(runtime_artifacts.get("required_artifact_fields", []))
     supported_package_platforms = set(runtime_artifacts.get("supported_package_platforms", []))
     artifact_platforms = {artifact.get("platform") for artifact in runtime_artifacts.get("artifacts", [])}
@@ -459,6 +531,7 @@ def main() -> None:
     for platform in artifact_platforms:
         if platform in unsupported_package_platforms:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
+    validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"
