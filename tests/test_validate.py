@@ -677,7 +677,6 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             }
         if baseline_gaps is None:
             baseline_gaps = [
-                {"gap_id": "browserleaks_audio_score_baseline_missing"},
                 {"gap_id": "native_headed_font_corpus_parity_missing"},
             ]
         self._write_json(

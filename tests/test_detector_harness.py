@@ -2347,11 +2347,6 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIsInstance(baseline_gaps, list)
             baseline_gap_by_id = {gap.get("gap_id"): gap for gap in baseline_gaps}
             expected_baseline_gaps = {
-                "browserleaks_audio_score_baseline_missing": {
-                    "surface": "audio",
-                    "detector_id": "browserleaks",
-                    "finding": "BrowserLeaks audio score baseline",
-                },
                 "pixelscan_audio_font_score_baseline_missing": {
                     "surface": "audio,fonts",
                     "detector_id": "pixelscan",
@@ -2370,6 +2365,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     self.assertEqual(gap["surface"], expected["surface"])
                     self.assertEqual(gap["detector_id"], expected["detector_id"])
                     self.assertIn(expected["finding"], gap["finding"])
+            self.assertNotIn("browserleaks_audio_score_baseline_missing", baseline_gap_by_id)
 
     def test_compare_scores_omits_pixelscan_baseline_gap_when_page_status_hashes_exist(self):
         with tempfile.TemporaryDirectory() as td:
@@ -2388,7 +2384,6 @@ class DetectorHarnessTests(unittest.TestCase):
 
             baseline_gap_ids = {gap.get("gap_id") for gap in payload["baseline_gaps"]}
             self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
-            self.assertIn("browserleaks_audio_score_baseline_missing", baseline_gap_ids)
             self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
 
 

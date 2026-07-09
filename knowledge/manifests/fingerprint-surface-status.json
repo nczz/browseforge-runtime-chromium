@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. Pixelscan records page verdict/status labels and AudioContext/font hash strings. CreepJS comparison now shows freq/gain/sum/time/unique match across headless/headed evidence, with drift isolated to trap; BrowserLeaks audio score baseline and native trap parity remain blockers.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. Pixelscan records page verdict/status labels and AudioContext/font hash strings. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. CreepJS comparison shows freq/gain/sum/time/unique match across headless/headed evidence, with drift isolated to trap; native trap parity remains the audio blocker.",
       "release_blocker": true,
-      "result": "warn_creepjs_trap_only_audio_drift_browserleaks_score_required",
+      "result": "warn_creepjs_trap_only_audio_drift",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"

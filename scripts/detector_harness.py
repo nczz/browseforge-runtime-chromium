@@ -902,13 +902,6 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
 def detector_score_baseline_gaps(evidence_rows: list[dict]) -> list[dict]:
     gaps = [
         {
-            "gap_id": "browserleaks_audio_score_baseline_missing",
-            "surface": "audio",
-            "detector_id": "browserleaks",
-            "finding": "BrowserLeaks audio score baseline is not yet committed for the packaged runtime.",
-            "required_evidence": "sanitized BrowserLeaks AudioContext score comparison for release artifact",
-        },
-        {
             "gap_id": "native_headed_font_corpus_parity_missing",
             "surface": "fonts",
             "detector_id": "browserleaks,creepjs,pixelscan",
