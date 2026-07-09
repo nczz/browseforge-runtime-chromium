@@ -555,6 +555,31 @@ def _collect_webrtc_records(evidence_rows: list[dict], detector_id: str) -> list
             })
     return records
 
+def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    required = ("verdict", "fingerprint", "audioContextHash", "fontHash")
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        if detector.get("detector_id") != "pixelscan":
+            continue
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if result.get("detector_check") != "pixelscan_fingerprint_page_status":
+                continue
+            if not all(values.get(field) for field in required):
+                continue
+            records.append({
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "verdict": values["verdict"],
+                "fingerprint": values["fingerprint"],
+                "bot_check": values.get("botCheck"),
+                "audio_context_hash": values["audioContextHash"],
+                "font_hash": values["fontHash"],
+            })
+    return records
+
+
 
 
 
@@ -868,21 +893,14 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
         })
     return comparisons, gaps
 
-def detector_score_baseline_gaps() -> list[dict]:
-    return [
+def detector_score_baseline_gaps(evidence_rows: list[dict]) -> list[dict]:
+    gaps = [
         {
             "gap_id": "browserleaks_audio_score_baseline_missing",
             "surface": "audio",
             "detector_id": "browserleaks",
             "finding": "BrowserLeaks audio score baseline is not yet committed for the packaged runtime.",
             "required_evidence": "sanitized BrowserLeaks AudioContext score comparison for release artifact",
-        },
-        {
-            "gap_id": "pixelscan_audio_font_score_baseline_missing",
-            "surface": "audio,fonts",
-            "detector_id": "pixelscan",
-            "finding": "Pixelscan AudioContext/fonts score baseline is not yet committed for the packaged runtime.",
-            "required_evidence": "sanitized Pixelscan score comparison covering audio/font surfaces",
         },
         {
             "gap_id": "native_headed_font_corpus_parity_missing",
@@ -892,6 +910,15 @@ def detector_score_baseline_gaps() -> list[dict]:
             "required_evidence": "native headed Linux/macOS font corpus and detector-score comparison",
         },
     ]
+    if not _collect_pixelscan_score_records(evidence_rows):
+        gaps.insert(1, {
+            "gap_id": "pixelscan_audio_font_score_baseline_missing",
+            "surface": "audio,fonts",
+            "detector_id": "pixelscan",
+            "finding": "Pixelscan AudioContext/fonts score baseline is not yet committed for the packaged runtime.",
+            "required_evidence": "sanitized Pixelscan score comparison covering audio/font surfaces",
+        })
+    return gaps
 
 
 def compare_scores(args):
@@ -905,7 +932,7 @@ def compare_scores(args):
             return code
         evidence_rows.append(load_json(path))
     comparisons, gaps = detector_score_comparisons(evidence_rows)
-    baseline_gaps = detector_score_baseline_gaps()
+    baseline_gaps = detector_score_baseline_gaps(evidence_rows)
     payload = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "runtime_id": "browseforge-chromium",
@@ -1193,6 +1220,14 @@ def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
 
 
 def classify_pixelscan_client_hints(value: dict) -> tuple[str, str, str]:
+    pixelscan = value.get("pixelscanPage") or {}
+    if isinstance(pixelscan, dict) and pixelscan.get("available"):
+        verdict = pixelscan.get("verdict")
+        fingerprint = str(pixelscan.get("fingerprint") or "")
+        if verdict == "inconsistent" or "masking" in fingerprint.lower():
+            return "warning", "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.", "medium"
+        if verdict == "consistent":
+            return "passed", "Pixelscan fingerprint check loaded and reported consistent fingerprint status.", "low"
     status, finding, severity = classify_browserleaks_client_hints(value)
     return status, finding.replace("BrowserLeaks Client Hints", "Pixelscan fingerprint check"), severity
 
@@ -1368,6 +1403,38 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       values,
     };
   })();
+  const pixelscanPage = (() => {
+    if (!location.hostname.includes('pixelscan.net')) return null;
+    const lines = text.split('\\n').map((line) => line.trim()).filter(Boolean);
+    const valueAfter = (label) => {
+      const index = lines.findIndex((line) => line === label);
+      return index >= 0 && index + 1 < lines.length ? lines[index + 1].slice(0, 160) : null;
+    };
+    const valueBefore = (label) => {
+      const index = lines.findIndex((line) => line === label);
+      return index > 0 ? lines[index - 1].slice(0, 160) : null;
+    };
+    const hasText = (needle) => text.toLowerCase().includes(needle.toLowerCase());
+    const verdict = hasText('Your Browser Fingerprint is consistent')
+      ? 'consistent'
+      : hasText('Your Browser Fingerprint is inconsistent')
+        ? 'inconsistent'
+        : null;
+    return {
+      available: Boolean(verdict || valueBefore('Fingerprint') || valueBefore('Bot check') || valueAfter('AudioContext Hash')),
+      verdict,
+      browser: valueBefore('Browser'),
+      location: valueBefore('Location'),
+      proxy: valueBefore('Proxy'),
+      fingerprint: valueBefore('Fingerprint'),
+      botCheck: valueBefore('Bot check'),
+      fontHash: valueAfter('Font hash'),
+      canvasHash: valueAfter('Canvas Hash'),
+      audioContextHash: valueAfter('AudioContext Hash'),
+      webglHash: valueAfter('WebGL Hash'),
+    };
+  })();
+
   const fonts = await (async () => {
     const candidates = ['Arial', 'Calibri', 'Consolas', 'Courier New', 'DejaVu Sans', 'Noto Sans CJK TC', 'Segoe UI', 'Times New Roman'];
     const checks = {};
@@ -1666,7 +1733,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, pixelscanPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)

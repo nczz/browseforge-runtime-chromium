@@ -226,7 +226,6 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
     baseline_gap_ids = {gap.get("gap_id") for gap in score_comparison.get("baseline_gaps", [])}
     for gap_id in [
         "browserleaks_audio_score_baseline_missing",
-        "pixelscan_audio_font_score_baseline_missing",
         "native_headed_font_corpus_parity_missing",
     ]:
         if gap_id not in baseline_gap_ids:

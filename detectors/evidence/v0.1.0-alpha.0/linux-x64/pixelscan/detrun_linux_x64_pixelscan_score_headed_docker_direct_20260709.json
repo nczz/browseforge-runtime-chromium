@@ -1,0 +1,87 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "pixelscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#pixelscan",
+    "name": "Pixelscan",
+    "url": "https://pixelscan.net/fingerprint-check"
+  },
+  "evidence_id": "evidence_linux_x64_pixelscan_score_headed_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:pixelscan:score:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "pixelscan_fingerprint_page_status",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint page reported inconsistent fingerprint status with masking detected, no proxy detected, no automated behavior detected, and committed only bounded page status plus AudioContext/font/canvas/WebGL hash strings.",
+      "normalized_values": {
+        "audioContextHash": "8152acd973f11a39b03b898df535357f",
+        "botCheck": "No automated behavior detected",
+        "browser": "Chrome 150.0.7871.101 on Linux",
+        "canvasHash": "b9c7e64820e4af3973ce929340341064",
+        "fingerprint": "Masking detected",
+        "fontHash": "650a9244e22bb0ceb4ae64db9775ed18",
+        "location": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "verdict": "inconsistent",
+        "webglHash": "-"
+      },
+      "raw_value_hash": "bc5393ae749681fd6737b1673dd45e250ff3f4f3458aca04ead3a1260a2af913",
+      "severity": "medium",
+      "status": "warn",
+      "surface": "audio"
+    }
+  ],
+  "run_id": "detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw Pixelscan page text, browser storage, and IP values are not committed; committed evidence stores bounded page verdict/status labels and Pixelscan hash strings for audio, fonts, canvas, and WebGL only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-pixelscan-page-status-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json",
+    "raw_capture_sha256": "48cce8a2d63d77e47d75c3e6b6279d2549667a188f4d3b9066c36f5dced45ae0",
+    "sha256": "1b2b77f9c6582a76b508d95cf85824fc2bd8f4ee14836cac72dd13cf773ac609",
+    "summary_path": "detector-summary.json"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T18:45:00+00:00"
+}

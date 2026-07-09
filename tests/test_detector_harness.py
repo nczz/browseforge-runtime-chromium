@@ -286,6 +286,28 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "webrtc",
         }
 
+    def pixelscan_page_status_result(self, *, detector_check="pixelscan_fingerprint_page_status"):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized Pixelscan page status and score hash evidence.",
+            "normalized_values": {
+                "audioContextHash": "a" * 32,
+                "botCheck": "No automated behavior detected",
+                "browser": "Chrome 150.0.7871.101 on Linux",
+                "canvasHash": "b" * 32,
+                "fingerprint": "Masking detected",
+                "fontHash": "c" * 32,
+                "location": "Taiwan / Taipei",
+                "proxy": "No proxy detected",
+                "verdict": "inconsistent",
+                "webglHash": "-",
+            },
+            "severity": "medium",
+            "status": "warn",
+            "surface": "audio",
+        }
+
 
     def webgl_score_result(self, *, vendor="Intel Inc.", renderer="Intel Iris OpenGL Engine", hashes=None):
         if hashes is None:
@@ -1265,6 +1287,18 @@ class DetectorHarnessTests(unittest.TestCase):
             ("Pixelscan", "https://pixelscan.net/fingerprint-check"),
         )
 
+    def test_classify_pixelscan_uses_page_status_when_available(self):
+        status, finding, severity = self.harness_module.classify_pixelscan_client_hints({
+            "pixelscanPage": {
+                "available": True,
+                "verdict": "inconsistent",
+                "fingerprint": "Masking detected",
+            }
+        })
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("inconsistent/masking", finding)
+
+
     def test_supported_collectors_includes_iphey(self):
         self.assertEqual(
             self.harness_module.SUPPORTED_COLLECTORS.get("iphey"),
@@ -1311,7 +1345,15 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("const audioContext = (() => {", expr)
         self.assertIn("ctx.createAnalyser()", expr)
         self.assertIn("observedFieldCount", expr)
-        self.assertIn("audio, browserleaksAudioPage, fonts", expr)
+        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, fonts", expr)
+
+    def test_collect_page_expression_records_pixelscan_page_fields(self):
+        expr = self.collect_page_expression()
+        self.assertIn("const pixelscanPage = (() => {", expr)
+        self.assertIn("location.hostname.includes('pixelscan.net')", expr)
+        self.assertIn("Your Browser Fingerprint is inconsistent", expr)
+        self.assertIn("valueAfter('AudioContext Hash')", expr)
+        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, fonts", expr)
 
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
         unsupported_detector = "unknown-detector"
@@ -2285,6 +2327,27 @@ class DetectorHarnessTests(unittest.TestCase):
                     self.assertEqual(gap["surface"], expected["surface"])
                     self.assertEqual(gap["detector_id"], expected["detector_id"])
                     self.assertIn(expected["finding"], gap["finding"])
+
+    def test_compare_scores_omits_pixelscan_baseline_gap_when_page_status_hashes_exist(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headed_xvfb",
+                label="pixelscan_page_status",
+                results=[self.pixelscan_page_status_result()],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            baseline_gap_ids = {gap.get("gap_id") for gap in payload["baseline_gaps"]}
+            self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
+            self.assertIn("browserleaks_audio_score_baseline_missing", baseline_gap_ids)
+            self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
+
 
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:

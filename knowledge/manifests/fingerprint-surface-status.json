@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. The native WebAudio source patch keeps AudioBuffer::copyFromChannel offset reads consistent with whole-buffer per-index noise by seeding perturbations from buffer_offset. knowledge/manifests/detector-score-comparison.json compares CreepJS headless/headed audio metrics, records passing BrowserLeaks and Pixelscan bounded AudioContext comparisons, and now records a passing BrowserLeaks JavaScript Web Audio page headless-vs-headed AudioContext/AnalyserNode field comparison. BrowserLeaks JavaScript Web Audio page collection uses the live /javascript#audio section instead of the retired /javascript/audio path and stores bounded page-context fields; BrowserLeaks/Pixelscan score baselines remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. Pixelscan now records page verdict/status labels and AudioContext/font hash strings, but BrowserLeaks audio score baseline and CreepJS trap parity remain blockers.",
       "release_blocker": true,
-      "result": "warn_audio_page_context_headed_closed_score_baselines_required",
+      "result": "warn_pixelscan_score_hash_baseline_recorded_browserleaks_score_required",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
@@ -181,6 +181,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json"
   ]
 }

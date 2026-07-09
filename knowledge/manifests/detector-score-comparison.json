@@ -8,13 +8,6 @@
       "surface": "audio"
     },
     {
-      "detector_id": "pixelscan",
-      "finding": "Pixelscan AudioContext/fonts score baseline is not yet committed for the packaged runtime.",
-      "gap_id": "pixelscan_audio_font_score_baseline_missing",
-      "required_evidence": "sanitized Pixelscan score comparison covering audio/font surfaces",
-      "surface": "audio,fonts"
-    },
-    {
       "detector_id": "browserleaks,creepjs,pixelscan",
       "finding": "Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.",
       "gap_id": "native_headed_font_corpus_parity_missing",
@@ -172,9 +165,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 22,
+  "evidence_count": 23,
   "gaps": [],
-  "generated_at": "2026-07-09T18:36:08.579556+00:00",
+  "generated_at": "2026-07-09T18:52:38.922659+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
