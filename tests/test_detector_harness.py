@@ -328,6 +328,21 @@ class DetectorHarnessTests(unittest.TestCase):
         }
         return value
 
+    def browserleaks_webrtc_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "BrowserLeaks - WebRTC Leak Test"
+        value["url"] = "https://browserleaks.com/webrtc"
+        value["webrtc"] = {
+            "available": True,
+            "candidateCount": 1,
+            "types": ["host"],
+            "ipLiteralCount": 0,
+            "privateIpLiteralCount": 0,
+            "publicIpLiteralCount": 0,
+            "rawCandidateSha256": "0" * 64,
+        }
+        return value
+
 
     def pixelscan_client_hints_value(self):
         value = self.browserleaks_client_hints_value()
@@ -428,15 +443,47 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("Fonts", finding)
         self.assertIn("font corpus", finding)
 
+    def test_classify_browserleaks_dispatches_webrtc_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_webrtc_value(),
+            "https://browserleaks.com/webrtc",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("WebRTC", finding)
+        self.assertIn("external proxy/geolocation", finding)
+
+    def test_classify_browserleaks_webrtc_flags_ip_literals(self):
+        public_leak = self.browserleaks_webrtc_value()
+        public_leak["webrtc"]["ipLiteralCount"] = 1
+        public_leak["webrtc"]["publicIpLiteralCount"] = 1
+        private_leak = self.browserleaks_webrtc_value()
+        private_leak["webrtc"]["ipLiteralCount"] = 1
+        private_leak["webrtc"]["privateIpLiteralCount"] = 1
+
+        cases = [
+            (public_leak, "public IP", "high"),
+            (private_leak, "private/local IP", "medium"),
+        ]
+        for value, finding_fragment, severity in cases:
+            with self.subTest(finding_fragment):
+                status, finding, observed_severity = self.harness_module.classify_browserleaks(value, "https://browserleaks.com/webrtc")
+                self.assertEqual((status, observed_severity), ("warning", severity))
+                self.assertIn(finding_fragment, finding)
+
     def test_classify_browserleaks_surface_pages_report_missing_summaries(self):
         audio = self.browserleaks_audio_value()
         del audio["audio"]["sumAbs"]
         fonts = self.browserleaks_fonts_value()
         del fonts["fonts"]["metrics"]["glyphSha256"]
 
+        webrtc = self.browserleaks_webrtc_value()
+        del webrtc["webrtc"]["candidateCount"]
+
         cases = [
             (audio, "https://browserleaks.com/javascript/audio", "sumAbs"),
             (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
+            (webrtc, "https://browserleaks.com/webrtc", "candidateCount"),
         ]
         for value, url, missing in cases:
             with self.subTest(missing):

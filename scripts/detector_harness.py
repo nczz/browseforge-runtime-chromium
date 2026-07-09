@@ -805,6 +805,22 @@ def classify_browserleaks_fonts_probe(value: dict) -> tuple[str, str, str]:
         return "warning", f"BrowserLeaks Fonts page loaded, but sanitized font metric summary is missing fields: {missing}", "medium"
     return "warning", "BrowserLeaks Fonts page loaded and produced bounded font metric/glyph summaries; release-grade font corpus parity remains required.", "medium"
 
+def classify_browserleaks_webrtc_probe(value: dict) -> tuple[str, str, str]:
+    webrtc = value.get("webrtc") or {}
+    if not webrtc.get("available"):
+        return "warning", "BrowserLeaks WebRTC page loaded, but the bounded WebRTC probe is unavailable.", "medium"
+    required = {"candidateCount", "ipLiteralCount", "privateIpLiteralCount", "publicIpLiteralCount", "types"}
+    missing = sorted(required - webrtc.keys())
+    if missing:
+        return "warning", f"BrowserLeaks WebRTC page loaded, but sanitized WebRTC summary is missing fields: {missing}", "medium"
+    if webrtc.get("publicIpLiteralCount", 0) > 0:
+        return "warning", "BrowserLeaks WebRTC bounded probe observed public IP literals; external proxy/geolocation coherence remains required.", "high"
+    if webrtc.get("privateIpLiteralCount", 0) > 0:
+        return "warning", "BrowserLeaks WebRTC bounded probe observed private/local IP literals; native masking policy needs headed detector confirmation.", "medium"
+    return "warning", "BrowserLeaks WebRTC page loaded and bounded probe recorded sanitized ICE candidate metadata without committed IP literals; external proxy/geolocation detector evidence remains required.", "medium"
+
+
+
 
 def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
     page_url = value.get("url") or url
@@ -812,6 +828,8 @@ def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
         return classify_browserleaks_audio_probe(value)
     if "/fonts" in page_url:
         return classify_browserleaks_fonts_probe(value)
+    if "/webrtc" in page_url:
+        return classify_browserleaks_webrtc_probe(value)
     return classify_browserleaks_client_hints(value)
 
 
@@ -1027,6 +1045,78 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
+  const webrtc = await (async () => {
+    try {
+      const RTCPeer = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+      if (!RTCPeer) return {available: false, reason: 'rtc_peer_connection_unavailable'};
+      const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const hashText = async (text) => globalThis.crypto && globalThis.crypto.subtle
+        ? toHex(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))
+        : null;
+      const ipLiteralRe = /\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b/g;
+      const isPrivateIp = (ip) => /^(10\\.|127\\.|169\\.254\\.|192\\.168\\.|172\\.(1[6-9]|2\\d|3[0-1])\\.)/.test(ip);
+      const candidates = [];
+      const candidateTypes = new Set();
+      const ipLiterals = new Set();
+      const privateIps = new Set();
+      const publicIps = new Set();
+      const trackCandidate = (line) => {
+        if (!line || candidates.includes(line)) return;
+        candidates.push(line);
+        const typeMatch = line.match(/\\styp\\s+([a-z0-9]+)/i);
+        if (typeMatch) candidateTypes.add(typeMatch[1].toLowerCase());
+        for (const match of line.matchAll(ipLiteralRe)) {
+          const ip = match[0];
+          ipLiterals.add(ip);
+          if (isPrivateIp(ip)) {
+            privateIps.add(ip);
+          } else {
+            publicIps.add(ip);
+          }
+        }
+      };
+      const pc = new RTCPeer({iceServers: []});
+      try {
+        pc.onicecandidate = (event) => {
+          if (event.candidate && event.candidate.candidate) trackCandidate(event.candidate.candidate);
+        };
+        pc.createDataChannel('browseforge-webrtc-probe');
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await new Promise((resolve) => {
+          if (pc.iceGatheringState === 'complete') {
+            resolve();
+            return;
+          }
+          const timer = setTimeout(resolve, 1500);
+          pc.onicegatheringstatechange = () => {
+            if (pc.iceGatheringState === 'complete') {
+              clearTimeout(timer);
+              resolve();
+            }
+          };
+        });
+        if (pc.localDescription && pc.localDescription.sdp) {
+          for (const line of pc.localDescription.sdp.split('\n')) {
+            if (line.startsWith('a=candidate:')) trackCandidate(line.slice(2).trim());
+          }
+        }
+      } finally {
+        pc.close();
+      }
+      return {
+        available: true,
+        candidateCount: candidates.length,
+        types: Array.from(candidateTypes).sort(),
+        ipLiteralCount: ipLiterals.size,
+        privateIpLiteralCount: privateIps.size,
+        publicIpLiteralCount: publicIps.size,
+        rawCandidateSha256: await hashText(JSON.stringify(candidates.sort())),
+      };
+    } catch (err) {
+      return {available: false, reason: String(err && err.name || err)};
+    }
+  })();
   const gl = (() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -1034,7 +1124,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     const ext = ctx.getExtension('WEBGL_debug_renderer_info');
     return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, webgl: gl};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, webgl: gl, webrtc};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)
