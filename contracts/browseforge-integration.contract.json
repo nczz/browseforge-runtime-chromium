@@ -29,11 +29,10 @@
     "smoke rest and smoke mcp pass under Docker"
   ],
   "release_blockers": [
-    "no runtime graph index",
-    "no detector baseline",
-    "no Docker smoke evidence",
-    "no profile migration/restore evidence",
-    "no Playwright bind evidence",
-    "unredacted secrets in detector reports"
+    "external proxy exit-IP/geolocation detector evidence is missing",
+    "macOS native BrowseForge Chromium release artifact is missing",
+    "Windows native BrowseForge Chromium release artifact is missing",
+    "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
+    "runtime release_grade must remain false until supported platform artifacts and live detector gates pass"
   ]
 }

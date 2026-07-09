@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import importlib.util
 import json
 import sys
@@ -469,6 +471,60 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("fingerprint surface", message)
         self.assertIn("missing evidence source", message)
 
+    def test_validate_accepts_committed_browseforge_integration_contract(self) -> None:
+        """The committed integration contract must be current enough for release validation."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            committed_contract = json.loads((ROOT / "contracts" / "browseforge-integration.contract.json").read_text(encoding="utf-8"))
+            self._write_json(temp_root / "contracts" / "browseforge-integration.contract.json", committed_contract)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_stale_browseforge_integration_release_blockers_after_evidence_gates_pass(self) -> None:
+        """Passed release evidence gates make old missing-evidence BrowseForge blockers invalid."""
+        module = self._load_validate_module()
+        stale_blockers = [
+            "no runtime graph index",
+            "no detector baseline",
+            "no Docker smoke evidence",
+            "no Playwright bind evidence",
+        ]
+        for stale_blocker in stale_blockers:
+            with self.subTest(stale_blocker=stale_blocker):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    self._write_browseforge_integration_contract(temp_root, release_blockers=[stale_blocker])
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._write_release_gates(temp_root, live_detector_status="passed")
+                    self._write_detector_summary(temp_root, coverage_gaps=[])
+                    self._write_score_comparison(temp_root, baseline_gaps=[])
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("stale browseforge integration release blockers", message)
+                self.assertIn(stale_blocker.lower(), message)
+
+
+
+    def _run_validate_expect_success(self, module: Any, temp_root: Path) -> str:
+        original_root = module.ROOT
+        output = io.StringIO()
+        try:
+            module.ROOT = temp_root
+            with contextlib.redirect_stdout(output):
+                result = module.main()
+        finally:
+            module.ROOT = original_root
+        self.assertIsNone(result)
+        return output.getvalue()
 
     def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
@@ -497,6 +553,17 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "fingerprint": {"surfaces": ["automation_signals", "canvas", "locale", "webgl"]},
             },
         )
+        self._write_browseforge_integration_contract(
+            root,
+            release_blockers=[
+                "external proxy exit-IP/geolocation detector evidence is missing",
+                "macOS native BrowseForge Chromium release artifact is missing",
+                "Windows native BrowseForge Chromium release artifact is missing",
+                "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
+                "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
+            ],
+        )
+
         self._write_json(
             root / "knowledge" / "kb-manifest.json",
             {
@@ -921,6 +988,43 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             "storage": storage,
         }
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+
+    def _write_browseforge_integration_contract(self, root: Path, *, release_blockers: list[str]) -> None:
+        self._write_json(
+            root / "contracts" / "browseforge-integration.contract.json",
+            {
+                "adapter_requirements": [
+                    "runtime descriptor registered with chromium family",
+                    "binary path resolved from config.runtimes.<id>.binary_path",
+                    "profile create/update/import/restore stores runtime_id, not engine",
+                    "launch path assembles deterministic profile-specific args without mutating unrelated runtimes",
+                    "Playwright bind endpoint is reachable for launched sessions",
+                    "browser cache version marker prevents stale seeded runtime reuse",
+                    "smoke rest and smoke mcp pass under Docker",
+                ],
+                "browseforge_min_version": "v2.0.0",
+                "contract_version": "v0.1.0",
+                "release_blockers": release_blockers,
+                "required_browseforge_surfaces": [
+                    "config.runtimes.<id>",
+                    "GET /api/runtimes",
+                    "POST /api/profiles",
+                    "PUT /api/profiles/{id}",
+                    "POST /api/profiles/import",
+                    "POST /api/backup/restore",
+                    "POST /api/sessions",
+                    "MCP list_runtimes",
+                    "MCP create_profile",
+                    "MCP open_browser",
+                    "workflow create_profile",
+                    "dashboard runtime selector",
+                    "browsers status",
+                    "browsers install",
+                    "Docker seed /app/browsers/<runtime>",
+                ],
+                "runtime_id": "browseforge-chromium",
+            },
+        )
 
     def _write_json(self, path: Path, payload: object) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

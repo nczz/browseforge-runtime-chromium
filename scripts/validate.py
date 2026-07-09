@@ -252,6 +252,53 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
         if score_comparison.get("baseline_gaps") or score_comparison.get("gaps") or warning_comparisons:
             raise SystemExit("live-detector-evidence gate cannot pass while detector score comparison has baseline gaps, evidence gaps, or warning comparisons")
 
+STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
+    "no runtime graph index",
+    "no detector baseline",
+    "no docker smoke evidence",
+    "no playwright bind evidence",
+}
+
+
+def validate_browseforge_integration_contract(contract: dict, gate_status: dict[str, str | None]) -> None:
+    if contract.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("BrowseForge integration contract runtime_id must be browseforge-chromium")
+    if contract.get("browseforge_min_version") != "v2.0.0":
+        raise SystemExit("BrowseForge integration contract must require BrowseForge v2.0.0")
+    required_surfaces = {
+        "config.runtimes.<id>",
+        "GET /api/runtimes",
+        "POST /api/profiles",
+        "PUT /api/profiles/{id}",
+        "POST /api/profiles/import",
+        "POST /api/backup/restore",
+        "POST /api/sessions",
+        "MCP list_runtimes",
+        "MCP create_profile",
+        "MCP open_browser",
+        "workflow create_profile",
+        "dashboard runtime selector",
+        "browsers status",
+        "browsers install",
+        "Docker seed /app/browsers/<runtime>",
+    }
+    surfaces = set(contract.get("required_browseforge_surfaces", []))
+    missing_surfaces = sorted(required_surfaces - surfaces)
+    if missing_surfaces:
+        raise SystemExit(f"BrowseForge integration contract missing surfaces: {missing_surfaces}")
+    blockers = contract.get("release_blockers", [])
+    if not blockers or not all(isinstance(blocker, str) and blocker for blocker in blockers):
+        raise SystemExit("BrowseForge integration contract release_blockers must be non-empty strings")
+    if gate_status.get("browseforge-adapter-merged") == "passed":
+        stale = sorted(
+            blocker
+            for blocker in blockers
+            if blocker.strip().lower() in STALE_BROWSEFORGE_INTEGRATION_BLOCKERS
+        )
+        if stale:
+            raise SystemExit(f"stale BrowseForge integration release blockers: {stale}")
+
+
 
 
 def main() -> None:
@@ -331,6 +378,9 @@ def main() -> None:
         if gate_id not in gate_ids:
             raise SystemExit(f"release gates missing {gate_id}")
     gate_status = {gate["gate_id"]: gate.get("status") for gate in release_gates["release_candidate_required_gates"]}
+    integration_contract = load_json("contracts/browseforge-integration.contract.json")
+    validate_browseforge_integration_contract(integration_contract, gate_status)
+
 
     surface_status = load_json("knowledge/manifests/fingerprint-surface-status.json")
     validate_surface_status_manifest(surface_status, gate_status)
