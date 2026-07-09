@@ -35,7 +35,7 @@
         "navigator_webdriver": false,
         "title": "Antibot"
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "automation_signals"
@@ -52,7 +52,7 @@
         ],
         "timezone": "Asia/Taipei"
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "locale"
@@ -65,7 +65,7 @@
         "deviceMemory": 8,
         "hardwareConcurrency": 8
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "hardware"
@@ -78,7 +78,7 @@
         "renderer": "Intel Iris OpenGL Engine",
         "vendor": "Intel Inc."
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "webgl"
@@ -86,15 +86,16 @@
     {
       "detector_check": "user_agent",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live detector context still exposed HeadlessChrome in navigator.userAgent when collected inside the packaged Linux container; native UA source patch requires a rebuilt packaged Chrome artifact or a renderer propagation fix before this surface is release-grade.",
+      "finding": "Live detector context and Browser.getVersion reported configured Chromium UA without HeadlessChrome when fingerprint.user_agent is set in the smoke config.",
       "normalized_values": {
-        "browser_version_userAgent_contains_HeadlessChrome": true,
-        "navigator_userAgent_contains_HeadlessChrome": true,
-        "navigator_userAgent_family": "chromium_linux_headless"
+        "browser_version_userAgent_contains_HeadlessChrome": false,
+        "navigator_userAgent_contains_HeadlessChrome": false,
+        "navigator_userAgent_family": "chromium_linux",
+        "ua_full_version": "150.0.7871.101"
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
-      "severity": "medium",
-      "status": "warning",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
+      "severity": "low",
+      "status": "pass",
       "surface": "user_agent"
     },
     {
@@ -108,7 +109,7 @@
         "height": 1080,
         "width": 1920
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "screen"
@@ -122,7 +123,7 @@
         "usage": 0,
         "usageDetails": {}
       },
-      "raw_value_hash": "6c36d2f45a4d31ae0416735cd5ba177d8e0db623ae2597da7f693b88f141d0a3",
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
       "severity": "low",
       "status": "pass",
       "surface": "storage_quota"
@@ -135,7 +136,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
+    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the source-controlled Linux detector smoke config with fingerprint.user_agent and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-sannysoft-2",
@@ -143,11 +144,11 @@
     "tokens_redacted": true
   },
   "schema_version": "1.1",
-  "status": "warning",
+  "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "a5a52fd984e98dfd3adbb84631e90859c9a7949fbbe0d62200406360a9ea96d0",
-    "sha256": "e6f62f3e1c96eb203c35b6c3625b8f08a1ac0d3bf8d4b7a19a1f4436a6baf860",
+    "raw_capture_sha256": "96e9e00d425f4cfa9542894f0a8d81810b2c8a804688d24b3a184f15db45b160",
+    "sha256": "d06b244cf3f84d339ecdfa89f17606a521f48b098d15bd1a143d402529ca0b4f",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -163,5 +164,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T04:22:00.994232+00:00"
+  "tested_at": "2026-07-09T04:28:45.772424+00:00"
 }

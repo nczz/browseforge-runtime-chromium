@@ -7,17 +7,17 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values, but packaged Linux UA still exposes HeadlessChrome in the in-container collector and the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "scope": "source_level_linux_headless_detector_smoke_plus_local_dogfood",
   "surfaces": [
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke collected inside container reported navigator.webdriver=false but navigator.userAgent still contained HeadlessChrome; source UA patch or packaged Chrome rebuild remains required for release-grade UA.",
-      "release_blocker": true,
-      "result": "warn_headless_ua_in_packaged_container",
-      "severity": "medium",
+      "evidence": "Packaged Linux SannySoft/CDP smoke using fingerprint.user_agent config reported navigator.webdriver=false and configured Chromium UA without HeadlessChrome.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "UA"
     },
