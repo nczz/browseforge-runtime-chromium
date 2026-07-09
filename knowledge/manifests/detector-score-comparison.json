@@ -55,7 +55,7 @@
       "surface": "fonts"
     }
   ],
-  "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
+  "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers, and complete WebGL metadata hashes remain required before WebGL parity claims.",
   "evidence_count": 17,
   "gaps": [
     {
@@ -84,9 +84,103 @@
         "headed"
       ],
       "surface": "fonts"
+    },
+    {
+      "detectors": [
+        "browserleaks",
+        "browserscan",
+        "creepjs",
+        "iphey",
+        "pixelscan",
+        "sannysoft"
+      ],
+      "finding": "WebGL comparison requires sanitized extension, parameter, shader precision, and rendered pixel hashes for each committed WebGL evidence row.",
+      "gap_id": "webgl_metadata_hashes_missing",
+      "missing_records": [
+        {
+          "detector_id": "browserleaks",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "browserscan",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "creepjs",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "iphey",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_iphey_uach_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "pixelscan",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "sannysoft",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_linux_x64_sannysoft_headless_docker_direct_20260709"
+        },
+        {
+          "detector_id": "sannysoft",
+          "missing": [
+            "extensionSha256",
+            "parameterSha256",
+            "precisionSha256",
+            "pixelSha256"
+          ],
+          "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1"
+        }
+      ],
+      "surface": "webgl"
+    },
+    {
+      "finding": "WebGL cross-detector comparison requires complete BrowserLeaks metadata and at least one complete peer detector metadata record.",
+      "gap_id": "webgl_cross_detector_metadata_comparison_missing",
+      "missing": [
+        "browserleaks_complete_webgl_metadata",
+        "peer_complete_webgl_metadata"
+      ],
+      "surface": "webgl"
     }
   ],
-  "generated_at": "2026-07-09T15:02:43.969276+00:00",
+  "generated_at": "2026-07-09T15:26:41.383471+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

@@ -249,6 +249,26 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "fonts",
         }
 
+    def webgl_score_result(self, *, vendor="Intel Inc.", renderer="Intel Iris OpenGL Engine", hashes=None):
+        if hashes is None:
+            hashes = {
+                "extensionSha256": "1" * 64,
+                "parameterSha256": "2" * 64,
+                "precisionSha256": "3" * 64,
+                "pixelSha256": "4" * 64,
+            }
+        values = {"vendor": vendor, "renderer": renderer, **hashes}
+        return {
+            "detector_check": "webgl_metadata_probe",
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized WebGL metadata hash evidence.",
+            "normalized_values": values,
+            "severity": "info",
+            "status": "pass",
+            "surface": "webgl",
+        }
+
+
     def run_compare_scores(self, evidence_root, output):
         proc = self.run_harness("compare-scores", "--evidence-root", str(evidence_root), "--output", str(output))
         self.assertEqual(proc.returncode, 0, proc.stderr)
@@ -1596,6 +1616,68 @@ class DetectorHarnessTests(unittest.TestCase):
             }
             self.assertIn(("pixelscan_audio_headless_vs_headed", ("headed",)), gaps)
             self.assertIn(("pixelscan_fonts_headless_vs_headed", ("headed",)), gaps)
+
+    def test_compare_scores_writes_webgl_cross_detector_metadata_comparison(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="webgl_browserleaks",
+                results=[self.webgl_score_result()],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headless",
+                label="webgl_pixelscan",
+                results=[self.webgl_score_result()],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = self.score_comparison(payload, surface="webgl", detectors={"browserleaks", "pixelscan"})
+            self.assertEqual(comparison["comparison_id"], "webgl_metadata_cross_detector")
+            self.assertEqual(comparison["status"], "pass")
+            self.assertIs(comparison["vendor_renderer_match"], True)
+            self.assertTrue(all(comparison["hash_matches"].values()))
+
+    def test_compare_scores_reports_webgl_metadata_hash_gaps(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="webgl_browserleaks_incomplete",
+                results=[
+                    self.webgl_score_result(
+                        hashes={
+                            "extensionSha256": "1" * 64,
+                            "parameterSha256": "2" * 64,
+                        }
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            metadata_gap = next(
+                (item for item in payload["gaps"] if item.get("gap_id") == "webgl_metadata_hashes_missing"),
+                None,
+            )
+            self.assertIsNotNone(metadata_gap, payload["gaps"])
+            self.assertEqual(metadata_gap["missing_records"][0]["missing"], ["precisionSha256", "pixelSha256"])
+            comparison_gap = next(
+                (item for item in payload["gaps"] if item.get("gap_id") == "webgl_cross_detector_metadata_comparison_missing"),
+                None,
+            )
+            self.assertIsNotNone(comparison_gap, payload["gaps"])
 
     def test_compare_scores_reports_gap_when_browserleaks_audio_counterpart_missing(self):
         with tempfile.TemporaryDirectory() as td:

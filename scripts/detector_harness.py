@@ -467,6 +467,31 @@ def _collect_font_availability_records(evidence_rows: list[dict], detector_id: s
             })
     return records
 
+WEBGL_METADATA_FIELDS = ("extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256")
+
+
+def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "webgl":
+                continue
+            if not isinstance(values, dict):
+                continue
+            records.append({
+                "detector_id": detector.get("detector_id"),
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "vendor": values.get("vendor"),
+                "renderer": values.get("renderer"),
+                "hashes": {field: values.get(field) for field in WEBGL_METADATA_FIELDS},
+                "missing_metadata": [field for field in WEBGL_METADATA_FIELDS if not values.get(field)],
+            })
+    return records
+
+
 
 def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], list[dict]]:
     comparisons = []
@@ -614,6 +639,63 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "Pixelscan font comparison requires both headless and headed sanitized font availability evidence.",
         })
 
+
+    webgl_records = _collect_webgl_records(evidence_rows)
+    incomplete_webgl = [record for record in webgl_records if record["missing_metadata"]]
+    if incomplete_webgl:
+        gaps.append({
+            "gap_id": "webgl_metadata_hashes_missing",
+            "surface": "webgl",
+            "detectors": sorted({record["detector_id"] for record in incomplete_webgl if record["detector_id"]}),
+            "missing_records": [
+                {
+                    "detector_id": record["detector_id"],
+                    "run_id": record["run_id"],
+                    "missing": record["missing_metadata"],
+                }
+                for record in incomplete_webgl
+            ],
+            "finding": "WebGL comparison requires sanitized extension, parameter, shader precision, and rendered pixel hashes for each committed WebGL evidence row.",
+        })
+    complete_webgl = [record for record in webgl_records if not record["missing_metadata"]]
+    browserleaks_webgl = next((record for record in complete_webgl if record["detector_id"] == "browserleaks"), None)
+    comparison_peer = next((record for record in complete_webgl if record["detector_id"] != "browserleaks"), None)
+    if browserleaks_webgl and comparison_peer:
+        hash_matches = {
+            field: browserleaks_webgl["hashes"][field] == comparison_peer["hashes"][field]
+            for field in WEBGL_METADATA_FIELDS
+        }
+        vendor_renderer_match = (
+            browserleaks_webgl["vendor"] == comparison_peer["vendor"]
+            and browserleaks_webgl["renderer"] == comparison_peer["renderer"]
+        )
+        all_match = vendor_renderer_match and all(hash_matches.values())
+        comparisons.append({
+            "comparison_id": "webgl_metadata_cross_detector",
+            "surface": "webgl",
+            "status": "pass" if all_match else "warning",
+            "left_detector_id": browserleaks_webgl["detector_id"],
+            "left_run_id": browserleaks_webgl["run_id"],
+            "right_detector_id": comparison_peer["detector_id"],
+            "right_run_id": comparison_peer["run_id"],
+            "vendor_renderer_match": vendor_renderer_match,
+            "hash_matches": hash_matches,
+            "finding": "WebGL metadata hashes match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata hashes differ across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "webgl_cross_detector_metadata_comparison_missing",
+            "surface": "webgl",
+            "missing": sorted(
+                label
+                for label, record in {
+                    "browserleaks_complete_webgl_metadata": browserleaks_webgl,
+                    "peer_complete_webgl_metadata": comparison_peer,
+                }.items()
+                if record is None
+            ),
+            "finding": "WebGL cross-detector comparison requires complete BrowserLeaks metadata and at least one complete peer detector metadata record.",
+        })
     return comparisons, gaps
 
 def detector_score_baseline_gaps() -> list[dict]:
@@ -662,7 +744,7 @@ def compare_scores(args):
         "comparisons": comparisons,
         "gaps": gaps,
         "baseline_gaps": baseline_gaps,
-        "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
+        "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers, and complete WebGL metadata hashes remain required before WebGL parity claims.",
     }
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
