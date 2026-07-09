@@ -5,6 +5,7 @@ import argparse
 import base64
 import datetime as dt
 import hashlib
+import ipaddress
 import json
 import os
 import re
@@ -14,6 +15,7 @@ import struct
 import sys
 import time
 import urllib.request
+import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +68,7 @@ EXIT_COLLECT_UNAVAILABLE = 2
 EXIT_SANITIZATION = 3
 EXIT_MANIFEST = 4
 EXIT_UNSUPPORTED = 5
+EXIT_PREFLIGHT = 6
 
 CANONICAL_SURFACES = set(json.loads((ROOT / "contracts/runtime.manifest.json").read_text())["fingerprint"]["surfaces"])
 SURFACE_ALIASES = {
@@ -122,6 +125,66 @@ def list_targets(args):
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
+
+def _is_external_proxy_host(host: str) -> bool:
+    lowered = host.strip().lower().strip("[]")
+    if lowered in {"localhost", "ip6-localhost"} or lowered.endswith(".local"):
+        return False
+    try:
+        address = ipaddress.ip_address(lowered)
+    except ValueError:
+        return True
+    return not (address.is_loopback or address.is_private or address.is_link_local or address.is_reserved or address.is_unspecified)
+
+def sanitized_proxy_descriptor(proxy_url: str) -> tuple[dict[str, object] | None, list[str]]:
+    errors: list[str] = []
+    parsed = urllib.parse.urlsplit(proxy_url)
+    if parsed.scheme not in {"http", "https", "socks4", "socks5"}:
+        errors.append("external proxy URL must use http, https, socks4, or socks5 scheme")
+    if not parsed.hostname:
+        errors.append("external proxy URL must include a host")
+    if parsed.port is None:
+        errors.append("external proxy URL must include a port")
+    if parsed.hostname and not _is_external_proxy_host(parsed.hostname):
+        errors.append("external proxy host must be an external routable proxy, not loopback/private/local infrastructure")
+    if errors:
+        return None, errors
+    descriptor = {
+        "scheme": parsed.scheme,
+        "host_redacted": "[REDACTED_IP]" if SENSITIVE_RE.search(parsed.hostname or "") else (parsed.hostname or "").lower(),
+        "port": parsed.port,
+        "has_credentials": bool(parsed.username or parsed.password),
+    }
+    return descriptor, []
+
+def proxy_preflight(args):
+    proxy_url = args.proxy_url or os.environ.get("BROWSEFORGE_DETECTOR_PROXY_URL", "")
+    proxy_region = args.proxy_region or os.environ.get("BROWSEFORGE_DETECTOR_PROXY_REGION", "")
+    missing = []
+    if not proxy_url:
+        missing.append("BROWSEFORGE_DETECTOR_PROXY_URL")
+    if not proxy_region:
+        missing.append("BROWSEFORGE_DETECTOR_PROXY_REGION")
+    errors: list[str] = []
+    proxy = None
+    if proxy_url:
+        proxy, errors = sanitized_proxy_descriptor(proxy_url)
+    payload = {
+        "status": "passed" if not missing and not errors else "failed",
+        "ready": not missing and not errors,
+        "missing": missing,
+        "errors": errors,
+        "proxy": proxy,
+        "proxy_region_redacted": _bounded_redacted_value(proxy_region) if proxy_region else None,
+        "requirements": [
+            "external proxy URL with scheme, host, and port",
+            "redacted external proxy region/geolocation label",
+            "no loopback, private, link-local, or .local proxy authority",
+            "no raw credentials or IP literals in committed evidence",
+        ],
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0 if payload["ready"] else EXIT_PREFLIGHT
 
 def plan(args):
     platforms = {p["id"]: p for p in platforms_manifest()["platforms"]}
@@ -1845,6 +1908,7 @@ def main(argv=None):
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
+    p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)

@@ -11,7 +11,7 @@
       "status": "passed"
     },
     {
-      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, validation, sanitization rejection, operational timeout, and KG JSONL edges.",
+      "evidence": "python3 -m unittest tests.test_detector_harness covers target listing, matrix planning, proxy-preflight prerequisite JSON, validation, sanitization rejection, operational timeout, and KG JSONL edges.",
       "gate_id": "detector-harness-contract-tests",
       "status": "passed"
     },

@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -17,8 +18,22 @@ def load_harness_module():
 
 
 class DetectorHarnessTests(unittest.TestCase):
-    def run_harness(self, *args):
-        return subprocess.run([sys.executable, str(HARNESS), *args], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def run_harness(self, *args, env=None):
+        process_env = os.environ.copy()
+        if env:
+            for key, value in env.items():
+                if value is None:
+                    process_env.pop(key, None)
+                else:
+                    process_env[key] = value
+        return subprocess.run(
+            [sys.executable, str(HARNESS), *args],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=process_env,
+        )
 
     def fixture_path(self, name):
         return ROOT / "tests" / "fixtures" / "detectors" / name
@@ -1507,6 +1522,122 @@ class DetectorHarnessTests(unittest.TestCase):
             module.resolve_collect_url("browserleaks", page="audio", url=override_url),
             override_url,
         )
+
+    def test_proxy_preflight_reports_missing_proxy_inputs_as_json(self):
+        proc = self.run_harness(
+            "proxy-preflight",
+            env={
+                "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+            },
+        )
+
+        self.assertEqual(proc.returncode, self.harness_module.EXIT_PREFLIGHT)
+        self.assertEqual(proc.stderr, "")
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertIs(payload["ready"], False)
+        self.assertCountEqual(
+            payload["missing"],
+            [
+                "BROWSEFORGE_DETECTOR_PROXY_URL",
+                "BROWSEFORGE_DETECTOR_PROXY_REGION",
+            ],
+        )
+        self.assertEqual(payload["errors"], [])
+        self.assertIsNone(payload["proxy"])
+
+    def test_proxy_preflight_rejects_loopback_and_localhost_proxy_authorities(self):
+        cases = [
+            ("loopback IPv4", "http://127.0.0.1:8080", "127.0.0.1"),
+            ("localhost", "http://localhost:8080", "localhost"),
+        ]
+        for name, proxy_url, raw_authority in cases:
+            with self.subTest(name):
+                proc = self.run_harness(
+                    "proxy-preflight",
+                    "--proxy-url",
+                    proxy_url,
+                    "--proxy-region-redacted",
+                    "redacted-region",
+                    env={
+                        "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                        "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+                    },
+                )
+
+                self.assertEqual(proc.returncode, self.harness_module.EXIT_PREFLIGHT)
+                self.assertEqual(proc.stderr, "")
+                payload = json.loads(proc.stdout)
+                self.assertEqual(payload["status"], "failed")
+                self.assertIs(payload["ready"], False)
+                self.assertEqual(payload["missing"], [])
+                self.assertIsNone(payload["proxy"])
+                self.assertTrue(any("loopback/private/local" in error for error in payload["errors"]))
+                self.assertNotIn(raw_authority, proc.stdout)
+
+    def test_proxy_preflight_sanitizes_credentials_and_ip_literal_proxy_url(self):
+        proc = self.run_harness(
+            "proxy-preflight",
+            "--proxy-url",
+            "socks5://proxy-user:ghp_abcdEFGH1234567890secret@8.8.8.8:1080",
+            "--proxy-region-redacted",
+            "external-region-redacted",
+            env={
+                "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+            },
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "passed")
+        self.assertIs(payload["ready"], True)
+        self.assertEqual(payload["missing"], [])
+        self.assertEqual(payload["errors"], [])
+        self.assertEqual(
+            payload["proxy"],
+            {
+                "scheme": "socks5",
+                "host_redacted": "[REDACTED_IP]",
+                "port": 1080,
+                "has_credentials": True,
+            },
+        )
+        self.assertNotIn("proxy-user", proc.stdout)
+        self.assertNotIn("ghp_abcdEFGH1234567890secret", proc.stdout)
+        self.assertNotIn("8.8.8.8", proc.stdout)
+
+    def test_proxy_preflight_accepts_valid_external_hostname_and_region(self):
+        proc = self.run_harness(
+            "proxy-preflight",
+            "--proxy-url",
+            "https://proxy.example.net:8443",
+            "--proxy-region-redacted",
+            "europe-redacted",
+            env={
+                "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+            },
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.stderr, "")
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["status"], "passed")
+        self.assertIs(payload["ready"], True)
+        self.assertEqual(payload["missing"], [])
+        self.assertEqual(payload["errors"], [])
+        self.assertEqual(
+            payload["proxy"],
+            {
+                "scheme": "https",
+                "host_redacted": "proxy.example.net",
+                "port": 8443,
+                "has_credentials": False,
+            },
+        )
+        self.assertEqual(payload["proxy_region_redacted"], "europe-redacted")
 
     def test_list_targets_reads_current_manifest(self):
         proc = self.run_harness("list-targets")

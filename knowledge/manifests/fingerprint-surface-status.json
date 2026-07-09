@@ -140,7 +140,7 @@
       "surface": "automation/headless/CDP"
     },
     {
-      "evidence": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts, but no external proxy exit-IP/geolocation detector run has been executed.",
+      "evidence": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. No external proxy exit-IP/geolocation detector run has been executed.",
       "release_blocker": true,
       "result": "warn_linux_browserleaks_local_proxy_and_webrtc_metadata_only",
       "severity": "high",
