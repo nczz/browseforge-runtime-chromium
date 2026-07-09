@@ -47,14 +47,13 @@ def host_os_name() -> str:
     return sys.platform
 
 
-def platform_contract(platform_id: str) -> tuple[str, str, str, str, str]:
+def platform_contract(platform_id: str) -> tuple[str, str, str, str]:
     if platform_id == "macos-arm64":
         return (
             "darwin",
             "out/BrowseForgeMacArm64",
             'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
             "Chromium.app/Contents/MacOS/Chromium",
-            "buildtools/mac/gn",
         )
     if platform_id == "windows-x64":
         return (
@@ -62,14 +61,46 @@ def platform_contract(platform_id: str) -> tuple[str, str, str, str, str]:
             "out/BrowseForgeWindowsX64",
             'target_os="win" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
             "chrome.exe",
-            "buildtools/win/gn.exe",
         )
     supported = ", ".join(sorted(SUPPORTED_NATIVE_PLATFORMS))
     raise SystemExit(f"unsupported native platform {platform_id}; supported: {supported}")
 
 
+def bounded_message(text: str, *, limit: int = 300) -> str:
+    normalized = " ".join(text.split())
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[:limit].rstrip() + "…"
+
+
+def macos_xcode_status() -> dict[str, object]:
+    xcodebuild = shutil.which("xcodebuild")
+    status: dict[str, object] = {
+        "xcodebuild": xcodebuild,
+        "xcodebuild_ok": False,
+    }
+    if xcodebuild is None:
+        status["xcodebuild_status"] = "missing"
+        status["xcodebuild_error"] = "xcodebuild not found"
+        return status
+    result = subprocess.run(
+        ["xcodebuild", "-version"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    output = bounded_message((result.stdout or "") + " " + (result.stderr or ""))
+    status["xcodebuild_ok"] = result.returncode == 0
+    status["xcodebuild_status"] = "ok" if result.returncode == 0 else "failed"
+    if output:
+        key = "xcodebuild_version" if result.returncode == 0 else "xcodebuild_error"
+        status[key] = output
+    return status
+
+
 def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str | None = None, jobs: int = DEFAULT_JOBS) -> NativeBuildPlan:
-    required_host, default_out, gn_args, output_rel, gn_rel = platform_contract(platform_id)
+    required_host, default_out, gn_args, output_rel = platform_contract(platform_id)
     selected_out = out_dir or default_out
     src = workdir / "src"
     output_binary = src / selected_out / output_rel
@@ -129,18 +160,23 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
     app_bundle = None
     if plan.platform_id == "macos-arm64":
         app_bundle = str(output.parents[2])
+    gn_path = Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")
+    depot_tools_exists = Path(plan.depot_tools_dir).is_dir()
+    gn_binary_exists = gn_path.is_file()
+    autoninja = str(Path(plan.depot_tools_dir) / "autoninja") if (Path(plan.depot_tools_dir) / "autoninja").is_file() else shutil.which("autoninja")
+    gclient = str(Path(plan.depot_tools_dir) / "gclient") if (Path(plan.depot_tools_dir) / "gclient").is_file() else shutil.which("gclient")
     status = {
         "host_os": plan.host_os,
         "required_host_os": plan.required_host_os,
         "host_supported": plan.host_os == plan.required_host_os,
         "chromium_src_exists": src.is_dir(),
         "chromium_deps_exists": (src / "DEPS").is_file(),
-        "gn_binary": str(Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")),
-        "gn_binary_exists": (Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")).is_file(),
+        "gn_binary": str(gn_path),
+        "gn_binary_exists": gn_binary_exists,
         "depot_tools_dir": plan.depot_tools_dir,
-        "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
-        "autoninja": str(Path(plan.depot_tools_dir) / "autoninja") if (Path(plan.depot_tools_dir) / "autoninja").is_file() else shutil.which("autoninja"),
-        "gclient": str(Path(plan.depot_tools_dir) / "gclient") if (Path(plan.depot_tools_dir) / "gclient").is_file() else shutil.which("gclient"),
+        "depot_tools_exists": depot_tools_exists,
+        "autoninja": autoninja,
+        "gclient": gclient,
         "out_args_exists": (src / plan.out_dir / "args.gn").is_file(),
         "build_ninja_exists": (src / plan.out_dir / "build.ninja").is_file(),
         "output_binary": plan.output_binary,
@@ -149,6 +185,20 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         "package_zip": str(ROOT / "dist" / f"{plan.package_artifact_id}.zip"),
         "package_zip_exists": (ROOT / "dist" / f"{plan.package_artifact_id}.zip").is_file(),
     }
+    toolchain_ready = bool(
+        status["host_supported"]
+        and status["chromium_src_exists"]
+        and status["chromium_deps_exists"]
+        and depot_tools_exists
+        and gn_binary_exists
+        and gclient
+        and autoninja
+    )
+    if plan.platform_id == "macos-arm64":
+        xcode_status = macos_xcode_status()
+        status.update(xcode_status)
+        toolchain_ready = toolchain_ready and bool(xcode_status["xcodebuild_ok"])
+    status["native_toolchain_ready"] = toolchain_ready
     if app_bundle is not None:
         status["app_bundle"] = app_bundle
         status["app_bundle_exists"] = Path(app_bundle).is_dir()

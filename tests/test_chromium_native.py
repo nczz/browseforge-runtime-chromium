@@ -41,6 +41,37 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertIsInstance(payload, dict)
         return payload
 
+    def _write_native_checkout_fixtures(self, workdir: Path) -> tuple[Path, Path]:
+        src = workdir / "src"
+        depot_tools = workdir / "depot_tools"
+        src.mkdir(parents=True)
+        depot_tools.mkdir()
+        (src / "DEPS").write_text("deps = {}\n", encoding="utf-8")
+        for tool in ("gclient", "autoninja", "gn"):
+            (depot_tools / tool).write_text("#!/bin/sh\n", encoding="utf-8")
+        return src, depot_tools
+
+    def _macos_check_status(self, workdir: Path, runtime_root: Path) -> dict:
+        stdout = io.StringIO()
+        argv = [
+            "chromium_native.py",
+            "check",
+            "--platform",
+            "macos-arm64",
+            "--workdir",
+            str(workdir),
+            "--out-dir",
+            "out/TestMacArm64",
+        ]
+        with (
+            mock.patch.object(chromium_native, "ROOT", runtime_root),
+            mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+            mock.patch.object(sys, "argv", argv),
+            mock.patch("sys.stdout", stdout),
+        ):
+            chromium_native.main()
+        return json.loads(stdout.getvalue())["status"]
+
     def test_macos_plan_targets_arm64_app_bundle_and_package_platform(self) -> None:
         """The macOS native plan targets arm64 Chromium.app and packages the macos-arm64 artifact."""
         with tempfile.TemporaryDirectory() as td:
@@ -160,6 +191,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
             with (
                 mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
                 mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native.shutil, "which", return_value=None),
                 mock.patch("sys.stdout", stdout),
             ):
                 chromium_native.main()
@@ -177,6 +209,72 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertIs(status["output_binary_exists"], False)
         self.assertIs(status["package_zip_exists"], False)
         self.assertIs(status["app_bundle_exists"], False)
+
+
+    def test_macos_check_reports_command_line_tools_xcodebuild_blocker_before_gn(self) -> None:
+        """A CommandLineTools-only xcodebuild failure blocks native readiness despite local depot_tools."""
+        command_line_tools_error = (
+            "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory "
+            "'/Library/Developer/CommandLineTools' is a command line tools instance\n"
+        )
+        long_error = command_line_tools_error + ("x" * 4096)
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            if kwargs.get("check"):
+                raise subprocess.CalledProcessError(1, command, output="", stderr=long_error)
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr=long_error)
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            _, depot_tools = self._write_native_checkout_fixtures(workdir)
+            with (
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as run,
+            ):
+                status = self._macos_check_status(workdir, tmp_path / "runtime")
+
+        self.assertEqual(str(depot_tools / "gclient"), status["gclient"])
+        self.assertEqual(str(depot_tools / "autoninja"), status["autoninja"])
+        self.assertEqual(str(depot_tools / "gn"), status["gn_binary"])
+        self.assertIs(status["gn_binary_exists"], True)
+        self.assertEqual("/usr/bin/xcodebuild", status["xcodebuild"])
+        self.assertIs(status["xcodebuild_ok"], False)
+        self.assertEqual("failed", status["xcodebuild_status"])
+        self.assertIn("requires Xcode", status["xcodebuild_error"])
+        self.assertIn("CommandLineTools", status["xcodebuild_error"])
+        self.assertLessEqual(len(status["xcodebuild_error"]), 2048)
+        self.assertIs(status["native_toolchain_ready"], False)
+        run.assert_called_once()
+
+    def test_macos_check_marks_native_toolchain_ready_when_xcodebuild_and_depot_tools_are_available(self) -> None:
+        """A supported macOS host with local depot_tools and working xcodebuild is ready for native GN steps."""
+        xcodebuild_output = "Xcode 16.4\nBuild version 16F6\n"
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 0, stdout=xcodebuild_output, stderr="")
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            self._write_native_checkout_fixtures(workdir)
+            with (
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as run,
+            ):
+                status = self._macos_check_status(workdir, tmp_path / "runtime")
+
+        self.assertEqual("/usr/bin/xcodebuild", status["xcodebuild"])
+        self.assertIs(status["xcodebuild_ok"], True)
+        self.assertEqual("ok", status["xcodebuild_status"])
+        self.assertEqual("Xcode 16.4 Build version 16F6", status["xcodebuild_version"])
+        self.assertIs(status["host_supported"], True)
+        self.assertIs(status["depot_tools_exists"], True)
+        self.assertIs(status["gn_binary_exists"], True)
+        self.assertIs(status["native_toolchain_ready"], True)
+        run.assert_called_once()
 
     def test_mutating_command_without_execute_exits_nonzero(self) -> None:
         """Native build actions fail closed unless the caller explicitly opts into mutation."""

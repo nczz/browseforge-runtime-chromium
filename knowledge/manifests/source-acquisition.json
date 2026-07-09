@@ -126,7 +126,9 @@
         "gn_binary_status": "present_after_deps_sync",
         "gn_generation_status": "blocked_full_xcode_required",
         "blocking_error": "xcodebuild requires full Xcode; active developer directory is /Library/Developer/CommandLineTools",
-        "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute"
+        "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
+        "native_toolchain_ready": false,
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports native_toolchain_ready=false, xcodebuild_ok=false, and build_ninja_exists=false"
       }
     },
     "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation"
