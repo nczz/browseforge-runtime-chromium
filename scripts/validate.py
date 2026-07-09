@@ -382,6 +382,29 @@ def validate_proxy_preflight_manifest(proxy_preflight: dict, gate_status: dict[s
     if ready and (gate_status.get("live-detector-evidence") != "passed" or proxy_gaps):
         raise SystemExit("proxy preflight cannot be ready while live-detector-evidence gate or proxy coverage remains blocked")
 
+def validate_release_gate_artifact_evidence(release_gates: dict, runtime_artifacts: dict) -> None:
+    artifacts = runtime_artifacts.get("artifacts", [])
+    if not artifacts:
+        raise SystemExit("runtime-artifacts manifest must list packaged artifacts")
+    primary = artifacts[0]
+    required_tokens = [
+        str(primary.get("artifact_id")),
+        str(primary.get("sha256")),
+        str(primary.get("size_bytes")),
+    ]
+    for gate in release_gates.get("release_candidate_required_gates", []):
+        gate_id = gate.get("gate_id")
+        if gate_id not in {"runtime-artifact-produced", "sbom-provenance-release-assets"}:
+            continue
+        if gate.get("status") != "passed":
+            continue
+        evidence = gate.get("evidence", "")
+        if not isinstance(evidence, str):
+            raise SystemExit(f"release gate {gate_id} evidence must be a string")
+        missing = [token for token in required_tokens if token not in evidence]
+        if missing:
+            raise SystemExit(f"release gate {gate_id} evidence has stale runtime artifact metadata: {missing}")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -606,6 +629,7 @@ def main() -> None:
         if platform in unsupported_package_platforms:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
+    validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"

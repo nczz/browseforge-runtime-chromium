@@ -304,6 +304,59 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 self.assertIn(field, message)
                 self.assertIn("drift", message)
 
+    def test_validate_accepts_release_gate_artifact_evidence_with_current_sha_and_size(self) -> None:
+        """Passed artifact release gates must cite the current packaged archive sha and byte size."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            artifact = manifest["artifacts"][0]
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            self._write_release_gates(temp_root, live_detector_status="warning")
+
+            release_gates = json.loads((temp_root / "knowledge" / "manifests" / "release-gates.json").read_text(encoding="utf-8"))
+            gates_by_id = {gate["gate_id"]: gate for gate in release_gates["release_candidate_required_gates"]}
+            for gate_id in ["runtime-artifact-produced", "sbom-provenance-release-assets"]:
+                with self.subTest(gate_id=gate_id):
+                    evidence = gates_by_id[gate_id]["evidence"]
+                    self.assertIn(artifact["sha256"], evidence)
+                    self.assertIn(str(artifact["size_bytes"]), evidence)
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_passed_release_gate_artifact_evidence_with_stale_sha_and_size(self) -> None:
+        """A passed artifact release gate cannot keep old archive sha/size text after runtime-artifacts changes."""
+        stale_sha = "1a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a"
+        stale_size_bytes = 567798165
+        for gate_id in ["runtime-artifact-produced", "sbom-provenance-release-assets"]:
+            with self.subTest(gate_id=gate_id):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    artifact = manifest["artifacts"][0]
+                    self.assertNotEqual(stale_sha, artifact["sha256"])
+                    self.assertNotEqual(stale_size_bytes, artifact["size_bytes"])
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._write_release_gates(temp_root, live_detector_status="warning")
+                    self._rewrite_release_gate_artifact_evidence(
+                        temp_root,
+                        gate_id=gate_id,
+                        sha256=stale_sha,
+                        size_bytes=stale_size_bytes,
+                    )
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("release gate", message)
+                self.assertIn(gate_id, message)
+                self.assertIn("stale", message)
+                self.assertIn("metadata", message)
+
     def test_validate_rejects_source_acquisition_with_stale_packaged_artifact_metadata(self) -> None:
         """source-acquisition.json cannot retain stale archive or packaged binary hashes."""
         cases: list[tuple[str, str | int]] = [
@@ -879,7 +932,6 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             root / "knowledge" / "manifests" / "platform-matrix.json",
             {"platforms": self._platform_matrix_platforms()},
         )
-        self._write_release_gates(root, live_detector_status="warning")
         self._write_surface_status(root)
         self._write_score_comparison(root)
         self._write_proxy_preflight(root)
@@ -946,6 +998,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
         self._write_current_runtime_artifact_fixture(root)
+        self._write_release_gates(root, live_detector_status="warning")
         self._write_json(root / "browser" / "chromium-base.json", {})
         self._write_detector_summary(root, coverage_gaps=[])
 
@@ -1286,28 +1339,64 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
 
     def _write_release_gates(self, root: Path, *, live_detector_status: str) -> None:
+        artifact_evidence = self._current_artifact_release_gate_evidence(root)
+        gates: list[dict[str, Any]] = []
+        for gate_id in [
+            "chromium-base-selected",
+            "wrapper-contract-tests",
+            "detector-harness-contract-tests",
+            "packaging-contract-tests",
+            "chromium-source-indexed",
+            "runtime-artifact-produced",
+            "browseforge-adapter-merged",
+            "live-detector-evidence",
+            "sbom-provenance-release-assets",
+        ]:
+            gate = {
+                "gate_id": gate_id,
+                "status": live_detector_status if gate_id == "live-detector-evidence" else "passed",
+            }
+            if artifact_evidence is not None and gate_id in {"runtime-artifact-produced", "sbom-provenance-release-assets"}:
+                gate["evidence"] = artifact_evidence
+            gates.append(gate)
         self._write_json(
             root / "knowledge" / "manifests" / "release-gates.json",
-            {
-                "release_candidate_required_gates": [
-                    {
-                        "gate_id": gate_id,
-                        "status": live_detector_status if gate_id == "live-detector-evidence" else "passed",
-                    }
-                    for gate_id in [
-                        "chromium-base-selected",
-                        "wrapper-contract-tests",
-                        "detector-harness-contract-tests",
-                        "packaging-contract-tests",
-                        "chromium-source-indexed",
-                        "runtime-artifact-produced",
-                        "browseforge-adapter-merged",
-                        "live-detector-evidence",
-                        "sbom-provenance-release-assets",
-                    ]
-                ]
-            },
+            {"release_candidate_required_gates": gates},
         )
+
+    def _current_artifact_release_gate_evidence(self, root: Path) -> str | None:
+        manifest_path = root / "knowledge" / "manifests" / "runtime-artifacts.json"
+        if not manifest_path.is_file():
+            return None
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        artifacts = manifest.get("artifacts") or []
+        if not artifacts:
+            return None
+        artifact = artifacts[0]
+        artifact_sha256 = artifact.get("sha256")
+        artifact_size_bytes = artifact.get("size_bytes")
+        if not artifact_sha256 or not artifact_size_bytes:
+            return None
+        return (
+            f"{artifact['artifact_id']} packaged archive {Path('dist') / (artifact['artifact_id'] + '.zip')} "
+            f"has sha256 {artifact_sha256} and size {artifact_size_bytes} bytes; "
+            f"runtime-artifacts.json records sha256 {artifact_sha256} and size_bytes {artifact_size_bytes}."
+        )
+
+    def _rewrite_release_gate_artifact_evidence(self, root: Path, *, gate_id: str, sha256: str, size_bytes: int) -> None:
+        release_gates_path = root / "knowledge" / "manifests" / "release-gates.json"
+        release_gates = json.loads(release_gates_path.read_text(encoding="utf-8"))
+        stale_evidence = (
+            f"stale fixture says dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip "
+            f"has sha256 {sha256} and size {size_bytes} bytes."
+        )
+        for gate in release_gates["release_candidate_required_gates"]:
+            if gate["gate_id"] == gate_id:
+                gate["evidence"] = stale_evidence
+                break
+        else:
+            self.fail(f"missing release gate {gate_id}")
+        self._write_json(release_gates_path, release_gates)
 
     def _write_proxy_preflight(
         self,
