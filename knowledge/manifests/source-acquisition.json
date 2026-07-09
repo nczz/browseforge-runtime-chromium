@@ -79,14 +79,14 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. The external checkout now also contains the UA-CH fullVersionList seed fix; the packaged artifact must be rebuilt before live detector evidence can prove fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
     "storage_quota_patch_status": "applied_to_external_checkout",
     "switch_propagation_patch_status": "applied_to_external_checkout",
     "timezone_patch_status": "applied_to_external_checkout",
-    "user_agent_patch_status": "applied_to_external_checkout",
+    "user_agent_patch_status": "applied_to_external_checkout_full_version_list_seed_fix",
     "webdriver_patch_status": "applied_to_external_checkout",
     "webgl_patch_status": "applied_to_external_checkout",
     "webrtc_patch_status": "applied_to_external_checkout"
@@ -99,7 +99,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. The external checkout now also contains the UA-CH fullVersionList seed fix; the packaged artifact must be rebuilt before live detector evidence can prove fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {

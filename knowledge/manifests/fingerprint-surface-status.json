@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures unscored WebAudio, FontFaceSet, and partial UA-CH probes, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Linux SannySoft smoke captures partial UA-CH and the source patch now seeds fullVersionList for the next rebuild, but the current packaged artifact and full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix are not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -22,11 +22,11 @@
       "surface": "UA"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke using UA-CH config reported navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, and wow64=false; fullVersionList remained empty, so BrowserLeaks/Pixelscan client-hints matrix remains required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke using UA-CH config reported navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, and wow64=false; fullVersionList remained empty in the existing package. scripts/apply_user_agent_patch.py now seeds empty brand_full_version_list from brand_version_list in the external Chromium checkout; a rebuilt artifact plus BrowserLeaks/Pixelscan client-hints matrix remains required.",
       "release_blocker": true,
-      "result": "warn_linux_sannysoft_partial_uach",
+      "result": "warn_patch_fixed_needs_rebuild_detector_matrix",
       "severity": "medium",
-      "status": "detector_tested",
+      "status": "implemented",
       "surface": "Client Hints"
     },
     {

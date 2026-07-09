@@ -87,6 +87,21 @@ bool BrowseForgeLooksLikeGreaseBrand(const std::string& brand) {
          brand.find("?") != std::string::npos;
 }
 
+void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
+                                      const std::string& full_version) {
+  if (!metadata.brand_full_version_list.empty()) {
+    return;
+  }
+  metadata.brand_full_version_list.reserve(metadata.brand_version_list.size());
+  for (const auto& brand_version : metadata.brand_version_list) {
+    metadata.brand_full_version_list.emplace_back(
+        brand_version.brand,
+        BrowseForgeLooksLikeGreaseBrand(brand_version.brand)
+            ? brand_version.version
+            : full_version);
+  }
+}
+
 bool BrowseForgeSwitchBool(const char* name, bool* value) {
   std::string raw =
       base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(name);
@@ -108,6 +123,7 @@ void BrowseForgeApplyUserAgentMetadataOverrides(UserAgentMetadata& metadata) {
     metadata.full_version = full_version;
     std::string major = BrowseForgeMajorVersion(full_version);
     if (!major.empty()) {
+      BrowseForgeEnsureFullVersionList(metadata, full_version);
       for (auto& brand_version : metadata.brand_version_list) {
         if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
           brand_version.version = major;
@@ -165,6 +181,54 @@ PATCHED_METADATA = '''  UserAgentMetadata metadata = GetUserAgentMetadata();
   ua_data->SetBrandVersionList(metadata.brand_version_list);
 '''
 
+UA_FULL_VERSION_LIST_HELPER = '''void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
+                                      const std::string& full_version) {
+  if (!metadata.brand_full_version_list.empty()) {
+    return;
+  }
+  metadata.brand_full_version_list.reserve(metadata.brand_version_list.size());
+  for (const auto& brand_version : metadata.brand_version_list) {
+    metadata.brand_full_version_list.emplace_back(
+        brand_version.brand,
+        BrowseForgeLooksLikeGreaseBrand(brand_version.brand)
+            ? brand_version.version
+            : full_version);
+  }
+}
+
+'''
+
+UA_FULL_VERSION_LIST_OLD = '''    std::string major = BrowseForgeMajorVersion(full_version);
+    if (!major.empty()) {
+      for (auto& brand_version : metadata.brand_version_list) {
+        if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+          brand_version.version = major;
+        }
+      }
+      for (auto& brand_version : metadata.brand_full_version_list) {
+        if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+          brand_version.version = full_version;
+        }
+      }
+    }
+'''
+
+UA_FULL_VERSION_LIST_NEW = '''    std::string major = BrowseForgeMajorVersion(full_version);
+    if (!major.empty()) {
+      BrowseForgeEnsureFullVersionList(metadata, full_version);
+      for (auto& brand_version : metadata.brand_version_list) {
+        if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+          brand_version.version = major;
+        }
+      }
+      for (auto& brand_version : metadata.brand_full_version_list) {
+        if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+          brand_version.version = full_version;
+        }
+      }
+    }
+'''
+
 
 def validate_chromium_src(src: Path) -> None:
     if not (src / ".git").exists():
@@ -201,6 +265,14 @@ def patch_navigator_ua(text: str) -> str:
         if UA_NAMESPACE_ANCHOR not in patched:
             raise SystemExit("navigator_ua.cc namespace anchor not found")
         patched = patched.replace(UA_NAMESPACE_ANCHOR, UA_NAMESPACE_ANCHOR + UA_METADATA_HELPER, 1)
+    if "BrowseForgeEnsureFullVersionList" not in patched:
+        if UA_FULL_VERSION_LIST_OLD not in patched:
+            raise SystemExit("NavigatorUA UA-CH full version list upgrade anchor not found")
+        patched = patched.replace(UA_FULL_VERSION_LIST_OLD, UA_FULL_VERSION_LIST_NEW, 1)
+        switch_bool_anchor = "bool BrowseForgeSwitchBool(const char* name, bool* value) {"
+        if switch_bool_anchor not in patched:
+            raise SystemExit("NavigatorUA UA-CH helper insertion anchor not found")
+        patched = patched.replace(switch_bool_anchor, UA_FULL_VERSION_LIST_HELPER + switch_bool_anchor, 1)
     if PATCHED_METADATA in patched:
         return patched
     if ORIGINAL_METADATA not in patched:

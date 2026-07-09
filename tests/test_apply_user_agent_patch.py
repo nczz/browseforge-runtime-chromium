@@ -89,6 +89,9 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         self.assertIn('BrowseForgeSwitchString("fingerprint-ua-platform", 64)', patched)
         self.assertIn('BrowseForgeSwitchString("fingerprint-ua-architecture", 32)', patched)
         self.assertIn('metadata.form_factors = {bool_value ? kMobileFormFactor : kDesktopFormFactor};', patched)
+        self.assertIn("BrowseForgeEnsureFullVersionList(metadata, full_version);", patched)
+        self.assertIn("metadata.brand_full_version_list.emplace_back", patched)
+        self.assertIn("ua_data->SetFullVersionList(metadata.brand_full_version_list);", patched)
 
     def test_patch_is_idempotent(self) -> None:
         patched_base_once = apply_user_agent_patch.patch_navigator_base(BASE_FIXTURE)
@@ -97,6 +100,20 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         patched_ua_once = apply_user_agent_patch.patch_navigator_ua(UA_FIXTURE)
         patched_ua_twice = apply_user_agent_patch.patch_navigator_ua(patched_ua_once)
         self.assertEqual(patched_ua_once, patched_ua_twice)
+
+    def test_upgrades_existing_ua_ch_patch_with_full_version_list_seed(self) -> None:
+        patched_once = apply_user_agent_patch.patch_navigator_ua(UA_FIXTURE)
+        old_patch = patched_once.replace(
+            "      BrowseForgeEnsureFullVersionList(metadata, full_version);\n",
+            "",
+        )
+        helper_start = old_patch.index("void BrowseForgeEnsureFullVersionList")
+        helper_end = old_patch.index("bool BrowseForgeSwitchBool", helper_start)
+        old_patch = old_patch[:helper_start] + old_patch[helper_end:]
+        upgraded = apply_user_agent_patch.patch_navigator_ua(old_patch)
+        self.assertIn("BrowseForgeEnsureFullVersionList(metadata, full_version);", upgraded)
+        self.assertIn("void BrowseForgeEnsureFullVersionList", upgraded)
+        self.assertIn("metadata.brand_full_version_list.emplace_back", upgraded)
 
     def test_apply_patch_updates_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
