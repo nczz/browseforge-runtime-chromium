@@ -198,6 +198,24 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "audio",
         }
 
+    def browserleaks_audio_page_context_result(self, *, detector_check, values):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized BrowserLeaks JavaScript Web Audio page-context evidence.",
+            "normalized_values": {
+                "audioContextValues": values,
+                "available": True,
+                "length": 44100,
+                "sampleRate": 44100,
+                "sum": 0.00000072,
+                "sumAbs": 0.00017846,
+            },
+            "severity": "info",
+            "status": "pass",
+            "surface": "audio",
+        }
+
     def font_availability_result(self, *, detector_check, checks):
         true_count = sum(1 for value in checks.values() if value)
         false_count = sum(1 for value in checks.values() if not value)
@@ -1911,6 +1929,61 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual(comparison["metric_deltas"], {"length": 0, "sampleRate": 0, "sum": 0.0, "sumAbs": 0.0})
             self.assertNotIn(
                 "browserleaks_audio_headless_vs_headed",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+
+    def test_compare_scores_passes_browserleaks_audio_page_context_when_fields_match(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            context_values = {
+                "channelCount": 2,
+                "channelCountMode": "explicit",
+                "channelInterpretation": "speakers",
+                "fftSize": 2048,
+                "frequencyBinCount": 1024,
+                "maxChannelCount": 2,
+                "maxDecibels": -30,
+                "minDecibels": -100,
+                "numberOfInputs": 1,
+                "numberOfOutputs": 0,
+                "sampleRate": 44100,
+                "smoothingTimeConstant": 0.8,
+                "state": "suspended",
+            }
+            for display_mode, label in [
+                ("headless", "browserleaks_audio_page_headless"),
+                ("headed_xvfb", "browserleaks_audio_page_headed"),
+            ]:
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="browserleaks",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.browserleaks_audio_page_context_result(
+                            detector_check=f"{label}_context",
+                            values=context_values,
+                        )
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = next(
+                (
+                    item
+                    for item in payload["comparisons"]
+                    if item.get("comparison_id") == "browserleaks_javascript_audio_page_context_headless_vs_headed"
+                ),
+                None,
+            )
+            self.assertIsNotNone(comparison, payload["comparisons"])
+            self.assertEqual(comparison["status"], "pass")
+            self.assertTrue(all(comparison["field_matches"].values()))
+            self.assertNotIn(
+                "browserleaks_javascript_audio_page_context_headless_vs_headed",
                 {gap.get("gap_id") for gap in payload["gaps"]},
             )
 

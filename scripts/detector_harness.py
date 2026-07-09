@@ -415,6 +415,41 @@ def _collect_detector_audio_probe_records(evidence_rows: list[dict], detector_id
 def _collect_browserleaks_audio_probe_records(evidence_rows: list[dict]) -> list[dict]:
     return _collect_detector_audio_probe_records(evidence_rows, "browserleaks")
 
+def _collect_browserleaks_audio_page_context_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    required = (
+        "channelCount",
+        "channelCountMode",
+        "channelInterpretation",
+        "fftSize",
+        "frequencyBinCount",
+        "maxChannelCount",
+        "maxDecibels",
+        "minDecibels",
+        "numberOfInputs",
+        "numberOfOutputs",
+        "sampleRate",
+        "smoothingTimeConstant",
+        "state",
+    )
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        if detector.get("detector_id") != "browserleaks":
+            continue
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "audio":
+                continue
+            context_values = values.get("audioContextValues", {})
+            if not all(field in context_values for field in required):
+                continue
+            records.append({
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "values": {key: context_values[key] for key in required},
+            })
+    return records
+
 
 def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
@@ -554,6 +589,37 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "detector_id": "browserleaks",
             "missing": sorted({"headless", "headed"} - set(browserleaks_audio)),
             "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
+        })
+
+    browserleaks_audio_page = {
+        record["display_mode"]: record
+        for record in _collect_browserleaks_audio_page_context_records(evidence_rows)
+    }
+    if {"headless", "headed"} <= set(browserleaks_audio_page):
+        headless = browserleaks_audio_page["headless"]
+        headed = browserleaks_audio_page["headed"]
+        value_matches = {
+            key: headless["values"].get(key) == headed["values"].get(key)
+            for key in sorted(set(headless["values"]) | set(headed["values"]))
+        }
+        all_match = all(value_matches.values())
+        comparisons.append({
+            "comparison_id": "browserleaks_javascript_audio_page_context_headless_vs_headed",
+            "detector_id": "browserleaks",
+            "surface": "audio",
+            "status": "pass" if all_match else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "field_matches": value_matches,
+            "finding": "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields match across headless/headed evidence." if all_match else "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields differ across headless/headed evidence; release-grade BrowserLeaks audio score baseline remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "browserleaks_javascript_audio_page_context_headless_vs_headed",
+            "surface": "audio",
+            "detector_id": "browserleaks",
+            "missing": sorted({"headless", "headed"} - set(browserleaks_audio_page)),
+            "finding": "BrowserLeaks JavaScript Web Audio page comparison requires both headless and headed sanitized AudioContext/AnalyserNode field evidence.",
         })
 
     pixelscan_audio = {

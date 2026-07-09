@@ -121,9 +121,15 @@
     }
   ],
   "coverage_platform": "linux-x64",
-  "evidence_count": 18,
-  "generated_at": "2026-07-09T17:52:47.293481+00:00",
+  "evidence_count": 19,
+  "generated_at": "2026-07-09T18:11:24.408487+00:00",
   "rows": [
+    {
+      "detector_id": "browserleaks",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709.json",
+      "platform": "linux-x64",
+      "status": "warning"
+    },
     {
       "detector_id": "browserleaks",
       "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headless_docker_direct_20260709.json",

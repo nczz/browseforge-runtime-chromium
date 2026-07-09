@@ -56,6 +56,30 @@
       "surface": "audio"
     },
     {
+      "comparison_id": "browserleaks_javascript_audio_page_context_headless_vs_headed",
+      "detector_id": "browserleaks",
+      "field_matches": {
+        "channelCount": true,
+        "channelCountMode": true,
+        "channelInterpretation": true,
+        "fftSize": true,
+        "frequencyBinCount": true,
+        "maxChannelCount": true,
+        "maxDecibels": true,
+        "minDecibels": true,
+        "numberOfInputs": true,
+        "numberOfOutputs": true,
+        "sampleRate": true,
+        "smoothingTimeConstant": true,
+        "state": true
+      },
+      "finding": "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields match across headless/headed evidence.",
+      "left_run_id": "detrun_linux_x64_browserleaks_audio_headless_docker_direct_20260709",
+      "right_run_id": "detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
       "comparison_id": "pixelscan_audio_headless_vs_headed",
       "detector_id": "pixelscan",
       "finding": "Pixelscan bounded AudioContext summaries match across headless/headed evidence.",
@@ -117,9 +141,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 18,
+  "evidence_count": 19,
   "gaps": [],
-  "generated_at": "2026-07-09T17:52:47.311776+00:00",
+  "generated_at": "2026-07-09T18:11:24.429437+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

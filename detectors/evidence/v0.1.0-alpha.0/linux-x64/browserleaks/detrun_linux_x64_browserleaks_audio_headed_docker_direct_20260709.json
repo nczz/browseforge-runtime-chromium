@@ -1,0 +1,149 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/javascript#audio"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_audio_headed_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:browserleaks-audio:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_javascript_audio_page_headed_xvfb_summary",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks JavaScript Web Audio section loaded on the packaged Linux runtime in headed Docker/Xvfb mode and produced bounded OfflineAudioContext plus AudioContext/AnalyserNode field summaries; raw page text and sample buffers are not committed.",
+      "normalized_values": {
+        "audioContextFieldCount": 13,
+        "audioContextValues": {
+          "channelCount": 2,
+          "channelCountMode": "explicit",
+          "channelInterpretation": "speakers",
+          "fftSize": 2048,
+          "frequencyBinCount": 1024,
+          "maxChannelCount": 2,
+          "maxDecibels": -30,
+          "minDecibels": -100,
+          "numberOfInputs": 1,
+          "numberOfOutputs": 0,
+          "sampleRate": 44100,
+          "smoothingTimeConstant": 0.8,
+          "state": "suspended"
+        },
+        "available": true,
+        "browserleaksAudioPage": {
+          "audioContext": {
+            "available": true,
+            "values": {
+              "channelCount": 2,
+              "channelCountMode": "explicit",
+              "channelInterpretation": "speakers",
+              "fftSize": 2048,
+              "frequencyBinCount": 1024,
+              "maxChannelCount": 2,
+              "maxDecibels": -30,
+              "minDecibels": -100,
+              "numberOfInputs": 1,
+              "numberOfOutputs": 0,
+              "sampleRate": 44100,
+              "smoothingTimeConstant": 0.8,
+              "state": "suspended"
+            }
+          },
+          "available": true,
+          "observedFieldCount": 1,
+          "values": {
+            "apiStatus": "\u2714"
+          }
+        },
+        "firstSamples": [
+          -6.1e-07,
+          4.4e-07,
+          -4.4e-07,
+          1.4e-07,
+          1e-08,
+          1.3e-07,
+          -3.3e-07,
+          8.7e-07
+        ],
+        "length": 44100,
+        "pageTitle": "JavaScript Browser Information - BrowserLeaks",
+        "sampleRate": 44100,
+        "sum": 7.2e-07,
+        "sumAbs": 0.00017846,
+        "textAudioApiStatus": "\u2714",
+        "url": "https://browserleaks.com/javascript#audio"
+      },
+      "raw_value_hash": "92b4a6f38d3674a3565b4308ce660416a49ab35759c7faa887fc7f58cbc9c65a",
+      "severity": "medium",
+      "status": "warn",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "browserleaks_javascript_audio_page_headed_xvfb_automation",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks JavaScript page context reported navigator.webdriver=false during the headed Docker/Xvfb Web Audio smoke run.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserLeaks JavaScript page text, browser storage, network identifiers, screenshots, and audio sample buffers are not committed; committed evidence stores bounded OfflineAudioContext summary values, BrowserLeaks Web Audio API status, AudioContext/AnalyserNode field summaries, page title/url, text hash, and raw capture SHA only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-javascript-audio-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709.json",
+    "raw_capture_sha256": "c1764f429757b8bab878409faa8fae70011ea1731dae658420be9bd0667186ad",
+    "sha256": "81cda1e9d3f9715104d1a888ab9296069c77720e4ace69a33d0906075e160037",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "b14803a8f91c982732d52d2c0d1f4bec3c997cdcec32b9cd2dc71545cfcc425f"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb software",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "tested_at": "2026-07-09T18:12:00.000000+00:00",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T17:39:38.000000+00:00"
+}
