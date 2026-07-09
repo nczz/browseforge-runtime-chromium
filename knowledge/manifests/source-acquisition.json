@@ -89,7 +89,35 @@
     "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
     "webdriver_patch_status": "applied_to_external_checkout",
     "webgl_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout"
+    "webrtc_patch_status": "applied_to_external_checkout",
+    "native_build_automation": {
+      "script": "scripts/chromium_native.py",
+      "status": "plan_and_preflight_ready_artifacts_missing",
+      "platforms": {
+        "macos-arm64": {
+          "out_dir": "out/BrowseForgeMacArm64",
+          "gn_args": "target_os=\"mac\" target_cpu=\"arm64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+          "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+          "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+          "required_host_os": "darwin",
+          "status": "preflight_ready_artifact_missing"
+        },
+        "windows-x64": {
+          "out_dir": "out/BrowseForgeWindowsX64",
+          "gn_args": "target_os=\"win\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+          "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
+          "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+          "required_host_os": "windows",
+          "status": "preflight_ready_artifact_missing"
+        }
+      },
+      "verification": [
+        "python3 scripts/chromium_native.py plan --platform macos-arm64",
+        "python3 scripts/chromium_native.py check --platform macos-arm64",
+        "python3 scripts/chromium_native.py plan --platform windows-x64",
+        "python3 scripts/chromium_native.py check --platform windows-x64"
+      ]
+    }
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {

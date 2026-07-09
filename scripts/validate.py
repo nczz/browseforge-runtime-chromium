@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     "scripts/chromium_source.py",
     "scripts/apply_stealth_scaffold.py",
     "scripts/chromium_docker.py",
+    "scripts/chromium_native.py",
     "scripts/package_linux_runtime.py",
     "scripts/apply_webdriver_patch.py",
     "scripts/apply_hardware_patch.py",
@@ -105,6 +106,7 @@ REQUIRED_FILES = [
     "tests/test_apply_process_priority_patch.py",
     "tests/test_apply_switch_propagation_patch.py",
     "tests/test_chromium_docker.py",
+    "tests/test_chromium_native.py",
     "internal/stealth/persona_test.go",
     "tests/test_stealth_scaffold.py",
 ]
@@ -232,6 +234,46 @@ def validate_runtime_artifact_consistency(runtime_artifacts: dict, source_acquis
                 raise SystemExit(f"artifact archive {artifact_id} manifest {key} drifted: {artifact_manifest.get(key)!r} != {artifact.get(key)!r}")
             if key != "artifact_id" and provenance.get(key) != artifact.get(key):
                 raise SystemExit(f"artifact archive {artifact_id} provenance {key} drifted: {provenance.get(key)!r} != {artifact.get(key)!r}")
+
+
+def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict) -> None:
+    automation = source_acquisition.get("chromium_base", {}).get("native_build_automation")
+    if not isinstance(automation, dict):
+        raise SystemExit("source-acquisition must record native_build_automation")
+    if automation.get("script") != "scripts/chromium_native.py":
+        raise SystemExit("source-acquisition native_build_automation script must be scripts/chromium_native.py")
+    if not (ROOT / automation["script"]).is_file():
+        raise SystemExit("source-acquisition native_build_automation script is missing")
+    platforms = automation.get("platforms", {})
+    if not isinstance(platforms, dict):
+        raise SystemExit("source-acquisition native_build_automation platforms must be an object")
+    expected_platforms = sorted(set(runtime_artifacts.get("supported_package_platforms", [])) - {"linux-x64"})
+    missing_platforms = sorted(set(expected_platforms) - set(platforms))
+    if missing_platforms:
+        raise SystemExit(f"source-acquisition native_build_automation missing platforms: {missing_platforms}")
+    required = {
+        "macos-arm64": {
+            "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+            "gn_args": 'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+            "out_dir": "out/BrowseForgeMacArm64",
+            "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+            "required_host_os": "darwin",
+        },
+        "windows-x64": {
+            "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+            "gn_args": 'target_os="win" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+            "out_dir": "out/BrowseForgeWindowsX64",
+            "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
+            "required_host_os": "windows",
+        },
+    }
+    for platform_id in expected_platforms:
+        platform = platforms.get(platform_id, {})
+        for key, expected in required[platform_id].items():
+            if platform.get(key) != expected:
+                raise SystemExit(f"source-acquisition native_build_automation {platform_id} {key} drifted: {platform.get(key)!r} != {expected!r}")
+        if platform.get("status") != "preflight_ready_artifact_missing":
+            raise SystemExit(f"source-acquisition native_build_automation {platform_id} must remain preflight_ready_artifact_missing until artifact exists")
 
 def validate_evidence_schema_contract(evidence_schema: dict) -> None:
     properties = evidence_schema.get("properties", {})
@@ -765,6 +807,7 @@ def main() -> None:
         if platform in unsupported_package_platforms:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
+    validate_native_build_automation(source_acquisition, runtime_artifacts)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)

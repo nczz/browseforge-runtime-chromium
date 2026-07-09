@@ -770,6 +770,29 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 self.assertIn(field, message)
                 self.assertIn("drift", message)
 
+    def test_validate_rejects_source_acquisition_with_native_build_automation_drift(self) -> None:
+        """macOS/Windows native build automation must stay pinned to the packager contract."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+            source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+            source_acquisition["chromium_base"]["native_build_automation"]["platforms"]["macos-arm64"][
+                "gn_args"
+            ] = 'target_os="mac" target_cpu="x64" is_debug=false'
+            self._write_json(source_acquisition_path, source_acquisition)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertRegex(message, r"source[- ]acquisition", message)
+        self.assertIn("native_build_automation", message)
+        self.assertIn("macos-arm64", message)
+        self.assertIn("gn_args", message)
+        self.assertIn("drifted", message)
+
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
         module = self._load_validate_module()
@@ -1594,12 +1617,36 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "status": "packaged",
                         "wrapper_binary_sha256": wrapper_sha256,
                     },
+                    "native_build_automation": self._native_build_automation_fixture(),
                     "source_checkout_status": "checked_out_pinned_ref",
                 },
                 "runtime_id": "browseforge-chromium",
                 "schema_version": "1.0",
             },
         )
+
+    def _native_build_automation_fixture(self) -> dict[str, Any]:
+        return {
+            "script": "scripts/chromium_native.py",
+            "platforms": {
+                "macos-arm64": {
+                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+                    "gn_args": 'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+                    "out_dir": "out/BrowseForgeMacArm64",
+                    "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+                    "required_host_os": "darwin",
+                    "status": "preflight_ready_artifact_missing",
+                },
+                "windows-x64": {
+                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+                    "gn_args": 'target_os="win" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+                    "out_dir": "out/BrowseForgeWindowsX64",
+                    "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
+                    "required_host_os": "windows",
+                    "status": "preflight_ready_artifact_missing",
+                },
+            },
+        }
 
     def _sha256_file(self, path: Path) -> str:
         digest = hashlib.sha256()
