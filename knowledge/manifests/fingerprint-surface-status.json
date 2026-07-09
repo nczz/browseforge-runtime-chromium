@@ -11,7 +11,8 @@
   "evidence_refs": [
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260710.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json"
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -131,9 +132,9 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs. A macOS arm64 local host headless SannySoft collector additionally recorded navigator.webdriver=false but a HeadlessChrome UA token, so macOS headless host remains warning evidence only.",
+      "evidence": "Packaged Linux SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs. A macOS arm64 local host headless SannySoft collector recorded navigator.webdriver=false but a HeadlessChrome UA token; a new macOS arm64 local host headed SannySoft collector passed direct coverage with webdriver=false and no HeadlessChrome UA token. macOS evidence remains non-release artifact evidence until a signed BrowseForge macOS Chromium package exists.",
       "release_blocker": false,
-      "result": "warn_macos_headless_host_headlesschrome_recorded",
+      "result": "pass_linux_headed_and_macos_host_headed_sannysoft_nonrelease_macos_artifact",
       "severity": "info",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"
@@ -155,9 +156,9 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and native headed Linux/macOS detector matrix remains absent.",
+      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed BrowserLeaks Fonts and SannySoft direct evidence also exists through the BrowseForge wrapper with installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
       "release_blocker": true,
-      "result": "linux_headless_and_headed_xvfb_sannysoft_browserleaks_pixelscan_browserscan_creepjs_only",
+      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_partial",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "cross-platform drift"
@@ -188,6 +189,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json"
   ]
 }

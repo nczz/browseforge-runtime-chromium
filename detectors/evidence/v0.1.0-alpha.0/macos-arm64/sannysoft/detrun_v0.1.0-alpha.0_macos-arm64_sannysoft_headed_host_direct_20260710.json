@@ -1,0 +1,202 @@
+{
+  "artifact_id": "unpackaged:macos-arm64:v0.1.0-alpha.0",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:sannysoft:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "evidence_ref": "observed.text_sha256",
+      "finding": "SannySoft headed macOS host run loaded through the BrowseForge wrapper; webdriver is false and configured UA does not expose HeadlessChrome. This satisfies macOS host headed direct SannySoft coverage but is not packaged macOS Chromium release evidence.",
+      "normalized_values": {
+        "headless_token_present": false,
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "evidence_ref": "observed.uaData.highEntropy",
+      "finding": "Sanitized macOS host headed run reported macOS UA-CH high-entropy values without committing visitor identifiers or IP literals.",
+      "normalized_values": {
+        "architecture": "arm",
+        "bitness": "64",
+        "brands": [
+          "Not;A=Brand",
+          "Chromium",
+          "Google Chrome"
+        ],
+        "fullVersionList": [
+          {
+            "brand": "Not;A=Brand",
+            "version_major": "8"
+          },
+          {
+            "brand": "Chromium",
+            "version_major": "150"
+          },
+          {
+            "brand": "Google Chrome",
+            "version_major": "150"
+          }
+        ],
+        "mobile": false,
+        "model": "",
+        "platform": "macOS",
+        "platformVersion": "26.5.1",
+        "wow64": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "data_url_sha256": "71cf4062038917e0d78ecd3c478b5124efdcc1509aa022b6d06006d636dd3c80",
+      "evidence_ref": "observed.canvas",
+      "finding": "Canvas probe committed only dimensions and SHA-256 summaries, not raw data URL or pixels.",
+      "height": 32,
+      "image_data_sha256": "f8d7606fac2326d6ff99d2af69c7805d12df136550883ab1c65b55b11dc9bf15",
+      "sample_count": 8192,
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas",
+      "width": 64
+    },
+    {
+      "evidence_ref": "observed.audio",
+      "finding": "OfflineAudioContext probe committed bounded aggregate summaries only.",
+      "normalized_values": {
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 0.77295988,
+        "sumAbs": 83.86503121
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "evidence_ref": "observed.fonts.metrics",
+      "finding": "Font probe committed bounded candidate list, metric rows, glyph hash, and metrics hash only.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "glyphSampleCount": 73728,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 45,
+            "width": 512.078
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 45,
+            "width": 411.625
+          }
+        ],
+        "metricsSha256": "25b20319648fc1d52776a83bdbd6accbc160502115c70ad7db2044ec3c0d843d"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from local macOS headed host CDP collector using installed system Chrome; no raw page text, storage, screenshots, IP literals, exact dotted UA version, or full detector DOM output are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-sannysoft-macos-host-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json",
+    "raw_capture_sha256": "e34f9b4d39b76f6873204cdc73027993b8fb7d8f7702dd4ef3dab0ce60430046",
+    "sha256": "45fc1b78024d744352de3a4d45fc6c3762dfb2a412a8a9badb98a44f436a8139",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "d1855576c61de5d1d85d95be82c4eee0bf0ceec1d8d056b863c0934738be379c"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed host native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-10T00:00:00Z"
+}
