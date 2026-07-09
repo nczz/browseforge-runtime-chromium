@@ -1,12 +1,22 @@
 {
-  "schema_version": "1.0",
-  "runtime_id": "browseforge-chromium",
-  "purpose": "Cross-platform implementation and evidence matrix for BrowseForge Chromium runtime development.",
+  "global_release_requirements": [
+    "runtime manifest validates",
+    "artifact manifest has SHA-256 values",
+    "SBOM/provenance generated",
+    "detector evidence has no unaccepted high/critical findings",
+    "BrowseForge compatibility test passes",
+    "knowledge graph contains RuntimeArtifact, Platform, DetectorRun, FingerprintSurface, Risk, and Mitigation links"
+  ],
   "platforms": [
     {
+      "evidence": {
+        "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+        "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+        "detector_summary": "detector-summary.json",
+        "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json"
+      },
       "id": "linux-x64",
       "priority": 1,
-      "status": "planned",
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
@@ -16,12 +26,12 @@
         "MCP smoke passes",
         "Playwright bind smoke passes",
         "detector run exists"
-      ]
+      ],
+      "status": "packaged_detector_tested"
     },
     {
       "id": "macos-arm64",
       "priority": 2,
-      "status": "planned",
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
@@ -29,23 +39,23 @@
         "codesign/notarization decision exists",
         "BrowseForge launches profile",
         "detector run exists"
-      ]
+      ],
+      "status": "planned"
     },
     {
       "id": "macos-x64",
       "priority": 3,
-      "status": "planned",
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
         "BrowseForge launches profile",
         "detector run exists"
-      ]
+      ],
+      "status": "planned"
     },
     {
       "id": "windows-x64",
       "priority": 4,
-      "status": "planned",
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
@@ -53,25 +63,21 @@
         "code signing decision exists",
         "BrowseForge launches profile",
         "detector run exists"
-      ]
+      ],
+      "status": "planned"
     },
     {
       "id": "linux-arm64",
       "priority": 5,
-      "status": "deferred",
       "required_evidence": [
         "Docker/KasmVNC runtime validation",
         "browser engine support confirmed",
         "detector run exists"
-      ]
+      ],
+      "status": "deferred"
     }
   ],
-  "global_release_requirements": [
-    "runtime manifest validates",
-    "artifact manifest has SHA-256 values",
-    "SBOM/provenance generated",
-    "detector evidence has no unaccepted high/critical findings",
-    "BrowseForge compatibility test passes",
-    "knowledge graph contains RuntimeArtifact, Platform, DetectorRun, FingerprintSurface, Risk, and Mitigation links"
-  ]
+  "purpose": "Cross-platform implementation and evidence matrix for BrowseForge Chromium runtime development.",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
 }

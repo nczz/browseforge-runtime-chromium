@@ -997,20 +997,63 @@ class DetectorHarnessTests(unittest.TestCase):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/detector-timeout.json")
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
-    def test_ingest_writes_normalized_path_and_kg_edges(self):
+    def test_ingest_writes_normalized_path_and_runtime_kg_schema_records(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
+            fixture = json.loads(self.fixture_path("valid-evidence.json").read_text(encoding="utf-8"))
             proc = self.run_harness("ingest", "--input", "tests/fixtures/detectors/valid-evidence.json", "--output-root", str(root / "evidence"), "--kg-out", str(root / "kg.jsonl"))
             self.assertEqual(proc.returncode, 0, proc.stderr)
             written = Path(proc.stdout.strip())
             self.assertTrue(written.is_file())
-            kg = [json.loads(line) for line in (root / "kg.jsonl").read_text().splitlines()]
-            edges = {edge["edge"] for entry in kg for edge in entry["edges"]}
-            self.assertIn("RUNS_DETECTOR", edges)
-            self.assertIn("TESTS_ARTIFACT", edges)
-            self.assertIn("EVIDENCES", edges)
-            self.assertNotIn("RAN_DETECTOR", edges)
-            self.assertNotIn("BUILT_FOR", edges)
+            self.assertEqual(
+                written.relative_to(root / "evidence"),
+                Path(f"{fixture['runtime_version']}/{fixture['target']['platform']}/{fixture['detector']['detector_id']}/{fixture['run_id']}.json"),
+            )
+
+            jsonl_entries = [json.loads(line) for line in (root / "kg.jsonl").read_text(encoding="utf-8").splitlines()]
+            records = []
+            for entry in jsonl_entries:
+                if "nodes" in entry or "edges" in entry:
+                    records.extend(entry.get("nodes", []))
+                    records.extend(entry.get("edges", []))
+                else:
+                    records.append(entry)
+            self.assertGreater(len(records), 0)
+
+            edge_labels = {record.get("label", record.get("edge")) for record in records if record.get("record_type") == "edge" or "edge" in record}
+            self.assertNotIn("EVIDENCES", edge_labels)
+            self.assertNotIn("RAN_DETECTOR", edge_labels)
+            for record in records:
+                self.assertIn(record.get("record_type"), {"node", "edge"})
+                self.assertIn("label", record)
+                self.assertIn("properties", record)
+                if record["record_type"] == "node":
+                    self.assertIn("id", record)
+                else:
+                    self.assertIn("from", record)
+                    self.assertIn("to", record)
+
+            run_node_id = f"DetectorRun:{fixture['run_id']}"
+            evidence_node_id = f"EvidenceArtifact:{fixture['evidence_id']}"
+            artifact_node_id = f"RuntimeArtifact:{fixture['artifact_id']}"
+            nodes = {record["id"]: record for record in records if record.get("record_type") == "node"}
+            self.assertIn(run_node_id, nodes)
+            self.assertIn(evidence_node_id, nodes)
+            self.assertEqual(nodes[run_node_id]["label"], "DetectorRun")
+            self.assertEqual(nodes[evidence_node_id]["label"], "EvidenceArtifact")
+
+            edge_records = [record for record in records if record.get("record_type") == "edge"]
+            self.assertEqual(
+                set(),
+                {
+                    (run_node_id, "RUNS_DETECTOR", f"Detector:{fixture['detector']['detector_id']}"),
+                    (run_node_id, "TESTS_ARTIFACT", artifact_node_id),
+                    (run_node_id, "TARGETS_ARTIFACT", artifact_node_id),
+                    (run_node_id, "PRODUCES_EVIDENCE", evidence_node_id),
+                    (evidence_node_id, "SUPPORTS_GATE", "ReleaseGate:live-detector-evidence"),
+                }
+                - {(record.get("from"), record.get("label"), record.get("to")) for record in edge_records},
+            )
 
 if __name__ == "__main__":
     unittest.main()

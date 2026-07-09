@@ -214,17 +214,45 @@ def kg_edges(evidence):
     run_id = evidence["run_id"]
     evidence_id = evidence["evidence_id"]
     artifact_id = evidence["artifact_id"]
+    detector_node = f"Detector:{det_id}"
+    run_node = f"DetectorRun:{run_id}"
+    evidence_node = f"EvidenceArtifact:{evidence_id}"
+    artifact_node = f"RuntimeArtifact:{artifact_id}"
     nodes = [
-        {"label": "DetectorRun", "id": run_id, "properties": {"status": evidence["status"], "failure_mode": evidence["failure_mode"], "matrix_key": evidence["matrix"]["matrix_key"]}},
-        {"label": "EvidenceArtifact", "id": evidence_id, "properties": {"path": evidence["storage"]["evidence_path"], "sha256": evidence["storage"]["sha256"], "sanitized": True}},
+        {
+            "record_type": "node",
+            "label": "DetectorRun",
+            "id": run_node,
+            "properties": {
+                "run_id": run_id,
+                "detector_id": det_id,
+                "status": evidence["status"],
+                "failure_mode": evidence["failure_mode"],
+                "matrix_key": evidence["matrix"]["matrix_key"],
+            },
+        },
+        {
+            "record_type": "node",
+            "label": "EvidenceArtifact",
+            "id": evidence_node,
+            "properties": {
+                "evidence_id": evidence_id,
+                "path": evidence["storage"]["evidence_path"],
+                "sha256": evidence["storage"]["sha256"],
+                "sanitized": True,
+                "status": evidence["status"],
+            },
+        },
     ]
     edges = [
-        {"from": run_id, "edge": "RUNS_DETECTOR", "to": det_id},
-        {"from": run_id, "edge": "TESTS_ARTIFACT", "to": artifact_id},
-        {"from": evidence_id, "edge": "EVIDENCES", "to": run_id},
+        {"record_type": "edge", "from": run_node, "label": "RUNS_DETECTOR", "to": detector_node, "properties": {}},
+        {"record_type": "edge", "from": run_node, "label": "TESTS_ARTIFACT", "to": artifact_node, "properties": {"status": evidence["status"]}},
+        {"record_type": "edge", "from": run_node, "label": "TARGETS_ARTIFACT", "to": artifact_node, "properties": {"status": evidence["status"]}},
+        {"record_type": "edge", "from": run_node, "label": "PRODUCES_EVIDENCE", "to": evidence_node, "properties": {"status": evidence["status"]}},
+        {"record_type": "edge", "from": evidence_node, "label": "SUPPORTS_GATE", "to": "ReleaseGate:live-detector-evidence", "properties": {"status": evidence["status"]}},
     ]
     for surface in sorted({canonical_surface(r["surface"]) for r in evidence.get("results", [])}):
-        edges.append({"from": det_id, "edge": "CHECKS_SURFACE", "to": surface})
+        edges.append({"record_type": "edge", "from": run_node, "label": "OBSERVED_SURFACE", "to": f"FingerprintSurface:{surface}", "properties": {"status": evidence["status"]}})
     return {"nodes": nodes, "edges": edges}
 
 def ingest(args):

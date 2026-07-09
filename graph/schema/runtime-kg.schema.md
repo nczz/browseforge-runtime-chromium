@@ -58,6 +58,8 @@ The runtime knowledge graph models source, artifacts, anti-detect surfaces, dete
 (Detector)-[:CHECKS_SURFACE]->(FingerprintSurface)
 (DetectorRun)-[:RUNS_DETECTOR]->(Detector)
 (DetectorRun)-[:TARGETS_ARTIFACT]->(RuntimeArtifact)
+(DetectorRun)-[:TESTS_ARTIFACT]->(RuntimeArtifact)
+(DetectorRun)-[:OBSERVED_SURFACE]->(FingerprintSurface)
 (DetectorRun)-[:PRODUCES_EVIDENCE]->(EvidenceArtifact)
 (DetectorRun)-[:OBSERVED_RISK]->(Risk)
 (EvidenceArtifact)-[:SUPPORTS_GATE]->(ReleaseGate)

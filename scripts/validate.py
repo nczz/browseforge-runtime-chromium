@@ -233,13 +233,78 @@ def main() -> None:
     required_edge_labels = {
         "REQUIRES_CAPABILITY", "DECLARES_CAPABILITY", "BUILT_FOR", "GENERATED_FROM",
         "MODIFIES_SOURCE", "CONTROLS_SURFACE", "CHECKS_SURFACE", "RUNS_DETECTOR",
-        "TARGETS_ARTIFACT", "PRODUCES_EVIDENCE", "SUPPORTS_GATE", "REFERENCES_SOURCE",
+        "TARGETS_ARTIFACT", "TESTS_ARTIFACT", "PRODUCES_EVIDENCE", "SUPPORTS_GATE",
+        "REFERENCES_SOURCE",
     }
     missing_edge_labels = sorted(required_edge_labels - edge_labels)
     if missing_edge_labels:
         raise SystemExit(f"generated KG missing edge labels: {missing_edge_labels}")
-    if not any(record.get("label") == "RuntimeArtifact" and record.get("properties", {}).get("status") == "missing" for record in graph_records):
-        raise SystemExit("generated KG must represent the missing runtime artifact blocker explicitly")
+
+    graph_nodes = {
+        record["id"]: record
+        for record in graph_records
+        if record.get("record_type") == "node" and "id" in record
+    }
+    graph_edges = {
+        (record.get("from"), record.get("label"), record.get("to"))
+        for record in graph_records
+        if record.get("record_type") == "edge"
+    }
+    runtime_artifacts = load_json("knowledge/manifests/runtime-artifacts.json")
+    required_artifact_fields = set(runtime_artifacts.get("required_artifact_fields", []))
+    for artifact in runtime_artifacts.get("artifacts", []):
+        artifact_id = artifact["artifact_id"]
+        node_id = f"RuntimeArtifact:{artifact_id}"
+        node = graph_nodes.get(node_id)
+        if node is None:
+            raise SystemExit(f"generated KG missing RuntimeArtifact node for {artifact_id}")
+        props = node.get("properties", {})
+        missing_fields = sorted(required_artifact_fields - props.keys())
+        if missing_fields:
+            raise SystemExit(f"generated KG RuntimeArtifact {artifact_id} missing fields: {missing_fields}")
+        for key in ["runtime_id", "runtime_version", "platform", "os", "arch", "browser_version", "source_ref", "patchset_id", "wrapper_version", "sha256", "size_bytes", "sbom_path", "provenance_path", "release_channel"]:
+            if props.get(key) != artifact.get(key):
+                raise SystemExit(f"generated KG RuntimeArtifact {artifact_id} {key} drifted: {props.get(key)!r} != {artifact.get(key)!r}")
+        if props.get("release_grade") is not True or props.get("status") != "packaged":
+            raise SystemExit(f"generated KG RuntimeArtifact {artifact_id} must be release_grade packaged")
+        for edge in [
+            (node_id, "GENERATED_FROM", "RuntimeProvider:browseforge-chromium"),
+            (node_id, "BUILT_FOR", f"Platform:{artifact['platform']}"),
+            (node_id, "TARGETS_PLATFORM", f"Platform:{artifact['platform']}"),
+        ]:
+            if edge not in graph_edges:
+                raise SystemExit(f"generated KG missing artifact edge: {edge}")
+        stale_linux_missing = [
+            record for record in graph_records
+            if record.get("record_type") == "edge"
+            and record.get("to") == f"Platform:{artifact['platform']}"
+            and record.get("properties", {}).get("status") == "missing_artifact"
+        ]
+        if stale_linux_missing:
+            raise SystemExit(f"generated KG still links {artifact['platform']} to missing artifact blockers")
+
+    detector_summary = load_json("detector-summary.json")
+    for row in detector_summary.get("rows", []):
+        path = ROOT / row["path"]
+        evidence = load_json(path)
+        if evidence["artifact_id"] not in {artifact["artifact_id"] for artifact in runtime_artifacts.get("artifacts", [])}:
+            continue
+        run_node = f"DetectorRun:{evidence['run_id']}"
+        evidence_node = f"EvidenceArtifact:{evidence['evidence_id']}"
+        artifact_node = f"RuntimeArtifact:{evidence['artifact_id']}"
+        if run_node not in graph_nodes:
+            raise SystemExit(f"generated KG missing DetectorRun node for {evidence['run_id']}")
+        if evidence_node not in graph_nodes:
+            raise SystemExit(f"generated KG missing EvidenceArtifact node for {evidence['evidence_id']}")
+        for edge in [
+            (run_node, "RUNS_DETECTOR", f"Detector:{evidence['detector']['detector_id']}"),
+            (run_node, "TESTS_ARTIFACT", artifact_node),
+            (run_node, "TARGETS_ARTIFACT", artifact_node),
+            (run_node, "PRODUCES_EVIDENCE", evidence_node),
+            (evidence_node, "SUPPORTS_GATE", "ReleaseGate:live-detector-evidence"),
+        ]:
+            if edge not in graph_edges:
+                raise SystemExit(f"generated KG missing detector evidence edge: {edge}")
 
     print("runtime framework validation ok")
 
