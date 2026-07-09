@@ -102,9 +102,9 @@
       "surface": "fonts"
     },
     {
-      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed. The BrowserLeaks WebRTC collector now records sanitized ICE candidate metadata and classifies public/private candidate IP literals without committing raw addresses; headed/proxy BrowserLeaks WebRTC evidence is still required.",
+      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed. BrowserLeaks WebRTC now has committed headless and headed Docker/Xvfb sanitized ICE candidate metadata, candidate type labels, public/private IP-literal counts, and a passing headless-vs-headed bounded comparison without committing raw addresses. External proxy/geolocation detector evidence is still required.",
       "release_blocker": false,
-      "result": "warn_bounded_webrtc_probe_requires_headed_proxy_evidence",
+      "result": "pass_browserleaks_webrtc_headed_headless_bounded_metadata",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "WebRTC"
@@ -179,6 +179,8 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headless_host_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json"
   ]
 }

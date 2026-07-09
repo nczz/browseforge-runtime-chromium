@@ -1,0 +1,99 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/webrtc"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headless",
+    "matrix_key": "linux-x64:browserleaks:webrtc:headless:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_webrtc_headless_bounded_candidate_metadata",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks WebRTC page loaded in the rebuilt packaged Linux runtime and recorded sanitized ICE candidate metadata without committing IP literals; external proxy/geolocation detector evidence remains required.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 2,
+        "ipLiteralCount": 0,
+        "privateIpLiteralCount": 0,
+        "publicIpLiteralCount": 0,
+        "rawCandidateSha256": "e58e8151f77509ef42e07b864a6213804e66dff05292b366789abda0532d4bbf",
+        "title": "WebRTC Leak Test - BrowserLeaks",
+        "types": [
+          "host"
+        ],
+        "url": "https://browserleaks.com/webrtc"
+      },
+      "raw_value_hash": "c2b1978e363a522dace95a375de00a98a19f26cb4d1b76faa9a5b6a71cac5331",
+      "severity": "medium",
+      "status": "pass",
+      "surface": "webrtc"
+    },
+    {
+      "detector_check": "browserleaks_webrtc_headless_automation_probe",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks WebRTC page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserLeaks WebRTC page text, browser storage, and ICE candidates are not committed; committed evidence stores sanitized page title/url, aggregate candidate counts, candidate type labels, IP literal counts, and a SHA-256 digest of sorted raw candidates only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-webrtc-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709.json",
+    "raw_capture_sha256": "fa73c9f1e33f928373dafacffe14f9701f7b237008557a4f6c2e6a21782cfdd0",
+    "sha256": "afe0c7e200e7d8b91efc82c90bacd42bfa4dc83324521a595af90abcd1951a9d",
+    "summary_path": "detector-summary.json"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headless swiftshader",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T18:30:00+00:00"
+}

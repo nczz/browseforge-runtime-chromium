@@ -529,6 +529,33 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
             })
     return records
 
+def _collect_webrtc_records(evidence_rows: list[dict], detector_id: str) -> list[dict]:
+    records = []
+    required = ("candidateCount", "types", "ipLiteralCount", "privateIpLiteralCount", "publicIpLiteralCount", "rawCandidateSha256")
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        if detector.get("detector_id") != detector_id:
+            continue
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "webrtc":
+                continue
+            if not all(field in values for field in required):
+                continue
+            records.append({
+                "detector_id": detector_id,
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "candidate_count": values["candidateCount"],
+                "types": sorted(values.get("types") or []),
+                "ip_literal_count": values["ipLiteralCount"],
+                "private_ip_literal_count": values["privateIpLiteralCount"],
+                "public_ip_literal_count": values["publicIpLiteralCount"],
+                "raw_candidate_sha256": values["rawCandidateSha256"],
+            })
+    return records
+
+
 
 
 def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -742,6 +769,42 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "Pixelscan font comparison requires both headless and headed sanitized font availability evidence.",
         })
 
+    browserleaks_webrtc = {
+        record["display_mode"]: record
+        for record in _collect_webrtc_records(evidence_rows, "browserleaks")
+    }
+    if {"headless", "headed"} <= set(browserleaks_webrtc):
+        headless = browserleaks_webrtc["headless"]
+        headed = browserleaks_webrtc["headed"]
+        value_matches = {
+            "candidateCount": headless["candidate_count"] == headed["candidate_count"],
+            "types": headless["types"] == headed["types"],
+            "ipLiteralCount": headless["ip_literal_count"] == headed["ip_literal_count"],
+            "privateIpLiteralCount": headless["private_ip_literal_count"] == headed["private_ip_literal_count"],
+            "publicIpLiteralCount": headless["public_ip_literal_count"] == headed["public_ip_literal_count"],
+        }
+        all_match = all(value_matches.values())
+        comparisons.append({
+            "comparison_id": "browserleaks_webrtc_headless_vs_headed",
+            "detector_id": "browserleaks",
+            "surface": "webrtc",
+            "status": "pass" if all_match else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "field_matches": value_matches,
+            "left_raw_candidate_sha256": headless["raw_candidate_sha256"],
+            "right_raw_candidate_sha256": headed["raw_candidate_sha256"],
+            "finding": "BrowserLeaks bounded WebRTC candidate metadata matches across headless/headed evidence without committed IP literals." if all_match else "BrowserLeaks bounded WebRTC candidate metadata differs across headless/headed evidence; external proxy/geolocation detector evidence remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "browserleaks_webrtc_headless_vs_headed",
+            "surface": "webrtc",
+            "detector_id": "browserleaks",
+            "missing": sorted({"headless", "headed"} - set(browserleaks_webrtc)),
+            "finding": "BrowserLeaks WebRTC comparison requires both headless and headed sanitized ICE candidate metadata evidence.",
+        })
+
 
     webgl_records = _collect_webgl_records(evidence_rows)
     incomplete_webgl = [record for record in webgl_records if record["status"] == "passed" and record["missing_metadata"]]
@@ -851,7 +914,7 @@ def compare_scores(args):
         "comparisons": comparisons,
         "gaps": gaps,
         "baseline_gaps": baseline_gaps,
-        "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
+        "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
     }
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

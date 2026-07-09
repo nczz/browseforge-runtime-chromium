@@ -267,6 +267,26 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "fonts",
         }
 
+    def webrtc_candidate_result(self, *, detector_check, raw_candidate_sha256="d" * 64):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized WebRTC ICE candidate metadata evidence.",
+            "normalized_values": {
+                "available": True,
+                "candidateCount": 2,
+                "ipLiteralCount": 0,
+                "privateIpLiteralCount": 0,
+                "publicIpLiteralCount": 0,
+                "rawCandidateSha256": raw_candidate_sha256,
+                "types": ["host"],
+            },
+            "severity": "info",
+            "status": "pass",
+            "surface": "webrtc",
+        }
+
+
     def webgl_score_result(self, *, vendor="Intel Inc.", renderer="Intel Iris OpenGL Engine", hashes=None):
         if hashes is None:
             hashes = {
@@ -1986,6 +2006,46 @@ class DetectorHarnessTests(unittest.TestCase):
                 "browserleaks_javascript_audio_page_context_headless_vs_headed",
                 {gap.get("gap_id") for gap in payload["gaps"]},
             )
+
+    def test_compare_scores_passes_browserleaks_webrtc_when_candidate_metadata_matches(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            for display_mode, label in [
+                ("headless", "browserleaks_webrtc_headless"),
+                ("headed_xvfb", "browserleaks_webrtc_headed"),
+            ]:
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="browserleaks",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.webrtc_candidate_result(
+                            detector_check=f"{label}_candidate_metadata",
+                        )
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = next(
+                (
+                    item
+                    for item in payload["comparisons"]
+                    if item.get("comparison_id") == "browserleaks_webrtc_headless_vs_headed"
+                ),
+                None,
+            )
+            self.assertIsNotNone(comparison, payload["comparisons"])
+            self.assertEqual(comparison["status"], "pass")
+            self.assertTrue(all(comparison["field_matches"].values()))
+            self.assertNotIn(
+                "browserleaks_webrtc_headless_vs_headed",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+
 
     def test_compare_scores_recognizes_matching_font_glyphs_but_warns_on_metric_hash_drift(self):
         with tempfile.TemporaryDirectory() as td:

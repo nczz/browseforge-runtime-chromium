@@ -134,6 +134,24 @@
       "true_count_delta": 0
     },
     {
+      "comparison_id": "browserleaks_webrtc_headless_vs_headed",
+      "detector_id": "browserleaks",
+      "field_matches": {
+        "candidateCount": true,
+        "ipLiteralCount": true,
+        "privateIpLiteralCount": true,
+        "publicIpLiteralCount": true,
+        "types": true
+      },
+      "finding": "BrowserLeaks bounded WebRTC candidate metadata matches across headless/headed evidence without committed IP literals.",
+      "left_raw_candidate_sha256": "e58e8151f77509ef42e07b864a6213804e66dff05292b366789abda0532d4bbf",
+      "left_run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709",
+      "right_raw_candidate_sha256": "6f24a2d962bd97c09cb7ac9a78345eb02323b622d0f98e6aca6de7bb3cbf81c8",
+      "right_run_id": "detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709",
+      "status": "pass",
+      "surface": "webrtc"
+    },
+    {
       "comparison_id": "webgl_metadata_cross_detector",
       "extension_count_match": true,
       "extension_profile_match": true,
@@ -153,10 +171,10 @@
       "vendor_renderer_match": true
     }
   ],
-  "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 20,
+  "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
+  "evidence_count": 22,
   "gaps": [],
-  "generated_at": "2026-07-09T18:20:55.061233+00:00",
+  "generated_at": "2026-07-09T18:36:08.579556+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
