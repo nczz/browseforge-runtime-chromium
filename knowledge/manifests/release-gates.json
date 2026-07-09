@@ -16,7 +16,7 @@
       "status": "passed"
     },
     {
-      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan, missing browser rejection, wrapper/browser zip packaging, checksums, non-placeholder SPDX-2.3-style SBOM metadata, file hashes/sizes, and source/patchset provenance hashes.",
+      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan support for linux-x64, macos-arm64, and windows-x64; Linux runtime sidecar packaging; macOS .app bundle layout preservation/rejection; Windows portable Chromium exe/DLL/pak/bin/locale packaging; checksums; non-placeholder SPDX-2.3-style SBOM metadata; file hashes/sizes; and source/patchset provenance hashes.",
       "gate_id": "packaging-contract-tests",
       "status": "passed"
     },
