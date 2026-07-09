@@ -93,8 +93,11 @@ class ApplyAudioPatchTests(unittest.TestCase):
         patched = apply_audio_patch.patch_audio_buffer(AUDIO_BUFFER_FIXTURE)
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('"fingerprint-audio-noise"', patched)
+        self.assertIn('BrowseForgeShouldApplyAudioNoise(base::span<const float> samples)', patched)
+        self.assertIn('!BrowseForgeShouldApplyAudioNoise(channel_data->AsSpan())', patched)
         self.assertIn('DOMFloat32Array::CreateOrNull(channel_data->length())', patched)
         self.assertIn('BrowseForgeApplyAudioNoise(noisy_data->AsSpan())', patched)
+        self.assertIn('BrowseForgeShouldApplyAudioNoise(src.subspan(buffer_offset, count))', patched)
         self.assertIn('BrowseForgeApplyAudioNoise(dst.first(count), static_cast<uint32_t>(buffer_offset))', patched)
         self.assertIn('start_index + static_cast<uint32_t>(i)', patched)
 
@@ -125,15 +128,37 @@ class ApplyAudioPatchTests(unittest.TestCase):
             "BrowseForgeAudioNoiseDelta(seed, start_index + static_cast<uint32_t>(i))",
             "BrowseForgeAudioNoiseDelta(seed, static_cast<uint32_t>(i))",
         ).replace(
-            "BrowseForgeApplyAudioNoise(dst.first(count), static_cast<uint32_t>(buffer_offset));",
-            "BrowseForgeApplyAudioNoise(dst.first(count));",
+            "  if (BrowseForgeShouldApplyAudioNoise(src.subspan(buffer_offset, count))) {\n    BrowseForgeApplyAudioNoise(dst.first(count), static_cast<uint32_t>(buffer_offset));\n  }",
+            "  BrowseForgeApplyAudioNoise(dst.first(count));",
+        )
+        legacy = legacy.replace(
+            "bool BrowseForgeShouldApplyAudioNoise(base::span<const float> samples) {\n"
+            "  if (samples.size() < 32u) {\n"
+            "    return false;\n"
+            "  }\n"
+            "  const float first = samples[0];\n"
+            "  uint32_t divergent_samples = 0;\n"
+            "  for (float sample : samples) {\n"
+            "    if (sample != first && ++divergent_samples > 16u) {\n"
+            "      return true;\n"
+            "    }\n"
+            "  }\n"
+            "  return false;\n"
+            "}\n\n",
+            "",
+        ).replace(
+            " || !BrowseForgeShouldApplyAudioNoise(channel_data->AsSpan())",
+            "",
+        ).replace(
+            "  if (!seed || !BrowseForgeShouldApplyAudioNoise(samples)) {\n    return;\n  }",
+            "  if (!seed) {\n    return;\n  }",
         )
 
         upgraded = apply_audio_patch.patch_audio_buffer(legacy)
 
         self.assertIn("void BrowseForgeApplyAudioNoise(base::span<float> samples, uint32_t start_index = 0)", upgraded)
         self.assertIn("BrowseForgeAudioNoiseDelta(seed, start_index + static_cast<uint32_t>(i))", upgraded)
-        self.assertIn("BrowseForgeApplyAudioNoise(dst.first(count), static_cast<uint32_t>(buffer_offset));", upgraded)
+        self.assertIn("BrowseForgeShouldApplyAudioNoise(src.subspan(buffer_offset, count))", upgraded)
 
     def test_apply_patch_updates_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
