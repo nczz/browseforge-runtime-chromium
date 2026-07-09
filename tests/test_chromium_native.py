@@ -90,13 +90,51 @@ class ChromiumNativePlanTests(unittest.TestCase):
         package_command = payload["package_command"]
         self.assertEqual("windows-x64", package_command[package_command.index("--platform") + 1])
 
-    def test_check_reports_missing_output_and_package_artifact_as_false(self) -> None:
-        """A valid temp checkout reports absent native binaries and release zip as false, not fabricated."""
+    def test_plan_exposes_checkout_depot_tools_and_wraps_native_commands(self) -> None:
+        """Run-hooks/build commands execute with the checkout depot_tools first in PATH."""
+        with tempfile.TemporaryDirectory() as td:
+            workdir = Path(td) / "chromium"
+            payload = self._json_from_script(
+                "plan",
+                "--platform",
+                "macos-arm64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestMacArm64",
+                "--jobs",
+                "13",
+            )
+
+        depot_tools = workdir / "depot_tools"
+        expected_path_prefix = f"{depot_tools}:$PATH"
+        self.assertEqual(str(depot_tools), payload["depot_tools_dir"])
+        self.assertEqual(expected_path_prefix, payload["path_prefix"])
+
+        run_hooks = payload["commands"]["run-hooks"]
+        self.assertEqual(["bash", "-lc"], run_hooks[:2])
+        self.assertEqual(f"PATH={expected_path_prefix} DEPOT_TOOLS_UPDATE=0 gclient runhooks", run_hooks[2])
+
+        build_chrome = payload["commands"]["build-chrome"]
+        self.assertEqual(["bash", "-lc"], build_chrome[:2])
+        self.assertEqual(
+            f"PATH={expected_path_prefix} DEPOT_TOOLS_UPDATE=0 autoninja -j13 -C out/TestMacArm64 chrome",
+            build_chrome[2],
+        )
+
+
+    def test_check_reports_checkout_depot_tools_and_missing_artifacts(self) -> None:
+        """A temp checkout reports local depot_tools paths and absent release outputs accurately."""
         with tempfile.TemporaryDirectory() as td:
             tmp_path = Path(td)
-            src = tmp_path / "chromium" / "src"
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            depot_tools = workdir / "depot_tools"
             src.mkdir(parents=True)
+            depot_tools.mkdir()
             (src / "DEPS").write_text("deps = {}\n", encoding="utf-8")
+            (depot_tools / "gclient").write_text("#!/bin/sh\n", encoding="utf-8")
+            (depot_tools / "autoninja").write_text("#!/bin/sh\n", encoding="utf-8")
             stdout = io.StringIO()
             argv = [
                 "chromium_native.py",
@@ -104,7 +142,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "--platform",
                 "macos-arm64",
                 "--workdir",
-                str(tmp_path / "chromium"),
+                str(workdir),
                 "--out-dir",
                 "out/TestMacArm64",
             ]
@@ -118,6 +156,10 @@ class ChromiumNativePlanTests(unittest.TestCase):
             status = payload["status"]
         self.assertIs(status["chromium_src_exists"], True)
         self.assertIs(status["chromium_deps_exists"], True)
+        self.assertEqual(str(depot_tools), status["depot_tools_dir"])
+        self.assertIs(status["depot_tools_exists"], True)
+        self.assertEqual(str(depot_tools / "gclient"), status["gclient"])
+        self.assertEqual(str(depot_tools / "autoninja"), status["autoninja"])
         self.assertIs(status["output_binary_exists"], False)
         self.assertIs(status["package_zip_exists"], False)
         self.assertIs(status["app_bundle_exists"], False)

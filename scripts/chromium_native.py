@@ -27,6 +27,8 @@ class NativeBuildPlan:
     host_os: str
     workdir: str
     chromium_src_dir: str
+    depot_tools_dir: str
+    path_prefix: str
     out_dir: str
     gn_args: str
     output_binary: str
@@ -94,6 +96,9 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         str(ROOT / "knowledge" / "manifests" / "patchset.json"),
     ]
     gn_binary = src / gn_rel
+    depot_tools = workdir / "depot_tools"
+    path_prefix = f"{depot_tools}:$PATH"
+    run_env = f"PATH={path_prefix} DEPOT_TOOLS_UPDATE=0"
     return NativeBuildPlan(
         runtime_id="browseforge-chromium",
         runtime_version=RUNTIME_VERSION,
@@ -102,15 +107,17 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         host_os=host_os_name(),
         workdir=str(workdir),
         chromium_src_dir=str(src),
+        depot_tools_dir=str(depot_tools),
+        path_prefix=path_prefix,
         out_dir=selected_out,
         gn_args=gn_args,
         output_binary=str(output_binary),
         package_artifact_id=artifact_id,
         package_command=package_command,
         commands={
-            "run-hooks": ["bash", "-lc", "gclient runhooks"],
+            "run-hooks": ["bash", "-lc", f"{run_env} gclient runhooks"],
             "gn-gen": [str(gn_binary), "gen", selected_out, f"--args={gn_args}"],
-            "build-chrome": ["autoninja", f"-j{jobs}", "-C", selected_out, "chrome"],
+            "build-chrome": ["bash", "-lc", f"{run_env} autoninja -j{jobs} -C {selected_out} chrome"],
             "package": package_command + ["--execute"],
         },
     )
@@ -130,8 +137,10 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         "chromium_deps_exists": (src / "DEPS").is_file(),
         "gn_binary": plan.commands["gn-gen"][0],
         "gn_binary_exists": Path(plan.commands["gn-gen"][0]).is_file(),
-        "autoninja": shutil.which("autoninja"),
-        "gclient": shutil.which("gclient"),
+        "depot_tools_dir": plan.depot_tools_dir,
+        "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
+        "autoninja": str(Path(plan.depot_tools_dir) / "autoninja") if (Path(plan.depot_tools_dir) / "autoninja").is_file() else shutil.which("autoninja"),
+        "gclient": str(Path(plan.depot_tools_dir) / "gclient") if (Path(plan.depot_tools_dir) / "gclient").is_file() else shutil.which("gclient"),
         "out_args_exists": (src / plan.out_dir / "args.gn").is_file(),
         "output_binary": plan.output_binary,
         "output_binary_exists": output.is_file(),
