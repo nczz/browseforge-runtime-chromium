@@ -86,6 +86,54 @@
       "surface": "client_hints"
     },
     {
+      "detector_check": "pixelscan_headed_audio_summary",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan headed Docker/Xvfb page context produced sanitized OfflineAudioContext summary values; raw samples remain limited to bounded numeric summaries.",
+      "normalized_values": {
+        "available": true,
+        "firstSamples": [
+          -6.1e-07,
+          4.4e-07,
+          -4.4e-07,
+          1.4e-07,
+          1e-08,
+          1.3e-07,
+          -3.3e-07,
+          8.7e-07
+        ],
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 7.2e-07,
+        "sumAbs": 0.00017846
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "pixelscan_headed_font_availability",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan headed Docker/Xvfb page context reported document.fonts.check availability for sampled desktop font families.",
+      "normalized_values": {
+        "available": true,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "true_count": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
       "detector_check": "pixelscan_headed_webdriver",
       "evidence_ref": "sanitized_runtime_observation",
       "finding": "Pixelscan page context reported navigator.webdriver=false in headed Docker/Xvfb mode.",
@@ -119,7 +167,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw Pixelscan page text, browser storage, network identifiers, and screenshots are not committed; committed evidence stores sanitized structured UA-CH/screen/automation values and raw capture SHA only.",
+    "notes": "Raw Pixelscan page text, browser storage, network identifiers, and screenshots are not committed; committed evidence stores sanitized structured UA-CH/audio/font/screen/automation values and raw capture SHA only.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-pixelscan-headed-1",

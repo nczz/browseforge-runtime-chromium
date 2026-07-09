@@ -1647,6 +1647,53 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIs(comparison["extension_count_match"], True)
             self.assertIs(comparison["extension_profile_match"], True)
 
+    def test_compare_scores_passes_pixelscan_audio_and_font_counterparts_when_headed_matches(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            audio = {
+                "sampleRate": 44100,
+                "length": 44100,
+                "sum": 0.00000072,
+                "sumAbs": 0.00017846,
+            }
+            checks = {"Arial": True, "Calibri": True, "Consolas": True}
+            for display_mode, label in [
+                ("headless", "pixelscan_audio_fonts_headless"),
+                ("headed_xvfb", "pixelscan_audio_fonts_headed"),
+            ]:
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="pixelscan",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.browserleaks_audio_summary_result(
+                            detector_check=f"{label}_audio",
+                            metrics=audio,
+                        ),
+                        self.font_availability_result(
+                            detector_check=f"{label}_fonts",
+                            checks=checks,
+                        ),
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            audio_comparison = self.score_comparison(payload, surface="audio", detector_id="pixelscan")
+            self.assertEqual(audio_comparison["comparison_id"], "pixelscan_audio_headless_vs_headed")
+            self.assertEqual(audio_comparison["status"], "pass")
+            font_comparison = self.score_comparison(payload, surface="fonts", detector_id="pixelscan")
+            self.assertEqual(font_comparison["comparison_id"], "pixelscan_fonts_headless_vs_headed")
+            self.assertEqual(font_comparison["status"], "pass")
+            self.assertTrue(font_comparison["font_check_match"])
+            self.assertFalse(
+                {"pixelscan_audio_headless_vs_headed", "pixelscan_fonts_headless_vs_headed"}
+                & {gap.get("gap_id") for gap in payload["gaps"]}
+            )
+
     def test_compare_scores_warns_on_webgl_extension_profile_drift(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
