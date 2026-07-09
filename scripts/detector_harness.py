@@ -734,6 +734,39 @@ def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
         return "warning", "BrowserLeaks Client Hints fullVersionList is present, but Chromium version is not full dotted version.", "medium"
     return "passed", "BrowserLeaks Client Hints loaded with configured Linux Chromium high entropy values and fullVersionList.", "low"
 
+def classify_browserleaks_audio_probe(value: dict) -> tuple[str, str, str]:
+    audio = value.get("audio") or {}
+    if not audio.get("available"):
+        return "warning", "BrowserLeaks Audio page loaded, but the bounded AudioContext probe is unavailable.", "medium"
+    required = {"sampleRate", "length", "sum", "sumAbs"}
+    missing = sorted(required - audio.keys())
+    if missing:
+        return "warning", f"BrowserLeaks Audio page loaded, but sanitized AudioContext summary is missing fields: {missing}", "medium"
+    return "warning", "BrowserLeaks Audio page loaded and produced bounded AudioContext summary values; release-grade BrowserLeaks score baseline remains required.", "medium"
+
+
+def classify_browserleaks_fonts_probe(value: dict) -> tuple[str, str, str]:
+    fonts = value.get("fonts") or {}
+    metrics = fonts.get("metrics") or {}
+    if not fonts.get("available"):
+        return "warning", "BrowserLeaks Fonts page loaded, but document.fonts probing is unavailable.", "medium"
+    required = {"candidateCount", "metricRows", "glyphSha256", "metricsSha256"}
+    missing = sorted(required - metrics.keys())
+    if missing:
+        return "warning", f"BrowserLeaks Fonts page loaded, but sanitized font metric summary is missing fields: {missing}", "medium"
+    return "warning", "BrowserLeaks Fonts page loaded and produced bounded font metric/glyph summaries; release-grade font corpus parity remains required.", "medium"
+
+
+def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
+    page_url = value.get("url") or url
+    if "/javascript/audio" in page_url:
+        return classify_browserleaks_audio_probe(value)
+    if "/fonts" in page_url:
+        return classify_browserleaks_fonts_probe(value)
+    return classify_browserleaks_client_hints(value)
+
+
+
 def classify_pixelscan_client_hints(value: dict) -> tuple[str, str, str]:
     status, finding, severity = classify_browserleaks_client_hints(value)
     return status, finding.replace("BrowserLeaks Client Hints", "Pixelscan fingerprint check"), severity
@@ -971,7 +1004,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     if detector_id == "sannysoft":
         status, finding, severity = classify_sannysoft({**value, "text": text})
     elif detector_id == "browserleaks":
-        status, finding, severity = classify_browserleaks_client_hints({**value, "text": text})
+        status, finding, severity = classify_browserleaks({**value, "text": text}, url)
     elif detector_id == "pixelscan":
         status, finding, severity = classify_pixelscan_client_hints({**value, "text": text})
     elif detector_id == "iphey":

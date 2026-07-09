@@ -289,6 +289,35 @@ class DetectorHarnessTests(unittest.TestCase):
             },
         }
 
+    def browserleaks_audio_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "BrowserLeaks - AudioContext"
+        value["url"] = "https://browserleaks.com/javascript/audio"
+        value["audio"] = {
+            "available": True,
+            "length": 44100,
+            "sampleRate": 44100,
+            "sum": 0.77295988,
+            "sumAbs": 83.86503121,
+        }
+        return value
+
+    def browserleaks_fonts_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "BrowserLeaks - Fonts"
+        value["url"] = "https://browserleaks.com/fonts"
+        value["fonts"] = {
+            "available": True,
+            "metrics": {
+                "candidateCount": 8,
+                "metricRows": [{"font": "Arial", "check": True, "width": 483.719, "height": 38}],
+                "glyphSha256": "a4497a76714c34ec4e0b277f80671473d6bad7dcedd1981a9738f62cc4441166",
+                "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb",
+            },
+        }
+        return value
+
+
     def pixelscan_client_hints_value(self):
         value = self.browserleaks_client_hints_value()
         value["title"] = "Pixelscan"
@@ -367,6 +396,42 @@ class DetectorHarnessTests(unittest.TestCase):
                 self.assertIn(status, {"warning", "failed"})
                 self.assertIn(severity, {"medium", "high", "critical"})
                 self.assertIn(case["finding"], finding)
+
+    def test_classify_browserleaks_dispatches_audio_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_audio_value(),
+            "https://browserleaks.com/javascript/audio",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("Audio", finding)
+        self.assertIn("release-grade", finding)
+
+    def test_classify_browserleaks_dispatches_fonts_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_fonts_value(),
+            "https://browserleaks.com/fonts",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("Fonts", finding)
+        self.assertIn("font corpus", finding)
+
+    def test_classify_browserleaks_surface_pages_report_missing_summaries(self):
+        audio = self.browserleaks_audio_value()
+        del audio["audio"]["sumAbs"]
+        fonts = self.browserleaks_fonts_value()
+        del fonts["fonts"]["metrics"]["glyphSha256"]
+
+        cases = [
+            (audio, "https://browserleaks.com/javascript/audio", "sumAbs"),
+            (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
+        ]
+        for value, url, missing in cases:
+            with self.subTest(missing):
+                status, finding, severity = self.harness_module.classify_browserleaks(value, url)
+                self.assertEqual((status, severity), ("warning", "medium"))
+                self.assertIn(missing, finding)
 
 
     def test_classify_pixelscan_client_hints_accepts_configured_chromium_ua_ch(self):
