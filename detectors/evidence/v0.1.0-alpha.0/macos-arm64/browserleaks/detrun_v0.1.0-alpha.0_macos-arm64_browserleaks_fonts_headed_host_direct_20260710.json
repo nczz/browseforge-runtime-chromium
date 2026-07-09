@@ -1,0 +1,190 @@
+{
+  "artifact_id": "unpackaged:macos-arm64:v0.1.0-alpha.0",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/fonts"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks-fonts:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_fonts_macos_host_headed_metrics",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Fonts page loaded in macOS host headed mode through the BrowseForge wrapper and produced bounded font metric/glyph summaries. This is native host corpus evidence, but it is not release-grade packaged runtime evidence because it used the installed system Chrome binary rather than a signed BrowseForge macOS Chromium artifact.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "glyphSampleCount": 73728,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 45,
+            "width": 512.078
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 45,
+            "width": 411.625
+          }
+        ],
+        "metricsSha256": "25b20319648fc1d52776a83bdbd6accbc160502115c70ad7db2044ec3c0d843d",
+        "url": "https://browserleaks.com/fonts"
+      },
+      "severity": "medium",
+      "status": "warning",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "browserleaks_fonts_macos_host_headed_uach",
+      "evidence_ref": "observed.uaData.highEntropy",
+      "finding": "macOS host headed run reported native system Chrome 150.0.7871.49 UA-CH values; this evidence informs native corpus drift but does not satisfy the packaged BrowseForge macOS runtime matrix.",
+      "normalized_values": {
+        "architecture": "arm",
+        "bitness": "64",
+        "brands": [
+          "Not;A=Brand",
+          "Chromium",
+          "Google Chrome"
+        ],
+        "fullVersionList": [
+          {
+            "brand": "Not;A=Brand",
+            "version_major": "8"
+          },
+          {
+            "brand": "Chromium",
+            "version_major": "150"
+          },
+          {
+            "brand": "Google Chrome",
+            "version_major": "150"
+          }
+        ],
+        "mobile": false,
+        "model": "",
+        "platform": "macOS",
+        "platformVersion": "26.5.1",
+        "wow64": false
+      },
+      "severity": "medium",
+      "status": "warning",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "browserleaks_fonts_macos_host_headed_webdriver",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Fonts page context reported navigator.webdriver=false in macOS host headed mode.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from local macOS headed host CDP collector using installed system Chrome; no raw page text, storage, screenshots, IP literals, or full font dictionary output are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-fonts-macos-host-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
+    "raw_capture_sha256": "00596e72b4f6be637e4b16aeed05adc5065da8219402eccc128d1c9949844501",
+    "sha256": "7a4876c570d5b0effd96633b87bde7c76e00238c9b920938df8d3a6407156fa4",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "5d8985e5e81d72055be9c35b524b59a8586b36917a47ebdffacef6f04f1708f8"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed host native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-10T00:00:00Z"
+}

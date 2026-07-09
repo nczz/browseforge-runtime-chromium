@@ -10,7 +10,8 @@
   "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, captures unscored WebAudio and FontFaceSet probes, and now records bounded BrowserLeaks/Pixelscan Permissions API plus feature-availability probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
   "evidence_refs": [
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260710.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json"
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -98,9 +99,9 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json now reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, reports matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and records a passing Pixelscan headless-vs-headed font availability comparison. BrowserLeaks/CreepJS/Pixelscan detector score baselines and native platform font corpus parity remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. New macOS arm64 host headed BrowserLeaks Fonts evidence records bounded native system Chrome font metrics/glyph hashes through the BrowseForge wrapper, proving local native corpus collection works; it remains warning evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium artifact. BrowserLeaks/CreepJS/Pixelscan native packaged platform corpus parity remains required.",
       "release_blocker": true,
-      "result": "warn_browserleaks_font_headed_closed_score_corpus_required",
+      "result": "warn_macos_host_font_corpus_collected_packaged_native_matrix_required",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "fonts"
@@ -186,6 +187,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json"
   ]
 }

@@ -108,13 +108,13 @@
       "candidate_count_match": true,
       "comparison_id": "browserleaks_fonts_headless_vs_headed",
       "detector_id": "browserleaks",
-      "finding": "BrowserLeaks bounded font metric and glyph hashes match across headless/headed evidence.",
+      "finding": "BrowserLeaks bounded font metric or glyph hashes differ across headless/headed evidence; release-grade font corpus parity remains required.",
       "font_list_match": true,
-      "glyph_sha256_match": true,
+      "glyph_sha256_match": false,
       "left_run_id": "detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709",
-      "metrics_sha256_match": true,
-      "right_run_id": "detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709",
-      "status": "pass",
+      "metrics_sha256_match": false,
+      "right_run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710",
+      "status": "warning",
       "surface": "fonts"
     },
     {
@@ -168,9 +168,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 25,
+  "evidence_count": 26,
   "gaps": [],
-  "generated_at": "2026-07-09T19:39:04.385023+00:00",
+  "generated_at": "2026-07-09T20:08:29.765166+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
