@@ -126,10 +126,10 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; broader headed headless-resistance evidence remains required.",
-      "release_blocker": true,
-      "result": "warn_linux_multi_detector_webdriver_false_headless_only",
-      "severity": "medium",
+      "evidence": "Linux packaged SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft was verified in both headless and headed Docker/Xvfb display modes with configured UA omitting HeadlessChrome.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft_headless_and_headed_webdriver_false",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "automation/headless/CDP"
     },
@@ -150,9 +150,9 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft smoke now exists, in addition to macOS dogfood; Windows and headed Linux/macOS detector matrix remains absent.",
+      "evidence": "Linux x64 Docker SannySoft smoke now exists in both headless and headed/Xvfb display modes, in addition to macOS dogfood; Windows and headed native Linux/macOS detector matrix remains absent.",
       "release_blocker": true,
-      "result": "linux_headless_only",
+      "result": "linux_headless_and_headed_xvfb_only",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "cross-platform drift"
@@ -167,6 +167,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/iphey/detrun_linux_x64_iphey_uach_headless_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json"
   ]
 }

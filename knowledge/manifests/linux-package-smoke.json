@@ -194,6 +194,27 @@
       "status": "passed"
     }
   ],
+  "headed_checks": [
+    {
+      "check": "sannysoft_headed_detector_navigation",
+      "command": "Docker linux/amd64 packaged runtime under Xvfb display using linux-runtime-detector-smoke-headed-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
+      "limitations": "Xvfb headed container smoke, not native desktop headed release matrix and not proxy/IP coherence evidence.",
+      "observed": {
+        "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
+        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json",
+        "navigator_webdriver": false,
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "ua_ch_fullVersionList_present": true
+      },
+      "status": "passed"
+    }
+  ],
   "limitations": [
     "This is a packaged runtime launch smoke, not a release-grade live detector matrix.",
     "The smoke uses Docker linux/amd64 under macOS/Apple Silicon, so logs include expected Rosetta/dbus container warnings.",
