@@ -488,6 +488,50 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
         self.assertIn("BrowserLeaks Client Hints", record["observed"]["text_excerpt"])
 
+    def test_collect_page_redacts_sensitive_values_from_text_excerpt(self):
+        value = self.browserleaks_client_hints_value()
+        value["text"] = (
+            "BrowserLeaks Client Hints observed from office network 203.0.113.42 "
+            "with session token ghp_abcdEFGH1234567890secret and final verdict harmless."
+        )
+
+        class FakeCDP:
+            def __init__(self, page_value):
+                self.page_value = page_value
+
+            def call(self, method, params=None, *, session_id=None, timeout=20):
+                if method == "Target.createTarget":
+                    return {"targetId": "target-1"}, []
+                if method == "Target.attachToTarget":
+                    return {"sessionId": "session-1"}, []
+                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                    return {}, []
+                if method == "Runtime.evaluate":
+                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                raise AssertionError(f"unexpected CDP method: {method}")
+
+            def events_until(self, predicate, *, timeout=30):
+                return []
+
+        record = self.harness_module.collect_page(
+            FakeCDP(value),
+            "browserleaks",
+            "BrowserLeaks",
+            "https://browserleaks.com/client-hints",
+            wait_seconds=0,
+        )
+
+        observed = record["observed"]
+        excerpt = observed["text_excerpt"]
+        self.assertNotIn("text", observed)
+        self.assertRegex(observed["text_sha256"], r"^[0-9a-f]{64}$")
+        self.assertIn("BrowserLeaks Client Hints observed from office network", excerpt)
+        self.assertIn("with session token", excerpt)
+        self.assertIn("and final verdict harmless.", excerpt)
+        self.assertNotIn("203.0.113.42", excerpt)
+        self.assertNotIn("ghp_abcdEFGH1234567890secret", excerpt)
+        self.assertIsNone(self.harness_module.SENSITIVE_RE.search(excerpt))
+
     def test_classify_sannysoft_maps_automation_signals_to_statuses(self):
         cases = [
             {

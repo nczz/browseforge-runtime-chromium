@@ -20,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 HARNESS_VERSION = "0.1.0"
 SENSITIVE_RE = re.compile(r"(gh[pousr]_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]+|\b(?:\d{1,3}\.){3}\d{1,3}\b)")
 
+def redact_sensitive_text(text: str) -> str:
+    return SENSITIVE_RE.sub("[REDACTED]", text)
+
 EXIT_SCHEMA = 1
 EXIT_COLLECT_UNAVAILABLE = 2
 EXIT_SANITIZATION = 3
@@ -588,7 +591,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     else:
         status, finding, severity = "warning", "Detector loaded; manual review required.", "medium"
     value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
-    value["text_excerpt"] = " ".join(text.split())[:800]
+    value["text_excerpt"] = redact_sensitive_text(" ".join(text.split())[:800])
     value["elapsed_seconds"] = elapsed
     return {
         "detector_id": detector_id,
