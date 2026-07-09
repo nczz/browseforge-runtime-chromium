@@ -186,20 +186,68 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
 
 
-    def test_runtime_artifact_manifest_blocks_non_linux_without_contract(self) -> None:
+    def test_runtime_artifact_manifest_distinguishes_supported_contracts_from_artifacts(self) -> None:
+        """macos-arm64 has a packager contract, but artifacts still list only produced packages."""
         with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
             manifest = json.load(fh)
 
-        self.assertEqual(["linux-x64"], manifest.get("supported_package_platforms"))
+        self.assertEqual(["linux-x64", "macos-arm64"], manifest.get("supported_package_platforms"))
         unsupported = manifest.get("unsupported_package_platforms")
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
-        self.assertIn("macos-arm64", unsupported)
+        self.assertNotIn("macos-arm64", unsupported)
         self.assertIn("windows-x64", unsupported)
 
         artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
         self.assertEqual({"linux-x64"}, artifact_platforms)
-        self.assertTrue(set(manifest["supported_package_platforms"]).issubset(artifact_platforms))
+        self.assertGreater(set(manifest["supported_package_platforms"]), artifact_platforms)
+
+    def test_validate_allows_supported_package_contract_without_artifact(self) -> None:
+        """A supported packager contract must not require a RuntimeArtifact until an artifact is listed."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self.assertEqual(["linux-x64", "macos-arm64"], manifest["supported_package_platforms"])
+            self.assertEqual({"linux-x64"}, {artifact["platform"] for artifact in manifest["artifacts"]})
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            original_root = module.ROOT
+            try:
+                module.ROOT = temp_root
+                module.main()
+            finally:
+                module.ROOT = original_root
+
+    def test_validate_rejects_artifact_for_unsupported_package_platform(self) -> None:
+        """An actual artifact for an unsupported platform is invalid even if the KG node exists."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            windows_artifact = dict(manifest["artifacts"][0])
+            windows_artifact.update(
+                {
+                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+                    "platform": "windows-x64",
+                    "os": "windows",
+                    "arch": "x64",
+                    "sha256": "2a991ac31efee72a2f93c688619644e97b52b5e4d8732eb30014fa0265ffd93a",
+                    "size_bytes": 567798166,
+                    "sbom_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
+                    "provenance_path": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
+                }
+            )
+            manifest["artifacts"].append(windows_artifact)
+            self._write_json(temp_root / "knowledge" / "manifests" / "runtime-artifacts.json", manifest)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            message = self._run_validate_expect_exit(module, temp_root)
+
+        self.assertIn("runtime asset contract", message)
+        self.assertIn("windows-x64", message)
 
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
@@ -579,9 +627,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "provenance_path",
                     "release_channel",
                 ],
-                "supported_package_platforms": ["linux-x64"],
+                "supported_package_platforms": ["linux-x64", "macos-arm64"],
                 "unsupported_package_platforms": {
-                    "macos-arm64": "missing macOS runtime asset contract",
                     "windows-x64": "missing Windows runtime asset contract",
                 },
             },
@@ -652,6 +699,72 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "edge", "label": "SUPPORTS_GATE", "from": "RuntimeProvider:browseforge-chromium", "to": "ReleaseGate:runtime-artifact-produced", "properties": {"status": "passed"}},
             {"record_type": "edge", "label": "REFERENCES_SOURCE", "from": "RuntimeProvider:browseforge-chromium", "to": "KnowledgeSource:chromium-upstream", "properties": {}},
         ]
+
+    def _load_temp_runtime_artifacts_manifest(self, root: Path) -> dict[str, Any]:
+        manifest_path = root / "knowledge" / "manifests" / "runtime-artifacts.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertIsInstance(manifest, dict)
+        assert isinstance(manifest, dict)
+        return manifest
+
+    def _write_runtime_graph_for_artifacts(self, root: Path, artifacts: list[dict[str, Any]]) -> None:
+        graph_records = self._minimal_graph_with_packaged_runtime_artifacts(artifacts)
+        graph_path = root / "generated" / "kg" / "runtime.graph.jsonl"
+        graph_path.parent.mkdir(parents=True, exist_ok=True)
+        with graph_path.open("w", encoding="utf-8") as fh:
+            for record in graph_records:
+                fh.write(json.dumps(record, sort_keys=True) + "\n")
+
+    def _minimal_graph_with_packaged_runtime_artifacts(self, artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        first_artifact_id = artifacts[0]["artifact_id"]
+        records: list[dict[str, Any]] = [
+            {"record_type": "node", "label": "RuntimeProvider", "id": "RuntimeProvider:browseforge-chromium", "properties": {}},
+            {"record_type": "node", "label": "BrowseForgeConsumer", "id": "BrowseForgeConsumer:browseforge-main", "properties": {}},
+            {"record_type": "node", "label": "FingerprintSurface", "id": "FingerprintSurface:automation_signals", "properties": {}},
+            {"record_type": "node", "label": "Patch", "id": "Patch:baseline", "properties": {}},
+            {"record_type": "node", "label": "SourceFile", "id": "SourceFile:main", "properties": {}},
+            {"record_type": "node", "label": "Symbol", "id": "Symbol:main", "properties": {}},
+            {"record_type": "node", "label": "Detector", "id": "Detector:sannysoft", "properties": {}},
+            {"record_type": "node", "label": "DetectorRun", "id": "DetectorRun:planned-sannysoft", "properties": {"status": "planned"}},
+            {"record_type": "node", "label": "EvidenceArtifact", "id": "EvidenceArtifact:planned-sannysoft", "properties": {}},
+            {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
+            {"record_type": "node", "label": "ReleaseGate", "id": "ReleaseGate:runtime-artifact-produced", "properties": {"gate_id": "runtime-artifact-produced", "status": "passed"}},
+            {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
+        ]
+        for artifact in artifacts:
+            platform = artifact["platform"]
+            node_id = f"RuntimeArtifact:{artifact['artifact_id']}"
+            records.extend(
+                [
+                    {"record_type": "node", "label": "Platform", "id": f"Platform:{platform}", "properties": {"key": platform}},
+                    {
+                        "record_type": "node",
+                        "label": "RuntimeArtifact",
+                        "id": node_id,
+                        "properties": {**artifact, "status": "packaged", "release_grade": True},
+                    },
+                    {"record_type": "edge", "label": "BUILT_FOR", "from": node_id, "to": f"Platform:{platform}", "properties": {}},
+                    {"record_type": "edge", "label": "TARGETS_PLATFORM", "from": node_id, "to": f"Platform:{platform}", "properties": {}},
+                    {"record_type": "edge", "label": "GENERATED_FROM", "from": node_id, "to": "RuntimeProvider:browseforge-chromium", "properties": {}},
+                ]
+            )
+        records.extend(
+            [
+                {"record_type": "edge", "label": "REQUIRES_CAPABILITY", "from": "BrowseForgeConsumer:browseforge-main", "to": "Capability:persistent_context", "properties": {}},
+                {"record_type": "edge", "label": "DECLARES_CAPABILITY", "from": "RuntimeProvider:browseforge-chromium", "to": "Capability:persistent_context", "properties": {}},
+                {"record_type": "edge", "label": "MODIFIES_SOURCE", "from": "Patch:baseline", "to": "SourceFile:main", "properties": {}},
+                {"record_type": "edge", "label": "MODIFIES_SOURCE", "from": "Patch:baseline", "to": "Symbol:main", "properties": {}},
+                {"record_type": "edge", "label": "CONTROLS_SURFACE", "from": "Patch:baseline", "to": "FingerprintSurface:automation_signals", "properties": {}},
+                {"record_type": "edge", "label": "CHECKS_SURFACE", "from": "Detector:sannysoft", "to": "FingerprintSurface:automation_signals", "properties": {}},
+                {"record_type": "edge", "label": "RUNS_DETECTOR", "from": "DetectorRun:planned-sannysoft", "to": "Detector:sannysoft", "properties": {}},
+                {"record_type": "edge", "label": "TARGETS_ARTIFACT", "from": "DetectorRun:planned-sannysoft", "to": f"RuntimeArtifact:{first_artifact_id}", "properties": {}},
+                {"record_type": "edge", "label": "TESTS_ARTIFACT", "from": "DetectorRun:planned-sannysoft", "to": f"RuntimeArtifact:{first_artifact_id}", "properties": {}},
+                {"record_type": "edge", "label": "PRODUCES_EVIDENCE", "from": "DetectorRun:planned-sannysoft", "to": "EvidenceArtifact:planned-sannysoft", "properties": {}},
+                {"record_type": "edge", "label": "SUPPORTS_GATE", "from": "RuntimeProvider:browseforge-chromium", "to": "ReleaseGate:runtime-artifact-produced", "properties": {"status": "passed"}},
+                {"record_type": "edge", "label": "REFERENCES_SOURCE", "from": "RuntimeProvider:browseforge-chromium", "to": "KnowledgeSource:chromium-upstream", "properties": {}},
+            ]
+        )
+        return records
 
     def _write_score_comparison(
         self,

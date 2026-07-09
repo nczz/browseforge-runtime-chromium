@@ -35,12 +35,12 @@
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
-        "app bundle layout documented",
+        "app bundle layout packaged",
         "codesign/notarization decision exists",
         "BrowseForge launches profile",
         "detector run exists"
       ],
-      "status": "planned"
+      "status": "packager_contract_defined"
     },
     {
       "id": "macos-x64",

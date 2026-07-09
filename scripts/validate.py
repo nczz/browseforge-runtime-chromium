@@ -402,9 +402,9 @@ def main() -> None:
     required_artifact_fields = set(runtime_artifacts.get("required_artifact_fields", []))
     supported_package_platforms = set(runtime_artifacts.get("supported_package_platforms", []))
     artifact_platforms = {artifact.get("platform") for artifact in runtime_artifacts.get("artifacts", [])}
-    missing_supported_artifacts = sorted(supported_package_platforms - artifact_platforms)
-    if missing_supported_artifacts:
-        raise SystemExit(f"runtime-artifacts supported platforms missing packaged artifacts: {missing_supported_artifacts}")
+    missing_artifact_contracts = sorted(artifact_platforms - supported_package_platforms)
+    if missing_artifact_contracts:
+        raise SystemExit(f"runtime-artifacts packaged platforms missing runtime asset contracts: {missing_artifact_contracts}")
     unsupported_package_platforms = runtime_artifacts.get("unsupported_package_platforms", {})
     for platform in artifact_platforms:
         if platform in unsupported_package_platforms:

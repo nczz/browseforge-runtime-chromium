@@ -36,7 +36,7 @@ LINUX_CHROMIUM_RUNTIME_DIRS = (
     'locales',
 )
 
-SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64'})
+SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64'})
 
 
 def sha256(path: Path) -> str:
@@ -158,13 +158,52 @@ def copy_required_linux_runtime_assets(browser: Path, stage: Path):
     for locale_file in locale_files:
         shutil.copy2(locale_file, staged_locales / locale_file.name)
 
-def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
-    if platform_id not in SUPPORTED_PACKAGE_PLATFORMS:
-        supported = ', '.join(sorted(SUPPORTED_PACKAGE_PLATFORMS))
-        raise SystemExit(f'unsupported package platform without runtime asset contract: {platform_id}; supported: {supported}')
-    if platform_id == 'linux-x64':
-        copy_required_linux_runtime_assets(browser, stage)
 
+def macos_app_bundle_root(browser: Path) -> Path:
+    for parent in (browser, *browser.parents):
+        if parent.suffix == '.app':
+            app_root = parent
+            break
+    else:
+        raise SystemExit(f'macos browser binary must be inside a .app bundle: {browser}')
+    try:
+        relative = browser.relative_to(app_root)
+    except ValueError:
+        raise SystemExit(f'macos browser binary must be inside a .app bundle: {browser}') from None
+    if len(relative.parts) < 3 or relative.parts[0] != 'Contents' or relative.parts[1] != 'MacOS':
+        raise SystemExit(f'macos browser binary must be under Contents/MacOS inside app bundle: {browser}')
+    info_plist = app_root / 'Contents' / 'Info.plist'
+    if not info_plist.is_file():
+        raise SystemExit(f'missing macos app bundle Info.plist: {info_plist}')
+    resources_dir = app_root / 'Contents' / 'Resources'
+    if not resources_dir.is_dir():
+        raise SystemExit(f'missing macos app bundle Contents/Resources directory: {resources_dir}')
+    if not any(path.is_file() for path in resources_dir.rglob('*')):
+        raise SystemExit(f'missing macos app bundle resource files: {resources_dir}')
+    return app_root
+
+def copy_required_macos_runtime_assets(browser: Path, stage: Path) -> Path:
+    app_root = macos_app_bundle_root(browser)
+    staged_app = stage / app_root.name
+    if staged_app.exists():
+        shutil.rmtree(staged_app)
+    shutil.copytree(app_root, staged_app, symlinks=True)
+    staged_browser = staged_app / browser.relative_to(app_root)
+    ensure_file(staged_browser, executable=True)
+    return staged_browser
+
+def stage_platform_browser(platform_id: str, browser: Path, stage: Path) -> Path:
+    if platform_id == 'linux-x64':
+        staged_browser = stage / browser.name
+        shutil.copy2(browser, staged_browser)
+        copy_required_linux_runtime_assets(browser, stage)
+        return staged_browser
+    if platform_id == 'macos-arm64':
+        return copy_required_macos_runtime_assets(browser, stage)
+    supported = ', '.join(sorted(SUPPORTED_PACKAGE_PLATFORMS))
+    raise SystemExit(f'unsupported package platform without runtime asset contract: {platform_id}; supported: {supported}')
+def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
+    return stage_platform_browser(platform_id, browser, stage)
 def package(args):
     platform_id = args.platform
     if platform_id not in SUPPORTED_PACKAGE_PLATFORMS:
@@ -180,15 +219,13 @@ def package(args):
     wrapper = Path(args.wrapper_binary)
     ensure_file(browser, executable=True)
     ensure_file(wrapper, executable=True)
-    staged_browser = stage / browser.name
+    staged_browser = stage_platform_browser(platform_id, browser, stage)
     staged_wrapper = stage / 'browseforge-runtime-chromium'
     staged_runtime_manifest = stage / 'runtime.manifest.json'
     source_acquisition = Path(args.source_acquisition_manifest)
     patchset_manifest = Path(args.patchset_manifest)
-    shutil.copy2(browser, staged_browser)
     shutil.copy2(wrapper, staged_wrapper)
     shutil.copy2(ROOT / 'contracts/runtime.manifest.json', staged_runtime_manifest)
-    copy_platform_runtime_assets(platform_id, browser, stage)
     created_at = datetime.now(timezone.utc).isoformat()
     files = [file_record(file, root=stage) for file in sorted(stage.rglob('*')) if file.is_file()]
     manifest = {

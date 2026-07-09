@@ -28,6 +28,15 @@ REQUIRED_LINUX_RUNTIME_ASSETS = (
     "locales/en-US.pak",
 )
 
+MACOS_APP_BUNDLE_FILES = (
+    "Contents/Info.plist",
+    "Contents/MacOS/Chromium",
+    "Contents/Resources/app.icns",
+    "Contents/Resources/en.lproj/InfoPlist.strings",
+    "Contents/Frameworks/Chromium Framework.framework/Chromium Framework",
+)
+
+
 class PackageRuntimeTests(unittest.TestCase):
     def _write_executable(self, path: Path, content: str = "#!/bin/sh\nexit 0\n") -> Path:
         path.write_text(content)
@@ -50,21 +59,51 @@ class PackageRuntimeTests(unittest.TestCase):
             asset.parent.mkdir(parents=True, exist_ok=True)
             asset.write_bytes(f"runtime asset: {relative_path}\n".encode())
 
+    def _write_macos_app_bundle(
+        self,
+        root: Path,
+        *,
+        browser_relative_path: str = "Contents/MacOS/Chromium",
+        omit: set[str] | None = None,
+    ):
+        omitted = omit or set()
+        app = root / "Chromium.app"
+        (app / browser_relative_path).parent.mkdir(parents=True, exist_ok=True)
+        browser = self._write_executable(app / browser_relative_path, "#!/bin/sh\necho chromium\n")
+        bundle_files = {
+            "Contents/Info.plist": b"<?xml version=\"1.0\"?><plist><dict><key>CFBundleExecutable</key><string>Chromium</string></dict></plist>\n",
+            "Contents/Resources/app.icns": b"fake icon bytes\n",
+            "Contents/Resources/en.lproj/InfoPlist.strings": b"CFBundleName = \"Chromium\";\n",
+            "Contents/Frameworks/Chromium Framework.framework/Chromium Framework": b"framework bytes\n",
+        }
+        for relative_path, content in bundle_files.items():
+            if relative_path in omitted or any(relative_path.startswith(f"{directory}/") for directory in omitted):
+                continue
+            path = app / relative_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        return app, browser
+
     def _run_package(
         self,
         td: Path,
         *,
+        platform_id: str = "linux-x64",
+        browser: Path | None = None,
+        browser_dir: Path | None = None,
         omit_runtime_assets: set[str] | None = None,
         expect_success: bool = True,
     ):
-        browser_dir = td / "browser-output"
-        browser_dir.mkdir()
-        browser = self._write_executable(browser_dir / "chrome", "#!/bin/sh\necho chrome\n")
-        self._write_runtime_assets(browser_dir, omit=omit_runtime_assets)
+        if browser is None:
+            browser_dir = td / "browser-output"
+            browser_dir.mkdir()
+            browser = self._write_executable(browser_dir / "chrome", "#!/bin/sh\necho chrome\n")
+            self._write_runtime_assets(browser_dir, omit=omit_runtime_assets)
+        elif browser_dir is None:
+            browser_dir = browser.parent
         wrapper = self._write_executable(td / "wrapper", "#!/bin/sh\necho wrapper\n")
         out = td / "dist"
         runtime_version = "v0.1.0-alpha.0"
-        platform_id = "linux-x64"
         artifact_id = f"browseforge-runtime-chromium-{runtime_version}-{platform_id}"
         source_acquisition_manifest = ROOT / "knowledge" / "manifests" / "source-acquisition.json"
         patchset_manifest = ROOT / "knowledge" / "manifests" / "patchset.json"
@@ -138,9 +177,13 @@ class PackageRuntimeTests(unittest.TestCase):
         proc = subprocess.run([sys.executable, str(PACKAGER), "plan"], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         data = json.loads(proc.stdout)
-        self.assertTrue(any(p["id"] == "linux-x64" for p in data["platforms"]))
-        self.assertEqual(["linux-x64"], data["supported_package_platforms"])
-        self.assertIn("macos-arm64", data["unsupported_package_platforms"])
+        platform_ids = {p["id"] for p in data["platforms"]}
+        self.assertIn("linux-x64", platform_ids)
+        self.assertIn("macos-arm64", platform_ids)
+        self.assertIn("windows-x64", platform_ids)
+        self.assertEqual(["linux-x64", "macos-arm64"], data["supported_package_platforms"])
+        self.assertNotIn("macos-arm64", data["unsupported_package_platforms"])
+        self.assertIn("windows-x64", data["unsupported_package_platforms"])
 
     def test_package_requires_browser_binary(self):
         with tempfile.TemporaryDirectory() as td:
@@ -149,37 +192,85 @@ class PackageRuntimeTests(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("missing file", proc.stderr + proc.stdout)
 
-    def test_package_rejects_platform_without_runtime_asset_contract(self):
+    def test_package_macos_arm64_requires_valid_app_bundle(self):
+        def outside_app(tmp: Path) -> Path:
+            return self._write_executable(tmp / "Chromium")
+
+        def outside_contents_macos(tmp: Path) -> Path:
+            _, browser = self._write_macos_app_bundle(tmp, browser_relative_path="Contents/Resources/Chromium")
+            return browser
+
+        def missing_info_plist(tmp: Path) -> Path:
+            _, browser = self._write_macos_app_bundle(tmp, omit={"Contents/Info.plist"})
+            return browser
+
+        cases = (
+            ("outside-app", outside_app, ("inside a .app bundle",)),
+            ("outside-contents-macos", outside_contents_macos, ("Contents/MacOS",)),
+            ("missing-info-plist", missing_info_plist, ("Info.plist",)),
+        )
+
+        for name, setup, expected_messages in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as td:
+                tmp = Path(td)
+                browser = setup(tmp)
+                package = self._run_package(
+                    tmp,
+                    platform_id="macos-arm64",
+                    browser=browser,
+                    browser_dir=tmp,
+                    expect_success=False,
+                )
+
+                output = package["proc"].stderr + package["proc"].stdout
+                for expected in expected_messages:
+                    self.assertIn(expected, output)
+
+    def test_package_macos_arm64_preserves_app_bundle_in_stage_manifest_sbom_and_zip(self):
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
-            browser = self._write_executable(tmp / "Chromium")
-            wrapper = self._write_executable(tmp / "wrapper")
-            proc = subprocess.run(
-                [
-                    sys.executable,
-                    str(PACKAGER),
-                    "package",
-                    "--platform",
-                    "macos-arm64",
-                    "--browser-binary",
-                    str(browser),
-                    "--wrapper-binary",
-                    str(wrapper),
-                    "--runtime-version",
-                    "v0.1.0-alpha.0",
-                    "--browser-version",
-                    "150.0.7871.100",
-                    "--source-ref",
-                    "b5a9",
-                ],
-                cwd=ROOT,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
+            app, browser = self._write_macos_app_bundle(tmp)
+            package = self._run_package(tmp, platform_id="macos-arm64", browser=browser, browser_dir=app.parent)
+            stage = package["stage"]
+            manifest = json.loads((stage / "artifact-manifest.json").read_text())
+            provenance = json.loads((stage / "provenance.json").read_text())
+            sbom = json.loads((stage / "SBOM.json").read_text())
+            archive = Path(package["payload"]["archive"])
 
-        self.assertNotEqual(proc.returncode, 0)
-        self.assertIn("unsupported package platform without runtime asset contract: macos-arm64", proc.stderr + proc.stdout)
+            for name, metadata in {
+                "artifact-manifest.json": manifest,
+                "provenance.json": provenance,
+                "SBOM.json": sbom,
+            }.items():
+                self.assertEqual(metadata["platform"], "macos-arm64", name)
+                self.assertEqual(metadata["os"], "macos", name)
+                self.assertEqual(metadata["arch"], "arm64", name)
+
+            expected_files = {
+                f"{app.name}/{relative_path}": app / relative_path
+                for relative_path in MACOS_APP_BUNDLE_FILES
+            }
+            expected_files["browseforge-runtime-chromium"] = package["wrapper"]
+            expected_files["runtime.manifest.json"] = ROOT / "contracts" / "runtime.manifest.json"
+
+            manifest_files = {entry["path"]: entry for entry in manifest["files"]}
+            sbom_files = {entry["path"]: entry for entry in sbom["files"]}
+            with zipfile.ZipFile(archive) as zf:
+                archive_names = set(zf.namelist())
+
+            for relative_path, source in expected_files.items():
+                staged = stage / relative_path
+                self.assertTrue(staged.is_file(), relative_path)
+                self.assertIn(relative_path, manifest_files)
+                self.assertIn(relative_path, sbom_files)
+                self.assertIn(f"{package['artifact_id']}/{relative_path}", archive_names)
+                self.assertEqual(manifest_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(manifest_files[relative_path]["size_bytes"], source.stat().st_size)
+                self.assertEqual(sbom_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(sbom_files[relative_path]["size"], source.stat().st_size)
+
+            self.assertEqual(manifest["browser_binary_sha256"], self._sha256(browser))
+            self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
 
     def test_package_creates_checksum_for_real_inputs(self):
         with tempfile.TemporaryDirectory() as td:
