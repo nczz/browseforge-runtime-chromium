@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -60,6 +61,57 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIs(tools["chromium_src_exists"], True)
         self.assertIs(tools["depot_tools_exists"], True)
         self.assertTrue(set(["fetch", "gclient", "gn", "ninja", "autoninja"]).issubset(tools))
+
+    def test_check_tools_reports_pinned_checkout_head(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            subprocess.run(["git", "init"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=src, check=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=src, check=True)
+            (src / "README").write_text("fixture\n", encoding="utf-8")
+            subprocess.run(["git", "add", "README"], cwd=src, check=True)
+            subprocess.run(["git", "commit", "-m", "fixture"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+            head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=src, text=True).strip()
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+            plan = chromium_source.SourcePlan(
+                runtime_id=plan.runtime_id,
+                base_version=plan.base_version,
+                base_ref=plan.base_ref,
+                base_commit=head,
+                workdir=plan.workdir,
+                depot_tools_dir=plan.depot_tools_dir,
+                chromium_src_dir=plan.chromium_src_dir,
+                git_cache_dir=plan.git_cache_dir,
+                path_prefix=plan.path_prefix,
+                steps=plan.steps,
+            )
+
+            tools = chromium_source.check_tools(plan)
+
+        self.assertEqual(tools["chromium_src_head"], head)
+        self.assertIs(tools["chromium_src_matches_manifest"], True)
+
+    def test_check_tools_reports_manifest_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            subprocess.run(["git", "init"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=src, check=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=src, check=True)
+            (src / "README").write_text("fixture\n", encoding="utf-8")
+            subprocess.run(["git", "add", "README"], cwd=src, check=True)
+            subprocess.run(["git", "commit", "-m", "fixture"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            tools = chromium_source.check_tools(plan)
+
+        self.assertRegex(tools["chromium_src_head"], r"^[0-9a-f]{40}$")
+        self.assertIs(tools["chromium_src_matches_manifest"], False)
 
 
 if __name__ == "__main__":

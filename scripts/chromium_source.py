@@ -120,17 +120,32 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
             ),
         ],
     )
-
+def git_head(src: Path) -> str | None:
+    if not (src / ".git").exists():
+        return None
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=src,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
 
 def check_tools(plan: SourcePlan) -> dict:
     depot_path = plan.path_prefix
+    chromium_src = Path(plan.chromium_src_dir)
+    head = git_head(chromium_src)
     return {
         "fetch": shutil.which("fetch", path=depot_path),
         "gclient": shutil.which("gclient", path=depot_path),
         "gn": shutil.which("gn", path=depot_path),
         "ninja": shutil.which("ninja", path=depot_path),
         "autoninja": shutil.which("autoninja", path=depot_path),
-        "chromium_src_exists": Path(plan.chromium_src_dir).is_dir(),
+        "chromium_src_exists": chromium_src.is_dir(),
+        "chromium_src_head": head,
+        "chromium_src_matches_manifest": head == plan.base_commit if head else False,
         "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
     }
 
