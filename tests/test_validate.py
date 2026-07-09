@@ -259,6 +259,83 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("runtime framework validation ok", output)
 
+    def test_validate_accepts_signing_policy_with_linux_signature_and_native_decisions(self) -> None:
+        """Signing policy records the Linux artifact signature and native signing blockers without claiming release readiness."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            signing_policy = self._write_signing_policy(temp_root, runtime_manifest=runtime_manifest)
+
+            policies = {entry["platform"]: entry for entry in signing_policy["policies"]}
+            linux_artifact = runtime_manifest["artifacts"][0]
+            self.assertEqual(linux_artifact["signature"], policies["linux-x64"]["signature"])
+            for platform in ["macos-arm64", "windows-x64"]:
+                with self.subTest(platform=platform):
+                    self.assertIn("signing_requirement", policies[platform])
+                    self.assertFalse(policies[platform]["release_grade_allowed"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_signing_policy_missing_native_platform_decision(self) -> None:
+        """macOS and Windows platform-matrix signing requirements must each have a signing-policy row."""
+        module = self._load_validate_module()
+        for platform in ["macos-arm64", "windows-x64"]:
+            with self.subTest(platform=platform):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+                    self._write_signing_policy(temp_root, runtime_manifest=runtime_manifest, omit_platforms={platform})
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("signing policy", message)
+                self.assertIn(platform, message)
+
+    def test_validate_rejects_signing_policy_linux_signature_drift(self) -> None:
+        """linux-x64 signing policy cannot retain stale signature metadata after runtime-artifacts changes."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            self.assertNotEqual("stale-linux-signature", runtime_manifest["artifacts"][0]["signature"])
+            self._write_signing_policy(
+                temp_root,
+                runtime_manifest=runtime_manifest,
+                platform_overrides={"linux-x64": {"signature": "stale-linux-signature"}},
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("signing policy", message)
+        self.assertIn("linux-x64", message)
+        self.assertIn("signature", message)
+
+    def test_validate_rejects_signing_policy_release_grade_ready_with_blocked_platform(self) -> None:
+        """release_grade_ready cannot be true while any supported platform signing decision is not release-grade allowed."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            signing_policy = self._write_signing_policy(temp_root, runtime_manifest=runtime_manifest, release_grade_ready=True)
+            self.assertTrue(any(not policy["release_grade_allowed"] for policy in signing_policy["policies"]))
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("signing policy", message)
+        self.assertIn("release_grade_ready", message)
+        self.assertIn("release-grade signing", message)
+
     def test_validate_rejects_native_artifact_preflight_missing_supported_platform(self) -> None:
         """Every runtime-artifacts supported package platform must have a native preflight row."""
         module = self._load_validate_module()
@@ -1144,6 +1221,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
         self._write_current_runtime_artifact_fixture(root)
+        self._write_signing_policy(root)
         self._write_native_artifact_preflight(root)
 
         self._write_release_gates(root, live_detector_status="warning")
@@ -1696,6 +1774,90 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         }
         self._write_json(root / "knowledge" / "manifests" / "native-artifact-preflight.json", preflight)
         return preflight
+
+    def _write_signing_policy(
+        self,
+        root: Path,
+        *,
+        runtime_manifest: dict[str, Any] | None = None,
+        platform_overrides: dict[str, dict[str, Any]] | None = None,
+        omit_platforms: set[str] | None = None,
+        release_grade_ready: bool = False,
+    ) -> dict[str, Any]:
+        if runtime_manifest is None:
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(root)
+        if platform_overrides is None:
+            platform_overrides = {}
+        if omit_platforms is None:
+            omit_platforms = set()
+
+        artifacts_by_platform = {artifact["platform"]: artifact for artifact in runtime_manifest["artifacts"]}
+        signing_requirements = {
+            platform["id"]: [
+                requirement
+                for requirement in platform["required_evidence"]
+                if "sign" in requirement or "codesign" in requirement or "notarization" in requirement
+            ]
+            for platform in self._platform_matrix_platforms()
+        }
+        supported_platforms = list(runtime_manifest["supported_package_platforms"])
+        policies: list[dict[str, Any]] = []
+        for platform in supported_platforms:
+            if platform in omit_platforms:
+                continue
+            artifact = artifacts_by_platform.get(platform)
+            if artifact is not None:
+                entry: dict[str, Any] = {
+                    "artifact_id": artifact["artifact_id"],
+                    "decision": artifact["signature"],
+                    "signature": artifact["signature"],
+                    "release_channel": artifact["release_channel"],
+                    "evidence": [
+                        f"knowledge/manifests/runtime-artifacts.json:{artifact['artifact_id']}:signature={artifact['signature']}"
+                    ],
+                    "missing_prerequisites": [],
+                    "platform": platform,
+                    "release_grade_allowed": True,
+                    "signing_requirement": "runtime-artifacts signature metadata matches artifact",
+                    "status": "allowed",
+                }
+            elif platform == "macos-arm64":
+                entry = {
+                    "decision": "codesign/notarization deferred until a native macOS artifact exists",
+                    "evidence": ["knowledge/manifests/platform-matrix.json:macos-arm64:codesign/notarization decision exists"],
+                    "missing_prerequisites": ["macOS native release artifact is missing"],
+                    "platform": platform,
+                    "release_grade_allowed": False,
+                    "signing_requirement": signing_requirements[platform][0],
+                    "status": "blocked",
+                }
+            elif platform == "windows-x64":
+                entry = {
+                    "decision": "code signing deferred until a native Windows artifact exists",
+                    "evidence": ["knowledge/manifests/platform-matrix.json:windows-x64:code signing decision exists"],
+                    "missing_prerequisites": ["Windows native release artifact is missing"],
+                    "platform": platform,
+                    "release_grade_allowed": False,
+                    "signing_requirement": signing_requirements[platform][0],
+                    "status": "blocked",
+                }
+            else:
+                self.fail(f"missing signing-policy fixture for supported platform {platform}")
+            entry.update(platform_overrides.get(platform, {}))
+            policies.append(entry)
+
+        signing_policy = {
+            "generated_at": "2026-07-09T00:00:00+00:00",
+            "platform_matrix_manifest": "knowledge/manifests/platform-matrix.json",
+            "policies": policies,
+            "release_grade_ready": release_grade_ready,
+            "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json",
+            "runtime_id": runtime_manifest["runtime_id"],
+            "schema_version": "1.0",
+            "supported_package_platforms": supported_platforms,
+        }
+        self._write_json(root / "knowledge" / "manifests" / "signing-policy.json", signing_policy)
+        return signing_policy
 
     def _write_detector_summary(
         self,

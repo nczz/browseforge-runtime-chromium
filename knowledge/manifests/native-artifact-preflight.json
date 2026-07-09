@@ -27,7 +27,8 @@
     {
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json"
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json"
       ],
       "platform": "macos-arm64",
       "ready": false,
@@ -35,14 +36,14 @@
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
         "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
-        "codesign/notarization decision evidence",
         "native macOS detector evidence for the packaged artifact"
       ]
     },
     {
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json"
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json"
       ],
       "platform": "windows-x64",
       "ready": false,
@@ -50,7 +51,6 @@
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
         "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
-        "code signing decision evidence",
         "native Windows detector evidence for the packaged artifact"
       ]
     }

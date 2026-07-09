@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/proxy-preflight.json",
     "knowledge/manifests/native-artifact-preflight.json",
+    "knowledge/manifests/signing-policy.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -456,6 +457,47 @@ def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts
     if release_ready and any(not entry.get("ready") for entry in entries.values()):
         raise SystemExit("native artifact preflight cannot be release_grade_ready while supported platforms remain blocked")
 
+def validate_signing_policy(signing_policy: dict, runtime_artifacts: dict, platform_matrix: dict) -> None:
+    if signing_policy.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("signing policy runtime_id must be browseforge-chromium")
+    if signing_policy.get("schema_version") != "1.0":
+        raise SystemExit("signing policy schema_version must be 1.0")
+    release_ready = signing_policy.get("release_grade_ready")
+    if not isinstance(release_ready, bool):
+        raise SystemExit("signing policy release_grade_ready must be boolean")
+    policies = signing_policy.get("policies", [])
+    if not isinstance(policies, list):
+        raise SystemExit("signing policy policies must be an array")
+    policies_by_platform = {policy.get("platform"): policy for policy in policies if isinstance(policy, dict)}
+    signing_required_platforms = {
+        platform["id"]
+        for platform in platform_matrix.get("platforms", [])
+        if any("sign" in item.lower() or "notarization" in item.lower() for item in platform.get("required_evidence", []))
+    }
+    artifact_platforms = {artifact.get("platform") for artifact in runtime_artifacts.get("artifacts", [])}
+    required_platforms = signing_required_platforms | artifact_platforms
+    missing_policy_platforms = sorted(required_platforms - policies_by_platform.keys())
+    if missing_policy_platforms:
+        raise SystemExit(f"signing policy missing platform decisions: {missing_policy_platforms}")
+    artifacts_by_platform = {artifact.get("platform"): artifact for artifact in runtime_artifacts.get("artifacts", [])}
+    for platform, policy in sorted(policies_by_platform.items()):
+        decision = policy.get("decision")
+        evidence = policy.get("evidence", [])
+        release_grade_allowed = policy.get("release_grade_allowed")
+        if not isinstance(decision, str) or not decision:
+            raise SystemExit(f"signing policy {platform} decision must be a non-empty string")
+        if not isinstance(evidence, list) or any(not isinstance(item, str) or not item for item in evidence):
+            raise SystemExit(f"signing policy {platform} evidence must be non-empty strings")
+        if not isinstance(release_grade_allowed, bool):
+            raise SystemExit(f"signing policy {platform} release_grade_allowed must be boolean")
+        artifact = artifacts_by_platform.get(platform)
+        if artifact is not None:
+            for key in ["artifact_id", "signature", "release_channel"]:
+                if policy.get(key) != artifact.get(key):
+                    raise SystemExit(f"signing policy {platform} {key} drifted from runtime-artifacts")
+    if release_ready and any(not policy.get("release_grade_allowed") for policy in policies_by_platform.values()):
+        raise SystemExit("signing policy cannot be release_grade_ready while platform policies block release-grade signing")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -692,6 +734,8 @@ def main() -> None:
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
+    signing_policy = load_json("knowledge/manifests/signing-policy.json")
+    validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"
