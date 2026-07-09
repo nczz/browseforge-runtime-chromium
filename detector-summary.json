@@ -1,7 +1,115 @@
 {
   "blocking_findings": [],
+  "coverage_gap_count": 13,
+  "coverage_gaps": [
+    {
+      "container": false,
+      "detector_id": "browserleaks",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:browserleaks:headed:direct:host",
+      "network_mode": "direct",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "browserleaks",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:browserleaks:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": true,
+      "detector_id": "browserleaks",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:browserleaks:headed:proxy:container",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "browserscan",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:browserscan:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": true,
+      "detector_id": "browserscan",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:browserscan:headed:proxy:container",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "creepjs",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:creepjs:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": true,
+      "detector_id": "creepjs",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:creepjs:headed:proxy:container",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "iphey",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:iphey:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "pixelscan",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:pixelscan:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": true,
+      "detector_id": "pixelscan",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:pixelscan:headed:proxy:container",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "sannysoft",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:sannysoft:headed:direct:host",
+      "network_mode": "direct",
+      "platform": "linux-x64"
+    },
+    {
+      "container": false,
+      "detector_id": "sannysoft",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:sannysoft:headed:proxy:host",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    },
+    {
+      "container": true,
+      "detector_id": "sannysoft",
+      "display_mode": "headed",
+      "matrix_key": "linux-x64:sannysoft:headed:proxy:container",
+      "network_mode": "proxy",
+      "platform": "linux-x64"
+    }
+  ],
+  "coverage_platform": "linux-x64",
   "evidence_count": 16,
-  "generated_at": "2026-07-09T12:05:33.353533+00:00",
+  "generated_at": "2026-07-09T12:15:17.836875+00:00",
   "rows": [
     {
       "detector_id": "browserleaks",

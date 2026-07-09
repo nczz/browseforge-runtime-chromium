@@ -278,21 +278,85 @@ def ingest(args):
     print(str(out))
     return 0
 
+def normalize_display_mode(display_mode: str) -> str:
+    if display_mode.startswith("headed"):
+        return "headed"
+    if display_mode.startswith("headless"):
+        return "headless"
+    return display_mode
+
+def observed_matrix_key(evidence: dict) -> tuple[str, str, str, bool]:
+    matrix = evidence.get("matrix", {})
+    return (
+        evidence["target"]["platform"],
+        evidence["detector"]["detector_id"],
+        normalize_display_mode(str(matrix.get("display_mode", ""))),
+        str(matrix.get("network_mode", "")),
+        bool(matrix.get("container")),
+    )
+
+def required_matrix_rows(platform: str) -> list[dict]:
+    rows = []
+    for det in sorted(detectors_manifest()["detectors"], key=lambda d: d["detector_id"]):
+        if det.get("required") is not True:
+            continue
+        matrix = det.get("matrix", {})
+        display_modes = matrix.get("display_modes") or ["headed"]
+        network_modes = matrix.get("network_modes") or ["direct"]
+        container_modes = matrix.get("container_modes") or []
+        containers = [False, True] if platform == "linux-x64" and "docker" in container_modes else [False]
+        for display in display_modes:
+            for network in network_modes:
+                for container in containers:
+                    rows.append({
+                        "matrix_key": f"{platform}:{det['detector_id']}:{display}:{network}:{'container' if container else 'host'}",
+                        "platform": platform,
+                        "detector_id": det["detector_id"],
+                        "display_mode": display,
+                        "network_mode": network,
+                        "container": container,
+                    })
+    return rows
+
+def matrix_coverage_gaps(evidence_rows: list[dict], platform: str) -> list[dict]:
+    observed = {
+        observed_matrix_key(evidence)
+        for evidence in evidence_rows
+        if evidence.get("status") == "passed" and evidence.get("target", {}).get("platform") == platform
+    }
+    gaps = []
+    for row in required_matrix_rows(platform):
+        key = (row["platform"], row["detector_id"], row["display_mode"], row["network_mode"], row["container"])
+        if key not in observed:
+            gaps.append(row)
+    return gaps
+
 def summary(args):
     root = Path(args.evidence_root)
     files = sorted(root.glob("**/*.json"))
     blocking = []
     rows = []
+    evidence_rows = []
     for path in files:
         code, errors = validate_evidence_file(path)
         if code:
             return code
         evidence = load_json(path)
+        evidence_rows.append(evidence)
         for result in evidence.get("results", []):
             if result.get("severity") in {"high", "critical"} and result.get("status") in {"fail", "warn"} and not result.get("accepted_risk_id"):
                 blocking.append({"path": str(path), "surface": result.get("surface"), "severity": result.get("severity"), "finding": result.get("finding")})
         rows.append({"path": str(path), "detector_id": evidence["detector"]["detector_id"], "platform": evidence["target"]["platform"], "status": evidence["status"]})
-    payload = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "evidence_count": len(rows), "blocking_findings": blocking, "rows": rows}
+    coverage_gaps = matrix_coverage_gaps(evidence_rows, args.platform)
+    payload = {
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "evidence_count": len(rows),
+        "blocking_findings": blocking,
+        "coverage_gap_count": len(coverage_gaps),
+        "coverage_gaps": coverage_gaps,
+        "coverage_platform": args.platform,
+        "rows": rows,
+    }
     Path(args.output).write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(args.output)
     return 0
@@ -766,7 +830,7 @@ def main(argv=None):
     p = sub.add_parser("plan"); p.add_argument("--runtime-version", required=True); p.add_argument("--platform", required=True); p.add_argument("--format", default="json"); p.set_defaults(func=plan)
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
-    p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.set_defaults(func=summary)
+    p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)

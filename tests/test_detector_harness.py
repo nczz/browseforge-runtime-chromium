@@ -23,6 +23,63 @@ class DetectorHarnessTests(unittest.TestCase):
     def fixture_path(self, name):
         return ROOT / "tests" / "fixtures" / "detectors" / name
 
+    def write_synthetic_summary_evidence(self, evidence_root, *, detector_id, display_mode, network_mode, container):
+        detector = self.harness_module.detector_by_id(detector_id)
+        self.assertIsNotNone(detector)
+        platform = "linux-x64"
+        container_label = "container" if container else "host"
+        display_key = "headed" if display_mode == "headed_xvfb" else display_mode
+        network_key = network_mode.replace("_", "-")
+        matrix_key = f"{platform}:{detector_id}:{display_key}:{network_key}:{container_label}"
+        suffix = f"{detector_id}_{display_mode}_{network_key}_{container_label}".replace("-", "_")
+        evidence = json.loads(self.fixture_path("valid-evidence.json").read_text(encoding="utf-8"))
+        evidence.update(
+            {
+                "run_id": f"detrun_summary_{suffix}",
+                "evidence_id": f"evidence_summary_{suffix}",
+                "artifact_id": f"unpackaged:{platform}:summary-test",
+                "runtime_version": "summary-test",
+                "detector": {
+                    "detector_id": detector_id,
+                    "name": detector["name"],
+                    "url": detector["url"],
+                    "category": detector["category"],
+                    "manifest_ref": f"knowledge/manifests/detectors.json#{detector_id}",
+                },
+                "target": {
+                    **evidence["target"],
+                    "platform": platform,
+                    "container": container,
+                    "proxy_region_redacted": "none" if network_mode == "direct" else "redacted",
+                },
+                "matrix": {
+                    "matrix_key": matrix_key,
+                    "display_mode": display_mode,
+                    "network_mode": network_mode,
+                    "container": container,
+                    "proxy": "none" if network_mode == "direct" else "redacted",
+                    "required": True,
+                },
+                "status": "passed",
+                "failure_mode": "none",
+                "results": [
+                    {
+                        "surface": "automation_signals",
+                        "status": "pass",
+                        "severity": "info",
+                        "finding": "Synthetic summary coverage evidence.",
+                        "evidence_ref": "summary-test",
+                    }
+                ],
+            }
+        )
+        path = evidence_root / detector_id / f"{suffix}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        evidence["storage"]["evidence_path"] = str(path)
+        path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return path
+
+
     @classmethod
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
@@ -925,6 +982,85 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertTrue(any(r["detector_id"] == "sannysoft" and r["network_mode"] == "proxy" for r in rows))
         bad = self.run_harness("plan", "--runtime-version", "v0.1.0-alpha.0", "--platform", "amiga")
         self.assertEqual(bad.returncode, 5)
+
+    def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-summary.json"
+            self.write_synthetic_summary_evidence(
+                evidence_root,
+                detector_id="sannysoft",
+                display_mode="headed_xvfb",
+                network_mode="direct",
+                container=True,
+            )
+            self.write_synthetic_summary_evidence(
+                evidence_root,
+                detector_id="sannysoft",
+                display_mode="headed",
+                network_mode="local-proxy",
+                container=True,
+            )
+
+            proc = self.run_harness("summary", "--evidence-root", str(evidence_root), "--output", str(output))
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertIn("coverage_gaps", payload)
+            self.assertIn("coverage_gap_count", payload)
+            self.assertEqual(payload["coverage_gap_count"], len(payload["coverage_gaps"]))
+            self.assertGreater(payload["coverage_gap_count"], 0)
+            gap_keys = {gap.get("matrix_key", gap.get("key")) for gap in payload["coverage_gaps"]}
+            self.assertNotIn("linux-x64:sannysoft:headed:direct:container", gap_keys)
+            self.assertIn("linux-x64:sannysoft:headed:direct:host", gap_keys)
+            self.assertIn("linux-x64:sannysoft:headed:proxy:host", gap_keys)
+            self.assertIn("linux-x64:sannysoft:headed:proxy:container", gap_keys)
+
+            proxy_container_gap = next(
+                gap
+                for gap in payload["coverage_gaps"]
+                if gap.get("matrix_key", gap.get("key")) == "linux-x64:sannysoft:headed:proxy:container"
+            )
+            for field in ("detector_id", "platform", "display_mode", "network_mode", "container"):
+                self.assertIn(field, proxy_container_gap)
+            self.assertTrue("matrix_key" in proxy_container_gap or "key" in proxy_container_gap)
+            self.assertEqual(
+                {
+                    "detector_id": proxy_container_gap["detector_id"],
+                    "platform": proxy_container_gap["platform"],
+                    "display_mode": proxy_container_gap["display_mode"],
+                    "network_mode": proxy_container_gap["network_mode"],
+                    "container": proxy_container_gap["container"],
+                },
+                {
+                    "detector_id": "sannysoft",
+                    "platform": "linux-x64",
+                    "display_mode": "headed",
+                    "network_mode": "proxy",
+                    "container": True,
+                },
+            )
+
+    def test_summary_does_not_count_headless_evidence_for_required_headed_rows(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-summary.json"
+            self.write_synthetic_summary_evidence(
+                evidence_root,
+                detector_id="sannysoft",
+                display_mode="headless",
+                network_mode="direct",
+                container=True,
+            )
+
+            proc = self.run_harness("summary", "--evidence-root", str(evidence_root), "--output", str(output))
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            gap_keys = {gap.get("matrix_key", gap.get("key")) for gap in payload["coverage_gaps"]}
+            self.assertIn("linux-x64:sannysoft:headed:direct:container", gap_keys)
 
     def test_validate_accepts_valid_sanitized_fixture(self):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/valid-evidence.json")
