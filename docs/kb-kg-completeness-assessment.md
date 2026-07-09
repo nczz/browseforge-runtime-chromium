@@ -49,7 +49,7 @@ Warning/blocking gates:
 
 - `live-detector-evidence`: Linux x64 has committed SannySoft, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS evidence, including headless and headed/Xvfb coverage for several detectors; `detector-summary.json` now records 13 remaining required matrix coverage gaps, so the full headed/proxy/native/cross-platform matrix is explicit but incomplete.
 - `proxy/IP coherence`: local CONNECT proxy routing evidence exists; no external proxy exit-IP/geolocation detector run is recorded.
-- `AudioContext` and `fonts`: page-context and CreepJS/BrowserLeaks metrics are recorded, and `detector-score-comparison.json` now compares CreepJS headless/headed audio deltas plus BrowserLeaks/CreepJS font glyph/metric hashes; release-grade BrowserLeaks/CreepJS/Pixelscan score baselines and platform corpus parity remain required.
+- `AudioContext` and `fonts`: page-context and CreepJS/BrowserLeaks metrics are recorded, and `detector-score-comparison.json` now compares CreepJS headless/headed audio deltas plus BrowserLeaks/CreepJS font glyph/metric hashes while explicitly listing missing BrowserLeaks audio, Pixelscan audio/fonts, and native-headed font-corpus baseline gaps; release-grade BrowserLeaks/CreepJS/Pixelscan score baselines and platform corpus parity remain required.
 - `cross-platform drift`: Linux Docker headless/headed evidence exists; Windows and native headed Linux/macOS detector matrix is absent.
 
 ## Permitted next work

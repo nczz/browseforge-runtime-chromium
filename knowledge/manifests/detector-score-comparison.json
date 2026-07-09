@@ -1,4 +1,27 @@
 {
+  "baseline_gaps": [
+    {
+      "detector_id": "browserleaks",
+      "finding": "BrowserLeaks audio score baseline is not yet committed for the packaged runtime.",
+      "gap_id": "browserleaks_audio_score_baseline_missing",
+      "required_evidence": "sanitized BrowserLeaks AudioContext score comparison for release artifact",
+      "surface": "audio"
+    },
+    {
+      "detector_id": "pixelscan",
+      "finding": "Pixelscan AudioContext/fonts score baseline is not yet committed for the packaged runtime.",
+      "gap_id": "pixelscan_audio_font_score_baseline_missing",
+      "required_evidence": "sanitized Pixelscan score comparison covering audio/font surfaces",
+      "surface": "audio,fonts"
+    },
+    {
+      "detector_id": "browserleaks,creepjs,pixelscan",
+      "finding": "Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.",
+      "gap_id": "native_headed_font_corpus_parity_missing",
+      "required_evidence": "native headed Linux/macOS font corpus and detector-score comparison",
+      "surface": "fonts"
+    }
+  ],
   "comparisons": [
     {
       "comparison_id": "creepjs_audio_headless_vs_headed",
@@ -35,7 +58,7 @@
   "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
   "evidence_count": 16,
   "gaps": [],
-  "generated_at": "2026-07-09T12:27:05.233725+00:00",
+  "generated_at": "2026-07-09T12:39:43.428173+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

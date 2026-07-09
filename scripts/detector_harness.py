@@ -449,6 +449,32 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
 
     return comparisons, gaps
 
+def detector_score_baseline_gaps() -> list[dict]:
+    return [
+        {
+            "gap_id": "browserleaks_audio_score_baseline_missing",
+            "surface": "audio",
+            "detector_id": "browserleaks",
+            "finding": "BrowserLeaks audio score baseline is not yet committed for the packaged runtime.",
+            "required_evidence": "sanitized BrowserLeaks AudioContext score comparison for release artifact",
+        },
+        {
+            "gap_id": "pixelscan_audio_font_score_baseline_missing",
+            "surface": "audio,fonts",
+            "detector_id": "pixelscan",
+            "finding": "Pixelscan AudioContext/fonts score baseline is not yet committed for the packaged runtime.",
+            "required_evidence": "sanitized Pixelscan score comparison covering audio/font surfaces",
+        },
+        {
+            "gap_id": "native_headed_font_corpus_parity_missing",
+            "surface": "fonts",
+            "detector_id": "browserleaks,creepjs,pixelscan",
+            "finding": "Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.",
+            "required_evidence": "native headed Linux/macOS font corpus and detector-score comparison",
+        },
+    ]
+
+
 def compare_scores(args):
     root = Path(args.evidence_root)
     evidence_rows = []
@@ -460,6 +486,7 @@ def compare_scores(args):
             return code
         evidence_rows.append(load_json(path))
     comparisons, gaps = detector_score_comparisons(evidence_rows)
+    baseline_gaps = detector_score_baseline_gaps()
     payload = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "runtime_id": "browseforge-chromium",
@@ -467,6 +494,7 @@ def compare_scores(args):
         "evidence_count": len(evidence_rows),
         "comparisons": comparisons,
         "gaps": gaps,
+        "baseline_gaps": baseline_gaps,
         "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
     }
     out = Path(args.output)

@@ -216,6 +216,14 @@ def main() -> None:
     for comparison_id in ["creepjs_audio_headless_vs_headed", "browserleaks_creepjs_font_metrics"]:
         if comparison_id not in comparison_ids:
             raise SystemExit(f"detector score comparison missing {comparison_id}")
+    baseline_gap_ids = {gap.get("gap_id") for gap in score_comparison.get("baseline_gaps", [])}
+    for gap_id in [
+        "browserleaks_audio_score_baseline_missing",
+        "pixelscan_audio_font_score_baseline_missing",
+        "native_headed_font_corpus_parity_missing",
+    ]:
+        if gap_id not in baseline_gap_ids:
+            raise SystemExit(f"detector score comparison missing baseline gap {gap_id}")
 
     query_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in [
         "graph/queries/development-readiness.cypher",

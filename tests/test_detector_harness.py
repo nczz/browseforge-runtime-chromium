@@ -1253,6 +1253,111 @@ class DetectorHarnessTests(unittest.TestCase):
                 {comparison.get("status") for comparison in payload["comparisons"] if comparison.get("surface") == "audio"},
             )
 
+
+    def test_compare_scores_reports_release_baseline_gaps_after_counterpart_evidence_matches(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            audio_metrics = {
+                "sum": 100.0,
+                "gain": 2.0,
+                "freq": 300.0,
+                "time": 4.0,
+                "trap": 5.0,
+                "unique": 6.0,
+            }
+            glyph_hash = "d" * 64
+            metrics_hash = "e" * 64
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headless",
+                label="audio_headless_release_gap",
+                results=[
+                    self.audio_score_result(
+                        detector_check="creepjs_audio_score_metrics",
+                        metrics=audio_metrics,
+                    )
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headed_xvfb",
+                label="audio_fonts_headed_release_gap",
+                results=[
+                    self.audio_score_result(
+                        detector_check="creepjs_headed_audio_metrics",
+                        metrics=audio_metrics,
+                    ),
+                    self.font_score_result(
+                        detector_check="creepjs_font_metric_probe",
+                        metrics_sha256=metrics_hash,
+                        glyph_sha256=glyph_hash,
+                    ),
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headed_xvfb",
+                label="fonts_browserleaks_release_gap",
+                results=[
+                    self.font_score_result(
+                        detector_check="browserleaks_fonts_headed_metrics",
+                        metrics_sha256=metrics_hash,
+                        glyph_sha256=glyph_hash,
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertIs(payload["release_grade"], False)
+            self.assertNotIn(
+                "creepjs_audio_headless_vs_headed",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+            self.assertNotIn(
+                "browserleaks_creepjs_font_metrics",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+            self.assertEqual(
+                self.score_comparison(payload, surface="audio", detector_id="creepjs")["status"],
+                "pass",
+            )
+            self.assertEqual(
+                self.score_comparison(payload, surface="fonts", detectors={"browserleaks", "creepjs"})["status"],
+                "pass",
+            )
+            baseline_gaps = payload.get("baseline_gaps")
+            self.assertIsInstance(baseline_gaps, list)
+            baseline_gap_by_id = {gap.get("gap_id"): gap for gap in baseline_gaps}
+            expected_baseline_gaps = {
+                "browserleaks_audio_score_baseline_missing": {
+                    "surface": "audio",
+                    "detector_id": "browserleaks",
+                    "finding": "BrowserLeaks audio score baseline",
+                },
+                "pixelscan_audio_font_score_baseline_missing": {
+                    "surface": "audio,fonts",
+                    "detector_id": "pixelscan",
+                    "finding": "Pixelscan AudioContext/fonts score baseline",
+                },
+                "native_headed_font_corpus_parity_missing": {
+                    "surface": "fonts",
+                    "detector_id": "browserleaks,creepjs,pixelscan",
+                    "finding": "native headed platform corpus evidence is missing",
+                },
+            }
+            for gap_id, expected in expected_baseline_gaps.items():
+                with self.subTest(gap_id=gap_id):
+                    gap = baseline_gap_by_id.get(gap_id)
+                    self.assertIsNotNone(gap, baseline_gaps)
+                    self.assertEqual(gap["surface"], expected["surface"])
+                    self.assertEqual(gap["detector_id"], expected["detector_id"])
+                    self.assertIn(expected["finding"], gap["finding"])
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

@@ -86,17 +86,17 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector metrics extraction now records detector-reported audio metric values from sanitized live page text in both headless and headed Docker/Xvfb modes; knowledge/manifests/detector-score-comparison.json compares those CreepJS audio records and reports only trap differs by 41.678470764144095 while freq/gain/sum/time/unique match. BrowserLeaks/CreepJS release-grade baseline comparison and native headed matrix remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector metrics extraction now records detector-reported audio metric values from sanitized live page text in both headless and headed Docker/Xvfb modes; knowledge/manifests/detector-score-comparison.json compares those CreepJS audio records and reports only trap differs by 41.678470764144095 while freq/gain/sum/time/unique match, and now carries explicit BrowserLeaks/Pixelscan release-baseline gaps. BrowserLeaks/CreepJS/Pixelscan release-grade baselines and native headed matrix remain required.",
       "release_blocker": true,
-      "result": "warn_linux_creepjs_headless_headed_audio_comparison_trap_delta",
+      "result": "warn_linux_creepjs_headless_headed_audio_comparison_with_baseline_gaps",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headed page and CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching sampled font list/candidate count/glyph SHA and differing metric SHA. BrowserLeaks/CreepJS/Pixelscan detector score comparison and platform font corpus parity remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headed page and CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching sampled font list/candidate count/glyph SHA, differing metric SHA, and explicit Pixelscan/native-headed font corpus baseline gaps. BrowserLeaks/CreepJS/Pixelscan detector score baselines and platform font corpus parity remain required.",
       "release_blocker": true,
-      "result": "warn_linux_browserleaks_creepjs_font_comparison_partial",
+      "result": "warn_linux_browserleaks_creepjs_font_comparison_with_baseline_gaps",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "fonts"

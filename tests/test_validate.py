@@ -289,6 +289,11 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     {"comparison_id": "creepjs_audio_headless_vs_headed"},
                     {"comparison_id": "browserleaks_creepjs_font_metrics"},
                 ],
+                "baseline_gaps": [
+                    {"gap_id": "browserleaks_audio_score_baseline_missing"},
+                    {"gap_id": "pixelscan_audio_font_score_baseline_missing"},
+                    {"gap_id": "native_headed_font_corpus_parity_missing"},
+                ],
             },
         )
         self._write_json(
