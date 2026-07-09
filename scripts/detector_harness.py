@@ -1143,6 +1143,68 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
+  const browserleaksAudioPage = (() => {
+    if (!(location.href.includes('/javascript') && location.hash === '#audio')) return null;
+    const lines = text.split('\\n').map((line) => line.trim()).filter(Boolean);
+    const sectionStart = lines.findIndex((line) => line === 'Web Audio API');
+    if (sectionStart < 0) return {available: false, reason: 'web_audio_section_missing'};
+    const fields = [
+      ['apiStatus', 'API Status'],
+      ['state', 'State'],
+      ['sampleRate', 'Sample Rate'],
+      ['maxChannelCount', 'Max Channel Count'],
+      ['numberOfInputs', 'Number of Inputs'],
+      ['numberOfOutputs', 'Number of Outputs'],
+      ['channelCount', 'Channel Count'],
+      ['channelCountMode', 'Channel Count Mode'],
+      ['channelInterpretation', 'Channel Interpretation'],
+      ['fftSize', 'FFT Size'],
+      ['frequencyBinCount', 'Frequency Bin Count'],
+      ['minDecibels', 'Min Decibels'],
+      ['maxDecibels', 'Max Decibels'],
+      ['smoothingTimeConstant', 'Smoothing Time Constant'],
+    ];
+    const values = {};
+    for (const [key, label] of fields) {
+      const index = lines.findIndex((line, offset) => offset > sectionStart && line === label);
+      if (index >= 0 && index + 1 < lines.length) {
+        values[key] = lines[index + 1].slice(0, 80);
+      }
+    }
+    const audioContext = (() => {
+      try {
+        const Audio = window.AudioContext || window.webkitAudioContext;
+        if (!Audio) return {available: false, reason: 'audio_context_unavailable'};
+        const ctx = new Audio();
+        const analyser = ctx.createAnalyser();
+        const values = {
+          state: ctx.state,
+          sampleRate: ctx.sampleRate,
+          maxChannelCount: ctx.destination && ctx.destination.maxChannelCount,
+          numberOfInputs: ctx.destination && ctx.destination.numberOfInputs,
+          numberOfOutputs: ctx.destination && ctx.destination.numberOfOutputs,
+          channelCount: ctx.destination && ctx.destination.channelCount,
+          channelCountMode: ctx.destination && ctx.destination.channelCountMode,
+          channelInterpretation: ctx.destination && ctx.destination.channelInterpretation,
+          fftSize: analyser.fftSize,
+          frequencyBinCount: analyser.frequencyBinCount,
+          minDecibels: analyser.minDecibels,
+          maxDecibels: analyser.maxDecibels,
+          smoothingTimeConstant: analyser.smoothingTimeConstant,
+        };
+        if (ctx.close) ctx.close();
+        return {available: true, values};
+      } catch (err) {
+        return {available: false, reason: String(err && err.name || err)};
+      }
+    })();
+    return {
+      available: Object.keys(values).length > 0 || Boolean(audioContext.available),
+      observedFieldCount: Object.keys(values).length,
+      audioContext,
+      values,
+    };
+  })();
   const fonts = await (async () => {
     const candidates = ['Arial', 'Calibri', 'Consolas', 'Courier New', 'DejaVu Sans', 'Noto Sans CJK TC', 'Segoe UI', 'Times New Roman'];
     const checks = {};
@@ -1441,7 +1503,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)

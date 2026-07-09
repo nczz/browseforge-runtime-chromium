@@ -30,9 +30,50 @@
     {
       "detector_check": "browserleaks_javascript_audio_page_summary",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "BrowserLeaks JavaScript Web Audio section loaded on the packaged Linux runtime and produced bounded OfflineAudioContext summary values; raw page text and sample buffers are not committed.",
+      "finding": "BrowserLeaks JavaScript Web Audio section loaded on the packaged Linux runtime and produced bounded OfflineAudioContext plus AudioContext/AnalyserNode field summaries; raw page text and sample buffers are not committed.",
       "normalized_values": {
+        "audioContextFieldCount": 13,
+        "audioContextValues": {
+          "channelCount": 2,
+          "channelCountMode": "explicit",
+          "channelInterpretation": "speakers",
+          "fftSize": 2048,
+          "frequencyBinCount": 1024,
+          "maxChannelCount": 2,
+          "maxDecibels": -30,
+          "minDecibels": -100,
+          "numberOfInputs": 1,
+          "numberOfOutputs": 0,
+          "sampleRate": 44100,
+          "smoothingTimeConstant": 0.8,
+          "state": "suspended"
+        },
         "available": true,
+        "browserleaksAudioPage": {
+          "audioContext": {
+            "available": true,
+            "values": {
+              "channelCount": 2,
+              "channelCountMode": "explicit",
+              "channelInterpretation": "speakers",
+              "fftSize": 2048,
+              "frequencyBinCount": 1024,
+              "maxChannelCount": 2,
+              "maxDecibels": -30,
+              "minDecibels": -100,
+              "numberOfInputs": 1,
+              "numberOfOutputs": 0,
+              "sampleRate": 44100,
+              "smoothingTimeConstant": 0.8,
+              "state": "suspended"
+            }
+          },
+          "available": true,
+          "observedFieldCount": 1,
+          "values": {
+            "apiStatus": "\u2714"
+          }
+        },
         "firstSamples": [
           -6.1e-07,
           4.4e-07,
@@ -48,9 +89,10 @@
         "sampleRate": 44100,
         "sum": 7.2e-07,
         "sumAbs": 0.00017846,
+        "textAudioApiStatus": "\u2714",
         "url": "https://browserleaks.com/javascript#audio"
       },
-      "raw_value_hash": "065da87fe83d23b017e02443a44d8ee71bd7fe2539873baa9b7cda0d65f7464a",
+      "raw_value_hash": "92b4a6f38d3674a3565b4308ce660416a49ab35759c7faa887fc7f58cbc9c65a",
       "severity": "medium",
       "status": "warn",
       "surface": "audio"
@@ -74,7 +116,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw BrowserLeaks JavaScript page text, browser storage, network identifiers, screenshots, and audio sample buffers are not committed; committed evidence stores bounded AudioContext summary values, page title/url, text hash, and raw capture SHA only.",
+    "notes": "Raw BrowserLeaks JavaScript page text, browser storage, network identifiers, screenshots, and audio sample buffers are not committed; committed evidence stores bounded OfflineAudioContext summary values, BrowserLeaks Web Audio API status, AudioContext/AnalyserNode field summaries, page title/url, text hash, and raw capture SHA only.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-browserleaks-javascript-audio-1",
@@ -85,10 +127,10 @@
   "status": "warning",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_audio_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "84275833fd81353ab27e3d6dd91bf0560ecb265bbb464fa9fd6c963df485530b",
-    "sha256": "b84e96e9c2f8eb917bab10556e61bee9c40cef39a2ce91c445bb501398142868",
+    "raw_capture_sha256": "b2ad05788f43054e0a02bbd588cedb27ab933f9e75001b8d2314da1bc4406f89",
+    "sha256": "a18ec489b3f4e090964e4f8315d308c155e46ea013d0d385a6e7ab3ba783d4f8",
     "summary_path": "detector-summary.json",
-    "text_sha256": "3c9e60e9fc73f337c9b305d059abaa6e4fd2ae995b4c7b7461b92813228fe290"
+    "text_sha256": "98389198f1f66310a02720c80570ed49ebdcef83873c7e83e7ca03c7e4a85b4d"
   },
   "target": {
     "arch": "amd64",

@@ -1262,6 +1262,19 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("return {title, url: location.href", expr)
         self.assertIn("canvas: canvasProbe, features, webgl: gl", expr)
 
+    def test_collect_page_expression_records_browserleaks_audio_page_fields(self):
+        expr = self.collect_page_expression()
+        self.assertIn("const browserleaksAudioPage = (() => {", expr)
+        self.assertIn("location.hash === '#audio'", expr)
+        self.assertIn("text.split('\\n')", expr)
+        self.assertNotIn("text.split('\n')", expr)
+        self.assertIn("'Web Audio API'", expr)
+        self.assertIn("['sampleRate', 'Sample Rate']", expr)
+        self.assertIn("const audioContext = (() => {", expr)
+        self.assertIn("ctx.createAnalyser()", expr)
+        self.assertIn("observedFieldCount", expr)
+        self.assertIn("audio, browserleaksAudioPage, fonts", expr)
+
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
         unsupported_detector = "unknown-detector"
         self.assertNotIn(unsupported_detector, self.harness_module.SUPPORTED_COLLECTORS)
