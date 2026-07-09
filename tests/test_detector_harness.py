@@ -1495,6 +1495,65 @@ class DetectorHarnessTests(unittest.TestCase):
         proc = self.run_harness("validate-evidence", "tests/fixtures/detectors/valid-evidence.json")
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
+    def test_evidence_schema_admits_current_harness_matrix_and_storage_contracts(self):
+        schema = json.loads((ROOT / "detectors" / "evidence-schema.json").read_text(encoding="utf-8"))
+        harness_props = schema["properties"]["harness"]["properties"]
+        matrix_props = schema["properties"]["matrix"]["properties"]
+        storage_props = schema["properties"]["storage"]["properties"]
+
+        self.assertGreaterEqual(
+            set(harness_props["name"]["enum"]),
+            {"browseforge-detector-harness", "browseforge-detector-harness + local-connect-proxy"},
+        )
+        self.assertGreaterEqual(
+            set(harness_props["mode"]["enum"]),
+            {"manual_ingest", "synthetic_fixture", "live_collect", "live_collect_local_proxy"},
+        )
+        self.assertGreaterEqual(set(matrix_props["display_mode"]["enum"]), {"headed", "headed_xvfb", "headless", "unknown"})
+        self.assertGreaterEqual(set(matrix_props["network_mode"]["enum"]), {"direct", "proxy", "local_proxy", "unknown"})
+        self.assertGreaterEqual(
+            set(matrix_props["proxy"]["enum"]),
+            {"none", "redacted", "public_test_infra", "local-connect-observer"},
+        )
+        self.assertGreaterEqual(
+            set(storage_props),
+            {"evidence_path", "sha256", "raw_capture_path", "raw_capture_sha256", "proxy_summary_sha256", "text_sha256", "summary_path"},
+        )
+
+    def test_committed_detector_evidence_uses_schema_admitted_contract_values(self):
+        schema = json.loads((ROOT / "detectors" / "evidence-schema.json").read_text(encoding="utf-8"))
+        harness_props = schema["properties"]["harness"]["properties"]
+        matrix_props = schema["properties"]["matrix"]["properties"]
+        storage_keys = set(schema["properties"]["storage"]["properties"])
+        admitted = {
+            "harness.name": set(harness_props["name"]["enum"]),
+            "harness.mode": set(harness_props["mode"]["enum"]),
+            "matrix.display_mode": set(matrix_props["display_mode"]["enum"]),
+            "matrix.network_mode": set(matrix_props["network_mode"]["enum"]),
+            "matrix.proxy": set(matrix_props["proxy"]["enum"]),
+        }
+        missing = {key: set() for key in [*admitted, "storage.keys"]}
+        evidence_paths = sorted((ROOT / "detectors" / "evidence").glob("**/*.json"))
+        self.assertGreater(len(evidence_paths), 0)
+
+        for path in evidence_paths:
+            evidence = json.loads(path.read_text(encoding="utf-8"))
+            values = {
+                "harness.name": evidence.get("harness", {}).get("name"),
+                "harness.mode": evidence.get("harness", {}).get("mode"),
+                "matrix.display_mode": evidence.get("matrix", {}).get("display_mode"),
+                "matrix.network_mode": evidence.get("matrix", {}).get("network_mode"),
+                "matrix.proxy": evidence.get("matrix", {}).get("proxy"),
+            }
+            for key, value in values.items():
+                if value not in admitted[key]:
+                    missing[key].add(value)
+            for storage_key in evidence.get("storage", {}):
+                if storage_key not in storage_keys:
+                    missing["storage.keys"].add(storage_key)
+
+        self.assertEqual({key: sorted(values) for key, values in missing.items() if values}, {})
+
     def test_validate_rejects_proxy_matrix_without_external_proxy_coherence(self):
         with tempfile.TemporaryDirectory() as td:
             path = self.write_synthetic_validation_evidence(

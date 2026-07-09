@@ -84,7 +84,10 @@
       ],
       "properties": {
         "name": {
-          "const": "browseforge-detector-harness"
+          "enum": [
+            "browseforge-detector-harness",
+            "browseforge-detector-harness + local-connect-proxy"
+          ]
         },
         "version": {
           "type": "string"
@@ -93,7 +96,8 @@
           "enum": [
             "manual_ingest",
             "synthetic_fixture",
-            "live_collect"
+            "live_collect",
+            "live_collect_local_proxy"
           ]
         }
       },
@@ -160,6 +164,7 @@
         "display_mode": {
           "enum": [
             "headed",
+            "headed_xvfb",
             "headless",
             "unknown"
           ]
@@ -168,6 +173,7 @@
           "enum": [
             "direct",
             "proxy",
+            "local_proxy",
             "unknown"
           ]
         },
@@ -178,7 +184,8 @@
           "enum": [
             "none",
             "redacted",
-            "public_test_infra"
+            "public_test_infra",
+            "local-connect-observer"
           ]
         },
         "required": {
@@ -335,6 +342,12 @@
           "type": "string"
         },
         "raw_capture_sha256": {
+          "type": "string"
+        },
+        "proxy_summary_sha256": {
+          "type": "string"
+        },
+        "text_sha256": {
           "type": "string"
         },
         "summary_path": {
