@@ -31,6 +31,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - Required detector set has run for release artifacts.
 - High/critical fingerprint surfaces have pass evidence or accepted risk.
 - Evidence is sanitized and linked to surfaces/patches/flags.
+- Detector score comparisons are generated from sanitized evidence and keep release-grade status false while baselines are partial.
 - Detector regressions block release unless explicitly accepted.
 
 ## Knowledge gates
@@ -52,6 +53,7 @@ provenance attestation
 runtime.manifest.json
 patchset manifest
 sanitized detector summary
+detector-score-comparison.json
 knowledge-export.jsonl
 graph.db.zst or equivalent graph export
 ```

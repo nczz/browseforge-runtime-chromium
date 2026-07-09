@@ -331,6 +331,150 @@ def matrix_coverage_gaps(evidence_rows: list[dict], platform: str) -> list[dict]
             gaps.append(row)
     return gaps
 
+def _evidence_display(evidence: dict) -> str:
+    return normalize_display_mode(str(evidence.get("matrix", {}).get("display_mode", "")))
+
+def _numeric_metric_deltas(left: dict, right: dict) -> dict:
+    deltas = {}
+    for key in sorted(set(left) & set(right)):
+        if isinstance(left[key], (int, float)) and isinstance(right[key], (int, float)):
+            deltas[key] = right[key] - left[key]
+    return deltas
+
+def _collect_audio_metric_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    for evidence in evidence_rows:
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "audio":
+                continue
+            if not all(field in values for field in ("freq", "gain", "sum", "time", "trap", "unique")):
+                continue
+            records.append({
+                "detector_id": evidence["detector"]["detector_id"],
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "metrics": {key: values[key] for key in ("freq", "gain", "sum", "time", "trap", "unique")},
+            })
+    return records
+
+def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
+    records = []
+    for evidence in evidence_rows:
+        merged = {
+            "detector_id": evidence["detector"]["detector_id"],
+            "display_mode": _evidence_display(evidence),
+            "run_id": evidence["run_id"],
+            "candidate_count": None,
+            "fonts": [],
+            "glyph_sha256": None,
+            "metrics_sha256": None,
+        }
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "fonts":
+                continue
+            if "candidateCount" in values:
+                merged["candidate_count"] = values["candidateCount"]
+            if "metricRows" in values:
+                merged["fonts"] = sorted(row.get("font") for row in values.get("metricRows", []) if row.get("font"))
+            if "glyphSha256" in values:
+                merged["glyph_sha256"] = values["glyphSha256"]
+            if "metricsSha256" in values:
+                merged["metrics_sha256"] = values["metricsSha256"]
+        if merged["fonts"] or merged["glyph_sha256"] or merged["metrics_sha256"]:
+            records.append(merged)
+    return records
+
+def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    comparisons = []
+    gaps = []
+
+    creepjs_audio = {
+        record["display_mode"]: record
+        for record in _collect_audio_metric_records(evidence_rows)
+        if record["detector_id"] == "creepjs"
+    }
+    if {"headless", "headed"} <= set(creepjs_audio):
+        headless = creepjs_audio["headless"]
+        headed = creepjs_audio["headed"]
+        deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
+        identical = all(abs(value) <= 1e-9 for value in deltas.values())
+        comparisons.append({
+            "comparison_id": "creepjs_audio_headless_vs_headed",
+            "detector_id": "creepjs",
+            "surface": "audio",
+            "status": "pass" if identical else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "metric_deltas": deltas,
+            "finding": "CreepJS audio metrics match across headless/headed evidence." if identical else "CreepJS audio metrics differ across headless/headed evidence; release-grade baseline comparison remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "creepjs_audio_headless_vs_headed",
+            "surface": "audio",
+            "missing": sorted({"headless", "headed"} - set(creepjs_audio)),
+            "finding": "CreepJS audio comparison requires both headless and headed sanitized evidence.",
+        })
+
+    font_records = _collect_font_metric_records(evidence_rows)
+    browserleaks_fonts = next((record for record in font_records if record["detector_id"] == "browserleaks"), None)
+    creepjs_fonts = next((record for record in font_records if record["detector_id"] == "creepjs"), None)
+    if browserleaks_fonts and creepjs_fonts:
+        same_glyph = bool(browserleaks_fonts["glyph_sha256"] and browserleaks_fonts["glyph_sha256"] == creepjs_fonts["glyph_sha256"])
+        same_metrics = bool(browserleaks_fonts["metrics_sha256"] and browserleaks_fonts["metrics_sha256"] == creepjs_fonts["metrics_sha256"])
+        same_fonts = browserleaks_fonts["fonts"] == creepjs_fonts["fonts"]
+        comparisons.append({
+            "comparison_id": "browserleaks_creepjs_font_metrics",
+            "surface": "fonts",
+            "status": "pass" if same_glyph and same_metrics and same_fonts else "warning",
+            "left_detector_id": "browserleaks",
+            "left_run_id": browserleaks_fonts["run_id"],
+            "right_detector_id": "creepjs",
+            "right_run_id": creepjs_fonts["run_id"],
+            "candidate_count_match": browserleaks_fonts["candidate_count"] == creepjs_fonts["candidate_count"],
+            "font_list_match": same_fonts,
+            "glyph_sha256_match": same_glyph,
+            "metrics_sha256_match": same_metrics,
+            "finding": "BrowserLeaks/CreepJS font metric evidence matches." if same_glyph and same_metrics and same_fonts else "BrowserLeaks/CreepJS font evidence is only partially comparable; release-grade font corpus parity remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "browserleaks_creepjs_font_metrics",
+            "surface": "fonts",
+            "missing": sorted(det for det, record in {"browserleaks": browserleaks_fonts, "creepjs": creepjs_fonts}.items() if record is None),
+            "finding": "Font comparison requires sanitized BrowserLeaks and CreepJS font metric evidence.",
+        })
+
+    return comparisons, gaps
+
+def compare_scores(args):
+    root = Path(args.evidence_root)
+    evidence_rows = []
+    for path in sorted(root.glob("**/*.json")):
+        code, errors = validate_evidence_file(path)
+        if code:
+            for err in errors:
+                print(err, file=sys.stderr)
+            return code
+        evidence_rows.append(load_json(path))
+    comparisons, gaps = detector_score_comparisons(evidence_rows)
+    payload = {
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "runtime_id": "browseforge-chromium",
+        "release_grade": False,
+        "evidence_count": len(evidence_rows),
+        "comparisons": comparisons,
+        "gaps": gaps,
+        "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers.",
+    }
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(str(out))
+    return 0
+
 def summary(args):
     root = Path(args.evidence_root)
     files = sorted(root.glob("**/*.json"))
@@ -831,6 +975,7 @@ def main(argv=None):
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
+    p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)

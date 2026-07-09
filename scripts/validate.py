@@ -26,6 +26,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/reference-sources.json",
     "knowledge/manifests/platform-matrix.json",
     "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -205,6 +206,16 @@ def main() -> None:
     for gate_id in ["chromium-base-selected", "wrapper-contract-tests", "detector-harness-contract-tests", "packaging-contract-tests", "chromium-source-indexed", "runtime-artifact-produced", "browseforge-adapter-merged", "live-detector-evidence", "sbom-provenance-release-assets"]:
         if gate_id not in gate_ids:
             raise SystemExit(f"release gates missing {gate_id}")
+
+    score_comparison = load_json("knowledge/manifests/detector-score-comparison.json")
+    if score_comparison.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("detector score comparison runtime_id must be browseforge-chromium")
+    if score_comparison.get("release_grade") is not False:
+        raise SystemExit("offline detector score comparison must not claim release grade")
+    comparison_ids = {comparison.get("comparison_id") for comparison in score_comparison.get("comparisons", [])}
+    for comparison_id in ["creepjs_audio_headless_vs_headed", "browserleaks_creepjs_font_metrics"]:
+        if comparison_id not in comparison_ids:
+            raise SystemExit(f"detector score comparison missing {comparison_id}")
 
     query_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in [
         "graph/queries/development-readiness.cypher",

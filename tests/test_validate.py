@@ -281,6 +281,17 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
         self._write_json(
+            root / "knowledge" / "manifests" / "detector-score-comparison.json",
+            {
+                "runtime_id": "browseforge-chromium",
+                "release_grade": False,
+                "comparisons": [
+                    {"comparison_id": "creepjs_audio_headless_vs_headed"},
+                    {"comparison_id": "browserleaks_creepjs_font_metrics"},
+                ],
+            },
+        )
+        self._write_json(
             root / "knowledge" / "manifests" / "runtime-artifacts.json",
             {
                 "artifacts": [

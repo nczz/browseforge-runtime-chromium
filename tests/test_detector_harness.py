@@ -79,6 +79,127 @@ class DetectorHarnessTests(unittest.TestCase):
         path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
 
+    def write_synthetic_score_evidence(self, evidence_root, *, detector_id, display_mode, results, label):
+        detector = self.harness_module.detector_by_id(detector_id)
+        self.assertIsNotNone(detector)
+        platform = "linux-x64"
+        network_mode = "direct"
+        container = True
+        display_key = "headed" if display_mode.startswith("headed") else display_mode
+        suffix = f"{detector_id}_{label}_{display_key}_{network_mode}_container"
+        evidence = json.loads(self.fixture_path("valid-evidence.json").read_text(encoding="utf-8"))
+        evidence.update(
+            {
+                "run_id": f"detrun_score_{suffix}",
+                "evidence_id": f"evidence_score_{suffix}",
+                "artifact_id": f"unpackaged:{platform}:score-test",
+                "runtime_version": "score-test",
+                "tested_at": "2026-07-09T00:00:00Z",
+                "detector": {
+                    "detector_id": detector_id,
+                    "name": detector["name"],
+                    "url": detector["url"],
+                    "category": detector["category"],
+                    "manifest_ref": f"knowledge/manifests/detectors.json#{detector_id}",
+                },
+                "target": {
+                    **evidence["target"],
+                    "platform": platform,
+                    "container": container,
+                    "proxy_region_redacted": "none",
+                },
+                "matrix": {
+                    "matrix_key": f"{platform}:{detector_id}:{display_key}:{network_mode}:container",
+                    "display_mode": display_mode,
+                    "network_mode": network_mode,
+                    "container": container,
+                    "proxy": "none",
+                    "required": False,
+                },
+                "status": "passed",
+                "failure_mode": "none",
+                "results": results,
+            }
+        )
+        path = evidence_root / detector_id / f"{suffix}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        evidence["storage"]["evidence_path"] = str(path)
+        path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return path
+
+    def audio_score_result(self, *, detector_check, metrics):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized CreepJS audio metric evidence.",
+            "normalized_values": metrics,
+            "severity": "info",
+            "status": "pass",
+            "surface": "audio",
+        }
+
+    def font_score_result(self, *, detector_check, metrics_sha256, glyph_sha256=None):
+        values = {
+            "candidateCount": 2,
+            "metricRows": [
+                {"check": True, "font": "Arial", "height": 19, "width": 241.859},
+                {"check": True, "font": "Courier New", "height": 19, "width": 241.859},
+            ],
+            "metricsSha256": metrics_sha256,
+        }
+        if glyph_sha256 is not None:
+            values.update({"glyphSampleCount": 73728, "glyphSha256": glyph_sha256})
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized font metric hash evidence.",
+            "normalized_values": values,
+            "severity": "info",
+            "status": "pass",
+            "surface": "fonts",
+        }
+
+    def glyph_score_result(self, *, detector_check, glyph_sha256):
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized font glyph hash evidence.",
+            "normalized_values": {"glyphSampleCount": 73728, "glyphSha256": glyph_sha256},
+            "severity": "info",
+            "status": "pass",
+            "surface": "fonts",
+        }
+
+    def run_compare_scores(self, evidence_root, output):
+        proc = self.run_harness("compare-scores", "--evidence-root", str(evidence_root), "--output", str(output))
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertTrue(output.is_file())
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        self.assertIs(payload.get("release_grade"), False)
+        self.assertIn("generated_at", payload)
+        self.assertIn("evidence_count", payload)
+        self.assertIsInstance(payload.get("comparisons"), list)
+        self.assertIsInstance(payload.get("gaps"), list)
+        return payload
+
+    def score_comparison(self, payload, *, surface, detector_id=None, detectors=None):
+        for comparison in payload["comparisons"]:
+            if comparison.get("surface") != surface:
+                continue
+            if detector_id is not None and comparison.get("detector_id") != detector_id:
+                continue
+            if detectors is not None:
+                observed_detectors = set(comparison.get("detectors", []))
+                if not observed_detectors:
+                    observed_detectors = {
+                        comparison.get("left_detector_id"),
+                        comparison.get("right_detector_id"),
+                    } - {None}
+                if observed_detectors != set(detectors):
+                    continue
+            return comparison
+        self.fail(f"missing {surface} comparison in {payload['comparisons']!r}")
+
 
     @classmethod
     def setUpClass(cls):
@@ -982,6 +1103,155 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertTrue(any(r["detector_id"] == "sannysoft" and r["network_mode"] == "proxy" for r in rows))
         bad = self.run_harness("plan", "--runtime-version", "v0.1.0-alpha.0", "--platform", "amiga")
         self.assertEqual(bad.returncode, 5)
+
+    def test_compare_scores_command_writes_creepjs_audio_display_mode_deltas(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headless",
+                label="audio_headless",
+                results=[
+                    self.audio_score_result(
+                        detector_check="creepjs_audio_score_metrics",
+                        metrics={
+                            "sum": 100.0,
+                            "gain": 2.0,
+                            "freq": 300.0,
+                            "time": 4.0,
+                            "trap": 5.0,
+                            "unique": 6.0,
+                        },
+                    )
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headed_xvfb",
+                label="audio_headed",
+                results=[
+                    self.audio_score_result(
+                        detector_check="creepjs_headed_audio_metrics",
+                        metrics={
+                            "sum": 101.25,
+                            "gain": 2.0,
+                            "freq": 303.5,
+                            "time": 4.0,
+                            "trap": 8.0,
+                            "unique": 6.0,
+                        },
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertEqual(payload["evidence_count"], 2)
+            comparison = self.score_comparison(payload, surface="audio", detector_id="creepjs")
+            self.assertEqual(comparison["status"], "warning")
+            deltas = comparison["metric_deltas"]
+            self.assertEqual(deltas["sum"], 1.25)
+            self.assertEqual(deltas["freq"], 3.5)
+            self.assertEqual(deltas["trap"], 3.0)
+            self.assertEqual(deltas["gain"], 0.0)
+            for metric in ("sum", "gain", "freq", "time", "trap", "unique"):
+                with self.subTest(metric=metric):
+                    self.assertIsInstance(deltas[metric], (int, float))
+                    self.assertNotIsInstance(deltas[metric], bool)
+            self.assertIn("differ", comparison["finding"].lower())
+
+    def test_compare_scores_recognizes_matching_font_glyphs_but_warns_on_metric_hash_drift(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            glyph_hash = "c" * 64
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headed_xvfb",
+                label="fonts_browserleaks",
+                results=[
+                    self.font_score_result(
+                        detector_check="browserleaks_fonts_headed_metrics",
+                        metrics_sha256="a" * 64,
+                        glyph_sha256=glyph_hash,
+                    )
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headed_xvfb",
+                label="fonts_creepjs",
+                results=[
+                    self.font_score_result(
+                        detector_check="creepjs_font_metric_probe",
+                        metrics_sha256="b" * 64,
+                    ),
+                    self.glyph_score_result(
+                        detector_check="creepjs_font_glyph_probe",
+                        glyph_sha256=glyph_hash,
+                    ),
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertEqual(payload["evidence_count"], 2)
+            comparison = self.score_comparison(payload, surface="fonts", detectors={"browserleaks", "creepjs"})
+            self.assertEqual(comparison["status"], "warning")
+            self.assertIs(comparison["glyph_sha256_match"], True)
+            self.assertIs(comparison["metrics_sha256_match"], False)
+            self.assertIn("partial", comparison["finding"].lower())
+
+    def test_compare_scores_reports_gap_when_required_counterpart_evidence_is_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="creepjs",
+                display_mode="headless",
+                label="audio_headless_only",
+                results=[
+                    self.audio_score_result(
+                        detector_check="creepjs_audio_score_metrics",
+                        metrics={
+                            "sum": 100.0,
+                            "gain": 2.0,
+                            "freq": 300.0,
+                            "time": 4.0,
+                            "trap": 5.0,
+                            "unique": 6.0,
+                        },
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            gap = next(
+                (
+                    item
+                    for item in payload["gaps"]
+                    if item.get("surface") == "audio"
+                    and item.get("gap_id") == "creepjs_audio_headless_vs_headed"
+                    and item.get("missing") == ["headed"]
+                ),
+                None,
+            )
+            self.assertIsNotNone(gap, payload["gaps"])
+            self.assertIn("both headless and headed", gap["finding"].lower())
+            self.assertNotIn(
+                "passed",
+                {comparison.get("status") for comparison in payload["comparisons"] if comparison.get("surface") == "audio"},
+            )
 
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
