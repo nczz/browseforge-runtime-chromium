@@ -179,10 +179,10 @@
     {
       "detector_check": "navigator_user_agent_data",
       "evidence_ref": "sanitized_runtime_observation",
-      "finding": "Live collector observed configured UA-CH low/high entropy fields for platform, platformVersion, architecture, bitness, mobile, model, and wow64; fullVersionList remained empty in this packaged headless run, so BrowserLeaks/Pixelscan client-hints release evidence remains required.",
+      "finding": "Rebuilt packaged Linux runtime reported configured UA-CH low/high entropy fields, including fullVersionList with Chromium 150.0.7871.101 after the source-level fullVersionList seed fix.",
       "normalized_values": {
         "available": true,
-        "fullVersionList_present": false,
+        "fullVersionList_present": true,
         "highEntropy": {
           "architecture": "x86",
           "bitness": "64",
@@ -196,7 +196,16 @@
               "version": "150"
             }
           ],
-          "fullVersionList": [],
+          "fullVersionList": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150.0.7871.101"
+            }
+          ],
           "mobile": false,
           "model": "",
           "platform": "Linux",
@@ -219,8 +228,8 @@
         }
       },
       "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
-      "severity": "medium",
-      "status": "warning",
+      "severity": "low",
+      "status": "pass",
       "surface": "client_hints"
     }
   ],
@@ -231,10 +240,10 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the Linux detector smoke config with fingerprint.user_agent and UA-CH metadata fields and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
+    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run used the rebuilt Linux runtime artifact after the UA-CH fullVersionList source fix and was collected inside the packaged Linux Chromium container by scripts/detector_harness.py collect over loopback CDP.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
-    "sanitizer_version": "source-detector-harness-sannysoft-5",
+    "sanitizer_version": "source-detector-harness-sannysoft-6",
     "screenshot_metadata_redacted": true,
     "tokens_redacted": true
   },
@@ -242,8 +251,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "273e7fb779ae98874643a0638e8481dbff2dde55b773110b0dd652c6865efea7",
-    "sha256": "7b83a7e5731360dc6f9efa790d048a911bf265a765edde13df4287500dba0f66",
+    "raw_capture_sha256": "797205d861372881991e6f0e169a876ca1f7d2a6bb77e70c42136bf8356530b4",
+    "sha256": "ea38f1a9de3bb31d0f6b98f612eb2f906bb0d25658aac426a5ae974d3a44e4ba",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -259,5 +268,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T04:50:40.318753+00:00"
+  "tested_at": "2026-07-09T05:10:01.834892+00:00"
 }

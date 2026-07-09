@@ -1,8 +1,8 @@
 {
-  "artifact_sha256": "64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9",
-  "artifact_size_bytes": 567797341,
+  "artifact_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
+  "artifact_size_bytes": 567798113,
   "artifacts": [],
-  "browser_binary_sha256": "2a6f5a577f44651250c344523e6008b339f7f35f19f76302b14724408bb177b5",
+  "browser_binary_sha256": "cea4437f1d7e8a341ec66da9342da8d561072a169c324d1806c8582bd5edcf92",
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
   "policy": {
     "publish_binaries_as_release_assets": true,
@@ -34,5 +34,5 @@
   ],
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
-  "wrapper_binary_sha256": "028c03ab4685ceece1fe881669bbc2dfdac50a9f3067b60dea3a4e2d6cf304ad"
+  "wrapper_binary_sha256": "eaa1d07a3b63f5cef95f0d1b291f6eacc4c51ce533639d8ae21b47d0790da94f"
 }

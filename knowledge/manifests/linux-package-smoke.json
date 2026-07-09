@@ -1,17 +1,22 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9",
-  "artifact_size_bytes": 567797341,
+  "artifact_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
+  "artifact_size_bytes": 567798113,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+      "observed": {
+        "archive_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
+        "archive_size_bytes": 567798113
+      },
       "status": "passed"
     },
     {
       "check": "wrapper_metadata_in_linux_amd64_container",
       "command": "docker run --rm --platform linux/amd64 ... ./browseforge-runtime-chromium metadata",
       "observed": {
+        "browser_binary_sha256": "cea4437f1d7e8a341ec66da9342da8d561072a169c324d1806c8582bd5edcf92",
         "capabilities": [
           "native_proxy",
           "persistent_context",
@@ -67,6 +72,7 @@
       "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
       "limitations": "Packaged runtime launch smoke, not a release-grade live detector matrix. BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed/proxy coverage remains required.",
       "observed": {
+        "artifact_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
         "audio": {
           "available": true,
           "length": 44100,
@@ -124,7 +130,7 @@
         "timezone": "Asia/Taipei",
         "ua_ch": {
           "available": true,
-          "fullVersionList_present": false,
+          "fullVersionList_present": true,
           "highEntropy": {
             "architecture": "x86",
             "bitness": "64",
@@ -138,7 +144,16 @@
                 "version": "150"
               }
             ],
-            "fullVersionList": [],
+            "fullVersionList": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150.0.7871.101"
+              }
+            ],
             "mobile": false,
             "model": "",
             "platform": "Linux",
