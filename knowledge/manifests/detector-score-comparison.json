@@ -66,9 +66,27 @@
         "headed"
       ],
       "surface": "audio"
+    },
+    {
+      "detector_id": "pixelscan",
+      "finding": "Pixelscan audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
+      "gap_id": "pixelscan_audio_headless_vs_headed",
+      "missing": [
+        "headed"
+      ],
+      "surface": "audio"
+    },
+    {
+      "detector_id": "pixelscan",
+      "finding": "Pixelscan font comparison requires both headless and headed sanitized font availability evidence.",
+      "gap_id": "pixelscan_fonts_headless_vs_headed",
+      "missing": [
+        "headed"
+      ],
+      "surface": "fonts"
     }
   ],
-  "generated_at": "2026-07-09T14:30:08.137374+00:00",
+  "generated_at": "2026-07-09T15:02:43.969276+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

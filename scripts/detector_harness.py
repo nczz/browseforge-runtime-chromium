@@ -391,11 +391,11 @@ def _collect_audio_metric_records(evidence_rows: list[dict]) -> list[dict]:
             })
     return records
 
-def _collect_browserleaks_audio_probe_records(evidence_rows: list[dict]) -> list[dict]:
+def _collect_detector_audio_probe_records(evidence_rows: list[dict], detector_id: str) -> list[dict]:
     records = []
     for evidence in evidence_rows:
         detector = evidence.get("detector", {})
-        if detector.get("detector_id") != "browserleaks":
+        if detector.get("detector_id") != detector_id:
             continue
         for result in evidence.get("results", []):
             values = result.get("normalized_values", {})
@@ -404,12 +404,16 @@ def _collect_browserleaks_audio_probe_records(evidence_rows: list[dict]) -> list
             if not all(field in values for field in ("sampleRate", "length", "sum", "sumAbs")):
                 continue
             records.append({
-                "detector_id": "browserleaks",
+                "detector_id": detector_id,
                 "display_mode": _evidence_display(evidence),
                 "run_id": evidence["run_id"],
                 "metrics": {key: values[key] for key in ("sampleRate", "length", "sum", "sumAbs")},
             })
     return records
+
+
+def _collect_browserleaks_audio_probe_records(evidence_rows: list[dict]) -> list[dict]:
+    return _collect_detector_audio_probe_records(evidence_rows, "browserleaks")
 
 
 def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
@@ -439,6 +443,30 @@ def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
         if merged["fonts"] or merged["glyph_sha256"] or merged["metrics_sha256"]:
             records.append(merged)
     return records
+
+def _collect_font_availability_records(evidence_rows: list[dict], detector_id: str) -> list[dict]:
+    records = []
+    for evidence in evidence_rows:
+        detector = evidence.get("detector", {})
+        if detector.get("detector_id") != detector_id:
+            continue
+        for result in evidence.get("results", []):
+            values = result.get("normalized_values", {})
+            if canonical_surface(result.get("surface", "")) != "fonts":
+                continue
+            checks = values.get("checks")
+            if not isinstance(checks, dict):
+                continue
+            records.append({
+                "detector_id": detector_id,
+                "display_mode": _evidence_display(evidence),
+                "run_id": evidence["run_id"],
+                "checks": {key: bool(value) for key, value in sorted(checks.items())},
+                "true_count": values.get("true_count"),
+                "false_count": values.get("false_count"),
+            })
+    return records
+
 
 def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], list[dict]]:
     comparisons = []
@@ -500,6 +528,34 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
         })
 
+    pixelscan_audio = {
+        record["display_mode"]: record
+        for record in _collect_detector_audio_probe_records(evidence_rows, "pixelscan")
+    }
+    if {"headless", "headed"} <= set(pixelscan_audio):
+        headless = pixelscan_audio["headless"]
+        headed = pixelscan_audio["headed"]
+        deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
+        identical = all(abs(value) <= 1e-9 for value in deltas.values())
+        comparisons.append({
+            "comparison_id": "pixelscan_audio_headless_vs_headed",
+            "detector_id": "pixelscan",
+            "surface": "audio",
+            "status": "pass" if identical else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "metric_deltas": deltas,
+            "finding": "Pixelscan bounded AudioContext summaries match across headless/headed evidence." if identical else "Pixelscan bounded AudioContext summaries differ across headless/headed evidence; release-grade Pixelscan baseline remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "pixelscan_audio_headless_vs_headed",
+            "surface": "audio",
+            "detector_id": "pixelscan",
+            "missing": sorted({"headless", "headed"} - set(pixelscan_audio)),
+            "finding": "Pixelscan audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
+        })
+
     font_records = _collect_font_metric_records(evidence_rows)
     browserleaks_fonts = next((record for record in font_records if record["detector_id"] == "browserleaks"), None)
     creepjs_fonts = next((record for record in font_records if record["detector_id"] == "creepjs"), None)
@@ -527,6 +583,35 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "surface": "fonts",
             "missing": sorted(det for det, record in {"browserleaks": browserleaks_fonts, "creepjs": creepjs_fonts}.items() if record is None),
             "finding": "Font comparison requires sanitized BrowserLeaks and CreepJS font metric evidence.",
+        })
+
+    pixelscan_fonts = {
+        record["display_mode"]: record
+        for record in _collect_font_availability_records(evidence_rows, "pixelscan")
+    }
+    if {"headless", "headed"} <= set(pixelscan_fonts):
+        headless = pixelscan_fonts["headless"]
+        headed = pixelscan_fonts["headed"]
+        same_checks = headless["checks"] == headed["checks"]
+        comparisons.append({
+            "comparison_id": "pixelscan_fonts_headless_vs_headed",
+            "detector_id": "pixelscan",
+            "surface": "fonts",
+            "status": "pass" if same_checks else "warning",
+            "left_run_id": headless["run_id"],
+            "right_run_id": headed["run_id"],
+            "font_check_match": same_checks,
+            "true_count_delta": headed["true_count"] - headless["true_count"] if isinstance(headless["true_count"], int) and isinstance(headed["true_count"], int) else None,
+            "false_count_delta": headed["false_count"] - headless["false_count"] if isinstance(headless["false_count"], int) and isinstance(headed["false_count"], int) else None,
+            "finding": "Pixelscan font availability checks match across headless/headed evidence." if same_checks else "Pixelscan font availability checks differ across headless/headed evidence; release-grade Pixelscan font baseline remains required.",
+        })
+    else:
+        gaps.append({
+            "gap_id": "pixelscan_fonts_headless_vs_headed",
+            "surface": "fonts",
+            "detector_id": "pixelscan",
+            "missing": sorted({"headless", "headed"} - set(pixelscan_fonts)),
+            "finding": "Pixelscan font comparison requires both headless and headed sanitized font availability evidence.",
         })
 
     return comparisons, gaps

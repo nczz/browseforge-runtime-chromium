@@ -198,6 +198,25 @@ class DetectorHarnessTests(unittest.TestCase):
             "surface": "audio",
         }
 
+    def font_availability_result(self, *, detector_check, checks):
+        true_count = sum(1 for value in checks.values() if value)
+        false_count = sum(1 for value in checks.values() if not value)
+        return {
+            "detector_check": detector_check,
+            "evidence_ref": "sanitized_score_comparison_fixture",
+            "finding": "Synthetic sanitized font availability evidence.",
+            "normalized_values": {
+                "available": True,
+                "checks": checks,
+                "true_count": true_count,
+                "false_count": false_count,
+            },
+            "severity": "info",
+            "status": "pass",
+            "surface": "fonts",
+        }
+
+
     def font_score_result(self, *, detector_check, metrics_sha256, glyph_sha256=None):
         values = {
             "candidateCount": 2,
@@ -1430,6 +1449,107 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual(comparison["metric_deltas"]["length"], 0)
             self.assertAlmostEqual(comparison["metric_deltas"]["sumAbs"], 0.15)
             self.assertIn("BrowserLeaks bounded AudioContext", comparison["finding"])
+
+    def test_compare_scores_command_writes_pixelscan_audio_and_font_deltas(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            headless_checks = {"Arial": True, "Calibri": True, "Consolas": True}
+            headed_checks = {"Arial": True, "Calibri": False, "Consolas": True}
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headless",
+                label="pixelscan_audio_fonts_headless",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="pixelscan_audio_headless_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.5,
+                            "sumAbs": 10.0,
+                        },
+                    ),
+                    self.font_availability_result(
+                        detector_check="pixelscan_fonts_headless_availability",
+                        checks=headless_checks,
+                    ),
+                ],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headed_xvfb",
+                label="pixelscan_audio_fonts_headed",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="pixelscan_audio_headed_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.75,
+                            "sumAbs": 9.5,
+                        },
+                    ),
+                    self.font_availability_result(
+                        detector_check="pixelscan_fonts_headed_availability",
+                        checks=headed_checks,
+                    ),
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            audio = self.score_comparison(payload, surface="audio", detector_id="pixelscan")
+            self.assertEqual(audio["comparison_id"], "pixelscan_audio_headless_vs_headed")
+            self.assertEqual(audio["status"], "warning")
+            self.assertEqual(audio["metric_deltas"]["sampleRate"], 0)
+            self.assertEqual(audio["metric_deltas"]["sum"], 0.25)
+            self.assertEqual(audio["metric_deltas"]["sumAbs"], -0.5)
+            fonts = self.score_comparison(payload, surface="fonts", detector_id="pixelscan")
+            self.assertEqual(fonts["comparison_id"], "pixelscan_fonts_headless_vs_headed")
+            self.assertEqual(fonts["status"], "warning")
+            self.assertIs(fonts["font_check_match"], False)
+            self.assertEqual(fonts["true_count_delta"], -1)
+
+    def test_compare_scores_reports_pixelscan_audio_and_font_counterpart_gaps(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headless",
+                label="pixelscan_audio_fonts_headless_only",
+                results=[
+                    self.browserleaks_audio_summary_result(
+                        detector_check="pixelscan_audio_headless_summary",
+                        metrics={
+                            "sampleRate": 44100,
+                            "length": 44100,
+                            "sum": 0.5,
+                            "sumAbs": 10.0,
+                        },
+                    ),
+                    self.font_availability_result(
+                        detector_check="pixelscan_fonts_headless_availability",
+                        checks={"Arial": True, "Calibri": True},
+                    ),
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            gaps = {
+                (item.get("gap_id"), tuple(item.get("missing", [])))
+                for item in payload["gaps"]
+                if item.get("detector_id") == "pixelscan"
+            }
+            self.assertIn(("pixelscan_audio_headless_vs_headed", ("headed",)), gaps)
+            self.assertIn(("pixelscan_fonts_headless_vs_headed", ("headed",)), gaps)
 
     def test_compare_scores_reports_gap_when_browserleaks_audio_counterpart_missing(self):
         with tempfile.TemporaryDirectory() as td:
