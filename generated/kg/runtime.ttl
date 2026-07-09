@@ -494,3 +494,4 @@
 <EvidenceArtifact:evidence_linux_x64_creepjs_metrics_headed_docker_direct_20260710> <SUPPORTS_GATE> <ReleaseGate:live-detector-evidence> .
 <DetectorRun:detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710> <OBSERVED_SURFACE> <FingerprintSurface:audio> .
 <DetectorRun:detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710> <OBSERVED_SURFACE> <FingerprintSurface:automation_signals> .
+<Patch:surface-audio-native-noise-override> <upstream_status> "release_built_linux_x64_detector_tested_native_matrix_required" .
