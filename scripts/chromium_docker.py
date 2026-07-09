@@ -55,6 +55,8 @@ def docker_run_base(workdir: Path, git_cache: Path, image: str, platform: str, *
             f"PATH={container_path}",
             "-e",
             "DEPOT_TOOLS_UPDATE=0",
+            "-e",
+            "AI_AGENT=1",
             "-v",
             f"{workdir}:/work/chromium",
             "-v",

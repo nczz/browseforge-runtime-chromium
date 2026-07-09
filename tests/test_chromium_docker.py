@@ -134,6 +134,7 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn(f"{workdir}:/work/chromium", gn)
         self.assertIn(f"{workdir.parent / 'git-cache'}:{workdir.parent / 'git-cache'}", gn)
         self.assertIn(f"{ROOT}:/work/runtime:ro", gn)
+        self.assertIn("AI_AGENT=1", gn)
         path_env = next(value.removeprefix("PATH=") for value in gn if value.startswith("PATH="))
         path_entries = path_env.split(":")
         self.assertEqual("/opt/depot_tools", path_entries[0])
