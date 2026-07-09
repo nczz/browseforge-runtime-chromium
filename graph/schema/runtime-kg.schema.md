@@ -84,7 +84,7 @@ The runtime knowledge graph models source, artifacts, anti-detect surfaces, dete
 ### Knowledge provenance
 
 ```text
-(Manifest)-[:DECLARES_SOURCE]->(SourceFile)
+(Manifest)-[:DECLARES_SOURCE]->(RuntimeProvider)
 (KBChunk)-[:DERIVED_FROM]->(SourceFile)
 (KBChunk)-[:MENTIONS_SYMBOL]->(Symbol)
 (KBChunk)-[:MENTIONS_SURFACE]->(FingerprintSurface)

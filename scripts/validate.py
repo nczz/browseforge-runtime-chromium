@@ -682,7 +682,7 @@ def main() -> None:
         "graph/queries/cross-repo-impact.cypher",
         "graph/queries/source-coverage.cypher",
     ])
-    for token in ["RuntimeArtifact", "DetectorRun", "BrowseForgeConsumer", "FingerprintSurface", "KnowledgeSource", "Platform", "RUNS_DETECTOR", "TARGETS_PLATFORM"]:
+    for token in ["RuntimeArtifact", "DetectorRun", "BrowseForgeConsumer", "FingerprintSurface", "KnowledgeSource", "Platform", "Manifest", "RUNS_DETECTOR", "TARGETS_PLATFORM", "DECLARES_SOURCE"]:
         if token not in query_text:
             raise SystemExit(f"graph queries missing {token}")
     for stale_token in ["RAN_DETECTOR", "platform_id"]:

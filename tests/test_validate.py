@@ -596,6 +596,43 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("runtime framework validation ok", output)
 
+    def test_validate_rejects_graph_queries_missing_manifest_source_tokens(self) -> None:
+        """Graph queries must cover Manifest provenance nodes and DECLARES_SOURCE edges."""
+        required_tokens = [
+            "RuntimeArtifact",
+            "DetectorRun",
+            "BrowseForgeConsumer",
+            "FingerprintSurface",
+            "KnowledgeSource",
+            "Platform",
+            "Manifest",
+            "RUNS_DETECTOR",
+            "TARGETS_PLATFORM",
+            "DECLARES_SOURCE",
+        ]
+
+        for missing_token in ["Manifest", "DECLARES_SOURCE"]:
+            with self.subTest(missing_token=missing_token):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    query_text = " ".join(token for token in required_tokens if token != missing_token)
+                    for query_path in [
+                        temp_root / "graph" / "queries" / "development-readiness.cypher",
+                        temp_root / "graph" / "queries" / "fingerprint-risk.cypher",
+                        temp_root / "graph" / "queries" / "cross-repo-impact.cypher",
+                        temp_root / "graph" / "queries" / "source-coverage.cypher",
+                    ]:
+                        query_path.write_text(query_text, encoding="utf-8")
+
+                    message = self._run_validate_expect_exit(module, temp_root)
+
+                self.assertEqual(f"graph queries missing {missing_token}", message)
+
+
     def test_validate_rejects_runtime_graph_missing_required_manifest_source_node(self) -> None:
         """A gate/source manifest cannot disappear from the KG as an orphan DECLARES_SOURCE edge."""
         missing_source_path = "knowledge/manifests/proxy-preflight.json"
@@ -1361,8 +1398,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "FingerprintSurface",
                 "KnowledgeSource",
                 "Platform",
+                "Manifest",
                 "RUNS_DETECTOR",
                 "TARGETS_PLATFORM",
+                "DECLARES_SOURCE",
             ]
         )
         for query_path in [

@@ -17,13 +17,9 @@ RETURN f.name AS flag,
        collect(DISTINCT surface.surface_id) AS surfaces,
        collect(DISTINCT det.detector_id) AS detectors;
 
-// Source manifests that point at stale refs versus latest indexed KG source
-MATCH (m:Manifest)-[:DECLARES_SOURCE]->(sf:SourceFile)
-WHERE sf.indexed_ref IS NOT NULL
-  AND m.ref IS NOT NULL
-  AND sf.indexed_ref <> m.ref
-RETURN m.manifest_id AS manifest,
-       sf.repo_path AS source,
-       m.ref AS manifest_ref,
-       sf.indexed_ref AS indexed_ref
-ORDER BY manifest, source;
+// Required source manifests represented in the runtime seed graph
+MATCH (p:RuntimeProvider {runtime_id: $runtime_id})
+OPTIONAL MATCH (m:Manifest)-[:DECLARES_SOURCE]->(p)
+RETURN p.runtime_id AS runtime_id,
+       collect(DISTINCT m.manifest_id) AS manifest_ids,
+       CASE WHEN count(DISTINCT m) = 0 THEN 'missing_manifest_sources' ELSE 'covered' END AS manifest_source_status;
