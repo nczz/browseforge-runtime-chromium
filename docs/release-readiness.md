@@ -13,6 +13,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 ## Artifact gates
 
 - Every platform artifact has download URL, SHA-256, size, source ref, patchset ID, wrapper version, SBOM path, and provenance path.
+- `build/package_runtime.py` must reject any platform not explicitly listed in `runtime-artifacts.json.supported_package_platforms`; add macOS/Windows only after committed runtime asset contracts cover bundle/layout, signing, SBOM/provenance, and detector evidence.
 - Browser binary path matches `contracts/runtime.manifest.json`.
 - `.version` marker behavior is specified.
 - Docker install/seed path is tested.

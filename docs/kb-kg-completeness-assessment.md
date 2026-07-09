@@ -51,6 +51,7 @@ Warning/blocking gates:
 - `proxy/IP coherence`: local CONNECT proxy routing evidence exists and validator logic now rejects release-matrix `proxy` evidence unless it carries sanitized external proxy exit-region and detector geolocation-region fields; no external proxy exit-IP/geolocation detector run is recorded.
 - `AudioContext` and `fonts`: page-context and CreepJS/BrowserLeaks metrics are recorded, and `detector-score-comparison.json` now compares CreepJS headless/headed audio deltas plus BrowserLeaks/CreepJS font glyph/metric hashes while explicitly listing missing BrowserLeaks audio, Pixelscan audio/fonts, and native-headed font-corpus baseline gaps; release-grade BrowserLeaks/CreepJS/Pixelscan score baselines and platform corpus parity remain required.
 - `cross-platform drift`: Linux Docker headless/headed evidence exists, and macOS arm64 local host headless SannySoft evidence now records a non-release warning with `HeadlessChrome` still present in UA; Windows plus native headed Linux/macOS release detector matrix remains absent.
+- `non-Linux release artifacts`: macOS / Windows packaged runtime artifacts, SBOM, provenance, signing, and detector evidence remain absent; `build/package_runtime.py` rejects non-Linux platforms until a committed runtime asset contract exists.
 
 ## Permitted next work
 

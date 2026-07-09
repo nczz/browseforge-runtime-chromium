@@ -29,6 +29,7 @@
   ],
   "browser_binary_sha256": "cea4437f1d7e8a341ec66da9342da8d561072a169c324d1806c8582bd5edcf92",
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+  "packager_contract": "build/package_runtime.py rejects platforms not listed in supported_package_platforms so non-Linux release artifacts cannot be generated without an explicit runtime asset contract.",
   "policy": {
     "publish_binaries_as_release_assets": true,
     "require_provenance": true,
@@ -59,5 +60,12 @@
   ],
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
+  "supported_package_platforms": [
+    "linux-x64"
+  ],
+  "unsupported_package_platforms": {
+    "macos-arm64": "blocked until a committed macOS runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence",
+    "windows-x64": "blocked until a committed Windows runtime asset contract covers executable/DLL layout, signing, SBOM/provenance, and detector evidence"
+  },
   "wrapper_binary_sha256": "c5363386ef27aa647c458d073f6bc72c8b504e320eee1f82911179fccf2d7328"
 }

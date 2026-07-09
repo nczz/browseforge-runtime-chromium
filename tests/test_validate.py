@@ -165,6 +165,21 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
 
 
+    def test_runtime_artifact_manifest_blocks_non_linux_without_contract(self) -> None:
+        with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
+            manifest = json.load(fh)
+
+        self.assertEqual(["linux-x64"], manifest.get("supported_package_platforms"))
+        unsupported = manifest.get("unsupported_package_platforms")
+        self.assertIsInstance(unsupported, dict)
+        assert isinstance(unsupported, dict)
+        self.assertIn("macos-arm64", unsupported)
+        self.assertIn("windows-x64", unsupported)
+
+        artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
+        self.assertEqual({"linux-x64"}, artifact_platforms)
+        self.assertTrue(set(manifest["supported_package_platforms"]).issubset(artifact_platforms))
+
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
         module = self._load_validate_module()
@@ -518,6 +533,11 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "provenance_path",
                     "release_channel",
                 ],
+                "supported_package_platforms": ["linux-x64"],
+                "unsupported_package_platforms": {
+                    "macos-arm64": "missing macOS runtime asset contract",
+                    "windows-x64": "missing Windows runtime asset contract",
+                },
             },
         )
         self._write_json(root / "knowledge" / "manifests" / "source-acquisition.json", {})

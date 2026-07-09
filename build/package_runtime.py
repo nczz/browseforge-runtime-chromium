@@ -36,6 +36,9 @@ LINUX_CHROMIUM_RUNTIME_DIRS = (
     'locales',
 )
 
+SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64'})
+
+
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open('rb') as fh:
@@ -156,10 +159,17 @@ def copy_required_linux_runtime_assets(browser: Path, stage: Path):
         shutil.copy2(locale_file, staged_locales / locale_file.name)
 
 def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
+    if platform_id not in SUPPORTED_PACKAGE_PLATFORMS:
+        supported = ', '.join(sorted(SUPPORTED_PACKAGE_PLATFORMS))
+        raise SystemExit(f'unsupported package platform without runtime asset contract: {platform_id}; supported: {supported}')
     if platform_id == 'linux-x64':
         copy_required_linux_runtime_assets(browser, stage)
+
 def package(args):
     platform_id = args.platform
+    if platform_id not in SUPPORTED_PACKAGE_PLATFORMS:
+        supported = ', '.join(sorted(SUPPORTED_PACKAGE_PLATFORMS))
+        raise SystemExit(f'unsupported package platform without runtime asset contract: {platform_id}; supported: {supported}')
     os_name, arch = platform_os_arch(platform_id)
     out_dir = Path(args.output_dir)
     stage = out_dir / 'stage' / f'browseforge-runtime-chromium-{args.runtime_version}-{platform_id}'
@@ -240,7 +250,16 @@ def package(args):
 
 def plan(args):
     matrix = json.loads((ROOT / 'knowledge/manifests/platform-matrix.json').read_text())
-    print(json.dumps({'platforms': matrix['platforms'], 'global_release_requirements': matrix['global_release_requirements']}, indent=2))
+    print(json.dumps({
+        'platforms': matrix['platforms'],
+        'global_release_requirements': matrix['global_release_requirements'],
+        'supported_package_platforms': sorted(SUPPORTED_PACKAGE_PLATFORMS),
+        'unsupported_package_platforms': [
+            platform['id']
+            for platform in matrix['platforms']
+            if platform.get('id') not in SUPPORTED_PACKAGE_PLATFORMS
+        ],
+    }, indent=2))
     return 0
 
 def main(argv=None):

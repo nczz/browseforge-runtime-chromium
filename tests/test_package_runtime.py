@@ -139,6 +139,8 @@ class PackageRuntimeTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         data = json.loads(proc.stdout)
         self.assertTrue(any(p["id"] == "linux-x64" for p in data["platforms"]))
+        self.assertEqual(["linux-x64"], data["supported_package_platforms"])
+        self.assertIn("macos-arm64", data["unsupported_package_platforms"])
 
     def test_package_requires_browser_binary(self):
         with tempfile.TemporaryDirectory() as td:
@@ -146,6 +148,38 @@ class PackageRuntimeTests(unittest.TestCase):
             proc = subprocess.run([sys.executable, str(PACKAGER), "package", "--platform", "linux-x64", "--browser-binary", str(Path(td) / "missing"), "--wrapper-binary", str(wrapper), "--runtime-version", "v0.1.0-alpha.0", "--browser-version", "150.0.7871.100", "--source-ref", "b5a9"], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("missing file", proc.stderr + proc.stdout)
+
+    def test_package_rejects_platform_without_runtime_asset_contract(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            browser = self._write_executable(tmp / "Chromium")
+            wrapper = self._write_executable(tmp / "wrapper")
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(PACKAGER),
+                    "package",
+                    "--platform",
+                    "macos-arm64",
+                    "--browser-binary",
+                    str(browser),
+                    "--wrapper-binary",
+                    str(wrapper),
+                    "--runtime-version",
+                    "v0.1.0-alpha.0",
+                    "--browser-version",
+                    "150.0.7871.100",
+                    "--source-ref",
+                    "b5a9",
+                ],
+                cwd=ROOT,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("unsupported package platform without runtime asset contract: macos-arm64", proc.stderr + proc.stdout)
 
     def test_package_creates_checksum_for_real_inputs(self):
         with tempfile.TemporaryDirectory() as td:
