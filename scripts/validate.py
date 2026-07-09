@@ -514,6 +514,19 @@ def main() -> None:
         for record in graph_records
         if record.get("record_type") == "node" and "id" in record
     }
+    for platform in platform_matrix["platforms"]:
+        platform_id = platform["id"]
+        node = graph_nodes.get(f"Platform:{platform_id}")
+        if node is None:
+            raise SystemExit(f"generated KG missing Platform node for {platform_id}")
+        props = node.get("properties", {})
+        for key in ["id", "priority", "required_evidence", "status"]:
+            if props.get(key) != platform.get(key):
+                raise SystemExit(f"generated KG Platform {platform_id} {key} drifted: {props.get(key)!r} != {platform.get(key)!r}")
+        if props.get("key") != platform_id:
+            raise SystemExit(f"generated KG Platform {platform_id} key drifted: {props.get('key')!r} != {platform_id!r}")
+        if props.get("evidence") != platform.get("evidence"):
+            raise SystemExit(f"generated KG Platform {platform_id} evidence drifted: {props.get('evidence')!r} != {platform.get('evidence')!r}")
     graph_edges = {
         (record.get("from"), record.get("label"), record.get("to"))
         for record in graph_records

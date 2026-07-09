@@ -224,6 +224,29 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             finally:
                 module.ROOT = original_root
 
+    def test_validate_rejects_platform_node_drift_from_platform_matrix(self) -> None:
+        """A generated Platform node cannot silently diverge from the release planning matrix."""
+        module = self._load_validate_module()
+        cases: list[tuple[str, Any]] = [
+            ("status", "planned"),
+            ("required_evidence", ["build succeeds", "artifact checksum exists"]),
+        ]
+        for field, stale_value in cases:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._rewrite_platform_node_property(temp_root, "linux-x64", field, stale_value)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("platform", message)
+                self.assertIn("drift", message)
+                self.assertIn("linux-x64", message)
+                self.assertIn(field, message)
+
     def test_validate_rejects_artifact_for_unsupported_package_platform(self) -> None:
         """An actual artifact for an unsupported platform is invalid even if the KG node exists."""
         module = self._load_validate_module()
@@ -594,6 +617,90 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             module.ROOT = original_root
         return str(raised.exception)
 
+    def _platform_matrix_platforms(self) -> list[dict[str, Any]]:
+        return [
+            {
+                "evidence": {
+                    "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+                    "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
+                    "detector_summary": "detector-summary.json",
+                    "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json",
+                },
+                "id": "linux-x64",
+                "priority": 1,
+                "required_evidence": [
+                    "build succeeds",
+                    "artifact checksum exists",
+                    "Docker seed installs runtime",
+                    "BrowseForge launches profile",
+                    "REST smoke passes",
+                    "MCP smoke passes",
+                    "Playwright bind smoke passes",
+                    "detector run exists",
+                ],
+                "status": "packaged_detector_tested",
+            },
+            {
+                "id": "macos-arm64",
+                "priority": 2,
+                "required_evidence": [
+                    "build succeeds",
+                    "artifact checksum exists",
+                    "app bundle layout packaged",
+                    "codesign/notarization decision exists",
+                    "BrowseForge launches profile",
+                    "detector run exists",
+                ],
+                "status": "packager_contract_defined",
+            },
+            {
+                "id": "macos-x64",
+                "priority": 3,
+                "required_evidence": [
+                    "build succeeds",
+                    "artifact checksum exists",
+                    "BrowseForge launches profile",
+                    "detector run exists",
+                ],
+                "status": "planned",
+            },
+            {
+                "id": "windows-x64",
+                "priority": 4,
+                "required_evidence": [
+                    "build succeeds",
+                    "artifact checksum exists",
+                    "portable executable/DLL layout packaged",
+                    "code signing decision exists",
+                    "BrowseForge launches profile",
+                    "detector run exists",
+                ],
+                "status": "packager_contract_defined",
+            },
+            {
+                "id": "linux-arm64",
+                "priority": 5,
+                "required_evidence": [
+                    "Docker/KasmVNC runtime validation",
+                    "browser engine support confirmed",
+                    "detector run exists",
+                ],
+                "status": "deferred",
+            },
+        ]
+
+    def _platform_node_properties(self, platform: dict[str, Any]) -> dict[str, Any]:
+        properties: dict[str, Any] = {
+            "id": platform["id"],
+            "key": platform["id"],
+            "priority": platform["priority"],
+            "required_evidence": list(platform["required_evidence"]),
+            "status": platform["status"],
+        }
+        if "evidence" in platform:
+            properties["evidence"] = dict(platform["evidence"])
+        return properties
+
     def _write_minimal_validate_tree(self, root: Path, module: Any) -> None:
         for directory in module.REQUIRED_DIRS:
             (root / directory).mkdir(parents=True, exist_ok=True)
@@ -708,7 +815,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
         self._write_json(
             root / "knowledge" / "manifests" / "platform-matrix.json",
-            {"platforms": [{"id": platform_id} for platform_id in ["linux-x64", "macos-arm64", "macos-x64", "windows-x64", "linux-arm64"]]},
+            {"platforms": self._platform_matrix_platforms()},
         )
         self._write_release_gates(root, live_detector_status="warning")
         self._write_surface_status(root)
@@ -821,7 +928,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "node", "label": "Detector", "id": "Detector:sannysoft", "properties": {}},
             {"record_type": "node", "label": "DetectorRun", "id": "DetectorRun:planned-sannysoft", "properties": {"status": "planned_missing_artifact"}},
             {"record_type": "node", "label": "EvidenceArtifact", "id": "EvidenceArtifact:missing-sannysoft", "properties": {}},
-            {"record_type": "node", "label": "Platform", "id": LINUX_PLATFORM_NODE_ID, "properties": {"key": "linux-x64"}},
+            *[
+                {"record_type": "node", "label": "Platform", "id": f"Platform:{platform['id']}", "properties": self._platform_node_properties(platform)}
+                for platform in self._platform_matrix_platforms()
+            ],
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
             {"record_type": "node", "label": "ReleaseGate", "id": "ReleaseGate:runtime-artifact-produced", "properties": {"gate_id": "runtime-artifact-produced", "status": "passed"}},
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
@@ -999,6 +1109,24 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             for record in graph_records:
                 fh.write(json.dumps(record, sort_keys=True) + "\n")
 
+
+    def _rewrite_platform_node_property(self, root: Path, platform_id: str, field: str, value: Any) -> None:
+        graph_path = root / "generated" / "kg" / "runtime.graph.jsonl"
+        graph_records = self._load_graph(graph_path)
+        node_id = f"Platform:{platform_id}"
+        for record in graph_records:
+            if record.get("record_type") == "node" and record.get("label") == "Platform" and record.get("id") == node_id:
+                properties = record.get("properties")
+                self.assertIsInstance(properties, dict)
+                assert isinstance(properties, dict)
+                properties[field] = value
+                break
+        else:
+            self.fail(f"missing Platform node {node_id}")
+        with graph_path.open("w", encoding="utf-8") as fh:
+            for record in graph_records:
+                fh.write(json.dumps(record, sort_keys=True) + "\n")
+
     def _minimal_graph_with_packaged_runtime_artifacts(self, artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         first_artifact_id = artifacts[0]["artifact_id"]
         records: list[dict[str, Any]] = [
@@ -1014,13 +1142,16 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
             {"record_type": "node", "label": "ReleaseGate", "id": "ReleaseGate:runtime-artifact-produced", "properties": {"gate_id": "runtime-artifact-produced", "status": "passed"}},
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
+            *[
+                {"record_type": "node", "label": "Platform", "id": f"Platform:{platform['id']}", "properties": self._platform_node_properties(platform)}
+                for platform in self._platform_matrix_platforms()
+            ],
         ]
         for artifact in artifacts:
             platform = artifact["platform"]
             node_id = f"RuntimeArtifact:{artifact['artifact_id']}"
             records.extend(
                 [
-                    {"record_type": "node", "label": "Platform", "id": f"Platform:{platform}", "properties": {"key": platform}},
                     {
                         "record_type": "node",
                         "label": "RuntimeArtifact",
