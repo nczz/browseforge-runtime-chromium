@@ -1,0 +1,20 @@
+{
+  "errors": [],
+  "generated_at": "2026-07-09T21:51:50Z",
+  "missing": [
+    "BROWSEFORGE_DETECTOR_PROXY_URL",
+    "BROWSEFORGE_DETECTOR_PROXY_REGION"
+  ],
+  "proxy": null,
+  "proxy_region_redacted": null,
+  "ready": false,
+  "requirements": [
+    "external proxy URL with scheme, host, and port",
+    "redacted external proxy region/geolocation label",
+    "no loopback, private, link-local, or .local proxy authority",
+    "no raw credentials or IP literals in committed evidence"
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "status": "failed"
+}

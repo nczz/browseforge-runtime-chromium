@@ -435,6 +435,68 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertRegex(message, r"artifact|linux-x64|release", message)
         self.assertNotRegex(message, r"detector[- ]summary|coverage_gap|live-detector", message)
 
+    def test_validate_accepts_safe_failed_proxy_preflight_manifest(self) -> None:
+        """A failed proxy preflight is valid release metadata when it redacts proxy inputs and names missing env prerequisites."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_proxy_preflight_manifest_with_raw_proxy_url_or_credentials(self) -> None:
+        """Proxy preflight metadata is safe to commit only when raw proxy endpoints and credentials are absent."""
+        module = self._load_validate_module()
+        cases: list[tuple[str, dict[str, Any]]] = [
+            ("raw_proxy_url", {"proxy": "http://proxy.example.test:8080"}),
+            ("embedded_credentials", {"proxy": "http://user:secret@proxy.example.test:8080"}),
+        ]
+        for case_name, overrides in cases:
+            with self.subTest(case=case_name):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._write_proxy_preflight(temp_root, **overrides)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("proxy", message)
+                self.assertIn("preflight", message)
+
+    def test_validate_rejects_ready_proxy_preflight_while_live_gate_or_proxy_gaps_block_release(self) -> None:
+        """Proxy preflight cannot claim readiness before the live detector gate and proxy coverage have cleared."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            self._write_release_gates(temp_root, live_detector_status="warning")
+            proxy_gaps = [gap for gap in self._coverage_gaps(2) if gap["network_mode"] == "proxy"]
+            self.assertTrue(proxy_gaps)
+            self._write_detector_summary(temp_root, coverage_gaps=proxy_gaps)
+            self._write_proxy_preflight(
+                temp_root,
+                ready=True,
+                status="passed",
+                missing=[],
+                proxy="redacted",
+                proxy_region_redacted="region-redacted",
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("proxy", message)
+        self.assertIn("preflight", message)
+        self.assertIn("ready", message)
+        self.assertRegex(message, r"live[- ]detector|coverage")
+
     def test_validate_rejects_evidence_schema_missing_committed_contract_values(self) -> None:
         """The release validation gate keeps the evidence schema aligned with committed harness/matrix shapes."""
         module = self._load_validate_module()
@@ -820,6 +882,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self._write_release_gates(root, live_detector_status="warning")
         self._write_surface_status(root)
         self._write_score_comparison(root)
+        self._write_proxy_preflight(root)
         self._write_json(
             root / "knowledge" / "manifests" / "runtime-artifacts.json",
             {
@@ -1243,6 +1306,47 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "sbom-provenance-release-assets",
                     ]
                 ]
+            },
+        )
+
+    def _write_proxy_preflight(
+        self,
+        root: Path,
+        *,
+        ready: bool = False,
+        status: str = "failed",
+        missing: list[str] | None = None,
+        errors: list[str] | None = None,
+        proxy: object | None = None,
+        proxy_region_redacted: str | None = None,
+        requirements: list[dict[str, str]] | None = None,
+    ) -> None:
+        if missing is None:
+            missing = ["BROWSEFORGE_DETECTOR_PROXY_URL", "BROWSEFORGE_DETECTOR_PROXY_REGION"]
+        if errors is None:
+            errors = []
+        if requirements is None:
+            requirements = [
+                {
+                    "name": name,
+                    "source": "env",
+                    "status": "missing" if name in missing else "configured",
+                }
+                for name in ["BROWSEFORGE_DETECTOR_PROXY_URL", "BROWSEFORGE_DETECTOR_PROXY_REGION"]
+            ]
+        self._write_json(
+            root / "knowledge" / "manifests" / "proxy-preflight.json",
+            {
+                "errors": errors,
+                "generated_at": "2026-07-09T00:00:00+00:00",
+                "missing": missing,
+                "proxy": proxy,
+                "proxy_region_redacted": proxy_region_redacted,
+                "ready": ready,
+                "requirements": requirements,
+                "runtime_id": "browseforge-chromium",
+                "schema_version": "1.0",
+                "status": status,
             },
         )
 

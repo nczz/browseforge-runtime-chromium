@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import json
 from pathlib import Path
 import zipfile
+import urllib.parse
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,6 +33,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/release-gates.json",
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/fingerprint-surface-status.json",
+    "knowledge/manifests/proxy-preflight.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -323,6 +326,62 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
         if score_comparison.get("baseline_gaps") or score_comparison.get("gaps") or warning_comparisons:
             raise SystemExit("live-detector-evidence gate cannot pass while detector score comparison has baseline gaps, evidence gaps, or warning comparisons")
 
+def contains_raw_url_or_ip(value: object) -> bool:
+    if isinstance(value, dict):
+        return any(contains_raw_url_or_ip(item) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_raw_url_or_ip(item) for item in value)
+    if not isinstance(value, str):
+        return False
+    if "://" in value or "@" in value:
+        return True
+    for token in value.replace("[", " ").replace("]", " ").replace(",", " ").replace(":", " ").split():
+        try:
+            ipaddress.ip_address(token)
+        except ValueError:
+            continue
+        return True
+    return False
+
+
+def validate_proxy_preflight_manifest(proxy_preflight: dict, gate_status: dict[str, str | None], detector_summary: dict) -> None:
+    if proxy_preflight.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("proxy preflight runtime_id must be browseforge-chromium")
+    if proxy_preflight.get("schema_version") != "1.0":
+        raise SystemExit("proxy preflight schema_version must be 1.0")
+    ready = proxy_preflight.get("ready")
+    status = proxy_preflight.get("status")
+    if not isinstance(ready, bool):
+        raise SystemExit("proxy preflight ready must be boolean")
+    if status not in {"passed", "failed"}:
+        raise SystemExit(f"proxy preflight status must be passed or failed: {status!r}")
+    if ready != (status == "passed"):
+        raise SystemExit("proxy preflight ready/status mismatch")
+    missing = proxy_preflight.get("missing", [])
+    errors = proxy_preflight.get("errors", [])
+    requirements = proxy_preflight.get("requirements", [])
+    for key, value in {"missing": missing, "errors": errors}.items():
+        if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+            raise SystemExit(f"proxy preflight {key} must be a string array")
+    if not isinstance(requirements, list) or any(
+        not (
+            isinstance(item, str)
+            or (
+                isinstance(item, dict)
+                and all(isinstance(k, str) and isinstance(v, str) for k, v in item.items())
+            )
+        )
+        for item in requirements
+    ):
+        raise SystemExit("proxy preflight requirements must be a string or string-object array")
+    if contains_raw_url_or_ip(proxy_preflight.get("proxy")) or contains_raw_url_or_ip(proxy_preflight.get("proxy_region_redacted")):
+        raise SystemExit("proxy preflight must not contain raw proxy URL, credentials, or IP literal")
+    if not ready and not missing and not errors:
+        raise SystemExit("failed proxy preflight must record missing prerequisites or errors")
+    proxy_gaps = [gap for gap in detector_summary.get("coverage_gaps", []) if gap.get("network_mode") == "proxy"]
+    if ready and (gate_status.get("live-detector-evidence") != "passed" or proxy_gaps):
+        raise SystemExit("proxy preflight cannot be ready while live-detector-evidence gate or proxy coverage remains blocked")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -470,6 +529,8 @@ def main() -> None:
         coverage_gap_count or detector_summary.get("blocking_findings")
     ):
         raise SystemExit("live-detector-evidence gate cannot pass while detector summary has coverage gaps or blocking findings")
+    proxy_preflight = load_json("knowledge/manifests/proxy-preflight.json")
+    validate_proxy_preflight_manifest(proxy_preflight, gate_status, detector_summary)
 
 
     score_comparison = load_json("knowledge/manifests/detector-score-comparison.json")
