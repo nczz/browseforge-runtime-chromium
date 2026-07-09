@@ -78,9 +78,9 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. BrowserLeaks WebGL collection now records sanitized extension-count, extension hash, parameter hash, and bounded parameter summary fields and flags SwiftShader/Google software rendering; shader precision, extension-profile parity, and rendered WebGL pixel output remain release-grade blockers.",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. BrowserLeaks WebGL collection now records sanitized extension-count, extension hash, bounded parameter hash, shader precision hash, and rendered pixel hash fields and flags SwiftShader/Google software rendering; extension-profile parity and headed/native cross-detector confirmation remain release-grade blockers.",
       "release_blocker": true,
-      "result": "warn_webgl_strings_and_parameter_hashes_collected",
+      "result": "warn_webgl_metadata_precision_pixel_hashes_collected",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "WebGL vendor/renderer"

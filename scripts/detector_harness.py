@@ -902,9 +902,11 @@ def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
     vendor = str(webgl.get("vendor", ""))
     if "SwiftShader" in renderer or "Google Inc. (Google)" in vendor:
         return "warning", "BrowserLeaks WebGL bounded probe still exposes SwiftShader/Google software rendering; configured vendor/renderer evidence is required.", "high"
-    if not webgl.get("extensionSha256") or not webgl.get("parameterSha256"):
-        return "warning", "BrowserLeaks WebGL page reported vendor/renderer strings, but extension/parameter summary hashes are missing; release-grade WebGL coherence remains required.", "medium"
-    return "warning", "BrowserLeaks WebGL page reported sanitized vendor/renderer plus extension/parameter summary hashes; shader precision and rendered pixel coherence still require release-grade detector evidence.", "medium"
+    metadata_fields = {"extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256"}
+    metadata_missing = sorted(field for field in metadata_fields if not webgl.get(field))
+    if metadata_missing:
+        return "warning", f"BrowserLeaks WebGL page reported vendor/renderer strings, but sanitized WebGL metadata is missing fields: {metadata_missing}; release-grade WebGL coherence remains required.", "medium"
+    return "warning", "BrowserLeaks WebGL page reported sanitized vendor/renderer, extension, parameter, shader precision, and rendered pixel hashes; headed/native cross-detector coherence still requires release-grade evidence.", "medium"
 
 
 
@@ -1231,6 +1233,9 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       const hashText = async (text) => globalThis.crypto && globalThis.crypto.subtle
         ? toHex(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))
         : null;
+      const hashBytes = async (bytes) => globalThis.crypto && globalThis.crypto.subtle
+        ? toHex(await globalThis.crypto.subtle.digest('SHA-256', bytes))
+        : null;
       const ext = ctx.getExtension('WEBGL_debug_renderer_info');
       const extensions = (ctx.getSupportedExtensions && ctx.getSupportedExtensions() || []).sort();
       const parameters = {
@@ -1248,6 +1253,44 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         maxVertexUniformVectors: ctx.getParameter(ctx.MAX_VERTEX_UNIFORM_VECTORS),
         maxViewportDims: Array.from(ctx.getParameter(ctx.MAX_VIEWPORT_DIMS) || []),
       };
+      const precision = {};
+      for (const [stageName, stage] of [['vertex', ctx.VERTEX_SHADER], ['fragment', ctx.FRAGMENT_SHADER]]) {
+        for (const [typeName, type] of [['lowFloat', ctx.LOW_FLOAT], ['mediumFloat', ctx.MEDIUM_FLOAT], ['highFloat', ctx.HIGH_FLOAT], ['lowInt', ctx.LOW_INT], ['mediumInt', ctx.MEDIUM_INT], ['highInt', ctx.HIGH_INT]]) {
+          const p = ctx.getShaderPrecisionFormat(stage, type);
+          precision[`${stageName}.${typeName}`] = p ? {rangeMin: p.rangeMin, rangeMax: p.rangeMax, precision: p.precision} : null;
+        }
+      }
+      const renderProbe = (() => {
+        const compile = (type, source) => {
+          const shader = ctx.createShader(type);
+          ctx.shaderSource(shader, source);
+          ctx.compileShader(shader);
+          if (!ctx.getShaderParameter(shader, ctx.COMPILE_STATUS)) return null;
+          return shader;
+        };
+        const vertex = compile(ctx.VERTEX_SHADER, 'attribute vec2 p; varying vec2 v; void main(){ v=(p+1.0)*0.5; gl_Position=vec4(p,0.0,1.0); }');
+        const fragment = compile(ctx.FRAGMENT_SHADER, 'precision mediump float; varying vec2 v; void main(){ gl_FragColor=vec4(v.x,v.y,0.25,1.0); }');
+        if (!vertex || !fragment) return null;
+        const program = ctx.createProgram();
+        ctx.attachShader(program, vertex);
+        ctx.attachShader(program, fragment);
+        ctx.linkProgram(program);
+        if (!ctx.getProgramParameter(program, ctx.LINK_STATUS)) return null;
+        const buffer = ctx.createBuffer();
+        ctx.bindBuffer(ctx.ARRAY_BUFFER, buffer);
+        ctx.bufferData(ctx.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), ctx.STATIC_DRAW);
+        const loc = ctx.getAttribLocation(program, 'p');
+        ctx.useProgram(program);
+        ctx.enableVertexAttribArray(loc);
+        ctx.vertexAttribPointer(loc, 2, ctx.FLOAT, false, 0, 0);
+        canvas.width = 16;
+        canvas.height = 16;
+        ctx.viewport(0, 0, canvas.width, canvas.height);
+        ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
+        const pixels = new Uint8Array(canvas.width * canvas.height * 4);
+        ctx.readPixels(0, 0, canvas.width, canvas.height, ctx.RGBA, ctx.UNSIGNED_BYTE, pixels);
+        return {width: canvas.width, height: canvas.height, pixels};
+      })();
       return {
         available: true,
         vendor: ext ? ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL) : null,
@@ -1255,6 +1298,10 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         extensionCount: extensions.length,
         extensionSha256: await hashText(JSON.stringify(extensions)),
         parameterSha256: await hashText(JSON.stringify(parameters)),
+        precisionSha256: await hashText(JSON.stringify(precision)),
+        pixelSha256: renderProbe ? await hashBytes(renderProbe.pixels) : null,
+        pixelWidth: renderProbe ? renderProbe.width : null,
+        pixelHeight: renderProbe ? renderProbe.height : null,
         parameters,
       };
     } catch (err) {

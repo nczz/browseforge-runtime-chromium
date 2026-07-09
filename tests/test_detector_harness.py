@@ -358,6 +358,10 @@ class DetectorHarnessTests(unittest.TestCase):
             "extensionCount": 42,
             "extensionSha256": "1" * 64,
             "parameterSha256": "2" * 64,
+            "precisionSha256": "3" * 64,
+            "pixelSha256": "4" * 64,
+            "pixelWidth": 16,
+            "pixelHeight": 16,
         }
         return value
 
@@ -482,6 +486,7 @@ class DetectorHarnessTests(unittest.TestCase):
             self.browserleaks_webgl_value(),
             "https://browserleaks.com/webgl",
         )
+        self.assertIn("rendered pixel", finding)
 
         self.assertEqual((status, severity), ("warning", "medium"))
         self.assertIn("WebGL", finding)
