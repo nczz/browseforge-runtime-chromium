@@ -51,14 +51,14 @@
     "feature_parity_patch_status": "applied_to_external_checkout",
     "fonts_patch_status": "applied_to_external_checkout",
     "linux_x64_artifact": {
-      "status": "packaged",
+      "status": "packaged_and_smoke_launched",
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "1e6638e61ac7994cb49a59c2883bf329b0f5cefc8ed130f5f386982841509af3",
+      "archive_sha256": "b491f854a5c3ce4f0e92039dfd5cbcebd6d1810ff401fe3249c79e8c842a0ae6",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
       "browser_binary_sha256": "63345fc333beeb7a0a2ab0ef297e676db848fde3daf1d775f9ff339cd3630719",
-      "wrapper_binary_sha256": "eec42ecf6f0d53ae7573f13e7b4812293a53eea57c1e0a44743ca88f8882939a",
+      "wrapper_binary_sha256": "54adff50117cb116059868a90aa5cb53343a617c8323757201993bc3fd746894",
       "runtime_manifest_sha256": "f55cf45d17e3c92bbd686dc110cea99eb6a7aa4bae7e390d4eed8b7111c72513",
       "artifact_manifest": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
       "provenance": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
@@ -69,6 +69,24 @@
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
         "python3 -m json.tool dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
+      ],
+      "archive_size_bytes": 567791234,
+      "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
+      "runtime_assets_included": [
+        "icudtl.dat",
+        "resources.pak",
+        "chrome_100_percent.pak",
+        "chrome_200_percent.pak",
+        "chrome_crashpad_handler",
+        "libEGL.so",
+        "libGLESv2.so",
+        "libvk_swiftshader.so",
+        "libvulkan.so.1",
+        "vk_swiftshader_icd.json",
+        "v8_context_snapshot.bin",
+        "snapshot_blob.bin",
+        "headless_command_resources.pak",
+        "locales/*.pak"
       ]
     }
   },

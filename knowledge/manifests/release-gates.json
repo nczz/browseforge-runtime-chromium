@@ -35,7 +35,7 @@
     {
       "gate_id": "runtime-artifact-produced",
       "status": "passed",
-      "evidence": "python3 scripts/package_linux_runtime.py --execute produced dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 1e6638e61ac7994cb49a59c2883bf329b0f5cefc8ed130f5f386982841509af3 from patched Chromium chrome sha256 63345fc333beeb7a0a2ab0ef297e676db848fde3daf1d775f9ff339cd3630719 and wrapper sha256 eec42ecf6f0d53ae7573f13e7b4812293a53eea57c1e0a44743ca88f8882939a."
+      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 b491f854a5c3ce4f0e92039dfd5cbcebd6d1810ff401fe3249c79e8c842a0ae6 and size 567791234 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools /json/version using knowledge/manifests/linux-package-smoke.json."
     },
     {
       "gate_id": "live-detector-evidence",
@@ -45,7 +45,7 @@
     {
       "gate_id": "sbom-provenance-release-assets",
       "status": "passed",
-      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, and patched chrome; python3 -m json.tool validated artifact-manifest.json/provenance.json/SBOM.json, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256."
+      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256."
     }
   ]
 }

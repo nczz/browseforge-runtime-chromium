@@ -3,12 +3,30 @@ import json
 import stat
 import subprocess
 import sys
+import zipfile
 import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGER = ROOT / "build" / "package_runtime.py"
+
+REQUIRED_LINUX_RUNTIME_ASSETS = (
+    "icudtl.dat",
+    "resources.pak",
+    "chrome_100_percent.pak",
+    "chrome_200_percent.pak",
+    "chrome_crashpad_handler",
+    "libEGL.so",
+    "libGLESv2.so",
+    "libvk_swiftshader.so",
+    "libvulkan.so.1",
+    "vk_swiftshader_icd.json",
+    "v8_context_snapshot.bin",
+    "snapshot_blob.bin",
+    "headless_command_resources.pak",
+    "locales/en-US.pak",
+)
 
 class PackageRuntimeTests(unittest.TestCase):
     def _write_executable(self, path: Path, content: str = "#!/bin/sh\nexit 0\n") -> Path:
@@ -23,8 +41,26 @@ class PackageRuntimeTests(unittest.TestCase):
                 h.update(chunk)
         return h.hexdigest()
 
-    def _run_package(self, td: Path):
-        browser = self._write_executable(td / "chrome", "#!/bin/sh\necho chrome\n")
+    def _write_runtime_assets(self, browser_dir: Path, *, omit: set[str] | None = None) -> None:
+        omitted = omit or set()
+        for relative_path in REQUIRED_LINUX_RUNTIME_ASSETS:
+            if relative_path in omitted:
+                continue
+            asset = browser_dir / relative_path
+            asset.parent.mkdir(parents=True, exist_ok=True)
+            asset.write_bytes(f"runtime asset: {relative_path}\n".encode())
+
+    def _run_package(
+        self,
+        td: Path,
+        *,
+        omit_runtime_assets: set[str] | None = None,
+        expect_success: bool = True,
+    ):
+        browser_dir = td / "browser-output"
+        browser_dir.mkdir()
+        browser = self._write_executable(browser_dir / "chrome", "#!/bin/sh\necho chrome\n")
+        self._write_runtime_assets(browser_dir, omit=omit_runtime_assets)
         wrapper = self._write_executable(td / "wrapper", "#!/bin/sh\necho wrapper\n")
         out = td / "dist"
         runtime_version = "v0.1.0-alpha.0"
@@ -67,12 +103,23 @@ class PackageRuntimeTests(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        if not expect_success:
+            self.assertNotEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            return {
+                "proc": proc,
+                "browser_dir": browser_dir,
+                "browser": browser,
+                "wrapper": wrapper,
+                "out": out,
+                "artifact_id": artifact_id,
+            }
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         stage = out / "stage" / artifact_id
         self.assertTrue(stage.is_dir())
         return {
             "artifact_id": artifact_id,
+            "browser_dir": browser_dir,
             "browser": browser,
             "wrapper": wrapper,
             "out": out,
@@ -106,6 +153,42 @@ class PackageRuntimeTests(unittest.TestCase):
             payload = package["payload"]
             self.assertTrue(Path(payload["archive"]).is_file())
             self.assertRegex((package["out"] / "checksums.txt").read_text(), r"^[0-9a-f]{64}  browseforge-runtime-chromium-")
+
+    def test_package_includes_linux_runtime_assets_in_stage_manifest_sbom_and_zip(self):
+        with tempfile.TemporaryDirectory() as td:
+            package = self._run_package(Path(td))
+            manifest = json.loads((package["stage"] / "artifact-manifest.json").read_text())
+            sbom = json.loads((package["stage"] / "SBOM.json").read_text())
+            archive = Path(package["payload"]["archive"])
+
+            manifest_files = {entry["path"]: entry for entry in manifest["files"]}
+            sbom_files = {entry["path"]: entry for entry in sbom["files"]}
+            with zipfile.ZipFile(archive) as zf:
+                archive_names = set(zf.namelist())
+
+            for relative_path in REQUIRED_LINUX_RUNTIME_ASSETS:
+                source = package["browser_dir"] / relative_path
+                staged = package["stage"] / relative_path
+                self.assertTrue(staged.is_file(), relative_path)
+                self.assertIn(relative_path, manifest_files)
+                self.assertIn(relative_path, sbom_files)
+                self.assertIn(f"{package['artifact_id']}/{relative_path}", archive_names)
+                self.assertEqual(manifest_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(manifest_files[relative_path]["size_bytes"], source.stat().st_size)
+                self.assertEqual(sbom_files[relative_path]["sha256"], self._sha256(source))
+                self.assertEqual(sbom_files[relative_path]["size"], source.stat().st_size)
+
+    def test_package_fails_clearly_when_linux_runtime_asset_is_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            package = self._run_package(
+                Path(td),
+                omit_runtime_assets={"icudtl.dat"},
+                expect_success=False,
+            )
+
+            output = package["proc"].stderr + package["proc"].stdout
+            self.assertIn("missing file", output)
+            self.assertIn("icudtl.dat", output)
 
     def test_package_writes_non_placeholder_sbom_with_hashed_files(self):
         with tempfile.TemporaryDirectory() as td:

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
@@ -56,6 +58,16 @@ class PackageLinuxRuntimeScriptTests(unittest.TestCase):
                 vectors.extend(self._command_vectors(item))
         return vectors
 
+    def _load_script_module(self) -> Any:
+        spec = importlib.util.spec_from_file_location("package_linux_runtime_under_test", SCRIPT)
+        self.assertIsNotNone(spec)
+        module = importlib.util.module_from_spec(spec)
+        assert spec is not None
+        assert spec.loader is not None
+        sys.modules["package_linux_runtime_under_test"] = module
+        spec.loader.exec_module(module)
+        return module
+
     def test_plan_uses_linux_release_inputs_from_repo_manifests(self) -> None:
         """--plan describes the linux-x64 package inputs resolved from the repo manifests."""
         plan = self._plan()
@@ -92,25 +104,52 @@ class PackageLinuxRuntimeScriptTests(unittest.TestCase):
         self.assertNotEqual(0, completed.returncode)
         self.assertIn("requires --execute", completed.stderr + completed.stdout)
 
-    def test_plan_build_commands_include_linux_wrapper_and_packager_when_exposed(self) -> None:
-        """If --plan exposes command vectors, they include the Linux Go build and packager invocation."""
-        plan = self._plan()
-        command_root = plan.get("commands") or plan.get("build_commands") or plan.get("command_list")
+    def test_plan_build_commands_and_package_cross_compile_env(self) -> None:
+        """The exposed plan and package action build the linux-amd64 wrapper before packaging."""
+        plan_payload = self._plan()
+        command_root = plan_payload.get("commands") or plan_payload.get("build_commands") or plan_payload.get("command_list")
         if command_root is None:
             self.skipTest("--plan does not expose build command vectors")
 
         command_vectors = self._command_vectors(command_root)
         self.assertTrue(command_vectors, "command list exists but contains no argv vectors")
         rendered = [" ".join(command) for command in command_vectors]
+        self.assertTrue(any("go build" in command for command in rendered), rendered)
+        self.assertTrue(any("package_runtime.py" in command and "package" in command for command in rendered), rendered)
 
-        self.assertTrue(
-            any("go build" in command and "GOOS=linux" in command and "GOARCH=amd64" in command for command in rendered),
-            rendered,
-        )
-        self.assertTrue(
-            any("package_runtime.py" in command and "package" in command for command in rendered),
-            rendered,
-        )
+        module = self._load_script_module()
+        recorded_commands: list[tuple[list[str], dict[str, str] | None]] = []
+
+        def record_command(command: Any, *, env: dict[str, str] | None = None) -> None:
+            recorded_commands.append((list(command), env))
+
+        with tempfile.TemporaryDirectory() as td:
+            plan = module.build_plan(
+                chromium_src=Path(td) / "chromium" / "src",
+                output_dir=Path(td) / "dist",
+                runtime_version_value="v-test",
+                browser_version_value="150.0.7871.101",
+                source_ref_value="51b83660c3609f271ccbbd65785bf7e50a21312d",
+                patchset_id_value="surface-font-face-set-native-list-override",
+            )
+            original_run_command = module.run_command
+            try:
+                module.run_command = record_command
+                module.package(plan)
+            finally:
+                module.run_command = original_run_command
+
+        self.assertEqual(2, len(recorded_commands))
+        wrapper_command, wrapper_env = recorded_commands[0]
+        package_command, package_env = recorded_commands[1]
+        self.assertEqual(plan.commands["build-wrapper"], wrapper_command)
+        self.assertIsNotNone(wrapper_env)
+        assert wrapper_env is not None
+        self.assertEqual("linux", wrapper_env["GOOS"])
+        self.assertEqual("amd64", wrapper_env["GOARCH"])
+        self.assertEqual("0", wrapper_env["CGO_ENABLED"])
+        self.assertEqual(plan.commands["package"], package_command)
+        self.assertIsNone(package_env)
 
 
 if __name__ == "__main__":

@@ -15,6 +15,27 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+
+LINUX_CHROMIUM_RUNTIME_FILES = (
+    'icudtl.dat',
+    'resources.pak',
+    'chrome_100_percent.pak',
+    'chrome_200_percent.pak',
+    'chrome_crashpad_handler',
+    'libEGL.so',
+    'libGLESv2.so',
+    'libvk_swiftshader.so',
+    'libvulkan.so.1',
+    'vk_swiftshader_icd.json',
+    'v8_context_snapshot.bin',
+    'snapshot_blob.bin',
+    'headless_command_resources.pak',
+)
+
+LINUX_CHROMIUM_RUNTIME_DIRS = (
+    'locales',
+)
+
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open('rb') as fh:
@@ -105,6 +126,29 @@ def ensure_file(path: Path, executable: bool = False):
     if executable and os.name != 'nt' and not (path.stat().st_mode & 0o111):
         raise SystemExit(f'not executable: {path}')
 
+def copy_required_file(src: Path, dest: Path):
+    ensure_file(src)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+
+def copy_required_linux_runtime_assets(browser: Path, stage: Path):
+    source_dir = browser.parent
+    for rel in LINUX_CHROMIUM_RUNTIME_FILES:
+        copy_required_file(source_dir / rel, stage / rel)
+    locales_dir = source_dir / 'locales'
+    if not locales_dir.is_dir():
+        raise SystemExit(f'missing directory: {locales_dir}')
+    staged_locales = stage / 'locales'
+    staged_locales.mkdir(parents=True, exist_ok=True)
+    locale_files = sorted(path for path in locales_dir.iterdir() if path.is_file() and path.suffix == '.pak')
+    if not locale_files:
+        raise SystemExit(f'missing locale pak files: {locales_dir}')
+    for locale_file in locale_files:
+        shutil.copy2(locale_file, staged_locales / locale_file.name)
+
+def copy_platform_runtime_assets(platform_id: str, browser: Path, stage: Path):
+    if platform_id == 'linux-x64':
+        copy_required_linux_runtime_assets(browser, stage)
 def package(args):
     platform_id = args.platform
     out_dir = Path(args.output_dir)
@@ -124,8 +168,9 @@ def package(args):
     shutil.copy2(browser, staged_browser)
     shutil.copy2(wrapper, staged_wrapper)
     shutil.copy2(ROOT / 'contracts/runtime.manifest.json', staged_runtime_manifest)
+    copy_platform_runtime_assets(platform_id, browser, stage)
     created_at = datetime.now(timezone.utc).isoformat()
-    files = [file_record(file) for file in sorted(stage.iterdir()) if file.is_file()]
+    files = [file_record(file, root=stage) for file in sorted(stage.rglob('*')) if file.is_file()]
     manifest = {
         'artifact_id': f'browseforge-runtime-chromium-{args.runtime_version}-{platform_id}',
         'runtime_id': 'browseforge-chromium',
@@ -171,8 +216,9 @@ def package(args):
     archive = out_dir / f'{manifest["artifact_id"]}.zip'
     archive.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-        for file in sorted(stage.iterdir()):
-            zf.write(file, arcname=f'{stage.name}/{file.name}')
+        for file in sorted(stage.rglob('*')):
+            if file.is_file():
+                zf.write(file, arcname=f'{stage.name}/{file.relative_to(stage).as_posix()}')
     checksum = sha256(archive)
     (out_dir / 'checksums.txt').write_text(f'{checksum}  {archive.name}\n')
     print(json.dumps({'archive': str(archive), 'sha256': checksum}, indent=2))

@@ -108,10 +108,6 @@ def build_plan(
         release_channel=release_channel,
         commands={
             "build-wrapper": [
-                "env",
-                "GOOS=linux",
-                "GOARCH=amd64",
-                "CGO_ENABLED=0",
                 "go",
                 "build",
                 "-o",
@@ -128,12 +124,16 @@ def emit_json(payload: object) -> None:
 
 
 def run_command(command: Sequence[str], *, env: dict[str, str] | None = None) -> None:
-    subprocess.run(list(command), cwd=ROOT, env=env, check=True)
+    command_env = None
+    if env is not None:
+        command_env = os.environ.copy()
+        command_env.update(env)
+    subprocess.run(list(command), cwd=ROOT, env=command_env, check=True)
 
 
 def package(plan: LinuxPackagePlan) -> None:
     Path(plan.wrapper_binary).parent.mkdir(parents=True, exist_ok=True)
-    run_command(plan.commands["build-wrapper"])
+    run_command(plan.commands["build-wrapper"], env={"GOOS": "linux", "GOARCH": "amd64", "CGO_ENABLED": "0"})
     run_command(plan.commands["package"])
 
 
