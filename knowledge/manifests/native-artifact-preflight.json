@@ -28,13 +28,15 @@
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json"
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute: blocked by xcodebuild requiring full Xcode instead of CommandLineTools"
       ],
       "platform": "macos-arm64",
       "ready": false,
       "status": "missing_native_release_artifact",
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+        "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
         "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
         "native macOS detector evidence for the packaged artifact"
       ]

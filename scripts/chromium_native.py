@@ -95,8 +95,8 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         "--patchset-manifest",
         str(ROOT / "knowledge" / "manifests" / "patchset.json"),
     ]
-    gn_binary = src / gn_rel
     depot_tools = workdir / "depot_tools"
+    gn_binary = depot_tools / ("gn.bat" if platform_id == "windows-x64" else "gn")
     path_prefix = f"{depot_tools}:$PATH"
     run_env = f"PATH={path_prefix} DEPOT_TOOLS_UPDATE=0"
     return NativeBuildPlan(
@@ -116,7 +116,7 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         package_command=package_command,
         commands={
             "run-hooks": ["bash", "-lc", f"{run_env} gclient runhooks"],
-            "gn-gen": [str(gn_binary), "gen", selected_out, f"--args={gn_args}"],
+            "gn-gen": ["bash", "-lc", f"{run_env} gn gen {selected_out} --args='{gn_args}'"],
             "build-chrome": ["bash", "-lc", f"{run_env} autoninja -j{jobs} -C {selected_out} chrome"],
             "package": package_command + ["--execute"],
         },
@@ -135,13 +135,14 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         "host_supported": plan.host_os == plan.required_host_os,
         "chromium_src_exists": src.is_dir(),
         "chromium_deps_exists": (src / "DEPS").is_file(),
-        "gn_binary": plan.commands["gn-gen"][0],
-        "gn_binary_exists": Path(plan.commands["gn-gen"][0]).is_file(),
+        "gn_binary": str(Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")),
+        "gn_binary_exists": (Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")).is_file(),
         "depot_tools_dir": plan.depot_tools_dir,
         "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
         "autoninja": str(Path(plan.depot_tools_dir) / "autoninja") if (Path(plan.depot_tools_dir) / "autoninja").is_file() else shutil.which("autoninja"),
         "gclient": str(Path(plan.depot_tools_dir) / "gclient") if (Path(plan.depot_tools_dir) / "gclient").is_file() else shutil.which("gclient"),
         "out_args_exists": (src / plan.out_dir / "args.gn").is_file(),
+        "build_ninja_exists": (src / plan.out_dir / "build.ninja").is_file(),
         "output_binary": plan.output_binary,
         "output_binary_exists": output.is_file(),
         "package_artifact_id": plan.package_artifact_id,

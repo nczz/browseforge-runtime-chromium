@@ -115,6 +115,16 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual(["bash", "-lc"], run_hooks[:2])
         self.assertEqual(f"PATH={expected_path_prefix} DEPOT_TOOLS_UPDATE=0 gclient runhooks", run_hooks[2])
 
+
+        gn_gen = payload["commands"]["gn-gen"]
+        self.assertEqual(["bash", "-lc"], gn_gen[:2])
+        self.assertEqual(
+            "PATH={path_prefix} DEPOT_TOOLS_UPDATE=0 gn gen out/TestMacArm64 --args='target_os=\"mac\" target_cpu=\"arm64\" "
+            "is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false'".format(
+                path_prefix=expected_path_prefix
+            ),
+            gn_gen[2],
+        )
         build_chrome = payload["commands"]["build-chrome"]
         self.assertEqual(["bash", "-lc"], build_chrome[:2])
         self.assertEqual(
@@ -135,6 +145,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
             (src / "DEPS").write_text("deps = {}\n", encoding="utf-8")
             (depot_tools / "gclient").write_text("#!/bin/sh\n", encoding="utf-8")
             (depot_tools / "autoninja").write_text("#!/bin/sh\n", encoding="utf-8")
+            (depot_tools / "gn").write_text("#!/bin/sh\n", encoding="utf-8")
             stdout = io.StringIO()
             argv = [
                 "chromium_native.py",
@@ -160,6 +171,9 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertIs(status["depot_tools_exists"], True)
         self.assertEqual(str(depot_tools / "gclient"), status["gclient"])
         self.assertEqual(str(depot_tools / "autoninja"), status["autoninja"])
+        self.assertEqual(str(depot_tools / "gn"), status["gn_binary"])
+        self.assertIs(status["gn_binary_exists"], True)
+        self.assertIs(status["build_ninja_exists"], False)
         self.assertIs(status["output_binary_exists"], False)
         self.assertIs(status["package_zip_exists"], False)
         self.assertIs(status["app_bundle_exists"], False)
