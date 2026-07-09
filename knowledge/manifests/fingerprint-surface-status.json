@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures unscored WebAudio and FontFaceSet probes, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, storage quota, hardware, and WebGL configured values and captures unscored WebAudio, FontFaceSet, and partial UA-CH probes, but the full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -22,11 +22,11 @@
       "surface": "UA"
     },
     {
-      "evidence": "Source-level UA-CH override exists in navigator_ua.cc patch, but no BrowserLeaks/Pixelscan client-hints row has been completed.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke using UA-CH config reported navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, and wow64=false; fullVersionList remained empty, so BrowserLeaks/Pixelscan client-hints matrix remains required.",
       "release_blocker": true,
-      "result": "needs_browserleaks_pixelscan",
+      "result": "warn_linux_sannysoft_partial_uach",
       "severity": "medium",
-      "status": "implemented",
+      "status": "detector_tested",
       "surface": "Client Hints"
     },
     {

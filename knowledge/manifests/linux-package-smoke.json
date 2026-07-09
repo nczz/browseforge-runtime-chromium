@@ -122,6 +122,44 @@
           "usage": 0
         },
         "timezone": "Asia/Taipei",
+        "ua_ch": {
+          "available": true,
+          "fullVersionList_present": false,
+          "highEntropy": {
+            "architecture": "x86",
+            "bitness": "64",
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "fullVersionList": [],
+            "mobile": false,
+            "model": "",
+            "platform": "Linux",
+            "platformVersion": "6.8.0",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
         "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
         "user_agent_redacted_summary": "configured Chromium UA without HeadlessChrome",
         "webgl": {

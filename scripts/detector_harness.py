@@ -353,6 +353,33 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
   const text = (document.body && document.body.innerText || '').slice(0, 12000);
   const title = document.title;
   const ua = navigator.userAgent;
+  const uaData = await (async () => {
+    if (!navigator.userAgentData) return {available: false};
+    const lowEntropy = {
+      brands: navigator.userAgentData.brands || [],
+      mobile: navigator.userAgentData.mobile,
+      platform: navigator.userAgentData.platform,
+    };
+    if (!navigator.userAgentData.getHighEntropyValues) {
+      return {available: true, lowEntropy};
+    }
+    try {
+      const highEntropy = await navigator.userAgentData.getHighEntropyValues([
+        'architecture',
+        'bitness',
+        'brands',
+        'fullVersionList',
+        'mobile',
+        'model',
+        'platform',
+        'platformVersion',
+        'wow64',
+      ]);
+      return {available: true, lowEntropy, highEntropy};
+    } catch (err) {
+      return {available: true, lowEntropy, highEntropyError: String(err && err.name || err)};
+    }
+  })();
   const webdriver = navigator.webdriver;
   const platform = navigator.platform;
   const languages = navigator.languages;
@@ -424,7 +451,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     const ext = ctx.getExtension('WEBGL_debug_renderer_info');
     return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
   })();
-  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, webgl: gl};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, webgl: gl};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)
