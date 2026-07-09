@@ -1358,6 +1358,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     self.assertEqual(gap["surface"], expected["surface"])
                     self.assertEqual(gap["detector_id"], expected["detector_id"])
                     self.assertIn(expected["finding"], gap["finding"])
+
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -1386,36 +1387,40 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIn("coverage_gap_count", payload)
             self.assertEqual(payload["coverage_gap_count"], len(payload["coverage_gaps"]))
             self.assertGreater(payload["coverage_gap_count"], 0)
-            gap_keys = {gap.get("matrix_key", gap.get("key")) for gap in payload["coverage_gaps"]}
-            self.assertNotIn("linux-x64:sannysoft:headed:direct:container", gap_keys)
-            self.assertIn("linux-x64:sannysoft:headed:direct:host", gap_keys)
-            self.assertIn("linux-x64:sannysoft:headed:proxy:host", gap_keys)
-            self.assertIn("linux-x64:sannysoft:headed:proxy:container", gap_keys)
+            gaps_by_key = {gap["matrix_key"]: gap for gap in payload["coverage_gaps"]}
+            self.assertNotIn("linux-x64:sannysoft:headed:direct:container", gaps_by_key)
+            self.assertIn("linux-x64:sannysoft:headed:direct:host", gaps_by_key)
+            self.assertIn("linux-x64:sannysoft:headed:proxy:host", gaps_by_key)
+            self.assertIn("linux-x64:sannysoft:headed:proxy:container", gaps_by_key)
 
-            proxy_container_gap = next(
-                gap
-                for gap in payload["coverage_gaps"]
-                if gap.get("matrix_key", gap.get("key")) == "linux-x64:sannysoft:headed:proxy:container"
-            )
-            for field in ("detector_id", "platform", "display_mode", "network_mode", "container"):
-                self.assertIn(field, proxy_container_gap)
-            self.assertTrue("matrix_key" in proxy_container_gap or "key" in proxy_container_gap)
-            self.assertEqual(
-                {
-                    "detector_id": proxy_container_gap["detector_id"],
-                    "platform": proxy_container_gap["platform"],
-                    "display_mode": proxy_container_gap["display_mode"],
-                    "network_mode": proxy_container_gap["network_mode"],
-                    "container": proxy_container_gap["container"],
-                },
-                {
-                    "detector_id": "sannysoft",
-                    "platform": "linux-x64",
-                    "display_mode": "headed",
-                    "network_mode": "proxy",
-                    "container": True,
-                },
-            )
+            expected_required_evidence = {
+                "linux-x64:sannysoft:headed:direct:host": ("native/host", "direct network"),
+                "linux-x64:sannysoft:headed:proxy:host": ("native/host", "external proxy", "exit-IP/geolocation"),
+                "linux-x64:sannysoft:headed:proxy:container": ("Docker/container", "external proxy", "exit-IP/geolocation"),
+            }
+            for matrix_key, expected_terms in expected_required_evidence.items():
+                with self.subTest(matrix_key=matrix_key):
+                    gap = gaps_by_key[matrix_key]
+                    self.assertEqual(
+                        {
+                            "detector_id": gap["detector_id"],
+                            "platform": gap["platform"],
+                            "display_mode": gap["display_mode"],
+                            "network_mode": gap["network_mode"],
+                            "container": gap["container"],
+                        },
+                        {
+                            "detector_id": "sannysoft",
+                            "platform": "linux-x64",
+                            "display_mode": "headed",
+                            "network_mode": "proxy" if ":proxy:" in matrix_key else "direct",
+                            "container": matrix_key.endswith(":container"),
+                        },
+                    )
+                    required_evidence = gap.get("required_evidence")
+                    self.assertIsInstance(required_evidence, str)
+                    for term in expected_terms:
+                        self.assertIn(term, required_evidence)
 
     def test_summary_does_not_count_headless_evidence_for_required_headed_rows(self):
         with tempfile.TemporaryDirectory() as td:

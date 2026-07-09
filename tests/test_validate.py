@@ -211,9 +211,18 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("coverage_gaps", message)
 
     def test_validate_rejects_detector_summary_coverage_gaps_missing_stable_fields(self) -> None:
-        """Every coverage gap must carry the stable matrix dimensions release review depends on."""
+        """Every coverage gap must carry the stable matrix dimensions and evidence label release review depends on."""
         module = self._load_validate_module()
-        for missing_field in ["matrix_key", "platform", "detector_id", "display_mode", "network_mode", "container"]:
+        stable_gap_fields = [
+            "matrix_key",
+            "platform",
+            "detector_id",
+            "display_mode",
+            "network_mode",
+            "container",
+            "required_evidence",
+        ]
+        for missing_field in stable_gap_fields:
             with self.subTest(missing_field=missing_field):
                 with tempfile.TemporaryDirectory() as td:
                     temp_root = Path(td)
@@ -520,6 +529,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         for detector_id in ["browserleaks", "browserscan", "creepjs", "iphey", "pixelscan", "sannysoft"]:
             for network_mode, container_values in [("direct", [False]), ("proxy", [False, True])]:
                 for container in container_values:
+                    network_evidence = (
+                        "external proxy exit-IP/geolocation" if network_mode == "proxy" else "direct network"
+                    )
+                    container_evidence = "Docker/container" if container else "native/host"
                     gaps.append(
                         {
                             "container": container,
@@ -528,6 +541,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                             "matrix_key": f"linux-x64:{detector_id}:headed:{network_mode}:{'container' if container else 'host'}",
                             "network_mode": network_mode,
                             "platform": "linux-x64",
+                            "required_evidence": f"headed / {container_evidence} / {network_evidence} sanitized detector evidence",
                         }
                     )
                     if len(gaps) == count:

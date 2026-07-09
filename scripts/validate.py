@@ -214,7 +214,7 @@ def main() -> None:
     coverage_gap_count = detector_summary.get("coverage_gap_count")
     if coverage_gap_count != len(coverage_gaps):
         raise SystemExit("detector summary coverage_gap_count must match coverage_gaps length")
-    required_gap_fields = {"matrix_key", "platform", "detector_id", "display_mode", "network_mode", "container"}
+    required_gap_fields = {"matrix_key", "platform", "detector_id", "display_mode", "network_mode", "container", "required_evidence"}
     for gap in coverage_gaps:
         missing_gap_fields = sorted(required_gap_fields - gap.keys())
         if missing_gap_fields:

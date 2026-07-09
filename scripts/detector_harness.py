@@ -295,6 +295,14 @@ def observed_matrix_key(evidence: dict) -> tuple[str, str, str, bool]:
         bool(matrix.get("container")),
     )
 
+def required_matrix_evidence(display: str, network: str, container: bool) -> str:
+    parts = [display, "Docker/container" if container else "native/host"]
+    if network == "proxy":
+        parts.append("external proxy exit-IP/geolocation")
+    else:
+        parts.append("direct network")
+    return " / ".join(parts) + " sanitized detector evidence"
+
 def required_matrix_rows(platform: str) -> list[dict]:
     rows = []
     for det in sorted(detectors_manifest()["detectors"], key=lambda d: d["detector_id"]):
@@ -315,6 +323,7 @@ def required_matrix_rows(platform: str) -> list[dict]:
                         "display_mode": display,
                         "network_mode": network,
                         "container": container,
+                        "required_evidence": required_matrix_evidence(display, network, container),
                     })
     return rows
 
