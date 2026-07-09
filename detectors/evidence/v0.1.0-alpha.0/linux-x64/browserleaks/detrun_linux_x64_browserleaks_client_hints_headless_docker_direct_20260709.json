@@ -183,6 +183,48 @@
       "surface": "storage_quota"
     },
     {
+      "detector_check": "browserleaks_runtime_probe_permissions_features",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks page context reported bounded Permissions API states and feature-availability booleans; this stores capability states only and does not request device access.",
+      "normalized_values": {
+        "available": true,
+        "featureFlags": {
+          "contactsManager": true,
+          "contentIndex": true,
+          "networkInformation": true,
+          "storageBuckets": true,
+          "webBluetooth": false,
+          "webHid": true,
+          "webNfc": false,
+          "webSerial": true,
+          "webUsb": true
+        },
+        "feature_false_count": 2,
+        "feature_true_count": 7,
+        "notificationPermission": "default",
+        "permissionStates": {
+          "accelerometer": "granted",
+          "background-sync": "granted",
+          "camera": "prompt",
+          "clipboard-read": "prompt",
+          "clipboard-write": "granted",
+          "geolocation": "prompt",
+          "gyroscope": "granted",
+          "magnetometer": "granted",
+          "microphone": "prompt",
+          "midi": "prompt",
+          "notifications": "prompt",
+          "persistent-storage": "prompt"
+        },
+        "permission_state_count": 12,
+        "permissionsApi": true
+      },
+      "raw_value_hash": "9a2d91112ed5a1560c88d9f66d3a1965ba948bbc5cde8ebec53ce2aa48bcbdd8",
+      "severity": "info",
+      "status": "pass",
+      "surface": "permissions"
+    },
+    {
       "detector_check": "browserleaks_runtime_probe_automation",
       "evidence_ref": "sanitized_runtime_observation",
       "finding": "BrowserLeaks page context reported navigator.webdriver=false.",
@@ -201,7 +243,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw BrowserLeaks page text and browser storage are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
+    "notes": "Raw BrowserLeaks page text and browser storage are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads. Committed evidence also stores sanitized bounded Permissions API states and feature-availability booleans without requesting device access.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-browserleaks-client-hints-1",
@@ -212,8 +254,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "09c5b0b1743c06e65823b711e47baa78e5a7096ae8414656bf29ca04b92421bb",
-    "sha256": "e267e278bdf9c5241487bb1e39de3f099e94b7009a4e975f20cef4a86c83efdb",
+    "raw_capture_sha256": "8e9626866be06d942d948c0e93cc231c9ad93166a2fdb5078ca40295a7ff1ee0",
+    "sha256": "f29b2bcc1338fbcc3e98530dbeab475bca9bd10ccacfb8c64aed858718a13c8a",
     "summary_path": "detector-summary.json"
   },
   "target": {

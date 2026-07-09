@@ -1251,6 +1251,17 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("pc.localDescription.sdp.split('\\n')", expr)
         self.assertNotIn("pc.localDescription.sdp.split('\n')", expr)
 
+    def test_collect_page_expression_records_permission_feature_surface(self):
+        expr = self.collect_page_expression()
+        self.assertIn("const features = await (async () => {", expr)
+        self.assertIn("'geolocation'", expr)
+        self.assertIn("'notifications'", expr)
+        self.assertIn("navigator.permissions.query({name})", expr)
+        self.assertIn("contactsManager", expr)
+        self.assertIn("contentIndex", expr)
+        self.assertIn("return {title, url: location.href", expr)
+        self.assertIn("canvas: canvasProbe, features, webgl: gl", expr)
+
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
         unsupported_detector = "unknown-detector"
         self.assertNotIn(unsupported_detector, self.harness_module.SUPPORTED_COLLECTORS)

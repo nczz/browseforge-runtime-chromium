@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, and captures unscored WebAudio and FontFaceSet probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, captures unscored WebAudio and FontFaceSet probes, and now records bounded BrowserLeaks/Pixelscan Permissions API plus feature-availability probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -110,9 +110,9 @@
       "surface": "WebRTC"
     },
     {
-      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok; broader CreepJS/BrowserLeaks permissions coverage remains absent.",
+      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok. The shared Linux collector now records bounded BrowserLeaks and Pixelscan page-context Permissions API states plus feature-availability booleans (Contacts Manager, Content Index, Network Information, storage buckets, WebHID/Serial/USB, etc.) without requesting device access; broader CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete.",
       "release_blocker": false,
-      "result": "pass_dogfood_sannysoft",
+      "result": "pass_linux_browserleaks_pixelscan_permissions_features_bounded",
       "severity": "info",
       "status": "detector_tested",
       "surface": "permissions"

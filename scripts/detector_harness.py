@@ -1240,6 +1240,51 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
+  const features = await (async () => {
+    const permissionNames = [
+      'geolocation',
+      'notifications',
+      'camera',
+      'microphone',
+      'clipboard-read',
+      'clipboard-write',
+      'midi',
+      'background-sync',
+      'persistent-storage',
+      'accelerometer',
+      'gyroscope',
+      'magnetometer',
+    ];
+    const permissionStates = {};
+    const permissionsApi = Boolean(navigator.permissions && navigator.permissions.query);
+    if (permissionsApi) {
+      for (const name of permissionNames) {
+        try {
+          const status = await navigator.permissions.query({name});
+          permissionStates[name] = status && status.state ? status.state : 'unknown';
+        } catch (err) {
+          permissionStates[name] = `error:${String(err && err.name || err)}`;
+        }
+      }
+    }
+    return {
+      available: true,
+      permissionsApi,
+      notificationPermission: typeof Notification !== 'undefined' ? Notification.permission : 'unavailable',
+      featureFlags: {
+        contactsManager: Boolean(navigator.contacts && navigator.contacts.select),
+        contentIndex: Boolean('ContentIndex' in window || (typeof ServiceWorkerRegistration !== 'undefined' && ServiceWorkerRegistration.prototype && 'index' in ServiceWorkerRegistration.prototype)),
+        networkInformation: Boolean(navigator.connection),
+        storageBuckets: Boolean(navigator.storageBuckets),
+        webBluetooth: Boolean(navigator.bluetooth && navigator.bluetooth.getAvailability),
+        webHid: Boolean(navigator.hid),
+        webNfc: Boolean('NDEFReader' in window),
+        webSerial: Boolean(navigator.serial),
+        webUsb: Boolean(navigator.usb),
+      },
+      permissionStates,
+    };
+  })();
   const webrtc = await (async () => {
     try {
       const RTCPeer = window.RTCPeerConnection || window.webkitRTCPeerConnection;
@@ -1396,7 +1441,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, webgl: gl, webrtc};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)

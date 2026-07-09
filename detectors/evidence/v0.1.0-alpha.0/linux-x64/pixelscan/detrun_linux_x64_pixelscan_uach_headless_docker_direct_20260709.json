@@ -183,6 +183,48 @@
       "surface": "storage_quota"
     },
     {
+      "detector_check": "pixelscan_runtime_probe_permissions_features",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan page context reported bounded Permissions API states and feature-availability booleans; this stores capability states only and does not request device access.",
+      "normalized_values": {
+        "available": true,
+        "featureFlags": {
+          "contactsManager": true,
+          "contentIndex": true,
+          "networkInformation": true,
+          "storageBuckets": true,
+          "webBluetooth": false,
+          "webHid": true,
+          "webNfc": false,
+          "webSerial": true,
+          "webUsb": true
+        },
+        "feature_false_count": 2,
+        "feature_true_count": 7,
+        "notificationPermission": "default",
+        "permissionStates": {
+          "accelerometer": "granted",
+          "background-sync": "granted",
+          "camera": "prompt",
+          "clipboard-read": "prompt",
+          "clipboard-write": "granted",
+          "geolocation": "prompt",
+          "gyroscope": "granted",
+          "magnetometer": "granted",
+          "microphone": "prompt",
+          "midi": "prompt",
+          "notifications": "prompt",
+          "persistent-storage": "prompt"
+        },
+        "permission_state_count": 12,
+        "permissionsApi": true
+      },
+      "raw_value_hash": "9a2d91112ed5a1560c88d9f66d3a1965ba948bbc5cde8ebec53ce2aa48bcbdd8",
+      "severity": "info",
+      "status": "pass",
+      "surface": "permissions"
+    },
+    {
       "detector_check": "pixelscan_runtime_probe_automation",
       "evidence_ref": "sanitized_runtime_observation",
       "finding": "Pixelscan page context reported navigator.webdriver=false.",
@@ -201,7 +243,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw Pixelscan page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads.",
+    "notes": "Raw Pixelscan page text, browser storage, and network identifiers are not committed; committed evidence stores sanitized page title/url, structured UA-CH values, text hash/excerpt hash reference, and raw capture SHA only; committed evidence stores sanitized WebGL metadata hashes/counts and does not commit raw extension, parameter, shader, or pixel payloads. Committed evidence also stores sanitized bounded Permissions API states and feature-availability booleans without requesting device access.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-pixelscan-uach-1",
@@ -212,8 +254,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "0a6887508866e672af4cc385f332a7eef962de0363d76f0a57fe99d9396ffdf5",
-    "sha256": "058fd2bbe9dda770e35f831e3a72a356b64155cc3557cd03b12d7336d306c41c",
+    "raw_capture_sha256": "0efe03d79ea59d2d7440f012e8bc332156deef2c617a2e68dfd036b74fe7e444",
+    "sha256": "0e56e2c8ffa87a4c509cf574a9238b0ee2c143f9504acdac73e8ee292b512932",
     "summary_path": "detector-summary.json"
   },
   "target": {
