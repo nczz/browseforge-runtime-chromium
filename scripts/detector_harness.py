@@ -715,7 +715,8 @@ def collect(args):
     try:
         version = http_json(args.cdp_url.rstrip("/") + "/json/version")
         cdp = CDPClient(version["webSocketDebuggerUrl"])
-        name, url = SUPPORTED_COLLECTORS[args.detector]
+        name, default_url = SUPPORTED_COLLECTORS[args.detector]
+        url = args.url or default_url
         payload = {
             "browser": version,
             "records": [collect_page(cdp, args.detector, name, url, wait_seconds=args.wait_seconds)],
@@ -738,7 +739,7 @@ def main(argv=None):
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.set_defaults(func=summary)
-    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
+    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)
 

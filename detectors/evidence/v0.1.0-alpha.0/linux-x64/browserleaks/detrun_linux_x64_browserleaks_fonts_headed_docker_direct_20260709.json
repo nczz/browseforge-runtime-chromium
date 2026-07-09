@@ -1,0 +1,153 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/fonts"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_fonts_headed_docker_direct_20260709",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:browserleaks-fonts:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_fonts_headed_metrics",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Fonts page loaded in headed Docker/Xvfb mode and page-context probe recorded bounded font availability rows plus aggregate metric/glyph hashes; release-grade BrowserLeaks font dictionary score comparison remains required.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "glyphSampleCount": 73728,
+        "glyphSha256": "a4497a76714c34ec4e0b277f80671473d6bad7dcedd1981a9738f62cc4441166",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 38,
+            "width": 483.719
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 38,
+            "width": 483.719
+          }
+        ],
+        "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb",
+        "url": "https://browserleaks.com/fonts"
+      },
+      "severity": "medium",
+      "status": "warning",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "browserleaks_fonts_headed_webdriver",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks Fonts page context reported navigator.webdriver=false in headed Docker/Xvfb mode.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserLeaks Fonts page text, browser storage, network identifiers, screenshots, and full font dictionary output are not committed; committed evidence stores bounded configured font probe rows and aggregate hashes with raw capture SHA.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-fonts-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709.json",
+    "raw_capture_sha256": "29a3e36e145c2a25f4f12353ebe420fa15928021dd4e2aa714d96173c1f99c9d",
+    "sha256": "c4e805883d7335579ab5587e33344c087c11ba6ca33e02fc39906042c0528c87",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "656efc12409a2a5ce4c9096581f69524e06c4fdff67ee51e6e4dca9a65c2a969"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb software",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-09T11:34:29.017173+00:00"
+}

@@ -820,6 +820,94 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertEqual(proc.stdout, "")
         self.assertIn(f"collector not implemented for detector: {unsupported_detector}", proc.stderr)
 
+    def test_collect_uses_url_override_without_changing_browserleaks_identity(self):
+        module = self.harness_module
+        original_http_json = module.http_json
+        original_cdp_client = module.CDPClient
+        original_collect_page = module.collect_page
+        self.addCleanup(setattr, module, "http_json", original_http_json)
+        self.addCleanup(setattr, module, "CDPClient", original_cdp_client)
+        self.addCleanup(setattr, module, "collect_page", original_collect_page)
+
+        calls = []
+
+        class FakeCDP:
+            def __init__(self, websocket_url):
+                self.websocket_url = websocket_url
+
+        def fake_http_json(url):
+            self.assertEqual(url, "http://127.0.0.1:9222/json/version")
+            return {"webSocketDebuggerUrl": "ws://127.0.0.1/devtools/browser/test"}
+
+        def fake_collect_page(cdp, detector_id, name, url, *, wait_seconds):
+            calls.append(
+                {
+                    "websocket_url": cdp.websocket_url,
+                    "detector_id": detector_id,
+                    "name": name,
+                    "url": url,
+                    "wait_seconds": wait_seconds,
+                }
+            )
+            return {
+                "detector_id": detector_id,
+                "name": name,
+                "url": url,
+                "status": "passed",
+                "failure_mode": "none",
+                "finding": "stubbed BrowserLeaks collection",
+                "severity": "low",
+                "observed": {},
+            }
+
+        module.http_json = fake_http_json
+        module.CDPClient = FakeCDP
+        module.collect_page = fake_collect_page
+
+        def run_collect(*extra_args):
+            with tempfile.TemporaryDirectory() as td:
+                output = Path(td) / "evidence.json"
+                code = module.main(
+                    [
+                        "collect",
+                        "--detector",
+                        "browserleaks",
+                        "--wait-seconds",
+                        "0",
+                        "--output",
+                        str(output),
+                        *extra_args,
+                    ]
+                )
+                self.assertEqual(code, 0)
+                return json.loads(output.read_text(encoding="utf-8"))
+
+        override_url = "https://browserleaks.com/fonts"
+        override_payload = run_collect("--url", override_url)
+        default_payload = run_collect()
+
+        self.assertEqual(
+            calls,
+            [
+                {
+                    "websocket_url": "ws://127.0.0.1/devtools/browser/test",
+                    "detector_id": "browserleaks",
+                    "name": "BrowserLeaks",
+                    "url": override_url,
+                    "wait_seconds": 0,
+                },
+                {
+                    "websocket_url": "ws://127.0.0.1/devtools/browser/test",
+                    "detector_id": "browserleaks",
+                    "name": "BrowserLeaks",
+                    "url": module.SUPPORTED_COLLECTORS["browserleaks"][1],
+                    "wait_seconds": 0,
+                },
+            ],
+        )
+        self.assertEqual(override_payload["records"][0]["url"], override_url)
+        self.assertEqual(default_payload["records"][0]["url"], module.SUPPORTED_COLLECTORS["browserleaks"][1])
+
     def test_list_targets_reads_current_manifest(self):
         proc = self.run_harness("list-targets")
         self.assertEqual(proc.returncode, 0, proc.stderr)

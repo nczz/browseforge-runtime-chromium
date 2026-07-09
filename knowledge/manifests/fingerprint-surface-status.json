@@ -94,9 +94,9 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. CreepJS page context now also records bounded font metric rows plus aggregate glyph and metrics SHA-256 values. BrowserLeaks/CreepJS/Pixelscan detector score comparison and platform font corpus parity remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headed page now records bounded font metric rows plus aggregate glyph and metrics SHA-256 values; CreepJS page context also records bounded font metric rows plus aggregate glyph and metrics SHA-256 values. BrowserLeaks/CreepJS/Pixelscan detector score comparison and platform font corpus parity remain required.",
       "release_blocker": true,
-      "result": "warn_linux_multi_detector_page_context_font_metrics_and_availability",
+      "result": "warn_linux_multi_detector_page_context_font_metrics_browserleaks_creepjs",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "fonts"
@@ -175,6 +175,7 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headed_docker_direct_20260709.json",
-    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260709.json"
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260709.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709.json"
   ]
 }
