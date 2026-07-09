@@ -1017,7 +1017,7 @@ def classify_browserleaks_webrtc_probe(value: dict) -> tuple[str, str, str]:
 
 def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
     page_url = value.get("url") or url
-    if "/javascript/audio" in page_url:
+    if "/javascript" in page_url and ("#audio" in page_url or value.get("title") == "JavaScript Browser Information - BrowserLeaks"):
         return classify_browserleaks_audio_probe(value)
     if "/fonts" in page_url:
         return classify_browserleaks_fonts_probe(value)
@@ -1496,7 +1496,7 @@ SUPPORTED_COLLECTORS = {
 SUPPORTED_COLLECTOR_PAGES = {
     "browserleaks": {
         "client-hints": "https://browserleaks.com/client-hints",
-        "audio": "https://browserleaks.com/javascript/audio",
+        "audio": "https://browserleaks.com/javascript#audio",
         "fonts": "https://browserleaks.com/fonts",
         "webgl": "https://browserleaks.com/webgl",
         "webrtc": "https://browserleaks.com/webrtc",

@@ -347,8 +347,8 @@ class DetectorHarnessTests(unittest.TestCase):
 
     def browserleaks_audio_value(self):
         value = self.browserleaks_client_hints_value()
-        value["title"] = "BrowserLeaks - AudioContext"
-        value["url"] = "https://browserleaks.com/javascript/audio"
+        value["title"] = "JavaScript Browser Information - BrowserLeaks"
+        value["url"] = "https://browserleaks.com/javascript#audio"
         value["audio"] = {
             "available": True,
             "length": 44100,
@@ -490,7 +490,7 @@ class DetectorHarnessTests(unittest.TestCase):
     def test_classify_browserleaks_dispatches_audio_page_without_claiming_release_pass(self):
         status, finding, severity = self.harness_module.classify_browserleaks(
             self.browserleaks_audio_value(),
-            "https://browserleaks.com/javascript/audio",
+            "https://browserleaks.com/javascript#audio",
         )
 
         self.assertEqual((status, severity), ("warning", "medium"))
@@ -571,7 +571,7 @@ class DetectorHarnessTests(unittest.TestCase):
         del webrtc["webrtc"]["candidateCount"]
 
         cases = [
-            (audio, "https://browserleaks.com/javascript/audio", "sumAbs"),
+            (audio, "https://browserleaks.com/javascript#audio", "sumAbs"),
             (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
             (webgl, "https://browserleaks.com/webgl", "parameter"),
             (webrtc, "https://browserleaks.com/webrtc", "candidateCount"),
@@ -1370,6 +1370,10 @@ class DetectorHarnessTests(unittest.TestCase):
         module = self.harness_module
 
         self.assertEqual(
+            module.resolve_collect_url("browserleaks", page="audio", url=None),
+            "https://browserleaks.com/javascript#audio",
+        )
+        self.assertNotEqual(
             module.resolve_collect_url("browserleaks", page="audio", url=None),
             "https://browserleaks.com/javascript/audio",
         )

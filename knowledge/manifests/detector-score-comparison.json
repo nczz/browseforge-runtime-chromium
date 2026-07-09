@@ -117,9 +117,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 17,
+  "evidence_count": 18,
   "gaps": [],
-  "generated_at": "2026-07-09T17:30:18.353170+00:00",
+  "generated_at": "2026-07-09T17:41:10.117445+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
