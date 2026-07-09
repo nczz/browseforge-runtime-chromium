@@ -211,6 +211,50 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
         if not (ROOT / source_path).is_file():
             raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")
 
+def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict[str, str | None]) -> None:
+    if score_comparison.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("detector score comparison runtime_id must be browseforge-chromium")
+    if score_comparison.get("release_grade") is not False:
+        raise SystemExit("offline detector score comparison must not claim release grade")
+
+    comparisons = score_comparison.get("comparisons", [])
+    comparison_ids = {comparison.get("comparison_id") for comparison in comparisons}
+    for comparison_id in ["creepjs_audio_headless_vs_headed", "browserleaks_creepjs_font_metrics"]:
+        if comparison_id not in comparison_ids:
+            raise SystemExit(f"detector score comparison missing {comparison_id}")
+
+    baseline_gap_ids = {gap.get("gap_id") for gap in score_comparison.get("baseline_gaps", [])}
+    for gap_id in [
+        "browserleaks_audio_score_baseline_missing",
+        "pixelscan_audio_font_score_baseline_missing",
+        "native_headed_font_corpus_parity_missing",
+    ]:
+        if gap_id not in baseline_gap_ids:
+            raise SystemExit(f"detector score comparison missing baseline gap {gap_id}")
+
+    gap_ids = {gap.get("gap_id") for gap in score_comparison.get("gaps", [])}
+    webgl_comparison = next((comparison for comparison in comparisons if comparison.get("comparison_id") == "webgl_metadata_cross_detector"), None)
+    if webgl_comparison is None:
+        for gap_id in ["webgl_metadata_hashes_missing", "webgl_cross_detector_metadata_comparison_missing"]:
+            if gap_id not in gap_ids:
+                raise SystemExit(f"detector score comparison missing WebGL comparison blocker {gap_id}")
+    else:
+        for field in ["vendor_renderer_match", "extension_count_match", "extension_profile_match", "hash_matches"]:
+            if field not in webgl_comparison:
+                raise SystemExit(f"detector score comparison WebGL comparison missing field {field}")
+        hash_matches = webgl_comparison.get("hash_matches")
+        if not isinstance(hash_matches, dict):
+            raise SystemExit("detector score comparison WebGL hash_matches must be an object")
+        for field in ["extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256"]:
+            if field not in hash_matches:
+                raise SystemExit(f"detector score comparison WebGL hash_matches missing {field}")
+
+    if gate_status.get("live-detector-evidence") == "passed":
+        warning_comparisons = [comparison.get("comparison_id") for comparison in comparisons if comparison.get("status") == "warning"]
+        if score_comparison.get("baseline_gaps") or score_comparison.get("gaps") or warning_comparisons:
+            raise SystemExit("live-detector-evidence gate cannot pass while detector score comparison has baseline gaps, evidence gaps, or warning comparisons")
+
+
 
 def main() -> None:
     missing = [path for path in REQUIRED_FILES if not (ROOT / path).is_file()]
@@ -310,22 +354,7 @@ def main() -> None:
 
 
     score_comparison = load_json("knowledge/manifests/detector-score-comparison.json")
-    if score_comparison.get("runtime_id") != "browseforge-chromium":
-        raise SystemExit("detector score comparison runtime_id must be browseforge-chromium")
-    if score_comparison.get("release_grade") is not False:
-        raise SystemExit("offline detector score comparison must not claim release grade")
-    comparison_ids = {comparison.get("comparison_id") for comparison in score_comparison.get("comparisons", [])}
-    for comparison_id in ["creepjs_audio_headless_vs_headed", "browserleaks_creepjs_font_metrics"]:
-        if comparison_id not in comparison_ids:
-            raise SystemExit(f"detector score comparison missing {comparison_id}")
-    baseline_gap_ids = {gap.get("gap_id") for gap in score_comparison.get("baseline_gaps", [])}
-    for gap_id in [
-        "browserleaks_audio_score_baseline_missing",
-        "pixelscan_audio_font_score_baseline_missing",
-        "native_headed_font_corpus_parity_missing",
-    ]:
-        if gap_id not in baseline_gap_ids:
-            raise SystemExit(f"detector score comparison missing baseline gap {gap_id}")
+    validate_score_comparison_manifest(score_comparison, gate_status)
 
     query_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in [
         "graph/queries/development-readiness.cypher",

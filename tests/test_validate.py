@@ -347,6 +347,46 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("fingerprint surfaces", message)
         self.assertIn("block release", message)
 
+    def test_validate_rejects_passed_live_detector_gate_with_score_gaps(self) -> None:
+        """A passed live-detector-evidence gate cannot coexist with detector score comparison blockers."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_surface_status(temp_root, release_grade=False, release_blocker=False)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("live-detector", message)
+        self.assertIn("score comparison", message)
+
+    def test_validate_rejects_webgl_comparison_missing_extension_profile_field(self) -> None:
+        """WebGL score comparison must expose the extension-profile parity decision explicitly."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            comparison = {
+                "comparison_id": "webgl_metadata_cross_detector",
+                "vendor_renderer_match": True,
+                "extension_count_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "status": "pass",
+            }
+            self._write_score_comparison(temp_root, webgl_comparison=comparison, gaps=[])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("webgl", message)
+        self.assertIn("extension_profile_match", message)
+
+
     def test_validate_rejects_surface_status_missing_updated_source(self) -> None:
         """Surface status provenance must point at committed evidence sources."""
         module = self._load_validate_module()
@@ -478,22 +518,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
         self._write_release_gates(root, live_detector_status="warning")
         self._write_surface_status(root)
-        self._write_json(
-            root / "knowledge" / "manifests" / "detector-score-comparison.json",
-            {
-                "runtime_id": "browseforge-chromium",
-                "release_grade": False,
-                "comparisons": [
-                    {"comparison_id": "creepjs_audio_headless_vs_headed"},
-                    {"comparison_id": "browserleaks_creepjs_font_metrics"},
-                ],
-                "baseline_gaps": [
-                    {"gap_id": "browserleaks_audio_score_baseline_missing"},
-                    {"gap_id": "pixelscan_audio_font_score_baseline_missing"},
-                    {"gap_id": "native_headed_font_corpus_parity_missing"},
-                ],
-            },
-        )
+        self._write_score_comparison(root)
         self._write_json(
             root / "knowledge" / "manifests" / "runtime-artifacts.json",
             {
@@ -606,6 +631,49 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "edge", "label": "SUPPORTS_GATE", "from": "RuntimeProvider:browseforge-chromium", "to": "ReleaseGate:runtime-artifact-produced", "properties": {"status": "passed"}},
             {"record_type": "edge", "label": "REFERENCES_SOURCE", "from": "RuntimeProvider:browseforge-chromium", "to": "KnowledgeSource:chromium-upstream", "properties": {}},
         ]
+
+    def _write_score_comparison(
+        self,
+        root: Path,
+        *,
+        webgl_comparison: dict[str, Any] | None = None,
+        gaps: list[dict[str, Any]] | None = None,
+        baseline_gaps: list[dict[str, Any]] | None = None,
+    ) -> None:
+        if webgl_comparison is None:
+            webgl_comparison = {
+                "comparison_id": "webgl_metadata_cross_detector",
+                "extension_count_match": True,
+                "extension_profile_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "status": "pass",
+                "vendor_renderer_match": True,
+            }
+        if baseline_gaps is None:
+            baseline_gaps = [
+                {"gap_id": "browserleaks_audio_score_baseline_missing"},
+                {"gap_id": "pixelscan_audio_font_score_baseline_missing"},
+                {"gap_id": "native_headed_font_corpus_parity_missing"},
+            ]
+        self._write_json(
+            root / "knowledge" / "manifests" / "detector-score-comparison.json",
+            {
+                "runtime_id": "browseforge-chromium",
+                "release_grade": False,
+                "comparisons": [
+                    {"comparison_id": "creepjs_audio_headless_vs_headed"},
+                    {"comparison_id": "browserleaks_creepjs_font_metrics"},
+                    webgl_comparison,
+                ],
+                "baseline_gaps": baseline_gaps,
+                "gaps": [] if gaps is None else gaps,
+            },
+        )
 
     def _write_release_gates(self, root: Path, *, live_detector_status: str) -> None:
         self._write_json(
