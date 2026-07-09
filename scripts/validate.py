@@ -34,6 +34,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/proxy-preflight.json",
+    "knowledge/manifests/native-artifact-preflight.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -405,6 +406,56 @@ def validate_release_gate_artifact_evidence(release_gates: dict, runtime_artifac
         if missing:
             raise SystemExit(f"release gate {gate_id} evidence has stale runtime artifact metadata: {missing}")
 
+def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts: dict) -> None:
+    if native_preflight.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("native artifact preflight runtime_id must be browseforge-chromium")
+    if native_preflight.get("schema_version") != "1.0":
+        raise SystemExit("native artifact preflight schema_version must be 1.0")
+    release_ready = native_preflight.get("release_grade_ready")
+    if not isinstance(release_ready, bool):
+        raise SystemExit("native artifact preflight release_grade_ready must be boolean")
+    supported = set(runtime_artifacts.get("supported_package_platforms", []))
+    declared_supported = set(native_preflight.get("supported_package_platforms", []))
+    if declared_supported != supported:
+        raise SystemExit(f"native artifact preflight supported_package_platforms drifted: {sorted(declared_supported)} != {sorted(supported)}")
+    artifacts_by_platform = {
+        artifact.get("platform"): artifact
+        for artifact in runtime_artifacts.get("artifacts", [])
+    }
+    platforms = native_preflight.get("platforms", [])
+    if not isinstance(platforms, list):
+        raise SystemExit("native artifact preflight platforms must be an array")
+    entries = {entry.get("platform"): entry for entry in platforms if isinstance(entry, dict)}
+    missing_entries = sorted(supported - entries.keys())
+    extra_entries = sorted(entries.keys() - supported)
+    if missing_entries or extra_entries:
+        raise SystemExit(f"native artifact preflight platform entries drifted: missing={missing_entries} extra={extra_entries}")
+    for platform, entry in sorted(entries.items()):
+        ready = entry.get("ready")
+        if not isinstance(ready, bool):
+            raise SystemExit(f"native artifact preflight {platform} ready must be boolean")
+        missing = entry.get("missing_prerequisites", [])
+        evidence = entry.get("evidence", [])
+        if not isinstance(missing, list) or any(not isinstance(item, str) or not item for item in missing):
+            raise SystemExit(f"native artifact preflight {platform} missing_prerequisites must be non-empty strings")
+        if not isinstance(evidence, list) or any(not isinstance(item, str) or not item for item in evidence):
+            raise SystemExit(f"native artifact preflight {platform} evidence must be non-empty strings")
+        artifact = artifacts_by_platform.get(platform)
+        if ready:
+            if missing:
+                raise SystemExit(f"native artifact preflight {platform} cannot be ready with missing prerequisites")
+            if artifact is None:
+                raise SystemExit(f"native artifact preflight {platform} cannot be ready without runtime-artifacts entry")
+            if entry.get("artifact_id") != artifact.get("artifact_id"):
+                raise SystemExit(f"native artifact preflight {platform} artifact_id drifted from runtime-artifacts")
+            archive = ROOT / "dist" / f"{artifact['artifact_id']}.zip"
+            if not archive.is_file():
+                raise SystemExit(f"native artifact preflight {platform} missing archive: {archive.relative_to(ROOT)}")
+        elif not missing:
+            raise SystemExit(f"native artifact preflight {platform} must record missing prerequisites when not ready")
+    if release_ready and any(not entry.get("ready") for entry in entries.values()):
+        raise SystemExit("native artifact preflight cannot be release_grade_ready while supported platforms remain blocked")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -598,6 +649,15 @@ def main() -> None:
         for record in graph_records
         if record.get("record_type") == "node" and "id" in record
     }
+    for gate in release_gates["release_candidate_required_gates"]:
+        gate_id = gate["gate_id"]
+        node = graph_nodes.get(f"ReleaseGate:{gate_id}")
+        if node is None:
+            raise SystemExit(f"generated KG missing ReleaseGate node for {gate_id}")
+        props = node.get("properties", {})
+        for key in ["gate_id", "status", "evidence"]:
+            if props.get(key) != gate.get(key):
+                raise SystemExit(f"generated KG ReleaseGate {gate_id} {key} drifted: {props.get(key)!r} != {gate.get(key)!r}")
     for platform in platform_matrix["platforms"]:
         platform_id = platform["id"]
         node = graph_nodes.get(f"Platform:{platform_id}")
@@ -630,6 +690,8 @@ def main() -> None:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
+    native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
+    validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"

@@ -224,6 +224,111 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             finally:
                 module.ROOT = original_root
 
+    def test_validate_accepts_native_artifact_preflight_for_linux_ready_and_native_blockers(self) -> None:
+        """native-artifact-preflight records the Linux artifact as ready while native OS artifacts remain blockers."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            preflight = self._write_native_artifact_preflight(temp_root, runtime_manifest=runtime_manifest)
+
+            platforms = {entry["platform"]: entry for entry in preflight["platforms"]}
+            self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], preflight["supported_package_platforms"])
+            self.assertTrue(platforms["linux-x64"]["ready"])
+            self.assertEqual("ready", platforms["linux-x64"]["status"])
+            self.assertEqual(LINUX_ARTIFACT_ID, platforms["linux-x64"]["artifact_id"])
+            self.assertEqual(
+                [f"knowledge/manifests/runtime-artifacts.json:{LINUX_ARTIFACT_ID}"],
+                platforms["linux-x64"]["evidence"],
+            )
+            self.assertEqual([], platforms["linux-x64"]["missing_prerequisites"])
+            for platform in ["macos-arm64", "windows-x64"]:
+                with self.subTest(platform=platform):
+                    self.assertFalse(platforms[platform]["ready"])
+                    self.assertEqual("blocked", platforms[platform]["status"])
+                    self.assertNotIn("artifact_id", platforms[platform])
+                    self.assertEqual([], platforms[platform]["evidence"])
+                    self.assertIn(
+                        "runtime-artifacts artifact missing",
+                        platforms[platform]["missing_prerequisites"],
+                    )
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_native_artifact_preflight_missing_supported_platform(self) -> None:
+        """Every runtime-artifacts supported package platform must have a native preflight row."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            self._write_native_artifact_preflight(
+                temp_root,
+                runtime_manifest=runtime_manifest,
+                omit_platforms={"windows-x64"},
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("native artifact preflight", message)
+        self.assertIn("windows-x64", message)
+
+    def test_validate_rejects_native_artifact_preflight_native_ready_without_artifact(self) -> None:
+        """macOS and Windows cannot claim preflight readiness until their artifacts exist in runtime-artifacts."""
+        module = self._load_validate_module()
+        for platform in ["macos-arm64", "windows-x64"]:
+            with self.subTest(platform=platform):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+                    fake_artifact_id = f"browseforge-runtime-chromium-v0.1.0-alpha.0-{platform}"
+                    self._write_native_artifact_preflight(
+                        temp_root,
+                        runtime_manifest=runtime_manifest,
+                        platform_overrides={
+                            platform: {
+                                "artifact_id": fake_artifact_id,
+                                "evidence": [f"knowledge/manifests/runtime-artifacts.json:{fake_artifact_id}"],
+                                "missing_prerequisites": [],
+                                "ready": True,
+                                "status": "ready",
+                            }
+                        },
+                    )
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("native artifact preflight", message)
+                self.assertIn(platform, message)
+                self.assertIn("runtime-artifacts", message)
+
+    def test_validate_rejects_native_artifact_preflight_release_grade_ready_with_blocked_platform(self) -> None:
+        """release_grade_ready cannot be true while any supported package platform remains not ready."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            self._write_native_artifact_preflight(
+                temp_root,
+                runtime_manifest=runtime_manifest,
+                release_grade_ready=True,
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("native artifact preflight", message)
+        self.assertIn("release_grade_ready", message)
+        self.assertIn("blocked", message)
+
     def test_validate_rejects_platform_node_drift_from_platform_matrix(self) -> None:
         """A generated Platform node cannot silently diverge from the release planning matrix."""
         module = self._load_validate_module()
@@ -326,6 +431,47 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             output = self._run_validate_expect_success(module, temp_root)
 
         self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_accepts_runtime_graph_release_gate_nodes_matching_manifest(self) -> None:
+        """Generated KG ReleaseGate nodes are valid when they mirror release-gates.json exactly."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_runtime_graph_release_gate_node_drift_from_manifest(self) -> None:
+        """Generated KG ReleaseGate status/evidence cannot drift from authoritative release-gates.json."""
+        cases: list[tuple[str, str]] = [
+            ("status", "blocked"),
+            ("evidence", "stale fixture cites sha256 0000 and size 1 bytes"),
+        ]
+        for field, stale_value in cases:
+            with self.subTest(field=field):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._rewrite_runtime_graph_release_gate_property(
+                        temp_root,
+                        gate_id="runtime-artifact-produced",
+                        field=field,
+                        value=stale_value,
+                    )
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("generated kg releasegate", message)
+                self.assertIn("runtime-artifact-produced", message)
+                self.assertIn(field, message)
+                self.assertIn("drifted", message)
 
     def test_validate_rejects_passed_release_gate_artifact_evidence_with_stale_sha_and_size(self) -> None:
         """A passed artifact release gate cannot keep old archive sha/size text after runtime-artifacts changes."""
@@ -998,6 +1144,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
         self._write_current_runtime_artifact_fixture(root)
+        self._write_native_artifact_preflight(root)
+
         self._write_release_gates(root, live_detector_status="warning")
         self._write_json(root / "browser" / "chromium-base.json", {})
         self._write_detector_summary(root, coverage_gaps=[])
@@ -1022,12 +1170,12 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         ]:
             query_path.write_text(query_text, encoding="utf-8")
 
-        graph_records = self._minimal_graph_with_only_missing_runtime_artifact()
+        graph_records = self._minimal_graph_with_only_missing_runtime_artifact(root)
         with (root / "generated" / "kg" / "runtime.graph.jsonl").open("w", encoding="utf-8") as fh:
             for record in graph_records:
                 fh.write(json.dumps(record, sort_keys=True) + "\n")
 
-    def _minimal_graph_with_only_missing_runtime_artifact(self) -> list[dict[str, Any]]:
+    def _minimal_graph_with_only_missing_runtime_artifact(self, root: Path) -> list[dict[str, Any]]:
         return [
             {"record_type": "node", "label": "RuntimeProvider", "id": "RuntimeProvider:browseforge-chromium", "properties": {}},
             {
@@ -1049,7 +1197,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 for platform in self._platform_matrix_platforms()
             ],
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
-            {"record_type": "node", "label": "ReleaseGate", "id": "ReleaseGate:runtime-artifact-produced", "properties": {"gate_id": "runtime-artifact-produced", "status": "passed"}},
+            *self._release_gate_graph_nodes(root),
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
             {"record_type": "edge", "label": "REQUIRES_CAPABILITY", "from": "BrowseForgeConsumer:browseforge-main", "to": "Capability:persistent_context", "properties": {}},
             {"record_type": "edge", "label": "DECLARES_CAPABILITY", "from": "RuntimeProvider:browseforge-chromium", "to": "Capability:persistent_context", "properties": {}},
@@ -1217,13 +1365,56 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 digest.update(chunk)
         return digest.hexdigest()
 
-    def _write_runtime_graph_for_artifacts(self, root: Path, artifacts: list[dict[str, Any]]) -> None:
-        graph_records = self._minimal_graph_with_packaged_runtime_artifacts(artifacts)
+    def _release_gate_graph_nodes(self, root: Path) -> list[dict[str, Any]]:
+        release_gates = json.loads((root / "knowledge" / "manifests" / "release-gates.json").read_text(encoding="utf-8"))
+        return [
+            {
+                "record_type": "node",
+                "label": "ReleaseGate",
+                "id": f"ReleaseGate:{gate['gate_id']}",
+                "properties": dict(gate),
+            }
+            for gate in release_gates["release_candidate_required_gates"]
+        ]
+
+    def _write_runtime_graph_records(self, root: Path, graph_records: list[dict[str, Any]]) -> None:
         graph_path = root / "generated" / "kg" / "runtime.graph.jsonl"
         graph_path.parent.mkdir(parents=True, exist_ok=True)
         with graph_path.open("w", encoding="utf-8") as fh:
             for record in graph_records:
                 fh.write(json.dumps(record, sort_keys=True) + "\n")
+
+    def _sync_runtime_graph_release_gate_nodes(self, root: Path) -> None:
+        graph_path = root / "generated" / "kg" / "runtime.graph.jsonl"
+        if not graph_path.is_file():
+            return
+        if graph_path.read_text(encoding="utf-8") == "placeholder\n":
+            return
+        graph_records = [
+            record
+            for record in self._load_graph(graph_path)
+            if not (record.get("record_type") == "node" and record.get("label") == "ReleaseGate")
+        ]
+        graph_records.extend(self._release_gate_graph_nodes(root))
+        self._write_runtime_graph_records(root, graph_records)
+
+    def _write_runtime_graph_for_artifacts(self, root: Path, artifacts: list[dict[str, Any]]) -> None:
+        self._write_runtime_graph_records(root, self._minimal_graph_with_packaged_runtime_artifacts(root, artifacts))
+
+    def _rewrite_runtime_graph_release_gate_property(self, root: Path, *, gate_id: str, field: str, value: Any) -> None:
+        graph_path = root / "generated" / "kg" / "runtime.graph.jsonl"
+        graph_records = self._load_graph(graph_path)
+        node_id = f"ReleaseGate:{gate_id}"
+        for record in graph_records:
+            if record.get("record_type") == "node" and record.get("label") == "ReleaseGate" and record.get("id") == node_id:
+                properties = record.get("properties")
+                self.assertIsInstance(properties, dict)
+                assert isinstance(properties, dict)
+                properties[field] = value
+                break
+        else:
+            self.fail(f"missing ReleaseGate node {node_id}")
+        self._write_runtime_graph_records(root, graph_records)
 
 
     def _rewrite_platform_node_property(self, root: Path, platform_id: str, field: str, value: Any) -> None:
@@ -1243,7 +1434,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             for record in graph_records:
                 fh.write(json.dumps(record, sort_keys=True) + "\n")
 
-    def _minimal_graph_with_packaged_runtime_artifacts(self, artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _minimal_graph_with_packaged_runtime_artifacts(self, root: Path, artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         first_artifact_id = artifacts[0]["artifact_id"]
         records: list[dict[str, Any]] = [
             {"record_type": "node", "label": "RuntimeProvider", "id": "RuntimeProvider:browseforge-chromium", "properties": {}},
@@ -1256,7 +1447,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"record_type": "node", "label": "DetectorRun", "id": "DetectorRun:planned-sannysoft", "properties": {"status": "planned"}},
             {"record_type": "node", "label": "EvidenceArtifact", "id": "EvidenceArtifact:planned-sannysoft", "properties": {}},
             {"record_type": "node", "label": "Capability", "id": "Capability:persistent_context", "properties": {}},
-            {"record_type": "node", "label": "ReleaseGate", "id": "ReleaseGate:runtime-artifact-produced", "properties": {"gate_id": "runtime-artifact-produced", "status": "passed"}},
+            *self._release_gate_graph_nodes(root),
             {"record_type": "node", "label": "KnowledgeSource", "id": "KnowledgeSource:chromium-upstream", "properties": {}},
             *[
                 {"record_type": "node", "label": "Platform", "id": f"Platform:{platform['id']}", "properties": self._platform_node_properties(platform)}
@@ -1363,6 +1554,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             root / "knowledge" / "manifests" / "release-gates.json",
             {"release_candidate_required_gates": gates},
         )
+        self._sync_runtime_graph_release_gate_nodes(root)
 
     def _current_artifact_release_gate_evidence(self, root: Path) -> str | None:
         manifest_path = root / "knowledge" / "manifests" / "runtime-artifacts.json"
@@ -1397,6 +1589,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         else:
             self.fail(f"missing release gate {gate_id}")
         self._write_json(release_gates_path, release_gates)
+        self._sync_runtime_graph_release_gate_nodes(root)
 
     def _write_proxy_preflight(
         self,
@@ -1438,6 +1631,71 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "status": status,
             },
         )
+
+    def _write_native_artifact_preflight(
+        self,
+        root: Path,
+        *,
+        runtime_manifest: dict[str, Any] | None = None,
+        platform_overrides: dict[str, dict[str, Any]] | None = None,
+        omit_platforms: set[str] | None = None,
+        release_grade_ready: bool = False,
+    ) -> dict[str, Any]:
+        if runtime_manifest is None:
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(root)
+        if platform_overrides is None:
+            platform_overrides = {}
+        if omit_platforms is None:
+            omit_platforms = set()
+        artifacts_by_platform = {artifact["platform"]: artifact for artifact in runtime_manifest["artifacts"]}
+        supported_platforms = list(runtime_manifest["supported_package_platforms"])
+        platforms: list[dict[str, Any]] = []
+        for platform in supported_platforms:
+            if platform in omit_platforms:
+                continue
+            artifact = artifacts_by_platform.get(platform)
+            entry: dict[str, Any] = {
+                "evidence": [],
+                "missing_prerequisites": ["runtime-artifacts artifact missing"],
+                "platform": platform,
+                "ready": False,
+                "status": "blocked",
+            }
+            if artifact is not None:
+                entry.update(
+                    {
+                        "artifact_id": artifact["artifact_id"],
+                        "evidence": [
+                            f"knowledge/manifests/runtime-artifacts.json:{artifact['artifact_id']}"
+                        ],
+                        "missing_prerequisites": [],
+                        "ready": True,
+                        "status": "ready",
+                    }
+                )
+            entry.update(platform_overrides.get(platform, {}))
+            platforms.append(entry)
+        preflight = {
+            "generated_at": "2026-07-09T00:00:00+00:00",
+            "requirements": [
+                {
+                    "id": "runtime-artifacts-artifact",
+                    "description": "supported package platform has a packaged artifact listed in runtime-artifacts.json",
+                },
+                {
+                    "id": "native-release-evidence",
+                    "description": "native package has release evidence for BrowseForge launch and detector coverage",
+                },
+            ],
+            "platforms": platforms,
+            "release_grade_ready": release_grade_ready,
+            "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json",
+            "runtime_id": runtime_manifest["runtime_id"],
+            "schema_version": "1.0",
+            "supported_package_platforms": supported_platforms,
+        }
+        self._write_json(root / "knowledge" / "manifests" / "native-artifact-preflight.json", preflight)
+        return preflight
 
     def _write_detector_summary(
         self,
