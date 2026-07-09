@@ -1756,6 +1756,45 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIsNotNone(gap, payload["gaps"])
             self.assertIn("BrowserLeaks audio comparison requires both headless and headed", gap["finding"])
 
+    def test_compare_scores_passes_browserleaks_audio_when_headed_counterpart_matches(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            metrics = {
+                "sampleRate": 44100,
+                "length": 44100,
+                "sum": 0.00000072,
+                "sumAbs": 0.00017846,
+            }
+            for display_mode, label in [
+                ("headless", "browserleaks_audio_headless"),
+                ("headed_xvfb", "browserleaks_audio_headed"),
+            ]:
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id="browserleaks",
+                    display_mode=display_mode,
+                    label=label,
+                    results=[
+                        self.browserleaks_audio_summary_result(
+                            detector_check=f"{label}_summary",
+                            metrics=metrics,
+                        )
+                    ],
+                )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            comparison = self.score_comparison(payload, surface="audio", detector_id="browserleaks")
+            self.assertEqual(comparison["comparison_id"], "browserleaks_audio_headless_vs_headed")
+            self.assertEqual(comparison["status"], "pass")
+            self.assertEqual(comparison["metric_deltas"], {"length": 0, "sampleRate": 0, "sum": 0.0, "sumAbs": 0.0})
+            self.assertNotIn(
+                "browserleaks_audio_headless_vs_headed",
+                {gap.get("gap_id") for gap in payload["gaps"]},
+            )
+
     def test_compare_scores_recognizes_matching_font_glyphs_but_warns_on_metric_hash_drift(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

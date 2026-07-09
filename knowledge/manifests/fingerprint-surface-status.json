@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. The native WebAudio source patch keeps AudioBuffer::copyFromChannel offset reads consistent with whole-buffer per-index noise by seeding perturbations from buffer_offset. knowledge/manifests/detector-score-comparison.json compares CreepJS headless/headed audio metrics and now emits explicit BrowserLeaks and Pixelscan headless-vs-headed AudioContext counterpart gaps; Pixelscan currently has headless audio summary only. BrowserLeaks/Pixelscan release-grade score baselines remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. The native WebAudio source patch keeps AudioBuffer::copyFromChannel offset reads consistent with whole-buffer per-index noise by seeding perturbations from buffer_offset. knowledge/manifests/detector-score-comparison.json compares CreepJS headless/headed audio metrics, now records a passing BrowserLeaks headless-vs-headed bounded AudioContext comparison, and still emits an explicit Pixelscan headed AudioContext counterpart gap. BrowserLeaks/Pixelscan release-grade score baselines remain required.",
       "release_blocker": true,
-      "result": "warn_audio_patch_and_pixelscan_gap_tracked",
+      "result": "warn_audio_browserleaks_headed_closed_pixelscan_gap_tracked",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"

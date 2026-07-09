@@ -41,6 +41,21 @@
       "surface": "audio"
     },
     {
+      "comparison_id": "browserleaks_audio_headless_vs_headed",
+      "detector_id": "browserleaks",
+      "finding": "BrowserLeaks bounded AudioContext summaries match across headless/headed evidence.",
+      "left_run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709",
+      "metric_deltas": {
+        "length": 0,
+        "sampleRate": 0,
+        "sum": 0.0,
+        "sumAbs": 0.0
+      },
+      "right_run_id": "detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
       "candidate_count_match": true,
       "comparison_id": "browserleaks_creepjs_font_metrics",
       "finding": "BrowserLeaks/CreepJS font evidence is only partially comparable; release-grade font corpus parity remains required.",
@@ -58,15 +73,6 @@
   "decision": "Offline comparisons summarize committed sanitized evidence only; live release-grade detector baselines remain required before closing AudioContext/fonts blockers, and complete WebGL metadata hashes remain required before WebGL parity claims.",
   "evidence_count": 17,
   "gaps": [
-    {
-      "detector_id": "browserleaks",
-      "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
-      "gap_id": "browserleaks_audio_headless_vs_headed",
-      "missing": [
-        "headed"
-      ],
-      "surface": "audio"
-    },
     {
       "detector_id": "pixelscan",
       "finding": "Pixelscan audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
@@ -187,7 +193,7 @@
       "surface": "webgl"
     }
   ],
-  "generated_at": "2026-07-09T15:39:23.477418+00:00",
+  "generated_at": "2026-07-09T16:25:19.910110+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
