@@ -86,9 +86,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. CreepJS detector metrics extraction now records detector-reported audio metric values from sanitized live page text in both headless and headed Docker/Xvfb modes; knowledge/manifests/detector-score-comparison.json compares those CreepJS audio records and reports only trap differs by 41.678470764144095 while freq/gain/sum/time/unique match, and now carries explicit BrowserLeaks/Pixelscan release-baseline gaps. BrowserLeaks/CreepJS/Pixelscan release-grade baselines and native headed matrix remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors rendered OfflineAudioContext length 44100 at sampleRate 44100 and recorded deterministic sanitized sum/sumAbs/first-sample summaries. The native WebAudio source patch now keeps AudioBuffer::copyFromChannel offset reads consistent with whole-buffer per-index noise by seeding perturbations from buffer_offset. CreepJS detector metrics extraction records detector-reported audio metric values from sanitized live page text in both headless and headed Docker/Xvfb modes; knowledge/manifests/detector-score-comparison.json compares those CreepJS audio records and reports only trap differs by 41.678470764144095 while freq/gain/sum/time/unique match, and carries explicit BrowserLeaks headed-summary, BrowserLeaks score, and Pixelscan release-baseline gaps. BrowserLeaks/CreepJS/Pixelscan release-grade baselines and native headed matrix remain required.",
       "release_blocker": true,
-      "result": "warn_linux_creepjs_headless_headed_audio_comparison_with_baseline_gaps",
+      "result": "warn_linux_audio_offset_consistent_patch_with_baseline_gaps",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"

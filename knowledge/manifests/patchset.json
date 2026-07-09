@@ -454,7 +454,7 @@
         "chromium/src/third_party/blink/renderer/modules/webaudio/audio_buffer.cc",
         "chromium/src/third_party/blink/renderer/modules/webaudio/analyser_node.cc"
       ],
-      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::copyFromChannel now seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-audio-native-noise-override",
       "risk_level": "high",
       "surface": "audio",
