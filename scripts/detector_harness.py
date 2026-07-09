@@ -2,12 +2,18 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import json
+import os
 import re
 import shutil
+import socket
+import struct
 import sys
+import time
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -207,9 +213,214 @@ def summary(args):
     print(args.output)
     return 0
 
+def http_json(url: str):
+    with urllib.request.urlopen(url, timeout=10) as response:
+        return json.loads(response.read())
+
+def ws_connect(url: str):
+    if not url.startswith("ws://"):
+        raise ValueError("only ws:// DevTools endpoints are supported")
+    rest = url[len("ws://"):]
+    hostport, path = rest.split("/", 1)
+    host, port_s = hostport.rsplit(":", 1)
+    sock = socket.create_connection((host, int(port_s)), timeout=10)
+    key = base64.b64encode(os.urandom(16)).decode()
+    request = (
+        f"GET /{path} HTTP/1.1\r\n"
+        f"Host: {hostport}\r\n"
+        "Upgrade: websocket\r\n"
+        "Connection: Upgrade\r\n"
+        f"Sec-WebSocket-Key: {key}\r\n"
+        "Sec-WebSocket-Version: 13\r\n\r\n"
+    )
+    sock.sendall(request.encode())
+    data = b""
+    while b"\r\n\r\n" not in data:
+        chunk = sock.recv(4096)
+        if not chunk:
+            raise EOFError("websocket handshake closed")
+        data += chunk
+    if b" 101 " not in data.split(b"\r\n", 1)[0]:
+        raise RuntimeError(data.decode(errors="replace"))
+    return sock
+
+def ws_send(sock: socket.socket, payload: object) -> None:
+    body = json.dumps(payload, separators=(",", ":")).encode()
+    mask = os.urandom(4)
+    header = bytearray([0x81])
+    n = len(body)
+    if n < 126:
+        header.append(0x80 | n)
+    elif n < 65536:
+        header.append(0x80 | 126)
+        header.extend(struct.pack("!H", n))
+    else:
+        header.append(0x80 | 127)
+        header.extend(struct.pack("!Q", n))
+    sock.sendall(bytes(header) + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(body)))
+
+def ws_recv(sock: socket.socket):
+    header = sock.recv(2)
+    if not header:
+        raise EOFError("websocket closed")
+    b1, b2 = header
+    opcode = b1 & 0x0F
+    masked = b2 & 0x80
+    n = b2 & 0x7F
+    if n == 126:
+        n = struct.unpack("!H", sock.recv(2))[0]
+    elif n == 127:
+        n = struct.unpack("!Q", sock.recv(8))[0]
+    mask = sock.recv(4) if masked else b""
+    data = b""
+    while len(data) < n:
+        chunk = sock.recv(n - len(data))
+        if not chunk:
+            raise EOFError("websocket frame truncated")
+        data += chunk
+    if masked:
+        data = bytes(b ^ mask[i % 4] for i, b in enumerate(data))
+    if opcode == 8:
+        raise EOFError("websocket closed")
+    if opcode == 9:
+        return ws_recv(sock)
+    return json.loads(data.decode())
+
+class CDPClient:
+    def __init__(self, ws_url: str):
+        self.sock = ws_connect(ws_url)
+        self.next_id = 1
+
+    def call(self, method: str, params: dict | None = None, *, session_id: str | None = None, timeout: int = 20):
+        msg_id = self.next_id
+        self.next_id += 1
+        payload = {"id": msg_id, "method": method}
+        if params is not None:
+            payload["params"] = params
+        if session_id is not None:
+            payload["sessionId"] = session_id
+        ws_send(self.sock, payload)
+        end = time.time() + timeout
+        events = []
+        while time.time() < end:
+            self.sock.settimeout(max(0.1, end - time.time()))
+            message = ws_recv(self.sock)
+            if message.get("id") == msg_id:
+                if "error" in message:
+                    raise RuntimeError(message["error"])
+                return message.get("result", {}), events
+            events.append(message)
+        raise TimeoutError(method)
+
+    def events_until(self, predicate, *, timeout: int = 30):
+        end = time.time() + timeout
+        events = []
+        while time.time() < end:
+            self.sock.settimeout(max(0.1, end - time.time()))
+            msg = ws_recv(self.sock)
+            events.append(msg)
+            if predicate(msg):
+                return events
+        return events
+
+def classify_sannysoft(value: dict) -> tuple[str, str, str]:
+    text = value.get("text", "")
+    ua = value.get("ua", "")
+    webdriver_false = value.get("webdriver") is False
+    webdriver_missing = re.search(r"webdriver\s*\(new\)\s*missing", text, re.IGNORECASE) is not None
+    webdriver_present = re.search(r"webdriver\s*\(new\)\s*present|webdriver\s+present\s*:?\s*true", text, re.IGNORECASE) is not None
+    if webdriver_false and webdriver_missing and "HeadlessChrome" not in ua:
+        return "passed", "SannySoft loaded; webdriver is false and configured UA does not expose HeadlessChrome.", "low"
+    if webdriver_false and webdriver_missing:
+        return "warning", "SannySoft loaded; webdriver is false, but UA still exposes HeadlessChrome.", "medium"
+    if webdriver_present:
+        return "failed", "SannySoft page text reports webdriver exposure.", "high"
+    return "warning", "SannySoft loaded; manual review required because no site-specific table parser matched.", "medium"
+
+def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int):
+    target, _ = cdp.call("Target.createTarget", {"url": "about:blank"})
+    target_id = target["targetId"]
+    attached, _ = cdp.call("Target.attachToTarget", {"targetId": target_id, "flatten": True})
+    session_id = attached["sessionId"]
+    cdp.call("Page.enable", session_id=session_id)
+    cdp.call("Runtime.enable", session_id=session_id)
+    started = time.time()
+    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=10)
+    cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
+    time.sleep(wait_seconds)
+    expr = """
+(() => {
+  const text = (document.body && document.body.innerText || '').slice(0, 12000);
+  const title = document.title;
+  const ua = navigator.userAgent;
+  const webdriver = navigator.webdriver;
+  const platform = navigator.platform;
+  const languages = navigator.languages;
+  const hw = navigator.hardwareConcurrency;
+  const dm = navigator.deviceMemory;
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const screenData = {
+    width: screen.width,
+    height: screen.height,
+    availWidth: screen.availWidth,
+    availHeight: screen.availHeight,
+    devicePixelRatio: window.devicePixelRatio,
+  };
+  const gl = (() => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!ctx) return null;
+    const ext = ctx.getExtension('WEBGL_debug_renderer_info');
+    return ext ? {vendor: ctx.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL)} : null;
+  })();
+  return {title, url: location.href, text, ua, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, webgl: gl};
+})()
+"""
+    result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)
+    value = result.get("result", {}).get("value", {})
+    elapsed = round(time.time() - started, 2)
+    cdp.call("Target.closeTarget", {"targetId": target_id}, timeout=5)
+    text = value.pop("text", "")
+    status, finding, severity = classify_sannysoft({**value, "text": text}) if detector_id == "sannysoft" else ("warning", "Detector loaded; manual review required.", "medium")
+    value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
+    value["text_excerpt"] = " ".join(text.split())[:800]
+    value["elapsed_seconds"] = elapsed
+    return {
+        "detector_id": detector_id,
+        "name": name,
+        "url": url,
+        "status": status,
+        "failure_mode": "none",
+        "finding": finding,
+        "severity": severity,
+        "observed": value,
+    }
+
+SUPPORTED_COLLECTORS = {
+    "sannysoft": ("SannySoft", "https://bot.sannysoft.com/"),
+}
+
 def collect(args):
-    print("live detector collection requires an explicit browser binary and a future live collector implementation", file=sys.stderr)
-    return EXIT_COLLECT_UNAVAILABLE
+    if args.detector not in SUPPORTED_COLLECTORS:
+        print(f"collector not implemented for detector: {args.detector}", file=sys.stderr)
+        return EXIT_COLLECT_UNAVAILABLE
+    try:
+        version = http_json(args.cdp_url.rstrip("/") + "/json/version")
+        cdp = CDPClient(version["webSocketDebuggerUrl"])
+        name, url = SUPPORTED_COLLECTORS[args.detector]
+        payload = {
+            "browser": version,
+            "records": [collect_page(cdp, args.detector, name, url, wait_seconds=args.wait_seconds)],
+        }
+    except Exception as err:
+        print(f"collect failed: {err}", file=sys.stderr)
+        return EXIT_COLLECT_UNAVAILABLE
+    out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        Path(args.output).write_text(out, encoding="utf-8")
+    else:
+        print(out, end="")
+    return 0
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
@@ -219,7 +430,7 @@ def main(argv=None):
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.set_defaults(func=summary)
-    p = sub.add_parser("collect"); p.set_defaults(func=collect)
+    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)
 

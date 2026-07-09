@@ -95,6 +95,22 @@
       "severity": "low",
       "status": "pass",
       "surface": "user_agent"
+    },
+    {
+      "detector_check": "screen_window_dpr",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Live detector context reported configured 1920x1080 screen, 1920x1040 available screen, and devicePixelRatio=1.",
+      "normalized_values": {
+        "availHeight": 1040,
+        "availWidth": 1920,
+        "devicePixelRatio": 1,
+        "height": 1080,
+        "width": 1920
+      },
+      "raw_value_hash": "10d13e6bb9278d18f8f5d26a908a74156521bb5bdcade656c9d3dfa542359f0a",
+      "severity": "low",
+      "status": "pass",
+      "surface": "screen"
     }
   ],
   "run_id": "detrun_linux_x64_sannysoft_headless_docker_direct_20260709",
@@ -104,10 +120,10 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run uses the configured Linux Chrome UA to exercise the source-level UA and UA-CH patch path.",
+    "notes": "Raw page text is not committed; sanitized excerpt and hashes keep no IP, cookie, storage, or screenshot data. This run was collected by scripts/detector_harness.py collect against packaged Linux Chromium via CDP.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
-    "sanitizer_version": "manual-sannysoft-smoke-3",
+    "sanitizer_version": "source-detector-harness-sannysoft-1",
     "screenshot_metadata_redacted": true,
     "tokens_redacted": true
   },
@@ -115,8 +131,8 @@
   "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-    "raw_capture_sha256": "ed7250e0e26e2ba6bd980cefdebcbc49c9343173bc61f851c7c4f475b984d495",
-    "sha256": "584992fc9b6aecef7315398991bb496e5f270465853b13300a3938bfd3882b71",
+    "raw_capture_sha256": "eee252ae0457b186a201ee8485eeb37cb45b8a4c08cb419467b24ad02d321bdd",
+    "sha256": "1bac661595a23be2f60b1cb674723273241973f93d56f9beffa522505d954df3",
     "summary_path": "detector-summary.json"
   },
   "target": {
@@ -132,5 +148,5 @@
     "proxy_region_redacted": "none",
     "timezone_profile": "Asia/Taipei"
   },
-  "tested_at": "2026-07-09T03:54:42.724617+00:00"
+  "tested_at": "2026-07-09T04:08:25.238992+00:00"
 }

@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import subprocess
 import sys
@@ -8,9 +9,73 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HARNESS = ROOT / "scripts" / "detector_harness.py"
 
+def load_harness_module():
+    spec = importlib.util.spec_from_file_location("detector_harness", HARNESS)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class DetectorHarnessTests(unittest.TestCase):
     def run_harness(self, *args):
         return subprocess.run([sys.executable, str(HARNESS), *args], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.harness_module = load_harness_module()
+
+    def test_classify_sannysoft_maps_automation_signals_to_statuses(self):
+        cases = [
+            {
+                "name": "passes when webdriver is false, row is missing, and UA is headed",
+                "value": {
+                    "text": "WebDriver (New) missing\nChrome (New) present",
+                    "webdriver": False,
+                    "ua": "Mozilla/5.0 AppleWebKit/537.36 Chrome/126.0.0.0 Safari/537.36",
+                },
+                "expected": ("passed", "low"),
+                "finding": "webdriver is false",
+            },
+            {
+                "name": "warns when HeadlessChrome remains in the UA",
+                "value": {
+                    "text": "WebDriver (New) missing\nChrome (New) present",
+                    "webdriver": False,
+                    "ua": "Mozilla/5.0 AppleWebKit/537.36 HeadlessChrome/126.0.0.0 Safari/537.36",
+                },
+                "expected": ("warning", "medium"),
+                "finding": "HeadlessChrome",
+            },
+            {
+                "name": "fails when page text reports webdriver exposure",
+                "value": {
+                    "text": "Webdriver present: true\nChrome (New) present",
+                    "webdriver": True,
+                    "ua": "Mozilla/5.0 AppleWebKit/537.36 Chrome/126.0.0.0 Safari/537.36",
+                },
+                "expected": ("failed", "high"),
+                "finding": "webdriver exposure",
+            },
+        ]
+        for case in cases:
+            with self.subTest(case["name"]):
+                status, finding, severity = self.harness_module.classify_sannysoft(case["value"])
+                self.assertEqual((status, severity), case["expected"])
+                self.assertIn(case["finding"], finding)
+
+    def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
+        proc = self.run_harness(
+            "collect",
+            "--detector",
+            "creepjs",
+            "--cdp-url",
+            "http://127.0.0.1:9",
+            "--wait-seconds",
+            "0",
+        )
+        self.assertEqual(proc.returncode, self.harness_module.EXIT_COLLECT_UNAVAILABLE)
+        self.assertEqual(proc.stdout, "")
+        self.assertIn("collector not implemented for detector: creepjs", proc.stderr)
 
     def test_list_targets_reads_current_manifest(self):
         proc = self.run_harness("list-targets")

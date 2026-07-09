@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, hardware, and WebGL configured values, but full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, screen, hardware, and WebGL configured values, but full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -54,11 +54,11 @@
       "surface": "locale"
     },
     {
-      "evidence": "No BrowserLeaks/CreepJS screen/window/DPR row was completed.",
-      "release_blocker": true,
-      "result": "not_tested",
-      "severity": "high",
-      "status": "blocked",
+      "evidence": "Linux packaged SannySoft/CDP smoke collected by scripts/detector_harness.py reported screen 1920x1080, available screen 1920x1040, and DPR=1 from configured fingerprint profile.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
       "surface": "screen/window/DPR"
     },
     {
