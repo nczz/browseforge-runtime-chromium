@@ -54,15 +54,25 @@ def apply_patch(src: Path) -> list[Path]:
         path.write_text(patched, encoding="utf-8")
     return [PROCESS_LINUX_CC]
 
+def check_patch(src: Path) -> list[Path]:
+    validate_chromium_src(src)
+    path = src / PROCESS_LINUX_CC
+    patch_process_linux(path.read_text(encoding="utf-8"))
+    return [PROCESS_LINUX_CC]
+
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--chromium-src", type=Path, default=DEFAULT_CHROMIUM_SRC)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    changed = apply_patch(args.chromium_src)
     if args.check:
-        print("process priority patch ready:", ", ".join(str(p) for p in changed))
+        checked = check_patch(args.chromium_src)
+        print("process priority patch ready:", ", ".join(str(p) for p in checked))
+        return 0
+    for path in apply_patch(args.chromium_src):
+        print(path.as_posix())
     return 0
 
 

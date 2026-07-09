@@ -105,7 +105,7 @@
   "toolchain": {
     "automation": {
       "apply_scaffold_script": "scripts/apply_stealth_scaffold.py",
-      "check_contract": "python3 scripts/chromium_source.py check reports tool paths, checkout presence, chromium_src_head, and chromium_src_matches_manifest against the manifest base_commit.",
+      "check_contract": "python3 scripts/chromium_source.py check reports tool paths, checkout presence, chromium_src_head, chromium_src_matches_manifest, and aggregate native patch/scaffold --check status against the manifest base_commit.",
       "default_git_cache": "/Users/chun/Projects/browser-source/git-cache",
       "default_workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
       "docker_base_image": "browseforge/chromium-build:ubuntu22",

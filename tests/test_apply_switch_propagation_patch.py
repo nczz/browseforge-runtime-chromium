@@ -15,6 +15,15 @@ apply_switch_propagation_patch = importlib.util.module_from_spec(spec)
 sys.modules["apply_switch_propagation_patch"] = apply_switch_propagation_patch
 spec.loader.exec_module(apply_switch_propagation_patch)
 
+
+def run_main_with_args(args: list[str]) -> int:
+    original_argv = sys.argv
+    try:
+        sys.argv = [str(SCRIPT), *args]
+        return apply_switch_propagation_patch.main()
+    finally:
+        sys.argv = original_argv
+
 RENDER_HOST_FIXTURE = '''void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
     const base::CommandLine& browser_cmd,
     base::CommandLine* renderer_cmd) {
@@ -52,6 +61,17 @@ class ApplySwitchPropagationPatchTests(unittest.TestCase):
             self.assertEqual([apply_switch_propagation_patch.RENDER_PROCESS_HOST_IMPL_CC], changed)
             text = path.read_text(encoding="utf-8")
             self.assertIn('"fingerprint-timezone"', text)
+
+    def test_check_mode_validates_without_mutating_external_checkout_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "src"
+            path = src / apply_switch_propagation_patch.RENDER_PROCESS_HOST_IMPL_CC
+            path.parent.mkdir(parents=True)
+            (src / ".git").mkdir()
+            path.write_text(RENDER_HOST_FIXTURE, encoding="utf-8")
+            result = run_main_with_args(["--chromium-src", str(src), "--check"])
+            self.assertEqual(0, result)
+            self.assertEqual(RENDER_HOST_FIXTURE, path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

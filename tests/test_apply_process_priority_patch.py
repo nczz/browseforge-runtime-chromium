@@ -68,6 +68,17 @@ class ApplyProcessPriorityPatchTests(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             self.assertIn("BrowseForge: setpriority failed", text)
 
+    def test_check_patch_validates_without_mutating_external_checkout_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "src"
+            path = src / apply_process_priority_patch.PROCESS_LINUX_CC
+            path.parent.mkdir(parents=True)
+            (src / ".git").mkdir()
+            path.write_text(PROCESS_LINUX_FIXTURE, encoding="utf-8")
+            checked = apply_process_priority_patch.check_patch(src)
+            self.assertEqual([apply_process_priority_patch.PROCESS_LINUX_CC], checked)
+            self.assertEqual(PROCESS_LINUX_FIXTURE, path.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

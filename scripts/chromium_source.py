@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Sequence
@@ -14,6 +15,99 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "knowledge" / "manifests" / "source-acquisition.json"
 DEFAULT_WORKDIR = Path(os.environ.get("BROWSEFORGE_CHROMIUM_WORKDIR", "/Users/chun/Projects/browser-source/browseforge-chromium"))
 DEFAULT_GIT_CACHE = Path(os.environ.get("GIT_CACHE_PATH", "/Users/chun/Projects/browser-source/git-cache"))
+
+PATCH_CHECKS = [
+    {
+        "patch_id": "scaffold-browseforge-stealth-substrate",
+        "surface": "stealth_substrate",
+        "script": "scripts/apply_stealth_scaffold.py",
+    },
+    {
+        "patch_id": "surface-webdriver-native-gate",
+        "surface": "automation_webdriver",
+        "script": "scripts/apply_webdriver_patch.py",
+    },
+    {
+        "patch_id": "surface-hardware-native-overrides",
+        "surface": "hardware",
+        "script": "scripts/apply_hardware_patch.py",
+    },
+    {
+        "patch_id": "surface-screen-native-overrides",
+        "surface": "screen",
+        "script": "scripts/apply_screen_patch.py",
+    },
+    {
+        "patch_id": "surface-platform-native-override",
+        "surface": "platform",
+        "script": "scripts/apply_platform_patch.py",
+    },
+    {
+        "patch_id": "surface-timezone-native-override",
+        "surface": "timezone",
+        "script": "scripts/apply_timezone_patch.py",
+    },
+    {
+        "patch_id": "surface-locale-native-override",
+        "surface": "locale",
+        "script": "scripts/apply_locale_patch.py",
+    },
+    {
+        "patch_id": "surface-user-agent-native-overrides",
+        "surface": "user_agent",
+        "script": "scripts/apply_user_agent_patch.py",
+    },
+    {
+        "patch_id": "surface-storage-quota-native-override",
+        "surface": "storage_quota",
+        "script": "scripts/apply_storage_quota_patch.py",
+    },
+    {
+        "patch_id": "surface-plugins-pdf-native-override",
+        "surface": "plugins_pdf",
+        "script": "scripts/apply_plugins_patch.py",
+    },
+    {
+        "patch_id": "surface-webrtc-ice-candidate-native-override",
+        "surface": "webrtc",
+        "script": "scripts/apply_webrtc_patch.py",
+    },
+    {
+        "patch_id": "surface-audio-native-noise-override",
+        "surface": "audio",
+        "script": "scripts/apply_audio_patch.py",
+    },
+    {
+        "patch_id": "surface-canvas-native-noise-override",
+        "surface": "canvas",
+        "script": "scripts/apply_canvas_patch.py",
+    },
+    {
+        "patch_id": "surface-webgl-vendor-renderer-native-override",
+        "surface": "webgl",
+        "script": "scripts/apply_webgl_patch.py",
+    },
+    {
+        "patch_id": "surface-feature-parity-native-defaults",
+        "surface": "permissions_features",
+        "script": "scripts/apply_feature_parity_patch.py",
+    },
+    {
+        "patch_id": "surface-font-face-set-native-list-override",
+        "surface": "fonts",
+        "script": "scripts/apply_fonts_patch.py",
+    },
+    {
+        "patch_id": "surface-process-priority-native-adjustment",
+        "surface": "process_priority",
+        "script": "scripts/apply_process_priority_patch.py",
+    },
+    {
+        "patch_id": "surface-switch-propagation-native-audit",
+        "surface": "switch_propagation",
+        "script": "scripts/apply_switch_propagation_patch.py",
+    },
+]
 
 
 @dataclass(frozen=True)
@@ -54,6 +148,7 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
         runtime_id=manifest["runtime_id"],
         base_version=chromium["base_version"],
         base_ref=chromium["base_ref"],
+
         base_commit=chromium["base_commit"],
         workdir=str(workdir),
         depot_tools_dir=str(depot_tools),
@@ -120,6 +215,55 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
             ),
         ],
     )
+
+def _bounded_message(text: str, *, limit: int = 500) -> str:
+    normalized = " ".join(text.split())
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[:limit].rstrip() + "…"
+
+
+def check_patches(plan: SourcePlan, runner=subprocess.run) -> dict:
+    chromium_src = Path(plan.chromium_src_dir)
+    checks = []
+    for patch in PATCH_CHECKS:
+        command = [
+            sys.executable,
+            patch["script"],
+            "--chromium-src",
+            str(chromium_src),
+            "--check",
+        ]
+        try:
+            result = runner(
+                command,
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+            returncode = result.returncode
+            message = _bounded_message((result.stdout or "") + " " + (result.stderr or ""))
+        except OSError as err:
+            returncode = 127
+            message = _bounded_message(str(err))
+        checks.append(
+            {
+                "script_path": patch["script"],
+                "patch_id": patch["patch_id"],
+                "surface": patch["surface"],
+                "command": command,
+                "ok": returncode == 0,
+                "returncode": returncode,
+                "message": message,
+            }
+        )
+    return {
+        "all_ok": all(check["ok"] for check in checks),
+        "checks": checks,
+    }
+
 def git_head(src: Path) -> str | None:
     if not (src / ".git").exists():
         return None
@@ -186,7 +330,7 @@ def main() -> None:
         emit_json(asdict(plan))
         return
     if args.command == "check":
-        emit_json({"plan": asdict(plan), "tools": check_tools(plan)})
+        emit_json({"plan": asdict(plan), "tools": check_tools(plan), "patches": check_patches(plan)})
         return
     if not args.execute:
         raise SystemExit("acquire requires --execute because Chromium checkout/build dependencies are large")

@@ -628,6 +628,65 @@
       "title": "BrowseForge FontFaceSet font availability native list override for Chromium M150",
       "upstream_status": "applied_to_external_checkout_not_release_built"
     }
+    ,
+    {
+      "detectors_addressed": [
+        "browserleaks",
+        "creepjs",
+        "pixelscan"
+      ],
+      "files_touched": [
+        "scripts/apply_process_priority_patch.py",
+        "tests/test_apply_process_priority_patch.py",
+        "chromium/src/base/process/process_linux.cc"
+      ],
+      "notes": "Replaces Linux setpriority DPCHECK hard-fail behavior with a warning so containerized/headless BrowseForge Chromium runs do not crash when the host disallows priority changes. This is a launch stability mitigation for detector collection and does not claim a fingerprint surface pass.",
+      "patchset_id": "surface-process-priority-native-adjustment",
+      "risk_level": "medium",
+      "surface": "process_priority",
+      "symbols_touched": [
+        "base::Process::SetPriority",
+        "PLOG(WARNING)"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_process_priority_patch",
+        "python3 scripts/apply_process_priority_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "title": "BrowseForge Linux process-priority failure warning for Chromium M150",
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "detectors_addressed": [
+        "browserleaks",
+        "creepjs",
+        "pixelscan",
+        "browserscan",
+        "sannysoft"
+      ],
+      "files_touched": [
+        "scripts/apply_switch_propagation_patch.py",
+        "tests/test_apply_switch_propagation_patch.py",
+        "chromium/src/content/browser/renderer_host/render_process_host_impl.cc"
+      ],
+      "notes": "Adds BrowseForge fingerprint and stealth command-line switches to Chromium's browser-to-renderer switch allowlist so Blink-side native patches can observe the browser-owned persona values in renderer processes. Without this patch, source-level surface overrides may compile but never receive profile-specific inputs.",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "risk_level": "high",
+      "surface": "switch_propagation",
+      "symbols_touched": [
+        "content::RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer",
+        "kSwitchNames",
+        "browseforge-stealth-mode",
+        "fingerprint-*"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_switch_propagation_patch",
+        "python3 scripts/apply_switch_propagation_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "title": "BrowseForge renderer switch propagation allowlist for Chromium M150",
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    }
   ],
   "policy": {
     "critical_risk_patch_requires_release_owner_approval": true,

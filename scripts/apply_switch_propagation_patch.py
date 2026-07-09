@@ -71,15 +71,25 @@ def apply_patch(src: Path) -> list[Path]:
         path.write_text(patched, encoding="utf-8")
     return [RENDER_PROCESS_HOST_IMPL_CC]
 
+def check_patch(src: Path) -> list[Path]:
+    validate_chromium_src(src)
+    path = src / RENDER_PROCESS_HOST_IMPL_CC
+    patch_switch_propagation(path.read_text(encoding="utf-8"))
+    return [RENDER_PROCESS_HOST_IMPL_CC]
+
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--chromium-src", type=Path, default=DEFAULT_CHROMIUM_SRC)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    changed = apply_patch(args.chromium_src.resolve())
     if args.check:
-        print("switch propagation patch ready:", ", ".join(str(p) for p in changed))
+        checked = check_patch(args.chromium_src.resolve())
+        print("switch propagation patch ready:", ", ".join(str(p) for p in checked))
+        return 0
+    for path in apply_patch(args.chromium_src.resolve()):
+        print(path.as_posix())
     return 0
 
 
