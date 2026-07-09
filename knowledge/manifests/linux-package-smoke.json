@@ -67,15 +67,18 @@
       "command": "docker linux/amd64 packaged runtime + CDP navigate https://bot.sannysoft.com/",
       "observed": {
         "browser_crash_regression_fixed": true,
+        "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
         "deviceMemory": 8,
         "devtools_navigation_completed": true,
         "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
         "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
         "languages": [
           "zh-TW",
           "zh;q=0.9",
           "en;q=0.8"
         ],
+        "navigator_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
         "navigator_webdriver": false,
         "timezone": "Asia/Taipei",
         "webgl": {
@@ -83,7 +86,7 @@
           "vendor": "Intel Inc."
         }
       },
-      "status": "passed_with_findings"
+      "status": "passed"
     }
   ],
   "limitations": [

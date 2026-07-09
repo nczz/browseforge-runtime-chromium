@@ -1,8 +1,4 @@
 {
-  "schema_version": "1.0",
-  "runtime_id": "browseforge-chromium",
-  "scope": "local_dogfood_only",
-  "release_grade": false,
   "allowed_status_values": [
     "not_started",
     "designed",
@@ -11,155 +7,161 @@
     "accepted",
     "blocked"
   ],
-  "updated_from": [
-    "detectors/local-sannysoft-dogfood.sanitized.json",
-    "knowledge/manifests/local-dogfood.json"
-  ],
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Source-level Linux SannySoft smoke now passes UA, webdriver, locale/timezone, hardware, and WebGL configured values, but full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona headed matrix is not complete.",
+  "release_grade": false,
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "scope": "source_level_linux_headless_detector_smoke_plus_local_dogfood",
   "surfaces": [
     {
-      "surface": "UA",
-      "status": "detector_tested",
-      "result": "pass_dogfood_sannysoft",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported configured Chrome/150 UA without HeadlessChrome in navigator.userAgent and Browser.getVersion; full UA-CH detector matrix remains required.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
       "severity": "info",
-      "evidence": "SannySoft local dogfood rerun observed Chrome UA and PHANTOM_UA ok; release-grade UA/client-hints coherence still requires full detector matrix.",
-      "release_blocker": false
+      "status": "detector_tested",
+      "surface": "UA"
     },
     {
-      "surface": "Client Hints",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "No BrowserLeaks/Pixelscan client-hints run was executed.",
-      "release_blocker": true
+      "evidence": "Source-level UA-CH override exists in navigator_ua.cc patch, but no BrowserLeaks/Pixelscan client-hints row has been completed.",
+      "release_blocker": true,
+      "result": "needs_browserleaks_pixelscan",
+      "severity": "medium",
+      "status": "implemented",
+      "surface": "Client Hints"
     },
     {
-      "surface": "platform",
-      "status": "detector_tested",
-      "result": "pass_dogfood_sannysoft",
-      "severity": "info",
       "evidence": "SannySoft local dogfood rerun observed MacIntel platform on macOS host; release-grade cross-platform persona coherence remains unproven.",
-      "release_blocker": false
-    },
-    {
-      "surface": "timezone",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "No timezone/proxy-country coherence detector row was completed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "locale",
-      "status": "detector_tested",
+      "release_blocker": false,
       "result": "pass_dogfood_sannysoft",
       "severity": "info",
-      "evidence": "SannySoft local dogfood rerun captured zh-TW, zh, en-US, en language list.",
-      "release_blocker": false
-    },
-    {
-      "surface": "screen/window/DPR",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "No BrowserLeaks/CreepJS screen/window/DPR row was completed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "hardwareConcurrency/deviceMemory",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "No detector row captured hardwareConcurrency/deviceMemory coherence.",
-      "release_blocker": true
-    },
-    {
-      "surface": "Canvas",
       "status": "detector_tested",
+      "surface": "platform"
+    },
+    {
+      "evidence": "Linux packaged SannySoft/CDP smoke reported Intl timezone Asia/Taipei with wrapper TZ propagation plus renderer switch propagation.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
+      "surface": "timezone"
+    },
+    {
+      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
+      "surface": "locale"
+    },
+    {
+      "evidence": "No BrowserLeaks/CreepJS screen/window/DPR row was completed.",
+      "release_blocker": true,
+      "result": "not_tested",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "screen/window/DPR"
+    },
+    {
+      "evidence": "Linux packaged SannySoft/CDP smoke reported hardwareConcurrency=8 and deviceMemory=8 from configured fingerprint profile.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
+      "surface": "hardwareConcurrency/deviceMemory"
+    },
+    {
+      "evidence": "SannySoft local dogfood rerun captured stable Canvas1..Canvas5 hashes; no generated target persona or cross-session noise comparison was performed.",
+      "release_blocker": true,
       "result": "warn_unscored",
       "severity": "low",
-      "evidence": "SannySoft local dogfood rerun captured stable Canvas1..Canvas5 hashes; no generated target persona or cross-session noise comparison was performed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "WebGL vendor/renderer",
       "status": "detector_tested",
-      "result": "warn_unscored",
-      "severity": "medium",
-      "evidence": "SannySoft local dogfood rerun captured host Apple/ANGLE WebGL renderer coherent with macOS dogfood, but no generated target persona comparison was performed.",
-      "release_blocker": true
+      "surface": "Canvas"
     },
     {
-      "surface": "AudioContext",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported Intel Inc. / Intel Iris OpenGL Engine from configured fingerprint profile.",
+      "release_blocker": false,
+      "result": "pass_linux_sannysoft",
+      "severity": "info",
+      "status": "detector_tested",
+      "surface": "WebGL vendor/renderer"
+    },
+    {
       "evidence": "No BrowserLeaks/CreepJS/BrowserScan audio row was completed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "fonts",
-      "status": "blocked",
+      "release_blocker": true,
       "result": "not_tested",
       "severity": "high",
-      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font row was completed.",
-      "release_blocker": true
+      "status": "blocked",
+      "surface": "AudioContext"
     },
     {
-      "surface": "WebRTC",
-      "status": "detector_tested",
+      "evidence": "No BrowserLeaks/CreepJS/Pixelscan font row was completed.",
+      "release_blocker": true,
+      "result": "not_tested",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "fonts"
+    },
+    {
+      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed.",
+      "release_blocker": false,
       "result": "pass_dogfood_creepjs",
       "severity": "info",
-      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed.",
-      "release_blocker": false
+      "status": "detector_tested",
+      "surface": "WebRTC"
     },
     {
-      "surface": "permissions",
-      "status": "detector_tested",
+      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok; broader CreepJS/BrowserLeaks permissions coverage remains absent.",
+      "release_blocker": false,
       "result": "pass_dogfood_sannysoft",
       "severity": "info",
-      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok; broader CreepJS/BrowserLeaks permissions coverage remains absent.",
-      "release_blocker": false
-    },
-    {
-      "surface": "storage quota",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "No BrowserScan storage/incognito row was completed.",
-      "release_blocker": true
-    },
-    {
-      "surface": "automation/headless/CDP",
       "status": "detector_tested",
-      "result": "mixed_sannysoft_pass_creepjs_warn",
-      "severity": "high",
-      "evidence": "SannySoft local dogfood rerun reported WebDriver missing and automation rows passed; CreepJS local smoke still reported headless-likeness percentages, so full automation/headless resistance is not accepted.",
-      "release_blocker": true
+      "surface": "permissions"
     },
     {
-      "surface": "proxy/IP coherence",
-      "status": "blocked",
+      "evidence": "No BrowserScan storage/incognito row was completed.",
+      "release_blocker": true,
       "result": "not_tested",
       "severity": "high",
-      "evidence": "No proxy detector run was executed.",
-      "release_blocker": true
+      "status": "blocked",
+      "surface": "storage quota"
     },
     {
-      "surface": "profile persistence",
-      "status": "implemented",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported navigator.webdriver=false and WebDriver row missing/passed; broader CreepJS/headed headless-resistance evidence remains required.",
+      "release_blocker": true,
+      "result": "pass_linux_sannysoft_headless",
+      "severity": "medium",
+      "status": "detector_tested",
+      "surface": "automation/headless/CDP"
+    },
+    {
+      "evidence": "No proxy detector run was executed.",
+      "release_blocker": true,
+      "result": "not_tested",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "proxy/IP coherence"
+    },
+    {
+      "evidence": "BrowseForge dogfood used distinct profile IDs and isolated same-origin localStorage across two sessions.",
+      "release_blocker": false,
       "result": "pass_dogfood",
       "severity": "info",
-      "evidence": "BrowseForge dogfood used distinct profile IDs and isolated same-origin localStorage across two sessions.",
-      "release_blocker": false
+      "status": "implemented",
+      "surface": "profile persistence"
     },
     {
-      "surface": "cross-platform drift",
-      "status": "blocked",
-      "result": "not_tested",
-      "severity": "high",
-      "evidence": "Only macOS arm64 local Chrome dogfood was exercised; no Linux/Windows detector evidence exists.",
-      "release_blocker": true
+      "evidence": "Linux x64 Docker SannySoft smoke now exists, in addition to macOS dogfood; Windows and headed Linux/macOS detector matrix remains absent.",
+      "release_blocker": true,
+      "result": "linux_headless_only",
+      "severity": "medium",
+      "status": "detector_tested",
+      "surface": "cross-platform drift"
     }
   ],
-  "decision": "Keep release-grade live-detector-evidence gate blocked. Local SannySoft WebDriver failure is fixed and CreepJS WebRTC candidates are blocked in dogfood, but CreepJS still reports headless-likeness and full BrowserLeaks/CreepJS/Pixelscan/iphey/BrowserScan/proxy/persona matrix is not complete."
+  "updated_from": [
+    "detectors/local-sannysoft-dogfood.sanitized.json",
+    "knowledge/manifests/local-dogfood.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+    "knowledge/manifests/linux-package-smoke.json"
+  ]
 }

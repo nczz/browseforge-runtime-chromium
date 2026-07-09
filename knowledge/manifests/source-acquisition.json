@@ -79,7 +79,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and a patched Linux x64 runtime artifact was packaged. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
@@ -91,7 +91,7 @@
     "webgl_patch_status": "applied_to_external_checkout",
     "webrtc_patch_status": "applied_to_external_checkout"
   },
-  "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; keep the live detector gate blocked until BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence exists.",
+  "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {
     "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "reason": "Existing local Chrome can exercise BrowseForge Chromium-family launch wiring, but it is not the selected Chromium base, not patched, and not a BrowseForge runtime release artifact.",
@@ -99,7 +99,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records the patched Linux x64 runtime artifact. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {

@@ -26,22 +26,22 @@
       "status": "passed"
     },
     {
-      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority patches.",
+      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation patches.",
       "gate_id": "chromium-source-indexed",
       "status": "passed"
     },
     {
-      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 ee95af2f7c4b3221554ad580746dd8b56f5a077b83a6fec37518bfd71bf07fb8 and size 567794441 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools /json/version and SannySoft navigation completed using knowledge/manifests/linux-package-smoke.json.",
+      "evidence": "python3 scripts/package_linux_runtime.py --execute produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9 and size 567797341 bytes; docker linux/amd64 packaged smoke reached Chrome/150.0.7871.101 DevTools /json/version and SannySoft navigation completed using knowledge/manifests/linux-package-smoke.json.",
       "gate_id": "runtime-artifact-produced",
       "status": "passed"
     },
     {
-      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json. It verifies navigator.webdriver=false but fails locale/timezone, hardware, WebGL, and headless UA expectations; release-grade headed BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required.",
+      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json. It verifies navigator.webdriver=false, configured Chrome UA without HeadlessChrome, zh-TW languages, Asia/Taipei timezone, hardwareConcurrency/deviceMemory=8, and Intel WebGL vendor/renderer. Release-grade headed BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required.",
       "gate_id": "live-detector-evidence",
-      "status": "failed"
+      "status": "warning"
     },
     {
-      "evidence": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and dist/checksums.txt records the artifact sha256.",
+      "evidence": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; python3 -m json.tool validated JSON metadata, unzip -t validated the archive, and manifests record sha256 64af908ccdc358550124b848e4981c07683b8c1218009fc7e1a960f7b54389e9.",
       "gate_id": "sbom-provenance-release-assets",
       "status": "passed"
     }
