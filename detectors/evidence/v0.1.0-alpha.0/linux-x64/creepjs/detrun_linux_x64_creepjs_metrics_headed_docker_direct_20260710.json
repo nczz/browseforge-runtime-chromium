@@ -1,0 +1,93 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "cross_surface_consistency",
+    "detector_id": "creepjs",
+    "manifest_ref": "knowledge/manifests/detectors.json#creepjs",
+    "name": "CreepJS",
+    "url": "https://abrahamjuliot.github.io/creepjs/"
+  },
+  "evidence_id": "evidence_linux_x64_creepjs_metrics_headed_docker_direct_20260710",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:creepjs:metrics:headed_xvfb:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "creepjs_headed_score_metrics",
+      "evidence_ref": "sanitized_detector_metrics",
+      "finding": "CreepJS detector page reported bounded headless score metrics from the rebuilt patched packaged Linux runtime; raw visitor identifiers and page text are not committed.",
+      "normalized_values": {
+        "headless_percent": 0.0,
+        "like_headless_percent": 19.0,
+        "stealth_percent": 0.0
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "creepjs_headed_audio_metrics",
+      "evidence_ref": "sanitized_detector_metrics",
+      "finding": "CreepJS detector page reported bounded WebAudio metric values from the rebuilt patched packaged Linux runtime; raw audio buffers and raw page text are not committed.",
+      "normalized_values": {
+        "freq": 164537.64805984497,
+        "gain": -20.538288116455078,
+        "sum": 124.0434981307917,
+        "time": 502.5999205905864,
+        "trap": -1.3620001135805637e-06,
+        "unique": 4986.0
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    }
+  ],
+  "run_id": "detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw CreepJS page text, visitor identifiers, candidates, browser storage, network identifiers, and raw audio buffers are not committed; committed evidence stores sanitized bounded detector metrics, text hash, and raw capture SHA only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-creepjs-metrics-2",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json",
+    "raw_capture_sha256": "54fc31fe67dc79c4802c4104086ac8f0377b738a81ceb71fa00553624943d630",
+    "sha256": "597822b608b030dc0a8ddae32b2d9e4f248dca42424db91acca2598dcc840839",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "af2a70e81e6180707a0991fb8bc0b39c0fce33afaab3e6ea32643ed557902aae"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "os": "linux",
+    "platform": "linux-x64"
+  },
+  "tested_at": "2026-07-09T19:38:11.444510+00:00"
+}

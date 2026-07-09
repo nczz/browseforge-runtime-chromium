@@ -8,6 +8,10 @@
     "blocked"
   ],
   "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, captures unscored WebAudio and FontFaceSet probes, and now records bounded BrowserLeaks/Pixelscan Permissions API plus feature-availability probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
+  "evidence_refs": [
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json"
+  ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
@@ -86,9 +90,9 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. CreepJS comparison shows freq/gain/sum/time/unique match across headless/headed evidence, with drift isolated to trap. Source patch now gates AudioBuffer noise to dense non-uniform buffers so sparse/uniform CreepJS trap probes keep native mutation semantics; rebuilt runtime and live CreepJS rerun remain required.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating.",
       "release_blocker": true,
-      "result": "warn_source_patch_pending_rebuild_for_creepjs_trap",
+      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_native_matrix_required",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"

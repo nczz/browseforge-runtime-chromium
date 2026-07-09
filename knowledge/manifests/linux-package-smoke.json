@@ -1,14 +1,14 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
-  "artifact_size_bytes": 567798113,
+  "artifact_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
+  "artifact_size_bytes": 567801863,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "observed": {
-        "archive_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
-        "archive_size_bytes": 567798113
+        "archive_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
+        "archive_size_bytes": 567801863
       },
       "status": "passed"
     },
@@ -72,7 +72,7 @@
       "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
       "limitations": "Packaged runtime launch smoke, not a release-grade live detector matrix. BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed/proxy coverage remains required.",
       "observed": {
-        "artifact_sha256": "05135aaa3f8b8d9a74c66bf7e11f591eded164f2084c4bfbc1dbde263b7c0027",
+        "artifact_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
         "audio": {
           "available": true,
           "length": 44100,
