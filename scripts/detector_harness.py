@@ -1004,16 +1004,44 @@ SUPPORTED_COLLECTORS = {
     "browserscan": ("BrowserScan", "https://www.browserscan.net/"),
     "creepjs": ("CreepJS", "https://abrahamjuliot.github.io/creepjs/"),
 }
+SUPPORTED_COLLECTOR_PAGES = {
+    "browserleaks": {
+        "client-hints": "https://browserleaks.com/client-hints",
+        "audio": "https://browserleaks.com/javascript/audio",
+        "fonts": "https://browserleaks.com/fonts",
+        "webgl": "https://browserleaks.com/webgl",
+        "webrtc": "https://browserleaks.com/webrtc",
+    },
+}
+
+
+def resolve_collect_url(detector_id: str, *, page: str | None, url: str | None) -> str:
+    if url:
+        return url
+    _, default_url = SUPPORTED_COLLECTORS[detector_id]
+    if page is None:
+        return default_url
+    detector_pages = SUPPORTED_COLLECTOR_PAGES.get(detector_id, {})
+    if page not in detector_pages:
+        supported = ", ".join(sorted(detector_pages)) or "none"
+        raise ValueError(f"unsupported collector page for {detector_id}: {page}; supported pages: {supported}")
+    return detector_pages[page]
+
+
 
 def collect(args):
     if args.detector not in SUPPORTED_COLLECTORS:
         print(f"collector not implemented for detector: {args.detector}", file=sys.stderr)
         return EXIT_COLLECT_UNAVAILABLE
     try:
+        name, _ = SUPPORTED_COLLECTORS[args.detector]
+        url = resolve_collect_url(args.detector, page=args.page, url=args.url)
+    except ValueError as err:
+        print(str(err), file=sys.stderr)
+        return EXIT_UNSUPPORTED
+    try:
         version = http_json(args.cdp_url.rstrip("/") + "/json/version")
         cdp = CDPClient(version["webSocketDebuggerUrl"])
-        name, default_url = SUPPORTED_COLLECTORS[args.detector]
-        url = args.url or default_url
         payload = {
             "browser": version,
             "records": [collect_page(cdp, args.detector, name, url, wait_seconds=args.wait_seconds)],
@@ -1037,7 +1065,7 @@ def main(argv=None):
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
-    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
+    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)
 

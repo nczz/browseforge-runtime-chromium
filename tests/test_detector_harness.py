@@ -1135,6 +1135,51 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertEqual(override_payload["records"][0]["url"], override_url)
         self.assertEqual(default_payload["records"][0]["url"], module.SUPPORTED_COLLECTORS["browserleaks"][1])
 
+    def test_collect_page_alias_selects_browserleaks_surface_url(self):
+        module = self.harness_module
+
+        self.assertEqual(
+            module.resolve_collect_url("browserleaks", page="audio", url=None),
+            "https://browserleaks.com/javascript/audio",
+        )
+        self.assertEqual(
+            module.resolve_collect_url("browserleaks", page="fonts", url=None),
+            "https://browserleaks.com/fonts",
+        )
+
+    def test_collect_page_alias_rejects_unknown_page_before_cdp_connection(self):
+        module = self.harness_module
+        original_http_json = module.http_json
+        self.addCleanup(setattr, module, "http_json", original_http_json)
+
+        def fail_http_json(url):
+            self.fail("unsupported collector page should be rejected before CDP lookup")
+
+        module.http_json = fail_http_json
+
+        code = module.main(
+            [
+                "collect",
+                "--detector",
+                "browserleaks",
+                "--page",
+                "unknown-surface",
+                "--wait-seconds",
+                "0",
+            ]
+        )
+
+        self.assertEqual(code, module.EXIT_UNSUPPORTED)
+
+    def test_collect_url_override_wins_over_page_alias(self):
+        module = self.harness_module
+        override_url = "https://browserleaks.com/client-hints"
+
+        self.assertEqual(
+            module.resolve_collect_url("browserleaks", page="audio", url=override_url),
+            override_url,
+        )
+
     def test_list_targets_reads_current_manifest(self):
         proc = self.run_harness("list-targets")
         self.assertEqual(proc.returncode, 0, proc.stderr)

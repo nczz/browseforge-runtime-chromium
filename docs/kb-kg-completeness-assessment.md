@@ -71,6 +71,6 @@ Not allowed yet:
 ## Shortest unblock path
 
 1. Run an external-proxy detector matrix for BrowserLeaks/Pixelscan/iphey/BrowserScan with sanitized exit-IP/geolocation evidence.
-2. Add release-grade BrowserLeaks/CreepJS/Pixelscan score baselines for AudioContext and fonts, backed by sanitized committed evidence.
+2. Add release-grade BrowserLeaks/CreepJS/Pixelscan score baselines for AudioContext and fonts, using `scripts/detector_harness.py collect --detector browserleaks --page audio|fonts` for BrowserLeaks surface pages and committed sanitized evidence for every baseline.
 3. Run native/headed Linux and macOS detector passes, then add Windows only after a real Windows artifact exists.
 4. Replace non-Linux missing-artifact blocker nodes with real artifact records only after builds, SBOM, provenance, signatures, and detector runs exist.
