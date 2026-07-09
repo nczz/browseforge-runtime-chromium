@@ -79,7 +79,7 @@ class DetectorHarnessTests(unittest.TestCase):
         path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
 
-    def write_synthetic_score_evidence(self, evidence_root, *, detector_id, display_mode, results, label):
+    def write_synthetic_score_evidence(self, evidence_root, *, detector_id, display_mode, results, label, status="passed"):
         detector = self.harness_module.detector_by_id(detector_id)
         self.assertIsNotNone(detector)
         platform = "linux-x64"
@@ -116,7 +116,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     "proxy": "none",
                     "required": False,
                 },
-                "status": "passed",
+                "status": status,
                 "failure_mode": "none",
                 "results": results,
             }
@@ -1780,6 +1780,34 @@ class DetectorHarnessTests(unittest.TestCase):
                 None,
             )
             self.assertIsNotNone(comparison_gap, payload["gaps"])
+
+    def test_compare_scores_ignores_warning_webgl_rows_for_metadata_gaps(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="sannysoft",
+                display_mode="headless",
+                label="webgl_sannysoft_warning_incomplete",
+                status="warning",
+                results=[
+                    self.webgl_score_result(
+                        hashes={
+                            "extensionSha256": "1" * 64,
+                            "parameterSha256": "2" * 64,
+                        }
+                    )
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertFalse(
+                any(gap.get("gap_id") == "webgl_metadata_hashes_missing" for gap in payload["gaps"]),
+                payload["gaps"],
+            )
 
     def test_compare_scores_reports_gap_when_browserleaks_audio_counterpart_missing(self):
         with tempfile.TemporaryDirectory() as td:

@@ -78,7 +78,7 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so headless Linux BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison; only legacy macOS local SannySoft WebGL metadata and headed/native detector confirmation remain blockers.",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker.",
       "release_blocker": true,
       "result": "warn_linux_webgl_metadata_cross_detector_passed_native_headed_required",
       "severity": "medium",

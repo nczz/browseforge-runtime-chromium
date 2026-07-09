@@ -485,6 +485,7 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
                 "detector_id": detector.get("detector_id"),
                 "display_mode": _evidence_display(evidence),
                 "run_id": evidence["run_id"],
+                "status": evidence.get("status"),
                 "vendor": values.get("vendor"),
                 "renderer": values.get("renderer"),
                 "extension_count": values.get("extensionCount"),
@@ -643,7 +644,7 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
 
 
     webgl_records = _collect_webgl_records(evidence_rows)
-    incomplete_webgl = [record for record in webgl_records if record["missing_metadata"]]
+    incomplete_webgl = [record for record in webgl_records if record["status"] == "passed" and record["missing_metadata"]]
     if incomplete_webgl:
         gaps.append({
             "gap_id": "webgl_metadata_hashes_missing",

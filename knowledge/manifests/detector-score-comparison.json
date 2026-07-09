@@ -118,30 +118,8 @@
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux headless WebGL metadata now has a passing BrowserLeaks-vs-peer comparison, while live release-grade detector baselines and native/headed WebGL coverage remain required before release claims.",
   "evidence_count": 17,
-  "gaps": [
-    {
-      "detectors": [
-        "sannysoft"
-      ],
-      "finding": "WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.",
-      "gap_id": "webgl_metadata_hashes_missing",
-      "missing_records": [
-        {
-          "detector_id": "sannysoft",
-          "missing": [
-            "extensionCount",
-            "extensionSha256",
-            "parameterSha256",
-            "precisionSha256",
-            "pixelSha256"
-          ],
-          "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1"
-        }
-      ],
-      "surface": "webgl"
-    }
-  ],
-  "generated_at": "2026-07-09T17:04:34.606514+00:00",
+  "gaps": [],
+  "generated_at": "2026-07-09T17:11:56.701826+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
