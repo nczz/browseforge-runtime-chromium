@@ -27,6 +27,113 @@ class DetectorHarnessTests(unittest.TestCase):
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
 
+    def browserleaks_client_hints_value(self):
+        return {
+            "title": "BrowserLeaks - Client Hints",
+            "url": "https://browserleaks.com/client-hints",
+            "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
+            "uaData": {
+                "available": True,
+                "lowEntropy": {
+                    "brands": [
+                        {"brand": "Not A(Brand", "version": "99"},
+                        {"brand": "Chromium", "version": "150"},
+                    ],
+                    "mobile": False,
+                    "platform": "Linux",
+                },
+                "highEntropy": {
+                    "architecture": "x86",
+                    "bitness": "64",
+                    "brands": [
+                        {"brand": "Not A(Brand", "version": "99"},
+                        {"brand": "Chromium", "version": "150"},
+                    ],
+                    "fullVersionList": [
+                        {"brand": "Not A(Brand", "version": "99.0.0.0"},
+                        {"brand": "Chromium", "version": "150.0.7871.101"},
+                        {"brand": "Google Chrome", "version": "150.0.7871.101"},
+                    ],
+                    "mobile": False,
+                    "platform": "Linux",
+                    "platformVersion": "6.8.0",
+                    "wow64": False,
+                },
+            },
+        }
+
+    def test_classify_browserleaks_client_hints_accepts_configured_chromium_ua_ch(self):
+        status, finding, severity = self.harness_module.classify_browserleaks_client_hints(
+            self.browserleaks_client_hints_value()
+        )
+
+        self.assertEqual((status, severity), ("passed", "low"))
+        self.assertIn("Linux", finding)
+
+    def test_classify_browserleaks_client_hints_flags_missing_high_entropy_data(self):
+        missing_full_version = self.browserleaks_client_hints_value()
+        del missing_full_version["uaData"]["highEntropy"]["fullVersionList"]
+        high_entropy_error = self.browserleaks_client_hints_value()
+        high_entropy_error["uaData"].pop("highEntropy")
+        high_entropy_error["uaData"]["highEntropyError"] = "NotAllowedError"
+
+        cases = [
+            {
+                "name": "missing fullVersionList cannot prove the Chromium build",
+                "value": missing_full_version,
+                "finding": "fullVersionList",
+            },
+            {
+                "name": "high entropy collection error is surfaced",
+                "value": high_entropy_error,
+                "finding": "NotAllowedError",
+            },
+        ]
+        for case in cases:
+            with self.subTest(case["name"]):
+                status, finding, severity = self.harness_module.classify_browserleaks_client_hints(case["value"])
+                self.assertIn(status, {"warning", "failed"})
+                self.assertIn(severity, {"medium", "high", "critical"})
+                self.assertIn(case["finding"], finding)
+
+    def test_collect_page_uses_browserleaks_classifier_without_raw_text_payload(self):
+        value = self.browserleaks_client_hints_value()
+        value["text"] = "BrowserLeaks Client Hints\nChromium 150.0.7871.101\nLinux x86 64"
+
+        class FakeCDP:
+            def __init__(self, page_value):
+                self.page_value = page_value
+
+            def call(self, method, params=None, *, session_id=None, timeout=20):
+                if method == "Target.createTarget":
+                    return {"targetId": "target-1"}, []
+                if method == "Target.attachToTarget":
+                    return {"sessionId": "session-1"}, []
+                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                    return {}, []
+                if method == "Runtime.evaluate":
+                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                raise AssertionError(f"unexpected CDP method: {method}")
+
+            def events_until(self, predicate, *, timeout=30):
+                return []
+
+        record = self.harness_module.collect_page(
+            FakeCDP(value),
+            "browserleaks",
+            "BrowserLeaks",
+            "https://browserleaks.com/client-hints",
+            wait_seconds=0,
+        )
+
+        self.assertEqual(record["detector_id"], "browserleaks")
+        self.assertEqual((record["status"], record["severity"]), ("passed", "low"))
+        self.assertEqual(record["failure_mode"], "none")
+        self.assertIn("uaData", record["observed"])
+        self.assertNotIn("text", record["observed"])
+        self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
+        self.assertIn("BrowserLeaks Client Hints", record["observed"]["text_excerpt"])
+
     def test_classify_sannysoft_maps_automation_signals_to_statuses(self):
         cases = [
             {
@@ -67,6 +174,11 @@ class DetectorHarnessTests(unittest.TestCase):
                 self.assertIn(case["finding"], finding)
 
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
+        self.assertEqual(
+            self.harness_module.SUPPORTED_COLLECTORS.get("browserleaks"),
+            ("BrowserLeaks", "https://browserleaks.com/client-hints"),
+        )
+        self.assertNotIn("creepjs", self.harness_module.SUPPORTED_COLLECTORS)
         proc = self.run_harness(
             "collect",
             "--detector",

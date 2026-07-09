@@ -352,6 +352,51 @@ def classify_sannysoft(value: dict) -> tuple[str, str, str]:
         return "failed", "SannySoft page text reports webdriver exposure.", "high"
     return "warning", "SannySoft loaded; manual review required because no site-specific table parser matched.", "medium"
 
+def _brand_name(entry: object) -> str:
+    return str(entry.get("brand", "")) if isinstance(entry, dict) else ""
+
+def _brand_version(entry: object) -> str:
+    return str(entry.get("version", "")) if isinstance(entry, dict) else ""
+
+def _is_grease_brand(brand: str) -> bool:
+    return not brand or "Not" in brand or ";" in brand
+
+def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
+    ua_data = value.get("uaData") or {}
+    if not ua_data.get("available"):
+        return "warning", "BrowserLeaks Client Hints loaded, but navigator.userAgentData is unavailable.", "medium"
+    if ua_data.get("highEntropyError"):
+        return "failed", f"BrowserLeaks Client Hints high entropy API failed: {ua_data['highEntropyError']}", "high"
+    high = ua_data.get("highEntropy") or {}
+    full_versions = high.get("fullVersionList") or []
+    chromium_versions = [
+        _brand_version(entry)
+        for entry in full_versions
+        if isinstance(entry, dict)
+        and not _is_grease_brand(_brand_name(entry))
+        and _brand_name(entry) in {"Chromium", "Google Chrome", "Chrome"}
+    ]
+    if not chromium_versions:
+        return "failed", "BrowserLeaks Client Hints high entropy data is missing a non-GREASE Chromium fullVersionList entry.", "high"
+    expected = {
+        "platform": "Linux",
+        "architecture": "x86",
+        "bitness": "64",
+        "mobile": False,
+        "wow64": False,
+    }
+    mismatches = {
+        key: {"expected": expected_value, "observed": high.get(key)}
+        for key, expected_value in expected.items()
+        if high.get(key) != expected_value
+    }
+    if mismatches:
+        return "warning", f"BrowserLeaks Client Hints fullVersionList is present, but high entropy values drifted: {mismatches}", "medium"
+    if not any(re.fullmatch(r"\d+\.\d+\.\d+\.\d+", version) for version in chromium_versions):
+        return "warning", "BrowserLeaks Client Hints fullVersionList is present, but Chromium version is not full dotted version.", "medium"
+    return "passed", "BrowserLeaks Client Hints loaded with configured Linux Chromium high entropy values and fullVersionList.", "low"
+
+
 def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int):
     target, _ = cdp.call("Target.createTarget", {"url": "about:blank"})
     target_id = target["targetId"]
@@ -511,7 +556,12 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     if isinstance(canvas, dict) and isinstance(canvas.get("dataUrlSha256Input"), str):
         data_url = canvas.pop("dataUrlSha256Input")
         canvas["dataUrlSha256"] = hashlib.sha256(data_url.encode()).hexdigest()
-    status, finding, severity = classify_sannysoft({**value, "text": text}) if detector_id == "sannysoft" else ("warning", "Detector loaded; manual review required.", "medium")
+    if detector_id == "sannysoft":
+        status, finding, severity = classify_sannysoft({**value, "text": text})
+    elif detector_id == "browserleaks":
+        status, finding, severity = classify_browserleaks_client_hints({**value, "text": text})
+    else:
+        status, finding, severity = "warning", "Detector loaded; manual review required.", "medium"
     value["text_sha256"] = hashlib.sha256(text.encode()).hexdigest()
     value["text_excerpt"] = " ".join(text.split())[:800]
     value["elapsed_seconds"] = elapsed
@@ -528,6 +578,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
 
 SUPPORTED_COLLECTORS = {
     "sannysoft": ("SannySoft", "https://bot.sannysoft.com/"),
+    "browserleaks": ("BrowserLeaks", "https://browserleaks.com/client-hints"),
 }
 
 def collect(args):

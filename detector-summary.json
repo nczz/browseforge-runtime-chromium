@@ -1,8 +1,14 @@
 {
   "blocking_findings": [],
-  "evidence_count": 2,
-  "generated_at": "2026-07-09T05:31:11.231220+00:00",
+  "evidence_count": 3,
+  "generated_at": "2026-07-09T08:51:55.653176+00:00",
   "rows": [
+    {
+      "detector_id": "browserleaks",
+      "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json",
+      "platform": "linux-x64",
+      "status": "passed"
+    },
     {
       "detector_id": "sannysoft",
       "path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
