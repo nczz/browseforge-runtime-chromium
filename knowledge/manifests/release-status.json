@@ -1,5 +1,5 @@
 {
-  "blocker_count": 33,
+  "blocker_count": 31,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -363,23 +363,9 @@
       "severity": "high",
       "source": "knowledge/manifests/signing-policy.json",
       "status": "decision_recorded_artifact_missing"
-    },
-    {
-      "blocker_id": "source-acquisition:artifact-rebuild:0",
-      "detail": "WebShare feature-parity source patch is applied in the external Chromium checkout after the current linux-x64 packaged artifact was built.",
-      "severity": "high",
-      "source": "knowledge/manifests/source-acquisition.json",
-      "status": "pending_linux_rebuild_after_webshare_feature_parity_patch"
-    },
-    {
-      "blocker_id": "source-acquisition:artifact-rebuild:1",
-      "detail": "Rebuild and repackage browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip before claiming packaged artifact coverage for WebShare feature inventory parity.",
-      "severity": "high",
-      "source": "knowledge/manifests/source-acquisition.json",
-      "status": "pending_linux_rebuild_after_webshare_feature_parity_patch"
     }
   ],
-  "generated_at": "2026-07-10T02:00:00Z",
+  "generated_at": "2026-07-10T11:38:59Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "b2e50a1593df0ed1dda639960a7bf646d1d2e172613a38129f1aef110e94923f",
@@ -387,9 +373,9 @@
     "knowledge/manifests/fingerprint-surface-status.json": "06e8f1f1fe6de0bae02d66fb11270000a512d293348716c7de7733872d52aa1a",
     "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
     "knowledge/manifests/proxy-preflight.json": "7b872359eaa1e895ecc50bdf3cfa46823f81bf91ad1889b078c38002823fa0ba",
-    "knowledge/manifests/release-gates.json": "31492b69f84fb064cfc02b5e9f83e0a5635aca35968b56423e3abdab81d367ad",
+    "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "d7fbd0ab29b95dbe5942f6bac6766abdb01d9516bccb4d4bf3fd9aaa15434d53"
+    "knowledge/manifests/source-acquisition.json": "e04e8a142e0824edfeb046bfd758580e6a875d435c70aa07b33d3efc101dec11"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",

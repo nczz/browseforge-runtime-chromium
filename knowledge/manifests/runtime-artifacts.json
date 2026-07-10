@@ -1,6 +1,6 @@
 {
-  "artifact_sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
-  "artifact_size_bytes": 567801878,
+  "artifact_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
+  "artifact_size_bytes": 567803677,
   "artifacts": [
     {
       "arch": "x64",
@@ -9,9 +9,9 @@
         "min_version": "v2.0.0",
         "profile_field": "runtime_id"
       },
-      "browser_binary_sha256": "a083b5e98f8a3badee5f3b36441dce109e335e04ffa65fb1664cec72d8dbc82f",
+      "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-10T13:33:50.425920+00:00",
+      "created_at": "2026-07-10T11:35:58.384606+00:00",
       "download_url": "GitHub Release asset or GHCR artifact pending publication",
       "os": "linux",
       "patchset_id": "surface-switch-propagation-native-audit",
@@ -21,15 +21,15 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
+      "sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 567801878,
+      "size_bytes": 567803677,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e",
+      "wrapper_binary_sha256": "055a3be505a747436fa0a9d6e00ebf486192e042b455a2cd858d881050e949d9",
       "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
-  "browser_binary_sha256": "a083b5e98f8a3badee5f3b36441dce109e335e04ffa65fb1664cec72d8dbc82f",
+  "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
   "packager_contract": "build/package_runtime.py supports linux-x64 runtime dependency layout, macos-arm64 .app bundle layout, and windows-x64 portable Chromium directory layout; platforms not listed in supported_package_platforms cannot be generated without an explicit runtime asset contract.",
   "policy": {
@@ -71,5 +71,5 @@
     "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence",
     "macos-x64": "blocked until a committed macOS x64 runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence"
   },
-  "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e"
+  "wrapper_binary_sha256": "055a3be505a747436fa0a9d6e00ebf486192e042b455a2cd858d881050e949d9"
 }

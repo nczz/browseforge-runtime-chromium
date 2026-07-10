@@ -1,14 +1,14 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
-  "artifact_size_bytes": 567801863,
+  "artifact_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
+  "artifact_size_bytes": 567803677,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "observed": {
-        "archive_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
-        "archive_size_bytes": 567801863
+        "archive_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
+        "archive_size_bytes": 567803677
       },
       "status": "passed"
     },
@@ -16,7 +16,7 @@
       "check": "wrapper_metadata_in_linux_amd64_container",
       "command": "docker run --rm --platform linux/amd64 ... ./browseforge-runtime-chromium metadata",
       "observed": {
-        "browser_binary_sha256": "cea4437f1d7e8a341ec66da9342da8d561072a169c324d1806c8582bd5edcf92",
+        "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
         "capabilities": [
           "native_proxy",
           "persistent_context",
@@ -49,7 +49,8 @@
           "--fingerprint-device-memory=8",
           "--fingerprint-storage-quota=8192",
           "--fingerprint-webrtc-ip=auto",
-          "--browseforge-stealth-mode=enabled"
+          "--browseforge-stealth-mode=enabled",
+          "--headless=new"
         ],
         "user_data_dir": "/tmp/bf-smoke-profile"
       },
@@ -62,7 +63,7 @@
         "browser": "Chrome/150.0.7871.101",
         "devtools_json_version_reachable": true,
         "protocol_version": "1.3",
-        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
         "websocket_debugger_url_present": true
       },
       "status": "passed"
@@ -70,9 +71,9 @@
     {
       "check": "sannysoft_headless_detector_navigation",
       "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
-      "limitations": "Packaged runtime launch smoke, not a release-grade live detector matrix. BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed/proxy coverage remains required.",
+      "limitations": "Prior detector navigation evidence predates this rebuilt artifact; rerun before release-grade detector claims.",
       "observed": {
-        "artifact_sha256": "9aa1e0c1da3ec16e5523ee49f2bc5b18e8828634d8af7186e24d67abe8624a94",
+        "artifact_sha256": "prior-artifact-detector-evidence",
         "audio": {
           "available": true,
           "length": 44100,
@@ -191,14 +192,15 @@
           "vendor": "Intel Inc."
         }
       },
-      "status": "passed"
+      "status": "warning"
     }
   ],
+  "detector_smoke_rerun_required": true,
   "headed_checks": [
     {
       "check": "sannysoft_headed_detector_navigation",
       "command": "Docker linux/amd64 packaged runtime under Xvfb display using linux-runtime-detector-smoke-headed-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
-      "limitations": "Xvfb headed container smoke, not native desktop headed release matrix and not proxy/IP coherence evidence.",
+      "limitations": "Prior headed detector evidence predates this rebuilt artifact; rerun before release-grade detector claims.",
       "observed": {
         "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
         "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json",
@@ -212,13 +214,14 @@
         },
         "ua_ch_fullVersionList_present": true
       },
-      "status": "passed"
+      "status": "warning"
     }
   ],
   "limitations": [
     "This is a packaged runtime launch smoke, not a release-grade live detector matrix.",
     "The smoke uses Docker linux/amd64 under macOS/Apple Silicon, so logs include expected Rosetta/dbus container warnings.",
-    "BrowseForge server consumption and Playwright Bind against this packaged Linux artifact still require a Linux BrowseForge runtime smoke."
+    "BrowseForge server consumption and Playwright Bind against this packaged Linux artifact still require a Linux BrowseForge runtime smoke.",
+    "Detector navigation rows are retained as prior evidence and must be rerun for release-grade detector claims after this WebShare parity rebuild."
   ],
   "platform": "linux-x64",
   "release_grade_detector_evidence": false,
@@ -226,5 +229,5 @@
   "runtime_version": "v0.1.0-alpha.0",
   "schema_version": "1.0",
   "scope": "packaged_runtime_smoke",
-  "tested_at": "2026-07-09T03:17:16.096416+00:00"
+  "tested_at": "2026-07-10T11:47:30.861093+00:00"
 }

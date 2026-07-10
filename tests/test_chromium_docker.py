@@ -66,6 +66,27 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn(f"{workdir}:/work/chromium", build_chrome)
         self.assertEqual("/work/chromium/src", build_chrome[build_chrome.index("-w") + 1])
         self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
+        self.assertEqual(4, payload["jobs"])
+
+
+    def test_plan_allows_higher_build_job_count(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workdir = Path(td) / "chromium"
+            completed = self._run_script(
+                "plan",
+                "--workdir",
+                str(workdir),
+                "--jobs",
+                "8",
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(8, payload["jobs"])
+        self.assertEqual(
+            ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j8 -C out/BrowseForgeLinuxDocker chrome"],
+            payload["commands"]["build-chrome"][-3:],
+        )
 
     def test_check_reports_chrome_output_binary_status(self) -> None:
         env = os.environ.copy()

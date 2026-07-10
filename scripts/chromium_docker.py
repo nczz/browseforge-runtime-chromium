@@ -30,6 +30,7 @@ class DockerPlan:
     out_dir: str
     gn_args: str
     output_binary: str
+    jobs: int
     commands: dict[str, list[str]]
 
 
@@ -77,6 +78,7 @@ def build_plan(
     git_cache: Path = DEFAULT_GIT_CACHE,
     platform: str = "linux/amd64",
     out_dir: str = DEFAULT_OUT,
+    jobs: int = 4,
 ) -> DockerPlan:
     src = workdir / "src"
     deps_image = dependency_image(image)
@@ -112,6 +114,7 @@ def build_plan(
         out_dir=out_dir,
         gn_args=gn_args,
         output_binary=str(src / out_dir / "chrome"),
+        jobs=jobs,
         commands={
             "build-image": ["docker", "build", "--platform", platform, "-f", str(DOCKERFILE), "-t", image, str(ROOT)],
             "check-container": base_run + ["bash", "-lc", "python3 --version && git --version && gclient help >/dev/null && test -f DEPS"],
@@ -119,7 +122,7 @@ def build_plan(
             "install-linux-deps": ["bash", "-lc", install_script],
             "run-hooks": deps_run + ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && cd /work/chromium && gclient runhooks"],
             "gn-gen": deps_run + ["bash", "-lc", f"./buildtools/linux64/gn gen {out_dir} --args='{gn_args}'"],
-            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C {out_dir} chrome"],
+            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -j{jobs} -C {out_dir} chrome"],
         },
     )
 
@@ -165,10 +168,11 @@ def main() -> None:
     parser.add_argument("--git-cache", type=Path, default=DEFAULT_GIT_CACHE)
     parser.add_argument("--platform", default="linux/amd64")
     parser.add_argument("--out-dir", default=DEFAULT_OUT)
+    parser.add_argument("--jobs", type=int, default=4, help="local compile jobs for build-chrome")
     parser.add_argument("--execute", action="store_true", help="required for commands that run Docker")
     args = parser.parse_args()
 
-    plan = build_plan(args.workdir, args.image, args.git_cache, args.platform, args.out_dir)
+    plan = build_plan(args.workdir, args.image, args.git_cache, args.platform, args.out_dir, args.jobs)
     if args.command == "plan":
         emit_json(asdict(plan))
         return

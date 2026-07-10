@@ -1,5 +1,8 @@
 {
   "chromium_base": {
+    "artifact_rebuild_reasons": [],
+    "artifact_rebuild_required": false,
+    "artifact_rebuild_status": "rebuilt_after_webshare_feature_parity_patch",
     "audio_patch_status": "applied_to_external_checkout",
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "base_ref": "refs/tags/150.0.7871.101",
@@ -7,6 +10,7 @@
     "canvas_patch_status": "applied_to_external_checkout",
     "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
     "deps_snapshot_status": "synced_selected_ref_with_linux_and_macos_host_deps",
+    "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
     "feature_parity_patch_status": "applied_to_external_checkout_with_contacts_content_index_netinfo_serial_port_connected_webshare",
     "fonts_patch_status": "applied_to_external_checkout",
     "gn_generation_status": "generated_linux_docker",
@@ -14,12 +18,12 @@
     "hooks_status": "completed",
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "777990f56e6d785a6fdfa53404b63b5412f329d0b07cd03cf42c5de098f069ca",
-      "archive_size_bytes": 567801878,
+      "archive_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
+      "archive_size_bytes": 567803677,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
-      "browser_binary_sha256": "a083b5e98f8a3badee5f3b36441dce109e335e04ffa65fb1664cec72d8dbc82f",
+      "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
       "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
       "provenance": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
       "runtime_assets_included": [
@@ -42,15 +46,16 @@
       "sbom": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "status": "packaged_smoke_launched_after_uach_full_version_rebuild_with_os_arch_metadata",
+      "status": "packaged_after_webshare_feature_parity_rebuild",
       "verification": [
+        "python3 scripts/package_linux_runtime.py --execute --release-channel alpha",
         "shasum -a 256 dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
         "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
         "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json | python3 -m json.tool",
         "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json | python3 -m json.tool",
         "unzip -p dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json | python3 -m json.tool"
       ],
-      "wrapper_binary_sha256": "00c7abb65d65373e86f82228aa4e3e4a447a5d121ef7706e9baed140f84be69e"
+      "wrapper_binary_sha256": "055a3be505a747436fa0a9d6e00ebf486192e042b455a2cd858d881050e949d9"
     },
     "local_paths_checked": [
       {
@@ -76,41 +81,50 @@
       }
     ],
     "locale_patch_status": "applied_to_external_checkout",
-    "platform_patch_status": "applied_to_external_checkout",
-    "plugins_patch_status": "applied_to_external_checkout",
-    "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout. The current dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact from the prior source-patch set and must be rebuilt before it can claim WebShare feature parity coverage with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
-    "screen_patch_status": "applied_to_external_checkout",
-    "source_checkout_status": "checked_out_pinned_ref",
-    "stealth_scaffold_status": "copied_and_linked_to_gn_all",
-    "storage_quota_patch_status": "applied_to_external_checkout",
-    "switch_propagation_patch_status": "applied_to_external_checkout",
-    "timezone_patch_status": "applied_to_external_checkout",
-    "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
-    "webdriver_patch_status": "applied_to_external_checkout",
-    "webgl_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout",
+    "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation",
     "native_build_automation": {
-      "script": "scripts/chromium_native.py",
-      "status": "plan_and_preflight_ready_artifacts_missing",
+      "last_macos_preflight": {
+        "blocking_error": "xcodebuild requires full Xcode; active developer directory is /Library/Developer/CommandLineTools",
+        "deps_sync_status": "passed_with_macos_host_hooks",
+        "gn_binary_status": "present_after_deps_sync",
+        "gn_generation_status": "blocked_full_xcode_required",
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports native_toolchain_ready=false, xcodebuild_ok=false, and build_ninja_exists=false",
+        "native_toolchain_ready": false,
+        "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
+        "runhooks_status": "passed"
+      },
+      "last_windows_preflight": {
+        "build_ninja_status": "missing_until_windows_gn_generation_runs_on_windows_host",
+        "gn_binary_status": "checkout_depot_tools_gn_bat_present",
+        "host_os": "darwin",
+        "host_supported": false,
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform windows-x64 reports host_supported=false, native_toolchain_ready=false, output_binary_exists=false, portable_layout_exists=false",
+        "native_toolchain_ready": false,
+        "next_action": "Run python3 scripts/chromium_native.py gn-gen --platform windows-x64 --execute on a Windows host with the pinned checkout and toolchain, then build-chrome and package after build_ninja/output exist",
+        "output_binary_status": "missing_windows_chrome_exe",
+        "package_status": "blocked_missing_windows_native_artifact",
+        "required_host_os": "windows"
+      },
       "platforms": {
         "macos-arm64": {
-          "out_dir": "out/BrowseForgeMacArm64",
-          "gn_args": "target_os=\"mac\" target_cpu=\"arm64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
-          "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
           "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+          "gn_args": "target_os=\"mac\" target_cpu=\"arm64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+          "out_dir": "out/BrowseForgeMacArm64",
+          "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
           "required_host_os": "darwin",
           "status": "preflight_ready_artifact_missing"
         },
         "windows-x64": {
-          "out_dir": "out/BrowseForgeWindowsX64",
-          "gn_args": "target_os=\"win\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
-          "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
           "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+          "gn_args": "target_os=\"win\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+          "out_dir": "out/BrowseForgeWindowsX64",
+          "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
           "required_host_os": "windows",
           "status": "preflight_ready_artifact_missing"
         }
       },
+      "script": "scripts/chromium_native.py",
+      "status": "plan_and_preflight_ready_artifacts_missing",
       "verification": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64",
         "python3 scripts/chromium_native.py check --platform macos-arm64",
@@ -120,38 +134,22 @@
         "python3 scripts/chromium_native.py run-hooks --platform macos-arm64 --execute",
         "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
         "python3 scripts/chromium_native.py package --platform macos-arm64 --execute"
-      ],
-      "last_macos_preflight": {
-        "runhooks_status": "passed",
-        "deps_sync_status": "passed_with_macos_host_hooks",
-        "gn_binary_status": "present_after_deps_sync",
-        "gn_generation_status": "blocked_full_xcode_required",
-        "blocking_error": "xcodebuild requires full Xcode; active developer directory is /Library/Developer/CommandLineTools",
-        "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
-        "native_toolchain_ready": false,
-        "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports native_toolchain_ready=false, xcodebuild_ok=false, and build_ninja_exists=false"
-      },
-      "last_windows_preflight": {
-        "host_os": "darwin",
-        "required_host_os": "windows",
-        "host_supported": false,
-        "native_toolchain_ready": false,
-        "gn_binary_status": "checkout_depot_tools_gn_bat_present",
-        "build_ninja_status": "missing_until_windows_gn_generation_runs_on_windows_host",
-        "output_binary_status": "missing_windows_chrome_exe",
-        "package_status": "blocked_missing_windows_native_artifact",
-        "machine_readable_status": "python3 scripts/chromium_native.py check --platform windows-x64 reports host_supported=false, native_toolchain_ready=false, output_binary_exists=false, portable_layout_exists=false",
-        "next_action": "Run python3 scripts/chromium_native.py gn-gen --platform windows-x64 --execute on a Windows host with the pinned checkout and toolchain, then build-chrome and package after build_ninja/output exist"
-      }
+      ]
     },
-    "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation",
-    "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
-    "artifact_rebuild_required": true,
-    "artifact_rebuild_status": "pending_linux_rebuild_after_webshare_feature_parity_patch",
-    "artifact_rebuild_reasons": [
-      "WebShare feature-parity source patch is applied in the external Chromium checkout after the current linux-x64 packaged artifact was built.",
-      "Rebuild and repackage browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip before claiming packaged artifact coverage for WebShare feature inventory parity."
-    ]
+    "platform_patch_status": "applied_to_external_checkout",
+    "plugins_patch_status": "applied_to_external_checkout",
+    "process_priority_patch_status": "applied_to_external_checkout",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and the linux-x64 artifact was rebuilt and repackaged after the WebShare feature parity patch.",
+    "screen_patch_status": "applied_to_external_checkout",
+    "source_checkout_status": "checked_out_pinned_ref",
+    "stealth_scaffold_status": "copied_and_linked_to_gn_all",
+    "storage_quota_patch_status": "applied_to_external_checkout",
+    "switch_propagation_patch_status": "applied_to_external_checkout",
+    "timezone_patch_status": "applied_to_external_checkout",
+    "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
+    "webdriver_patch_status": "applied_to_external_checkout",
+    "webgl_patch_status": "applied_to_external_checkout",
+    "webrtc_patch_status": "applied_to_external_checkout"
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {
