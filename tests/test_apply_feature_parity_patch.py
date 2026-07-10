@@ -39,6 +39,11 @@ FEATURES_FIXTURE = '''features: [
       },
       base_feature: "none",
     },
+    {
+      name: "SerialPortConnected",
+      status: {"Android": "", "default": "experimental"},
+      base_feature: "none",
+    },
 ]
 '''
 
@@ -53,7 +58,7 @@ class ApplyFeatureParityPatchTests(unittest.TestCase):
         self.assertIn('name: "NetInfoDownlinkMax"', patched)
         self.assertNotIn('"default": "test"', patched)
         self.assertNotIn('"default": "experimental"', patched)
-        self.assertEqual(patched.count('status: "stable"'), 4)
+        self.assertEqual(patched.count('status: "stable"'), 5)
 
     def test_patch_is_idempotent(self) -> None:
         patched_once = apply_feature_parity_patch.patch_runtime_features(FEATURES_FIXTURE)
@@ -75,6 +80,8 @@ class ApplyFeatureParityPatchTests(unittest.TestCase):
             content = features_path.read_text(encoding="utf-8")
             self.assertIn('name: "ContentIndex"', content)
             self.assertIn('BrowseForge enables this desktop parity surface', content)
+            self.assertIn('name: "SerialPortConnected"', content)
+            self.assertIn("desktop serial feature inventory coherent", content)
             self.assertNotIn('"default": "experimental"', content)
 
 

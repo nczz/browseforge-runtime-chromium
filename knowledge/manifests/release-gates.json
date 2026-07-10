@@ -26,7 +26,7 @@
       "status": "passed"
     },
     {
-      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation patches.",
+      "evidence": "source-acquisition.json records checked-out Chromium refs/tags/150.0.7871.101, Linux deps sync, Docker deps image, GN output at out/BrowseForgeLinuxDocker, and applied BrowseForge scaffold/webdriver/hardware/screen/platform/timezone/locale/user-agent/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected)/fonts/process-priority/switch-propagation patches.",
       "gate_id": "chromium-source-indexed",
       "status": "passed"
     },

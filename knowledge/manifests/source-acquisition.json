@@ -7,7 +7,7 @@
     "canvas_patch_status": "applied_to_external_checkout",
     "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
     "deps_snapshot_status": "synced_selected_ref_with_linux_and_macos_host_deps",
-    "feature_parity_patch_status": "applied_to_external_checkout",
+    "feature_parity_patch_status": "applied_to_external_checkout_with_contacts_content_index_netinfo_serial_port_connected",
     "fonts_patch_status": "applied_to_external_checkout",
     "gn_generation_status": "generated_linux_docker",
     "hardware_patch_status": "applied_to_external_checkout",
@@ -79,7 +79,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
@@ -144,7 +144,8 @@
         "next_action": "Run python3 scripts/chromium_native.py gn-gen --platform windows-x64 --execute on a Windows host with the pinned checkout and toolchain, then build-chrome and package after build_ninja/output exist"
       }
     },
-    "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation"
+    "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation",
+    "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, and SerialPortConnected are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access."
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {
@@ -154,7 +155,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {

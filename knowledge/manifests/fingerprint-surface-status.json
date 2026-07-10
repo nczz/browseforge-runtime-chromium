@@ -116,9 +116,9 @@
       "surface": "WebRTC"
     },
     {
-      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok. The shared Linux collector now records bounded BrowserLeaks and Pixelscan page-context Permissions API states plus feature-availability booleans (Contacts Manager, Content Index, Network Information, storage buckets, WebHID/Serial/USB, etc.) without requesting device access; broader CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete.",
+      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok. The source-level feature parity patch now stabilizes ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, and SerialPortConnected desktop defaults; the shared Linux collector records bounded BrowserLeaks and Pixelscan page-context Permissions API states plus feature-availability booleans (Contacts Manager, Content Index, Network Information, storage buckets, WebHID/Serial/USB, etc.) without requesting device access. Broader CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete.",
       "release_blocker": false,
-      "result": "pass_linux_browserleaks_pixelscan_permissions_features_bounded",
+      "result": "pass_linux_browserleaks_pixelscan_permissions_features_bounded_serial_source_patch",
       "severity": "info",
       "status": "detector_tested",
       "surface": "permissions"

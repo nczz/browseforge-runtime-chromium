@@ -59,6 +59,21 @@ NETINFO_PATCHED = '''    {
     },
 '''
 
+SERIAL_PORT_CONNECTED_ORIGINAL = '''    {
+      name: "SerialPortConnected",
+      status: {"Android": "", "default": "experimental"},
+      base_feature: "none",
+    },
+'''
+SERIAL_PORT_CONNECTED_PATCHED = '''    {
+      name: "SerialPortConnected",
+      // BrowseForge keeps desktop serial feature inventory coherent with
+      // navigator.serial availability without requiring device access.
+      status: "stable",
+      base_feature: "none",
+    },
+'''
+
 
 def validate_chromium_src(src: Path) -> None:
     if not (src / ".git").exists():
@@ -79,6 +94,12 @@ def patch_runtime_features(text: str) -> str:
     patched = replace_once(text, CONTACTS_ORIGINAL, CONTACTS_PATCHED, "ContactsManager")
     patched = replace_once(patched, CONTENT_INDEX_ORIGINAL, CONTENT_INDEX_PATCHED, "ContentIndex")
     patched = replace_once(patched, NETINFO_ORIGINAL, NETINFO_PATCHED, "NetInfoDownlinkMax")
+    patched = replace_once(
+        patched,
+        SERIAL_PORT_CONNECTED_ORIGINAL,
+        SERIAL_PORT_CONNECTED_PATCHED,
+        "SerialPortConnected",
+    )
     return patched
 
 
