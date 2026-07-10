@@ -534,14 +534,14 @@
         "sannysoft"
       ],
       "files_touched": [
-        "scripts/apply_webgl_patch.py",
-        "tests/test_apply_webgl_patch.py",
-        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc",
         "internal/launcher/config.go",
         "internal/launcher/launcher_test.go",
-        "chromium/src/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc"
+        "scripts/apply_webgl_patch.py",
+        "scripts/validate.py",
+        "tests/test_apply_webgl_patch.py"
       ],
-      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims.",
+      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims. The launcher validates webgl_vendor and webgl_renderer as printable ASCII strings capped at 256 bytes before emitting the native switches, matching the Blink-side override guard.",
       "patchset_id": "surface-webgl-vendor-renderer-native-override",
       "risk_level": "high",
       "surface": "webgl",

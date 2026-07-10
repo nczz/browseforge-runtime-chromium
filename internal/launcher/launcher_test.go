@@ -291,6 +291,20 @@ func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidWebGLFingerprintArgs(t *testing.T) {
+	for name, cfg := range map[string]Config{
+		"vendor_control":   {UserDataDir: t.TempDir(), Fingerprint: FingerprintConfig{WebGLVendor: "Google\nInc."}},
+		"renderer_unicode": {UserDataDir: t.TempDir(), Fingerprint: FingerprintConfig{WebGLRenderer: "ANGLE \u2603"}},
+		"renderer_long":    {UserDataDir: t.TempDir(), Fingerprint: FingerprintConfig{WebGLRenderer: strings.Repeat("A", 257)}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected invalid WebGL fingerprint arg error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsFontListFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

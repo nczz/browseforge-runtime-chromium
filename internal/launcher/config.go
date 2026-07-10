@@ -135,6 +135,12 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
+	if err := validatePrintableASCII(c.Fingerprint.WebGLVendor, "fingerprint.webgl_vendor", 256); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.WebGLRenderer, "fingerprint.webgl_renderer", 256); err != nil {
+		return err
+	}
 	if err := validateWebRTCIP(c.Fingerprint.WebRTCIP, "fingerprint.webrtc_ip", true); err != nil {
 		return err
 	}
@@ -144,6 +150,21 @@ func (c Config) Validate(requireBinary bool) error {
 	for _, arg := range c.ExtraArgs {
 		if hasManagedPrefix(arg) {
 			return fmt.Errorf("extra arg %q collides with BrowseForge-managed runtime policy", arg)
+		}
+	}
+	return nil
+}
+
+func validatePrintableASCII(value, field string, limit int) error {
+	if value == "" {
+		return nil
+	}
+	if len(value) > limit {
+		return fmt.Errorf("%s must be at most %d bytes", field, limit)
+	}
+	for _, c := range value {
+		if c < 0x20 || c > 0x7e {
+			return fmt.Errorf("%s must contain printable ASCII only", field)
 		}
 	}
 	return nil
