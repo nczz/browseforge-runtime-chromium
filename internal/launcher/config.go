@@ -211,6 +211,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if err := validatePrintableASCII(c.Fingerprint.WebGLRenderer, "fingerprint.webgl_renderer", 256); err != nil {
 		return err
 	}
+	if err := validateFonts(c.Fingerprint.Fonts); err != nil {
+		return err
+	}
 	if err := validateWebRTCIP(c.Fingerprint.WebRTCIP, "fingerprint.webrtc_ip", true); err != nil {
 		return err
 	}
@@ -323,6 +326,31 @@ func validatePrintableASCII(value, field string, limit int) error {
 	for _, c := range value {
 		if c < 0x20 || c > 0x7e {
 			return fmt.Errorf("%s must contain printable ASCII only", field)
+		}
+	}
+	return nil
+}
+
+func validateFonts(fonts []string) error {
+	total := 0
+	for i, font := range fonts {
+		if font == "" {
+			return fmt.Errorf("fingerprint.fonts[%d] must not be empty", i)
+		}
+		if len(font) > 128 {
+			return fmt.Errorf("fingerprint.fonts[%d] must be at most 128 bytes", i)
+		}
+		if i > 0 {
+			total++
+		}
+		total += len(font)
+		if total > 8192 {
+			return errors.New("fingerprint.fonts must encode to at most 8192 bytes")
+		}
+		for _, c := range font {
+			if c < 0x20 || c > 0x7e || c == '|' {
+				return fmt.Errorf("fingerprint.fonts[%d] must contain printable ASCII without pipe separators", i)
+			}
 		}
 	}
 	return nil

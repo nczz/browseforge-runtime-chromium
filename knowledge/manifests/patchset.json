@@ -628,14 +628,15 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/css/font_face_set.cc"
       ],
-      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence.",
+      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence.",
       "patchset_id": "surface-font-face-set-native-list-override",
       "risk_level": "high",
       "surface": "fonts",
       "symbols_touched": [
         "blink::FontFaceSet::check",
         "BrowseForgeFontFamilyAllowed",
-        "launcher.FingerprintConfig.Fonts"
+        "launcher.FingerprintConfig.Fonts",
+        "launcher.validateFonts"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_fonts_patch",

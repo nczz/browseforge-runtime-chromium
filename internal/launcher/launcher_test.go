@@ -490,6 +490,34 @@ func TestBuildPlanAddsFontListFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidFontListFingerprintArgs(t *testing.T) {
+	encodedLong := make([]string, 64)
+	for i := range encodedLong {
+		encodedLong[i] = strings.Repeat("A", 128)
+	}
+
+	for name, fonts := range map[string][]string{
+		"empty":        {""},
+		"too_long":     {strings.Repeat("A", 129)},
+		"separator":    {"Segoe|UI"},
+		"control":      {"Segoe\nUI"},
+		"unicode":      {"Noto \u2603"},
+		"encoded_long": encodedLong,
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: FingerprintConfig{
+					Fonts: fonts,
+				},
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected font list validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanRejectsManagedExtraArgs(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir(), ExtraArgs: []string{"--user-data-dir=/tmp/evil", "--user-agent=evil", "--disable-blink-features=Other", "--force-webrtc-ip-handling-policy=default_public_interface_only", stealthConfigArg + "=/tmp/evil.json"}}
 	_, err := cfg.BuildPlan()
