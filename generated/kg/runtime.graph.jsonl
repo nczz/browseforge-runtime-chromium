@@ -584,3 +584,5 @@
 {"from": "Manifest:knowledge-manifests-proxy-preflight.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
 {"id": "Manifest:knowledge-manifests-signing-policy.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/signing-policy.json", "repo_path": "knowledge/manifests/signing-policy.json"}, "record_type": "node"}
 {"from": "Manifest:knowledge-manifests-signing-policy.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
+{"id": "Manifest:knowledge-manifests-release-status.json", "label": "Manifest", "properties": {"manifest_id": "knowledge/manifests/release-status.json", "repo_path": "knowledge/manifests/release-status.json"}, "record_type": "node"}
+{"from": "Manifest:knowledge-manifests-release-status.json", "label": "DECLARES_SOURCE", "properties": {}, "record_type": "edge", "to": "RuntimeProvider:browseforge-chromium"}
