@@ -276,6 +276,94 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertIs(status["native_toolchain_ready"], True)
         run.assert_called_once()
 
+    def test_execute_gn_and_build_fail_before_running_with_command_line_tools_xcodebuild(self) -> None:
+        """GN/build execution refuses a CommandLineTools-only macOS toolchain before invoking build commands."""
+        command_line_tools_error = (
+            "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory "
+            "'/Library/Developer/CommandLineTools' is a command line tools instance\n"
+        )
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr=command_line_tools_error)
+
+        for command in ("gn-gen", "build-chrome"):
+            with self.subTest(command=command), tempfile.TemporaryDirectory() as td:
+                tmp_path = Path(td)
+                workdir = tmp_path / "chromium"
+                self._write_native_checkout_fixtures(workdir)
+                argv = [
+                    "chromium_native.py",
+                    command,
+                    "--platform",
+                    "macos-arm64",
+                    "--workdir",
+                    str(workdir),
+                    "--out-dir",
+                    "out/TestMacArm64",
+                    "--execute",
+                ]
+                with (
+                    mock.patch.object(sys, "argv", argv),
+                    mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                    mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                    mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                    mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
+                    mock.patch.object(chromium_native, "run_command") as run_command,
+                ):
+                    with self.assertRaises(SystemExit) as raised:
+                        chromium_native.main()
+
+                message = str(raised.exception)
+                self.assertIn(f"{command} native toolchain is not ready", message)
+                self.assertIn("xcodebuild_status=failed", message)
+                self.assertIn("xcodebuild_error=", message)
+                self.assertIn("CommandLineTools", message)
+                xcodebuild_run.assert_called_once()
+                run_command.assert_not_called()
+
+    def test_execute_run_hooks_still_runs_with_command_line_tools_xcodebuild(self) -> None:
+        """Run-hooks is allowed under CommandLineTools-only xcodebuild so it can repair checkout buildtools."""
+        command_line_tools_error = (
+            "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory "
+            "'/Library/Developer/CommandLineTools' is a command line tools instance\n"
+        )
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr=command_line_tools_error)
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src, _ = self._write_native_checkout_fixtures(workdir)
+            argv = [
+                "chromium_native.py",
+                "run-hooks",
+                "--platform",
+                "macos-arm64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestMacArm64",
+                "--execute",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
+                mock.patch.object(chromium_native, "run_command") as run_command,
+            ):
+                chromium_native.main()
+
+        xcodebuild_run.assert_called_once()
+        run_command.assert_called_once()
+        delegated_command, delegated_cwd = run_command.call_args.args
+        self.assertEqual(chromium_native.build_plan("macos-arm64", workdir, "out/TestMacArm64").commands["run-hooks"], delegated_command)
+        self.assertEqual(src, delegated_cwd)
+
     def test_mutating_command_without_execute_exits_nonzero(self) -> None:
         """Native build actions fail closed unless the caller explicitly opts into mutation."""
         with tempfile.TemporaryDirectory() as td:

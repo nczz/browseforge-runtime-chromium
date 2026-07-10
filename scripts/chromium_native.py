@@ -216,6 +216,24 @@ def run_command(command: Sequence[str], cwd: Path) -> None:
     subprocess.run(list(command), cwd=cwd, check=True)
 
 
+def native_toolchain_error(command: str, status: dict[str, object]) -> str:
+    details = []
+    for key in (
+        "xcodebuild_status",
+        "xcodebuild_error",
+        "gn_binary_exists",
+        "depot_tools_exists",
+        "chromium_src_exists",
+        "chromium_deps_exists",
+    ):
+        if key in status:
+            details.append(f"{key}={status[key]}")
+    suffix = "; ".join(details)
+    if suffix:
+        suffix = f": {suffix}"
+    return f"{command} native toolchain is not ready{suffix}"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium native build helper")
     parser.add_argument("command", choices=["plan", "check", "run-hooks", "gn-gen", "build-chrome", "package"])
@@ -238,6 +256,8 @@ def main() -> None:
     status = check(plan)
     if not status["host_supported"]:
         raise SystemExit(f"{args.command} for {plan.platform_id} requires host_os={plan.required_host_os}; current host_os={plan.host_os}")
+    if args.command in {"gn-gen", "build-chrome"} and not status["native_toolchain_ready"]:
+        raise SystemExit(native_toolchain_error(args.command, status))
     run_command(plan.commands[args.command], Path(plan.chromium_src_dir))
 
 
