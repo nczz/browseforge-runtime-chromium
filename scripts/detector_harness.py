@@ -862,6 +862,35 @@ def _pixelscan_variant_observation(record: dict) -> dict:
         "webglHash": page.get("webglHash"),
     }
 
+def _pixelscan_variant_summary_row(input_dir: Path, variant: dict) -> dict:
+    variant_id = variant["variant_id"]
+    raw_path = _pixelscan_variant_raw_path(input_dir, variant_id)
+    row = {
+        "variant_id": variant_id,
+        "isolated_surfaces": variant["isolated_surfaces"],
+        "fingerprint_overrides": variant["fingerprint_overrides"],
+        "raw_capture_committed": False,
+        "raw_capture_path_committed": False,
+    }
+    if raw_path is None:
+        row["status"] = "missing"
+        row["observation"] = {}
+    else:
+        raw = json.loads(raw_path.read_text(encoding="utf-8"))
+        records = raw.get("records", [])
+        row["status"] = "observed" if records else "empty"
+        row["observation"] = _pixelscan_variant_observation(records[0]) if records else {}
+    return row
+
+def _pixelscan_all_inconsistent(rows: list[dict]) -> bool:
+    observed = [row.get("observation", {}) for row in rows if row.get("status") == "observed"]
+    return bool(observed) and all(row.get("verdict") == "inconsistent" and row.get("fingerprint") == "Masking detected" for row in observed)
+
+def _pixelscan_all_bot_clean(rows: list[dict]) -> bool:
+    observed = [row.get("observation", {}) for row in rows if row.get("status") == "observed"]
+    return bool(observed) and all(row.get("botCheck") == "No automated behavior detected" for row in observed)
+
+
 
 def pixelscan_variant_summary(args) -> int:
     generated_at = args.generated_at or dt.datetime.now(dt.timezone.utc).isoformat()
@@ -881,33 +910,27 @@ def pixelscan_variant_summary(args) -> int:
         "conclusion": "",
     }
     for variant in PIXELSCAN_ISOLATION_VARIANTS:
-        variant_id = variant["variant_id"]
-        raw_path = _pixelscan_variant_raw_path(input_dir, variant_id)
-        row = {
-            "variant_id": variant_id,
-            "isolated_surfaces": variant["isolated_surfaces"],
-            "fingerprint_overrides": variant["fingerprint_overrides"],
-            "raw_capture_committed": False,
-            "raw_capture_path_committed": False,
-        }
-        if raw_path is None:
-            row["status"] = "missing"
-            row["observation"] = {}
-        else:
-            raw = json.loads(raw_path.read_text(encoding="utf-8"))
-            records = raw.get("records", [])
-            row["status"] = "observed" if records else "empty"
-            row["observation"] = _pixelscan_variant_observation(records[0]) if records else {}
-        payload["variants"].append(row)
-    observed = [row.get("observation", {}) for row in payload["variants"] if row.get("status") == "observed"]
-    all_inconsistent = bool(observed) and all(row.get("verdict") == "inconsistent" and row.get("fingerprint") == "Masking detected" for row in observed)
-    all_bot_clean = bool(observed) and all(row.get("botCheck") == "No automated behavior detected" for row in observed)
+        payload["variants"].append(_pixelscan_variant_summary_row(input_dir, variant))
+    if getattr(args, "headed_input_dir", None):
+        headed_input_dir = Path(args.headed_input_dir)
+        payload["headed_controls"] = [
+            {
+                **_pixelscan_variant_summary_row(headed_input_dir, variant),
+                "display_mode": "headed_xvfb",
+            }
+            for variant in PIXELSCAN_ISOLATION_VARIANTS
+        ]
+    all_inconsistent = _pixelscan_all_inconsistent(payload["variants"])
+    all_bot_clean = _pixelscan_all_bot_clean(payload["variants"])
     if all_inconsistent and all_bot_clean:
         payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant plus the minimal native control still reports inconsistent/masking."
     elif all_inconsistent:
         payload["conclusion"] = "All current direct headless Docker variants still report Pixelscan inconsistent/masking; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation."
     else:
         payload["conclusion"] = "Pixelscan variant outcomes are mixed; inspect per-variant verdict, fingerprint, and botCheck fields before changing native surfaces."
+    headed_controls = payload.get("headed_controls", [])
+    if headed_controls and _pixelscan_all_inconsistent(headed_controls) and _pixelscan_all_bot_clean(headed_controls):
+        payload["conclusion"] += " Headed/Xvfb controls also clear botCheck while remaining inconsistent/masking, so the remaining Pixelscan finding is not headless-only."
     out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if args.output:
         Path(args.output).write_text(out, encoding="utf-8")
@@ -2223,7 +2246,7 @@ def main(argv=None):
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("pixelscan-variant-plan"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_plan)
     p = sub.add_parser("pixelscan-materialize-variants"); p.add_argument("--base-config", required=True); p.add_argument("--output-dir", required=True); p.add_argument("--manifest-output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_materialize_variants)
-    p = sub.add_parser("pixelscan-variant-summary"); p.add_argument("--input-dir", required=True); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_summary)
+    p = sub.add_parser("pixelscan-variant-summary"); p.add_argument("--input-dir", required=True); p.add_argument("--headed-input-dir"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_summary)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)

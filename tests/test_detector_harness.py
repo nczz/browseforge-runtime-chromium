@@ -2712,6 +2712,8 @@ class DetectorHarnessTests(unittest.TestCase):
             root = Path(td)
             raw_dir = root / "raw"
             raw_dir.mkdir()
+            headed_dir = root / "headed"
+            headed_dir.mkdir()
             output = root / "summary.json"
             (raw_dir / "detrun_linux_x64_pixelscan_canvas_off_headless_docker_direct.json").write_text(json.dumps({
                 "records": [
@@ -2736,11 +2738,35 @@ class DetectorHarnessTests(unittest.TestCase):
                     }
                 ]
             }), encoding="utf-8")
+            (headed_dir / "detrun_linux_x64_pixelscan_canvas_off_headed_xvfb_docker_direct.json").write_text(json.dumps({
+                "records": [
+                    {
+                        "status": "warning",
+                        "finding": "Pixelscan headed fingerprint check reported masking.",
+                        "severity": "medium",
+                        "observed": {
+                            "pixelscanPage": {
+                                "verdict": "inconsistent",
+                                "fingerprint": "Masking detected",
+                                "botCheck": "No automated behavior detected",
+                                "proxy": "No proxy detected",
+                                "location": "Taiwan / Taipei",
+                                "audioContextHash": "headed-audio",
+                                "canvasHash": "headed-canvas",
+                                "fontHash": "headed-font",
+                                "webglHash": "-",
+                            },
+                        },
+                    }
+                ]
+            }), encoding="utf-8")
 
             proc = self.run_harness(
                 "pixelscan-variant-summary",
                 "--input-dir",
                 str(raw_dir),
+                "--headed-input-dir",
+                str(headed_dir),
                 "--output",
                 str(output),
                 "--generated-at",
@@ -2759,6 +2785,10 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual("inconsistent", canvas["observation"]["verdict"])
             self.assertEqual("[REDACTED]", canvas["observation"]["finding"].split()[-4])
             self.assertEqual("missing", variants["audio-off"]["status"])
+
+            headed = {row["variant_id"]: row for row in payload["headed_controls"]}
+            self.assertEqual("headed_xvfb", headed["canvas-off"]["display_mode"])
+            self.assertEqual("No automated behavior detected", headed["canvas-off"]["observation"]["botCheck"])
 
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
