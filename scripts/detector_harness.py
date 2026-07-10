@@ -1649,6 +1649,8 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         webNfc: Boolean('NDEFReader' in window),
         webSerial: Boolean(navigator.serial),
         webUsb: Boolean(navigator.usb),
+        webShare: Boolean(navigator.share),
+        webShareData: Boolean(navigator.canShare),
         idleDetector: Boolean('IdleDetector' in window),
         keyboardLock: Boolean(navigator.keyboard && navigator.keyboard.lock),
         localFonts: Boolean('queryLocalFonts' in window),

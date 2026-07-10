@@ -573,7 +573,7 @@
         "scripts/validate.py",
         "chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5"
       ],
-      "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, NetInfoDownlinkMax, and SerialPortConnected to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, noDownlinkMax, and serial connected-state inventory drift. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, and detector pass still require a patched Chromium artifact and live detector evidence.",
+      "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, NetInfoDownlinkMax, SerialPortConnected, and WebShare to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, noDownlinkMax, missing Web Share API, and serial connected-state inventory drift. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, share UI invocation, and detector pass still require a patched Chromium artifact and live detector evidence.",
       "patchset_id": "surface-feature-parity-native-defaults",
       "risk_level": "high",
       "surface": "permissions_features",
@@ -582,7 +582,8 @@
         "RuntimeEnabledFeatures::ContactsManagerEnabled",
         "RuntimeEnabledFeatures::ContactsManagerExtraPropertiesEnabled",
         "RuntimeEnabledFeatures::NetInfoDownlinkMaxEnabled",
-        "RuntimeEnabledFeatures::SerialPortConnectedEnabled"
+        "RuntimeEnabledFeatures::SerialPortConnectedEnabled",
+        "RuntimeEnabledFeatures::WebShareEnabled"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_feature_parity_patch",
@@ -592,7 +593,7 @@
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules:modules",
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
       ],
-      "title": "BrowseForge Chromium feature inventory parity defaults for ContentIndex, ContactsManager, and NetInfo downlinkMax",
+      "title": "BrowseForge Chromium feature inventory parity defaults for ContentIndex, ContactsManager, NetInfo downlinkMax, SerialPortConnected, and WebShare",
       "upstream_status": "applied_to_external_checkout_not_release_built"
     },
     {

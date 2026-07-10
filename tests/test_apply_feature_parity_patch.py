@@ -44,6 +44,15 @@ FEATURES_FIXTURE = '''features: [
       status: {"Android": "", "default": "experimental"},
       base_feature: "none",
     },
+    // WebShare is enabled by default on Android (non-WebView), Win, ChromeOS, and Mac.
+    // This is done in chrome/renderer/chrome_content_renderer_client.cc to prevent
+    // making the API available to Linux and WebView. Ideally we would set the status
+    // below to "stable" once we can do so without significant test expectation duplication.
+    {
+      name: "WebShare",
+      public: true,
+      status: "test",
+    },
 ]
 '''
 
@@ -58,7 +67,7 @@ class ApplyFeatureParityPatchTests(unittest.TestCase):
         self.assertIn('name: "NetInfoDownlinkMax"', patched)
         self.assertNotIn('"default": "test"', patched)
         self.assertNotIn('"default": "experimental"', patched)
-        self.assertEqual(patched.count('status: "stable"'), 5)
+        self.assertEqual(patched.count('status: "stable"'), 6)
 
     def test_patch_is_idempotent(self) -> None:
         patched_once = apply_feature_parity_patch.patch_runtime_features(FEATURES_FIXTURE)
@@ -82,6 +91,8 @@ class ApplyFeatureParityPatchTests(unittest.TestCase):
             self.assertIn('BrowseForge enables this desktop parity surface', content)
             self.assertIn('name: "SerialPortConnected"', content)
             self.assertIn("desktop serial feature inventory coherent", content)
+            self.assertIn('name: "WebShare"', content)
+            self.assertIn("modern desktop personas", content)
             self.assertNotIn('"default": "experimental"', content)
 
 

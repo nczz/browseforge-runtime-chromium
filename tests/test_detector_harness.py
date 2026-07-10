@@ -1349,6 +1349,8 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("contactsManager", expr)
         self.assertIn("contentIndex", expr)
         self.assertIn("localFonts", expr)
+        self.assertIn("webShare", expr)
+        self.assertIn("webShareData", expr)
         self.assertIn("windowControlsOverlay", expr)
         self.assertIn("return {title, url: location.href", expr)
         self.assertIn("canvas: canvasProbe, features, webgl: gl", expr)

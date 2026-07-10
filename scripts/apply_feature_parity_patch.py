@@ -74,6 +74,27 @@ SERIAL_PORT_CONNECTED_PATCHED = '''    {
     },
 '''
 
+WEB_SHARE_ORIGINAL = '''    // WebShare is enabled by default on Android (non-WebView), Win, ChromeOS, and Mac.
+    // This is done in chrome/renderer/chrome_content_renderer_client.cc to prevent
+    // making the API available to Linux and WebView. Ideally we would set the status
+    // below to "stable" once we can do so without significant test expectation duplication.
+    {
+      name: "WebShare",
+      public: true,
+      status: "test",
+    },
+'''
+WEB_SHARE_PATCHED = '''    // WebShare is enabled by default on Android (non-WebView), Win, ChromeOS, and Mac.
+    // BrowseForge keeps this desktop feature inventory coherent for claimed
+    // modern desktop personas without invoking a share sheet.
+    {
+      name: "WebShare",
+      public: true,
+      status: "stable",
+    },
+'''
+
+
 
 def validate_chromium_src(src: Path) -> None:
     if not (src / ".git").exists():
@@ -100,6 +121,7 @@ def patch_runtime_features(text: str) -> str:
         SERIAL_PORT_CONNECTED_PATCHED,
         "SerialPortConnected",
     )
+    patched = replace_once(patched, WEB_SHARE_ORIGINAL, WEB_SHARE_PATCHED, "WebShare")
     return patched
 
 
