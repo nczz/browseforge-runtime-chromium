@@ -113,7 +113,7 @@
         "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
         "chromium/src/third_party/blink/renderer/core/frame/navigator_device_memory.cc"
       ],
-      "notes": "When --fingerprint-hardware-concurrency or --fingerprint-device-memory contains a bounded positive integer, Blink returns that value for navigator.hardwareConcurrency or navigator.deviceMemory. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-hardware-concurrency or --fingerprint-device-memory contains a bounded positive integer, Blink returns that value for navigator.hardwareConcurrency or navigator.deviceMemory. Zero or absent values preserve upstream Chromium behavior; explicit negative values, hardware concurrency above 128, or device memory above 64 GB are rejected by the launcher before command-plan emission, matching the Blink helper bounds. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-hardware-native-overrides",
       "risk_level": "medium",
       "surface": "hardware",
@@ -123,7 +123,10 @@
         "BrowseForgeHardwareConcurrencyOverrideOrDefault",
         "BrowseForgeDeviceMemoryOverrideOrDefault",
         "launcher.FingerprintConfig.HardwareConcurrency",
-        "launcher.FingerprintConfig.DeviceMemoryGB"
+        "launcher.FingerprintConfig.DeviceMemoryGB",
+        "launcher.maxHardwareConcurrency",
+        "launcher.maxDeviceMemoryGB",
+        "launcher.validateHardwareValue"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_hardware_patch",

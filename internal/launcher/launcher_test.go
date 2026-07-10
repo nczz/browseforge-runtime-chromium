@@ -242,6 +242,26 @@ func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidHardwareFingerprintArgs(t *testing.T) {
+	for name, fingerprint := range map[string]FingerprintConfig{
+		"concurrency_too_large": {HardwareConcurrency: maxHardwareConcurrency + 1},
+		"device_memory_too_large": {
+			DeviceMemoryGB: maxDeviceMemoryGB + 1,
+		},
+		"device_memory_negative": {DeviceMemoryGB: -1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: fingerprint,
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected hardware validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
