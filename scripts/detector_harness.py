@@ -866,7 +866,7 @@ def pixelscan_variant_summary(args) -> int:
     all_inconsistent = bool(observed) and all(row.get("verdict") == "inconsistent" and row.get("fingerprint") == "Masking detected" for row in observed)
     all_bot_clean = bool(observed) and all(row.get("botCheck") == "No automated behavior detected" for row in observed)
     if all_inconsistent and all_bot_clean:
-        payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every active canvas/audio/WebGL/font isolation variant still reports inconsistent/masking."
+        payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant, including strict passive-native-surfaces, still reports inconsistent/masking."
     elif all_inconsistent:
         payload["conclusion"] = "All current direct headless Docker variants still report Pixelscan inconsistent/masking; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation."
     else:

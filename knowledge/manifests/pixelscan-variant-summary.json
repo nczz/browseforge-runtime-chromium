@@ -1,7 +1,7 @@
 {
-  "conclusion": "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every active canvas/audio/WebGL/font isolation variant still reports inconsistent/masking.",
+  "conclusion": "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant, including strict passive-native-surfaces, still reports inconsistent/masking.",
   "detector_id": "pixelscan",
-  "generated_at": "2026-07-10T18:07:37.998693+00:00",
+  "generated_at": "2026-07-10T19:10:00+00:00",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "secret_policy": {
@@ -155,6 +155,7 @@
         "canvas_noise": 0,
         "fonts": [],
         "fonts_dir": "",
+        "native_mode": "strict",
         "webgl_renderer": "",
         "webgl_vendor": ""
       },
