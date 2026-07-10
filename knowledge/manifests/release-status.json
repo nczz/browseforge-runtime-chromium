@@ -389,7 +389,7 @@
     "knowledge/manifests/proxy-preflight.json": "7b872359eaa1e895ecc50bdf3cfa46823f81bf91ad1889b078c38002823fa0ba",
     "knowledge/manifests/release-gates.json": "31492b69f84fb064cfc02b5e9f83e0a5635aca35968b56423e3abdab81d367ad",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "e41f844ff913cce2914f4617509b0a793e34453713299a5b2f096ad211d8513a"
+    "knowledge/manifests/source-acquisition.json": "d7fbd0ab29b95dbe5942f6bac6766abdb01d9516bccb4d4bf3fd9aaa15434d53"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",
