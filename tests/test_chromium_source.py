@@ -117,6 +117,27 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertRegex(tools["chromium_src_head"], r"^[0-9a-f]{40}$")
         self.assertIs(tools["chromium_src_matches_manifest"], False)
 
+    def test_check_build_outputs_reports_baseline_and_release_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            (src / "out" / "BrowseForgeDev").mkdir(parents=True)
+            (src / "out" / "BrowseForgeLinuxDocker").mkdir(parents=True)
+            (src / "out" / "BrowseForgeDev" / "args.gn").write_text("is_debug=false\n", encoding="utf-8")
+            (src / "out" / "BrowseForgeLinuxDocker" / "args.gn").write_text("is_debug=false\n", encoding="utf-8")
+            (src / "out" / "BrowseForgeLinuxDocker" / "build.ninja").write_text("rule noop\n", encoding="utf-8")
+            (src / "out" / "BrowseForgeLinuxDocker" / "chrome").write_text("binary\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            outputs = chromium_source.check_build_outputs(plan)
+
+        self.assertIs(outputs["dev_gn_args"]["exists"], True)
+        self.assertIs(outputs["dev_build_ninja"]["exists"], False)
+        self.assertIs(outputs["linux_docker_gn_args"]["exists"], True)
+        self.assertIs(outputs["linux_docker_build_ninja"]["exists"], True)
+        self.assertIs(outputs["linux_docker_chrome"]["exists"], True)
+
 
 
 class ChromiumSourcePatchStatusTests(unittest.TestCase):
@@ -218,6 +239,9 @@ class ChromiumSourcePatchStatusTests(unittest.TestCase):
         payload, completed_commands = self._run_check_with_stubbed_patch_results()
 
         entries, all_ok = self._patch_status(payload)
+        self.assertIn("build_outputs", payload)
+        self.assertIn("linux_docker_build_ninja", payload["build_outputs"])
+        self.assertIn("linux_docker_chrome", payload["build_outputs"])
         entries_by_script = {self._entry_script_path(entry): entry for entry in entries}
         self.assertEqual(set(expected), set(entries_by_script))
         self.assertEqual(set(expected), {self._script_from_command(command) for command in completed_commands})

@@ -294,6 +294,24 @@ def check_tools(plan: SourcePlan) -> dict:
     }
 
 
+def check_build_outputs(plan: SourcePlan) -> dict:
+    chromium_src = Path(plan.chromium_src_dir)
+    outputs = {
+        "dev_gn_args": chromium_src / "out" / "BrowseForgeDev" / "args.gn",
+        "dev_build_ninja": chromium_src / "out" / "BrowseForgeDev" / "build.ninja",
+        "linux_docker_gn_args": chromium_src / "out" / "BrowseForgeLinuxDocker" / "args.gn",
+        "linux_docker_build_ninja": chromium_src / "out" / "BrowseForgeLinuxDocker" / "build.ninja",
+        "linux_docker_chrome": chromium_src / "out" / "BrowseForgeLinuxDocker" / "chrome",
+    }
+    return {
+        key: {
+            "path": str(path),
+            "exists": path.exists(),
+        }
+        for key, path in outputs.items()
+    }
+
+
 def emit_json(payload: object) -> None:
     print(json.dumps(payload, indent=2, sort_keys=True))
 
@@ -330,7 +348,12 @@ def main() -> None:
         emit_json(asdict(plan))
         return
     if args.command == "check":
-        emit_json({"plan": asdict(plan), "tools": check_tools(plan), "patches": check_patches(plan)})
+        emit_json({
+            "plan": asdict(plan),
+            "tools": check_tools(plan),
+            "patches": check_patches(plan),
+            "build_outputs": check_build_outputs(plan),
+        })
         return
     if not args.execute:
         raise SystemExit("acquire requires --execute because Chromium checkout/build dependencies are large")
