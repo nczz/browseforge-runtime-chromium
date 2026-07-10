@@ -312,7 +312,7 @@
         "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
         "chromium/src/third_party/blink/renderer/core/frame/navigator_ua.cc"
       ],
-      "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version, and an empty upstream brand_full_version_list is seeded from brand_version_list so navigator.userAgentData.getHighEntropyValues([\"fullVersionList\"]) can return full-version entries after rebuild. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers DOM User-Agent and navigator.userAgentData values; release detector pass still requires a rebuilt patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version, and an empty upstream brand_full_version_list is seeded from brand_version_list so navigator.userAgentData.getHighEntropyValues([\"fullVersionList\"]) can return full-version entries after rebuild. Empty or absent values preserve upstream Chromium behavior; explicit non-ASCII/control strings or values above the native launcher limits are rejected before command-plan emission. This covers DOM User-Agent and navigator.userAgentData values; release detector pass still requires a rebuilt patched Chromium artifact and live detector run. User-Agent is limited to 512 printable ASCII bytes; UA-CH full version/platform/platform version are limited to 64 bytes, architecture to 32, bitness to 16, and model to 128.",
       "patchset_id": "surface-user-agent-native-overrides",
       "risk_level": "high",
       "surface": "user_agent",
@@ -328,7 +328,8 @@
         "launcher.FingerprintConfig.UAArchitecture",
         "launcher.FingerprintConfig.UABitness",
         "launcher.FingerprintConfig.UAMobile",
-        "launcher.FingerprintConfig.UAWoW64"
+        "launcher.FingerprintConfig.UAWoW64",
+        "launcher.validatePrintableASCII"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_user_agent_patch",

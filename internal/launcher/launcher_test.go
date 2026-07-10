@@ -223,6 +223,29 @@ func TestBuildPlanAddsUserAgentFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidUserAgentFingerprintArgs(t *testing.T) {
+	for name, fingerprint := range map[string]FingerprintConfig{
+		"user_agent_control": {UserAgent: "Mozilla\n5.0"},
+		"user_agent_long":    {UserAgent: strings.Repeat("A", 513)},
+		"full_version_unicode": {
+			UAFullVersion: "146.0\u2603",
+		},
+		"architecture_long": {UAArchitecture: strings.Repeat("x", 33)},
+		"bitness_long":      {UABitness: strings.Repeat("6", 17)},
+		"model_long":        {UAModel: strings.Repeat("M", 129)},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: fingerprint,
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected user-agent validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsHardwareFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

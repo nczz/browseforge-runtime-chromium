@@ -184,6 +184,27 @@ func (c Config) Validate(requireBinary bool) error {
 	if err := validatePluginsPDF(c.Fingerprint.PluginsPDF); err != nil {
 		return err
 	}
+	if err := validatePrintableASCII(c.Fingerprint.UserAgent, "fingerprint.user_agent", 512); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UAFullVersion, "fingerprint.ua_full_version", 64); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UAPlatform, "fingerprint.ua_platform", 64); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UAPlatformVersion, "fingerprint.ua_platform_version", 64); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UAArchitecture, "fingerprint.ua_architecture", 32); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UABitness, "fingerprint.ua_bitness", 16); err != nil {
+		return err
+	}
+	if err := validatePrintableASCII(c.Fingerprint.UAModel, "fingerprint.ua_model", 128); err != nil {
+		return err
+	}
 	if err := validatePrintableASCII(c.Fingerprint.WebGLVendor, "fingerprint.webgl_vendor", 256); err != nil {
 		return err
 	}
