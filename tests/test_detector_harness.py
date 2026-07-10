@@ -2635,6 +2635,63 @@ class DetectorHarnessTests(unittest.TestCase):
         for key in ("audio_noise", "canvas_noise", "webgl_vendor", "webgl_renderer", "fonts", "fonts_dir"):
             self.assertIn(key, passive)
 
+    def test_pixelscan_materialize_variants_writes_local_configs_and_secret_safe_manifest(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            base_config = root / "base.json"
+            output_dir = root / "variants"
+            manifest = root / "manifest.json"
+            base_config.write_text(json.dumps({
+                "profile_id": "pix",
+                "fingerprint": {
+                    "canvas_noise": 7,
+                    "audio_noise": 11,
+                    "webgl_vendor": "SpoofVendor",
+                    "webgl_renderer": "SpoofRenderer",
+                    "fonts": ["Arial"],
+                    "fonts_dir": "/tmp/fonts",
+                    "timezone": "Asia/Taipei",
+                },
+                "proxy": {
+                    "server": "socks5://127.0.0.1:57626",
+                    "username": "user",
+                    "password": "secret",
+                },
+            }), encoding="utf-8")
+
+            proc = self.run_harness(
+                "pixelscan-materialize-variants",
+                "--base-config",
+                str(base_config),
+                "--output-dir",
+                str(output_dir),
+                "--manifest-output",
+                str(manifest),
+                "--generated-at",
+                "2026-07-10T00:00:00+00:00",
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            manifest_text = manifest.read_text(encoding="utf-8")
+            self.assertNotIn("socks5://127.0.0.1:57626", manifest_text)
+            self.assertNotIn("password", manifest_text)
+            self.assertFalse(payload["secret_policy"]["manifest_contains_proxy_secret"])
+            variants = {row["variant_id"]: row for row in payload["variants"]}
+            canvas_cfg = json.loads((output_dir / "canvas-off.json").read_text(encoding="utf-8"))
+            self.assertEqual(canvas_cfg["profile_id"], "pix-canvas-off")
+            self.assertEqual(0, canvas_cfg["fingerprint"]["canvas_noise"])
+            self.assertEqual(11, canvas_cfg["fingerprint"]["audio_noise"])
+            self.assertEqual("secret", canvas_cfg["proxy"]["password"])
+            passive_cfg = json.loads((output_dir / "passive-native-surfaces.json").read_text(encoding="utf-8"))
+            self.assertEqual(0, passive_cfg["fingerprint"]["canvas_noise"])
+            self.assertEqual(0, passive_cfg["fingerprint"]["audio_noise"])
+            self.assertEqual("", passive_cfg["fingerprint"]["webgl_vendor"])
+            self.assertEqual("", passive_cfg["fingerprint"]["webgl_renderer"])
+            self.assertEqual([], passive_cfg["fingerprint"]["fonts"])
+            self.assertEqual("", passive_cfg["fingerprint"]["fonts_dir"])
+            self.assertEqual({"canvas_noise": 0}, variants["canvas-off"]["fingerprint_overrides"])
+
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import base64
 import datetime as dt
 import hashlib
@@ -759,6 +760,46 @@ def pixelscan_variant_plan(args) -> int:
     else:
         print(out, end="")
     return 0
+
+def pixelscan_materialize_variants(args) -> int:
+    generated_at = args.generated_at or dt.datetime.now(dt.timezone.utc).isoformat()
+    base_config_path = Path(args.base_config)
+    output_dir = Path(args.output_dir)
+    manifest_path = Path(args.manifest_output) if args.manifest_output else output_dir / "manifest.json"
+    base_config = json.loads(base_config_path.read_text(encoding="utf-8"))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    entries = []
+    for variant in PIXELSCAN_ISOLATION_VARIANTS:
+        variant_id = variant["variant_id"]
+        config = copy.deepcopy(base_config)
+        fingerprint = config.setdefault("fingerprint", {})
+        for key, value in variant["fingerprint_overrides"].items():
+            fingerprint[key] = value
+        config["profile_id"] = f"{config.get('profile_id', 'pixelscan')}-{variant_id}"
+        config_path = output_dir / f"{variant_id}.json"
+        config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        entries.append({
+            "variant_id": variant_id,
+            "config_path": str(config_path),
+            "fingerprint_overrides": variant["fingerprint_overrides"],
+            "isolated_surfaces": variant["isolated_surfaces"],
+        })
+    manifest = {
+        "runtime_id": "browseforge-chromium",
+        "schema_version": "1.0",
+        "generated_at": generated_at,
+        "detector_id": "pixelscan",
+        "base_config_path": str(base_config_path),
+        "secret_policy": {
+            "manifest_contains_proxy_secret": False,
+            "variant_configs_are_local_only": True,
+        },
+        "variants": entries,
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return 0
+
 
 def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
@@ -2065,6 +2106,7 @@ def main(argv=None):
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("pixelscan-variant-plan"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_plan)
+    p = sub.add_parser("pixelscan-materialize-variants"); p.add_argument("--base-config", required=True); p.add_argument("--output-dir", required=True); p.add_argument("--manifest-output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_materialize_variants)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
