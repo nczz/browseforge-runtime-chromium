@@ -19,6 +19,7 @@ INPUT_PATHS = [
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/signing-policy.json",
+    "knowledge/manifests/source-acquisition.json",
     "contracts/browseforge-integration.contract.json",
 ]
 
@@ -60,6 +61,28 @@ def native_blocker_snapshot_fields(entry: dict[str, Any]) -> dict[str, Any]:
         "package_zip_exists": snapshot.get("package_zip_exists"),
     }
 
+def source_rebuild_blockers(source_acquisition: dict[str, Any]) -> list[dict[str, Any]]:
+    chromium = source_acquisition.get("chromium_base", {})
+    if not isinstance(chromium, dict) or chromium.get("artifact_rebuild_required") is not True:
+        return []
+    reasons = chromium.get("artifact_rebuild_reasons", [])
+    if not isinstance(reasons, list) or not reasons:
+        reasons = ["source patch changes require rebuilding packaged runtime artifacts"]
+    blockers = []
+    for index, reason in enumerate(reasons):
+        blockers.append(
+            {
+                "blocker_id": f"source-acquisition:artifact-rebuild:{index}",
+                "detail": str(reason),
+                "severity": "high",
+                "source": "knowledge/manifests/source-acquisition.json",
+                "status": chromium.get("artifact_rebuild_status"),
+            }
+        )
+    return blockers
+
+
+
 
 
 def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[str, Any]:
@@ -71,6 +94,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
     surface_status = load_json(root, "knowledge/manifests/fingerprint-surface-status.json")
     signing_policy = load_json(root, "knowledge/manifests/signing-policy.json")
     integration_contract = load_json(root, "contracts/browseforge-integration.contract.json")
+    source_acquisition = load_json(root, "knowledge/manifests/source-acquisition.json")
 
     blockers: list[dict[str, Any]] = []
     for gate in release_gates.get("release_candidate_required_gates", []):
@@ -87,6 +111,8 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
                 status=status,
                 evidence=gate.get("evidence"),
             )
+
+    blockers.extend(source_rebuild_blockers(source_acquisition))
 
     if native_preflight.get("release_grade_ready") is not True:
         for entry in native_preflight.get("platforms", []):

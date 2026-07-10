@@ -79,7 +79,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout. The current dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact from the prior source-patch set and must be rebuilt before it can claim WebShare feature parity coverage with explicit artifact os=linux and arch=x64 metadata and an alpha runtime manifest. The rebuilt artifact live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head and chromium_src_matches_manifest so pinned checkout drift is visible before source patch/build work.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
@@ -145,7 +145,13 @@
       }
     },
     "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation",
-    "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI."
+    "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
+    "artifact_rebuild_required": true,
+    "artifact_rebuild_status": "pending_linux_rebuild_after_webshare_feature_parity_patch",
+    "artifact_rebuild_reasons": [
+      "WebShare feature-parity source patch is applied in the external Chromium checkout after the current linux-x64 packaged artifact was built.",
+      "Rebuild and repackage browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip before claiming packaged artifact coverage for WebShare feature inventory parity."
+    ]
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {

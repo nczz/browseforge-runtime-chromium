@@ -131,6 +131,17 @@ class ReleaseStatusTests(unittest.TestCase):
             "contracts/browseforge-integration.contract.json",
             {"release_blockers": ["external proxy exit-IP/geolocation detector evidence is missing"]},
         )
+        self.write_json(
+            root,
+            "knowledge/manifests/source-acquisition.json",
+            {
+                "chromium_base": {
+                    "artifact_rebuild_required": True,
+                    "artifact_rebuild_reasons": ["WebShare source patch has not been rebuilt into packaged artifacts."],
+                    "artifact_rebuild_status": "pending_linux_rebuild",
+                }
+            },
+        )
 
     def test_release_status_collects_blockers_and_input_hashes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -152,6 +163,7 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("fingerprint-surface:proxy/IP coherence", blocker_ids)
         self.assertIn("signing-policy:linux-x64", blocker_ids)
         self.assertIn("browseforge-integration:0", blocker_ids)
+        self.assertIn("source-acquisition:artifact-rebuild:0", blocker_ids)
         detector_blocker = next(
             blocker for blocker in payload["blockers"]
             if blocker["blocker_id"] == "detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host"
@@ -188,6 +200,8 @@ class ReleaseStatusTests(unittest.TestCase):
                     payload = {"release_grade_ready": True, "policies": [{"platform": "linux-x64", "release_grade_allowed": True}]}
                 elif path == "contracts/browseforge-integration.contract.json":
                     payload = {"release_blockers": []}
+                elif path == "knowledge/manifests/source-acquisition.json":
+                    payload = {"chromium_base": {"artifact_rebuild_required": False}}
                 else:  # pragma: no cover - keeps the fixture exhaustive when inputs change.
                     raise AssertionError(path)
                 self.write_json(root, path, payload)

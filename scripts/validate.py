@@ -622,6 +622,7 @@ RELEASE_STATUS_INPUTS = [
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/signing-policy.json",
+    "knowledge/manifests/source-acquisition.json",
     "contracts/browseforge-integration.contract.json",
 ]
 
