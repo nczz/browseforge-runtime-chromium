@@ -1,0 +1,101 @@
+{
+  "artifact_id": "unpackaged:macos-arm64:v0.1.0-alpha.0",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/webrtc"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_host_direct_20260710",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "unknown",
+    "matrix_key": "macos-arm64:browserleaks-webrtc:unknown:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_webrtc_macos_host_bounded_candidate_metadata",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks WebRTC page loaded under macOS headed host Chrome and recorded sanitized ICE candidate metadata without committing IP literals; release-grade packaged macOS runtime evidence remains required.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 2,
+        "ipLiteralCount": 0,
+        "privateIpLiteralCount": 0,
+        "publicIpLiteralCount": 0,
+        "rawCandidateSha256": "996967a8e25157012b1b6a711c2d48a75ef0fb45bcdaeaddad0111869015899d",
+        "title": "WebRTC Leak Test - BrowserLeaks",
+        "types": [
+          "host"
+        ],
+        "url": "https://browserleaks.com/webrtc"
+      },
+      "raw_value_hash": "74a565907eadb570a24c4a626d03b65075ea85d53b7c26a33c5230b51ac9a310",
+      "severity": "medium",
+      "status": "pass",
+      "surface": "webrtc"
+    },
+    {
+      "detector_check": "browserleaks_webrtc_macos_host_automation_probe",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "BrowserLeaks WebRTC page context reported navigator.webdriver=false under macOS headed host Chrome.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_host_direct_20260710",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw BrowserLeaks WebRTC page text, browser storage, remote address text, and ICE candidates are not committed; committed evidence stores sanitized title/url, aggregate candidate counts, candidate type labels, IP literal counts, and a SHA-256 digest of sorted raw candidates only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-webrtc-macos-host-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_host_direct_20260710.json",
+    "raw_capture_sha256": "41914d61ced2921846689b4bd1e9fba6f55d6fd41b957f74de49bf0873c96af7",
+    "sha256": "4499224cdabc857e31feef120821d17af83d09c4e11d93cca0f5e49f0e5e1be0",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "be47f293ab0170f5b2ab55c1b089ed9995b96fbada4e27e5e823a5ed28313ff6"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed host native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-10T12:55:00Z"
+}

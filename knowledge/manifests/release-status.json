@@ -365,12 +365,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T12:19:06Z",
+  "generated_at": "2026-07-10T12:32:09Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
-    "detector-summary.json": "6cc9d201f2a908d943ec40f8c8847785e6ac3f91b6303e6585f9d56058b0a93f",
-    "knowledge/manifests/detector-score-comparison.json": "e3125cf924e9abad40464028d0c5b6018b4705f0cb76fe49260935d5009d239b",
-    "knowledge/manifests/fingerprint-surface-status.json": "8a4dcabeb1d9693e64f8bbd4a9c2035e01b799eacb5becc31acf957446b93f85",
+    "detector-summary.json": "428297a39d02e556c699d28484ba0b93055c75ee86276c9be17c88410a712d76",
+    "knowledge/manifests/detector-score-comparison.json": "5ca83c81825b8d21bcee935378416a84672af355b60864816350fd0e12cc6403",
+    "knowledge/manifests/fingerprint-surface-status.json": "3f0bdad90eb78c0a0421f1bda95fe4410665e1ac9d3fd119b0c49c5c6405c35e",
     "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
     "knowledge/manifests/proxy-preflight.json": "7b872359eaa1e895ecc50bdf3cfa46823f81bf91ad1889b078c38002823fa0ba",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
