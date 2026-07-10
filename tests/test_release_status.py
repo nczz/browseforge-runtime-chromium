@@ -74,7 +74,9 @@ class ReleaseStatusTests(unittest.TestCase):
                         "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
                         "platform": "macos-arm64",
                         "detector_id": "sannysoft",
+                        "display_mode": "headed",
                         "network_mode": "proxy",
+                        "container": False,
                         "required_evidence": "external proxy exit-IP/geolocation evidence",
                     }
                 ],
@@ -143,6 +145,13 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("fingerprint-surface:proxy/IP coherence", blocker_ids)
         self.assertIn("signing-policy:linux-x64", blocker_ids)
         self.assertIn("browseforge-integration:0", blocker_ids)
+        detector_blocker = next(
+            blocker for blocker in payload["blockers"]
+            if blocker["blocker_id"] == "detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host"
+        )
+        self.assertEqual(detector_blocker["display_mode"], "headed")
+        self.assertEqual(detector_blocker["network_mode"], "proxy")
+        self.assertEqual(detector_blocker["container"], False)
         self.assertEqual(set(release_status.INPUT_PATHS), set(payload["input_sha256"]))
 
     def test_release_status_passes_only_without_blockers(self) -> None:

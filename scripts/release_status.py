@@ -131,6 +131,9 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
             platform=gap.get("platform"),
             detector_id=gap.get("detector_id"),
             matrix_key=matrix_key,
+            display_mode=gap.get("display_mode"),
+            network_mode=gap.get("network_mode"),
+            container=gap.get("container"),
         )
 
     for gap_key in ("baseline_gaps", "gaps"):
