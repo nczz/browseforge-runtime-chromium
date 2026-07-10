@@ -10,7 +10,24 @@ NAVIGATOR_CC = Path("third_party/blink/renderer/core/frame/navigator.cc")
 COMMAND_LINE_INCLUDE = '#include "base/command_line.h"\n'
 INCLUDE_ANCHOR = '#include "third_party/blink/renderer/core/frame/navigator.h"\n'
 
-HELPER = '''\nnamespace {\n\nconstexpr char kBrowseForgeStealthModeSwitch[] = "browseforge-stealth-mode";\nconstexpr char kBrowseForgeStealthModeOff[] = "off";\n\nbool BrowseForgeShouldHideWebDriver() {\n  const base::CommandLine* command_line =\n      base::CommandLine::ForCurrentProcess();\n  if (!command_line->HasSwitch(kBrowseForgeStealthModeSwitch))\n    return false;\n  return command_line->GetSwitchValueASCII(kBrowseForgeStealthModeSwitch) !=\n         kBrowseForgeStealthModeOff;\n}\n\n}  // namespace\n'''
+HELPER = '''
+namespace {
+
+constexpr char kBrowseForgeStealthModeSwitch[] = "browseforge-stealth-mode";
+
+bool BrowseForgeShouldHideWebDriver() {
+  const base::CommandLine* command_line =
+      base::CommandLine::ForCurrentProcess();
+  if (!command_line->HasSwitch(kBrowseForgeStealthModeSwitch))
+    return false;
+  const std::string mode =
+      command_line->GetSwitchValueASCII(kBrowseForgeStealthModeSwitch);
+  return mode == "enabled" || mode == "strict" || mode == "true" ||
+         mode == "1";
+}
+
+}  // namespace
+'''
 NAMESPACE_ANCHOR = "namespace blink {\n"
 
 ORIGINAL_WEBDRIVER = '''bool Navigator::webdriver() const {\n  if (RuntimeEnabledFeatures::AutomationControlledEnabled())\n    return true;\n\n  bool automation_enabled = false;\n  probe::ApplyAutomationOverride(GetExecutionContext(), automation_enabled);\n  return automation_enabled;\n}\n'''

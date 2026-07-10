@@ -214,6 +214,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if err := validateFonts(c.Fingerprint.Fonts); err != nil {
 		return err
 	}
+	if err := validateNativeMode(c.Fingerprint.NativeMode); err != nil {
+		return err
+	}
 	if err := validateWebRTCIP(c.Fingerprint.WebRTCIP, "fingerprint.webrtc_ip", true); err != nil {
 		return err
 	}
@@ -306,6 +309,15 @@ func validatePluginsPDF(value string) error {
 		return nil
 	default:
 		return fmt.Errorf("fingerprint.plugins_pdf must be enabled/true/1 or disabled/false/0")
+	}
+}
+
+func validateNativeMode(value string) error {
+	switch value {
+	case "", "enabled", "strict", "true", "1", "off", "disabled", "false", "0":
+		return nil
+	default:
+		return fmt.Errorf("fingerprint.native_mode must be enabled/strict/true/1 or off/disabled/false/0")
 	}
 }
 

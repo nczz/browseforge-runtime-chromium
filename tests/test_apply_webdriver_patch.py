@@ -40,6 +40,11 @@ class ApplyWebdriverPatchTests(unittest.TestCase):
 
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('constexpr char kBrowseForgeStealthModeSwitch[] = "browseforge-stealth-mode";', patched)
+        self.assertIn('mode == "enabled"', patched)
+        self.assertIn('mode == "strict"', patched)
+        self.assertIn('mode == "true"', patched)
+        self.assertIn('mode == "1"', patched)
+        self.assertNotIn('mode !=', patched)
         self.assertIn("if (BrowseForgeShouldHideWebDriver())\n    return false;", patched)
         self.assertIn("RuntimeEnabledFeatures::AutomationControlledEnabled()", patched)
 

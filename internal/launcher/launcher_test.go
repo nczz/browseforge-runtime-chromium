@@ -547,6 +547,38 @@ func TestBuildPlanAddsNativeStealthConfig(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidNativeStealthMode(t *testing.T) {
+	for _, mode := range []string{"maybe", "ENABLED", "strict\n", strings.Repeat("x", 65)} {
+		cfg := Config{
+			UserDataDir: t.TempDir(),
+			Fingerprint: FingerprintConfig{
+				NativeMode: mode,
+			},
+		}
+		if _, err := cfg.BuildPlan(); err == nil {
+			t.Fatalf("expected native mode validation error for %q", mode)
+		}
+	}
+}
+
+func TestBuildPlanAllowsExplicitNativeStealthNoOpModes(t *testing.T) {
+	for _, mode := range []string{"off", "disabled", "false", "0"} {
+		cfg := Config{
+			UserDataDir: t.TempDir(),
+			Fingerprint: FingerprintConfig{
+				NativeMode: mode,
+			},
+		}
+		plan, err := cfg.BuildPlan()
+		if err != nil {
+			t.Fatalf("expected native mode %q to be valid: %v", mode, err)
+		}
+		if !containsArg(plan.Args, stealthModeArg+"="+mode) {
+			t.Fatalf("missing native stealth mode arg for %q: %v", mode, plan.Args)
+		}
+	}
+}
+
 func TestProfileLockPreventsConcurrentUse(t *testing.T) {
 	dir := t.TempDir()
 	lock, err := AcquireProfileLock(dir)

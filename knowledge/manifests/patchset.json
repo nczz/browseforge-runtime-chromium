@@ -51,7 +51,8 @@
         "browseforge::stealth::PersonaResolver",
         "browseforge.stealth.mojom.BrowseForgeStealthHost",
         "launcher.FingerprintConfig.NativeConfigPath",
-        "launcher.FingerprintConfig.NativeMode"
+        "launcher.FingerprintConfig.NativeMode",
+        "launcher.validateNativeMode"
       ],
       "tests": [
         "go test ./...",
@@ -76,14 +77,15 @@
         "scripts/validate.py",
         "chromium/src/third_party/blink/renderer/core/frame/navigator.cc"
       ],
-      "notes": "When --browseforge-stealth-mode is present and not 'off', blink::Navigator::webdriver returns false before Chromium's AutomationControlled/probe override path. Without BrowseForge stealth mode the upstream behavior is preserved. This is source-level patch evidence only; release detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --browseforge-stealth-mode is explicitly enabled/strict/true/1, blink::Navigator::webdriver returns false before Chromium's AutomationControlled/probe override path. Empty, absent, off, disabled, false, or 0 preserve upstream behavior; the launcher rejects unknown mode strings before command-plan emission. This is source-level patch evidence only; release detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-webdriver-native-gate",
       "risk_level": "medium",
       "surface": "automation_webdriver",
       "symbols_touched": [
         "blink::Navigator::webdriver",
         "BrowseForgeShouldHideWebDriver",
-        "launcher.FingerprintConfig.NativeMode"
+        "launcher.FingerprintConfig.NativeMode",
+        "launcher.validateNativeMode"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_webdriver_patch",
