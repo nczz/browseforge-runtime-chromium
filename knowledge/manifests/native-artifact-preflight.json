@@ -45,13 +45,15 @@
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json"
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=false on darwin host and native Windows output binary is missing"
       ],
       "platform": "windows-x64",
       "ready": false,
       "status": "missing_native_release_artifact",
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
+        "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
         "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
         "native Windows detector evidence for the packaged artifact"
       ]

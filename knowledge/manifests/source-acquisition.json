@@ -118,7 +118,8 @@
         "python3 scripts/chromium_native.py check --platform windows-x64",
         "python3 scripts/chromium_source.py acquire --execute --step sync-deps",
         "python3 scripts/chromium_native.py run-hooks --platform macos-arm64 --execute",
-        "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute"
+        "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
+        "python3 scripts/chromium_native.py package --platform macos-arm64 --execute"
       ],
       "last_macos_preflight": {
         "runhooks_status": "passed",
@@ -129,6 +130,18 @@
         "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
         "native_toolchain_ready": false,
         "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports native_toolchain_ready=false, xcodebuild_ok=false, and build_ninja_exists=false"
+      },
+      "last_windows_preflight": {
+        "host_os": "darwin",
+        "required_host_os": "windows",
+        "host_supported": false,
+        "native_toolchain_ready": false,
+        "gn_binary_status": "checkout_depot_tools_gn_bat_present",
+        "build_ninja_status": "missing_until_windows_gn_generation_runs_on_windows_host",
+        "output_binary_status": "missing_windows_chrome_exe",
+        "package_status": "blocked_missing_windows_native_artifact",
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform windows-x64 reports host_supported=false, native_toolchain_ready=false, output_binary_exists=false, portable_layout_exists=false",
+        "next_action": "Run python3 scripts/chromium_native.py gn-gen --platform windows-x64 --execute on a Windows host with the pinned checkout and toolchain, then build-chrome and package after build_ninja/output exist"
       }
     },
     "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation"
