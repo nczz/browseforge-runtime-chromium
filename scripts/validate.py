@@ -593,12 +593,17 @@ def validate_release_status(release_status: dict) -> None:
         raise SystemExit("release status blocker_count must match blockers length")
     if release_status.get("release_grade_ready") != (len(blockers) == 0):
         raise SystemExit("release status release_grade_ready must match blockers")
+    seen_blocker_ids: set[str] = set()
     for blocker in blockers:
         if not isinstance(blocker, dict):
             raise SystemExit("release status blockers must be objects")
         for key in ["blocker_id", "source", "severity", "detail"]:
             if not isinstance(blocker.get(key), str) or not blocker.get(key):
                 raise SystemExit(f"release status blocker missing {key}")
+        blocker_id = blocker["blocker_id"]
+        if blocker_id in seen_blocker_ids:
+            raise SystemExit(f"release status duplicate blocker_id: {blocker_id}")
+        seen_blocker_ids.add(blocker_id)
     inputs = release_status.get("inputs", [])
     if inputs != RELEASE_STATUS_INPUTS:
         raise SystemExit(f"release status inputs drifted: {inputs!r}")

@@ -889,6 +889,28 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertRegex(message, r"artifact|linux-x64|release", message)
         self.assertNotRegex(message, r"detector[- ]summary|coverage_gap|live-detector", message)
 
+    def test_validate_rejects_release_status_duplicate_blocker_ids(self) -> None:
+        """Release-status blocker IDs must be unique so automation can address blockers deterministically."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._refresh_release_status(temp_root)
+            payload = json.loads((temp_root / "knowledge" / "manifests" / "release-status.json").read_text(encoding="utf-8"))
+            payload["blockers"].append(dict(payload["blockers"][0]))
+            payload["blocker_count"] = len(payload["blockers"])
+
+            original_root = module.ROOT
+            try:
+                module.ROOT = temp_root
+                with self.assertRaises(SystemExit) as raised:
+                    module.validate_release_status(payload)
+            finally:
+                module.ROOT = original_root
+
+        self.assertIn("duplicate blocker_id", str(raised.exception))
+
+
     def test_validate_accepts_safe_failed_proxy_preflight_manifest(self) -> None:
         """A failed proxy preflight is valid release metadata when it redacts proxy inputs and names missing env prerequisites."""
         module = self._load_validate_module()
