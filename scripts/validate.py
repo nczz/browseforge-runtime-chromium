@@ -56,6 +56,7 @@ REQUIRED_FILES = [
     "scripts/release_status.py",
     "scripts/package_linux_runtime.py",
     "scripts/apply_webdriver_patch.py",
+    "scripts/patch_ops.py",
     "scripts/apply_hardware_patch.py",
     "scripts/apply_screen_patch.py",
     "scripts/apply_platform_patch.py",

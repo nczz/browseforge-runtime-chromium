@@ -648,6 +648,12 @@ def _collect_webrtc_records(evidence_rows: list[dict], detector_id: str) -> list
             })
     return records
 
+PIXELSCAN_PAGE_SCORE_CHECKS = {
+    "pixelscan_fingerprint_page_status",
+    "pixelscan_page_verdict",
+}
+
+
 def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
     required = ("verdict", "fingerprint", "audioContextHash", "fontHash")
@@ -657,7 +663,7 @@ def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
             continue
         for result in evidence.get("results", []):
             values = result.get("normalized_values", {})
-            if result.get("detector_check") != "pixelscan_fingerprint_page_status":
+            if result.get("detector_check") not in PIXELSCAN_PAGE_SCORE_CHECKS:
                 continue
             if not all(values.get(field) for field in required):
                 continue

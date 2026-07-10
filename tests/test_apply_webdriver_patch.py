@@ -68,6 +68,21 @@ class ApplyWebdriverPatchTests(unittest.TestCase):
             self.assertEqual(apply_webdriver_patch.NAVIGATOR_CC, changed)
             self.assertIn("BrowseForgeShouldHideWebDriver", navigator.read_text(encoding="utf-8"))
 
+    def test_missing_webdriver_anchor_reports_nearest_candidate(self) -> None:
+        drifted = NAVIGATOR_FIXTURE.replace(
+            "bool Navigator::webdriver() const {",
+            "bool Navigator::webdriver(ScriptState*) const {",
+        )
+
+        with self.assertRaises(SystemExit) as raised:
+            apply_webdriver_patch.patch_navigator(drifted)
+
+        message = str(raised.exception)
+        self.assertIn("navigator.webdriver implementation: replacement anchor not found", message)
+        self.assertIn("nearest anchor candidate", message)
+        self.assertIn("expected-anchor", message)
+        self.assertIn("nearest-source", message)
+
 
 if __name__ == "__main__":
     unittest.main()

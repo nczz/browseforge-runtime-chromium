@@ -2578,6 +2578,25 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
             self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
 
+    def test_compare_scores_accepts_pixelscan_page_verdict_rows(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headed_xvfb",
+                label="pixelscan_page_verdict",
+                results=[self.pixelscan_page_status_result(detector_check="pixelscan_page_verdict")],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            baseline_gap_ids = {gap.get("gap_id") for gap in payload["baseline_gaps"]}
+            self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
+            self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
+
 
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:

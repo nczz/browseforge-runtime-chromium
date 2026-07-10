@@ -2,7 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from patch_ops import ensure_text_after, ensure_text_before, replace_once, write_if_changed
 
 DEFAULT_CHROMIUM_SRC = Path("/Users/chun/Projects/browser-source/browseforge-chromium/src")
 NAVIGATOR_CC = Path("third_party/blink/renderer/core/frame/navigator.cc")
@@ -42,31 +49,31 @@ def validate_chromium_src(src: Path) -> None:
 
 
 def patch_navigator(text: str) -> str:
-    patched = text
-    if COMMAND_LINE_INCLUDE not in patched:
-        if INCLUDE_ANCHOR not in patched:
-            raise SystemExit("navigator.cc include anchor not found")
-        patched = patched.replace(INCLUDE_ANCHOR, INCLUDE_ANCHOR + "\n" + COMMAND_LINE_INCLUDE, 1)
-
-    if "BrowseForgeShouldHideWebDriver" not in patched:
-        if NAMESPACE_ANCHOR not in patched:
-            raise SystemExit("navigator.cc namespace anchor not found")
-        patched = patched.replace(NAMESPACE_ANCHOR, HELPER + "\n" + NAMESPACE_ANCHOR, 1)
-
-    if PATCHED_WEBDRIVER in patched:
-        return patched
-    if ORIGINAL_WEBDRIVER not in patched:
-        raise SystemExit("navigator.webdriver implementation anchor not found")
-    return patched.replace(ORIGINAL_WEBDRIVER, PATCHED_WEBDRIVER, 1)
+    patched = ensure_text_after(
+        text,
+        INCLUDE_ANCHOR,
+        "\n" + COMMAND_LINE_INCLUDE,
+        "navigator.cc include",
+    )
+    patched = ensure_text_before(
+        patched,
+        NAMESPACE_ANCHOR,
+        HELPER + "\n",
+        "navigator.cc namespace",
+    )
+    return replace_once(
+        patched,
+        ORIGINAL_WEBDRIVER,
+        PATCHED_WEBDRIVER,
+        "navigator.webdriver implementation",
+    )
 
 
 def apply_patch(src: Path) -> Path:
     validate_chromium_src(src)
     navigator = src / NAVIGATOR_CC
-    original = navigator.read_text(encoding="utf-8")
-    patched = patch_navigator(original)
-    if patched != original:
-        navigator.write_text(patched, encoding="utf-8")
+    patched = patch_navigator(navigator.read_text(encoding="utf-8"))
+    write_if_changed(navigator, patched)
     return NAVIGATOR_CC
 
 

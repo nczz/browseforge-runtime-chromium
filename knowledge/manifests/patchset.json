@@ -73,6 +73,7 @@
       ],
       "files_touched": [
         "scripts/apply_webdriver_patch.py",
+        "scripts/patch_ops.py",
         "tests/test_apply_webdriver_patch.py",
         "scripts/validate.py",
         "chromium/src/third_party/blink/renderer/core/frame/navigator.cc"
