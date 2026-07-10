@@ -718,6 +718,43 @@ PIXELSCAN_ISOLATION_VARIANTS = [
         "isolated_surfaces": ["audio", "canvas", "webgl", "fonts"],
         "expected_arg_effect": "sets native_mode=strict so the wrapper suppresses active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
     },
+    {
+        "variant_id": "minimal-native-control",
+        "purpose": "Strip BrowseForge persona overrides to test whether the patched headless Docker runtime remains inconsistent before reintroducing fingerprint surfaces.",
+        "fingerprint_overrides": {
+            "accept_language": "",
+            "audio_noise": 0,
+            "canvas_noise": 0,
+            "device_memory_gb": 0,
+            "fonts": [],
+            "fonts_dir": "",
+            "hardware_concurrency": 0,
+            "locale": "",
+            "native_mode": "strict",
+            "platform": "",
+            "plugins_pdf": "",
+            "screen_avail_height": 0,
+            "screen_avail_width": 0,
+            "screen_height": 0,
+            "screen_width": 0,
+            "storage_quota_mb": 0,
+            "timezone": "",
+            "ua_architecture": "",
+            "ua_bitness": "",
+            "ua_full_version": "",
+            "ua_model": "",
+            "ua_platform": "",
+            "ua_platform_version": "",
+            "ua_mobile": False,
+            "ua_wow64": False,
+            "user_agent": "",
+            "webgl_renderer": "",
+            "webgl_vendor": "",
+            "webrtc_ip": "",
+        },
+        "isolated_surfaces": ["persona", "audio", "canvas", "webgl", "fonts"],
+        "expected_arg_effect": "omits BrowseForge persona and high-risk spoofing switches while retaining only browser launch policy needed for collection",
+    },
 ]
 
 
@@ -866,7 +903,7 @@ def pixelscan_variant_summary(args) -> int:
     all_inconsistent = bool(observed) and all(row.get("verdict") == "inconsistent" and row.get("fingerprint") == "Masking detected" for row in observed)
     all_bot_clean = bool(observed) and all(row.get("botCheck") == "No automated behavior detected" for row in observed)
     if all_inconsistent and all_bot_clean:
-        payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant, including strict passive-native-surfaces, still reports inconsistent/masking."
+        payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant plus the minimal native control still reports inconsistent/masking."
     elif all_inconsistent:
         payload["conclusion"] = "All current direct headless Docker variants still report Pixelscan inconsistent/masking; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation."
     else:

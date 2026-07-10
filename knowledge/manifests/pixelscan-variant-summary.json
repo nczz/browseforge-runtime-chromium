@@ -1,7 +1,7 @@
 {
-  "conclusion": "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every canvas/audio/WebGL/font isolation variant, including strict passive-native-surfaces, still reports inconsistent/masking.",
+  "conclusion": "All current direct headless Docker variants still report Pixelscan inconsistent/masking; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation.",
   "detector_id": "pixelscan",
-  "generated_at": "2026-07-10T19:10:00+00:00",
+  "generated_at": "2026-07-10T19:20:00+00:00",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "secret_policy": {
@@ -183,6 +183,64 @@
       "raw_capture_path_committed": false,
       "status": "observed",
       "variant_id": "passive-native-surfaces"
+    },
+    {
+      "fingerprint_overrides": {
+        "accept_language": "",
+        "audio_noise": 0,
+        "canvas_noise": 0,
+        "device_memory_gb": 0,
+        "fonts": [],
+        "fonts_dir": "",
+        "hardware_concurrency": 0,
+        "locale": "",
+        "native_mode": "strict",
+        "platform": "",
+        "plugins_pdf": "",
+        "screen_avail_height": 0,
+        "screen_avail_width": 0,
+        "screen_height": 0,
+        "screen_width": 0,
+        "storage_quota_mb": 0,
+        "timezone": "",
+        "ua_architecture": "",
+        "ua_bitness": "",
+        "ua_full_version": "",
+        "ua_mobile": false,
+        "ua_model": "",
+        "ua_platform": "",
+        "ua_platform_version": "",
+        "ua_wow64": false,
+        "user_agent": "",
+        "webgl_renderer": "",
+        "webgl_vendor": "",
+        "webrtc_ip": ""
+      },
+      "isolated_surfaces": [
+        "persona",
+        "audio",
+        "canvas",
+        "webgl",
+        "fonts"
+      ],
+      "observation": {
+        "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "8789d2cdf8c08a01265b482e9bf27ffd",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+        "location_redacted": "Timezone spoofed",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "minimal-native-control"
     }
   ]
 }

@@ -5,7 +5,8 @@
     "audio-off",
     "webgl-native",
     "fonts-native",
-    "passive-native-surfaces"
+    "passive-native-surfaces",
+    "minimal-native-control"
   ],
   "constant_controls": [
     "runtime artifact",
@@ -20,7 +21,7 @@
   ],
   "decision": "Run direct-network rows first because committed direct evidence already reproduces masking/inconsistent; repeat only decisive rows through an external proxy relay after a trigger is isolated.",
   "detector_id": "pixelscan",
-  "generated_at": "2026-07-10T18:07:37.998693+00:00",
+  "generated_at": "2026-07-10T19:10:00+00:00",
   "pairwise_followup": [
     [
       "canvas",
@@ -130,6 +131,49 @@
       ],
       "purpose": "Disable all currently active Pixelscan masking candidates to test whether the final verdict returns to consistent.",
       "variant_id": "passive-native-surfaces"
+    },
+    {
+      "expected_arg_effect": "omits BrowseForge persona and high-risk spoofing switches while retaining only browser launch policy needed for collection",
+      "fingerprint_overrides": {
+        "accept_language": "",
+        "audio_noise": 0,
+        "canvas_noise": 0,
+        "device_memory_gb": 0,
+        "fonts": [],
+        "fonts_dir": "",
+        "hardware_concurrency": 0,
+        "locale": "",
+        "native_mode": "strict",
+        "platform": "",
+        "plugins_pdf": "",
+        "screen_avail_height": 0,
+        "screen_avail_width": 0,
+        "screen_height": 0,
+        "screen_width": 0,
+        "storage_quota_mb": 0,
+        "timezone": "",
+        "ua_architecture": "",
+        "ua_bitness": "",
+        "ua_full_version": "",
+        "ua_mobile": false,
+        "ua_model": "",
+        "ua_platform": "",
+        "ua_platform_version": "",
+        "ua_wow64": false,
+        "user_agent": "",
+        "webgl_renderer": "",
+        "webgl_vendor": "",
+        "webrtc_ip": ""
+      },
+      "isolated_surfaces": [
+        "persona",
+        "audio",
+        "canvas",
+        "webgl",
+        "fonts"
+      ],
+      "purpose": "Strip BrowseForge persona overrides to test whether the patched headless Docker runtime remains inconsistent before reintroducing fingerprint surfaces.",
+      "variant_id": "minimal-native-control"
     }
   ]
 }

@@ -2621,6 +2621,7 @@ class DetectorHarnessTests(unittest.TestCase):
                 "webgl-native",
                 "fonts-native",
                 "passive-native-surfaces",
+                "minimal-native-control",
             ],
             payload["collection_order"],
         )
@@ -2635,6 +2636,13 @@ class DetectorHarnessTests(unittest.TestCase):
         for key in ("audio_noise", "canvas_noise", "webgl_vendor", "webgl_renderer", "fonts", "fonts_dir", "native_mode"):
             self.assertIn(key, passive)
         self.assertEqual("strict", passive["native_mode"])
+        minimal = variants["minimal-native-control"]["fingerprint_overrides"]
+        self.assertEqual("strict", minimal["native_mode"])
+        self.assertEqual("", minimal["user_agent"])
+        self.assertEqual("", minimal["ua_full_version"])
+        self.assertEqual("", minimal["timezone"])
+        self.assertEqual(0, minimal["hardware_concurrency"])
+        self.assertEqual(0, minimal["screen_width"])
 
     def test_pixelscan_materialize_variants_writes_local_configs_and_secret_safe_manifest(self):
         with tempfile.TemporaryDirectory() as td:
@@ -2692,6 +2700,11 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual([], passive_cfg["fingerprint"]["fonts"])
             self.assertEqual("", passive_cfg["fingerprint"]["fonts_dir"])
             self.assertEqual("strict", passive_cfg["fingerprint"]["native_mode"])
+            minimal_cfg = json.loads((output_dir / "minimal-native-control.json").read_text(encoding="utf-8"))
+            self.assertEqual("strict", minimal_cfg["fingerprint"]["native_mode"])
+            self.assertEqual("", minimal_cfg["fingerprint"]["user_agent"])
+            self.assertEqual("", minimal_cfg["fingerprint"]["ua_full_version"])
+            self.assertEqual(0, minimal_cfg["fingerprint"]["hardware_concurrency"])
             self.assertEqual({"canvas_noise": 0}, variants["canvas-off"]["fingerprint_overrides"])
 
     def test_pixelscan_variant_summary_commits_only_sanitized_detector_fields(self):
