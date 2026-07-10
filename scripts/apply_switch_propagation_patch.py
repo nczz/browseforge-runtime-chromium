@@ -8,43 +8,48 @@ DEFAULT_CHROMIUM_SRC = Path("/Users/chun/Projects/browser-source/browseforge-chr
 RENDER_PROCESS_HOST_IMPL_CC = Path("content/browser/renderer_host/render_process_host_impl.cc")
 
 ANCHOR = "  static const char* const kSwitchNames[] = {\n"
-BROWSEFORGE_SWITCH_BLOCK = '''      // BrowseForge fingerprint and stealth switches are intentionally
-      // browser-owned public contract knobs. Blink-side patches read them in
-      // renderer processes, so they must survive Chromium's child command-line
-      // allowlist.
-      "browseforge-stealth-config",
-      "browseforge-stealth-mode",
-      "fingerprint",
-      "fingerprint-accept-language",
-      "fingerprint-audio-noise",
-      "fingerprint-canvas-noise",
-      "fingerprint-device-memory",
-      "fingerprint-fonts-dir",
-      "fingerprint-hardware-concurrency",
-      "fingerprint-locale",
-      "fingerprint-native-config",
-      "fingerprint-native-mode",
-      "fingerprint-platform",
-      "fingerprint-plugins-pdf",
-      "fingerprint-screen-avail-height",
-      "fingerprint-screen-avail-width",
-      "fingerprint-screen-height",
-      "fingerprint-screen-width",
-      "fingerprint-storage-quota",
-      "fingerprint-timezone",
-      "fingerprint-ua-architecture",
-      "fingerprint-ua-bitness",
-      "fingerprint-ua-full-version",
-      "fingerprint-ua-mobile",
-      "fingerprint-ua-model",
-      "fingerprint-ua-platform",
-      "fingerprint-ua-platform-version",
-      "fingerprint-ua-wow64",
-      "fingerprint-user-agent",
-      "fingerprint-webrtc-ip",
-      "fingerprint-webgl-renderer",
-      "fingerprint-webgl-vendor",
-'''
+BROWSEFORGE_SWITCHES = [
+    "browseforge-stealth-config",
+    "browseforge-stealth-mode",
+    "fingerprint",
+    "fingerprint-accept-language",
+    "fingerprint-audio-noise",
+    "fingerprint-canvas-noise",
+    "fingerprint-device-memory",
+    "fingerprint-fonts-dir",
+    "fingerprint-fonts-list",
+    "fingerprint-hardware-concurrency",
+    "fingerprint-locale",
+    "fingerprint-native-config",
+    "fingerprint-native-mode",
+    "fingerprint-platform",
+    "fingerprint-plugins-pdf",
+    "fingerprint-screen-avail-height",
+    "fingerprint-screen-avail-width",
+    "fingerprint-screen-height",
+    "fingerprint-screen-width",
+    "fingerprint-storage-quota",
+    "fingerprint-timezone",
+    "fingerprint-ua-architecture",
+    "fingerprint-ua-bitness",
+    "fingerprint-ua-full-version",
+    "fingerprint-ua-mobile",
+    "fingerprint-ua-model",
+    "fingerprint-ua-platform",
+    "fingerprint-ua-platform-version",
+    "fingerprint-ua-wow64",
+    "fingerprint-user-agent",
+    "fingerprint-webrtc-ip",
+    "fingerprint-webgl-renderer",
+    "fingerprint-webgl-vendor",
+]
+BROWSEFORGE_SWITCH_BLOCK = (
+    "      // BrowseForge fingerprint and stealth switches are intentionally\n"
+    "      // browser-owned public contract knobs. Blink-side patches read them in\n"
+    "      // renderer processes, so they must survive Chromium's child command-line\n"
+    "      // allowlist.\n"
+    + "".join(f'      "{switch}",\n' for switch in BROWSEFORGE_SWITCHES)
+)
 
 
 def validate_chromium_src(src: Path) -> None:
@@ -54,8 +59,12 @@ def validate_chromium_src(src: Path) -> None:
         raise SystemExit(f"Chromium renderer host source file is missing: {src / RENDER_PROCESS_HOST_IMPL_CC}")
 
 
+def missing_browseforge_switches(text: str) -> list[str]:
+    return [switch for switch in BROWSEFORGE_SWITCHES if f'"{switch}"' not in text]
+
+
 def patch_switch_propagation(text: str) -> str:
-    if '"fingerprint-timezone",' in text and '"browseforge-stealth-mode",' in text:
+    if not missing_browseforge_switches(text):
         return text
     if ANCHOR not in text:
         raise SystemExit("RenderProcessHostImpl renderer switch allowlist anchor not found")

@@ -44,6 +44,21 @@ class ApplySwitchPropagationPatchTests(unittest.TestCase):
         self.assertIn('"fingerprint-webgl-renderer"', patched)
         self.assertIn('"browseforge-stealth-mode"', patched)
         self.assertLess(patched.index('"fingerprint"'), patched.index("switches::kDisableInProcessStackTraces"))
+        for switch in apply_switch_propagation_patch.BROWSEFORGE_SWITCHES:
+            self.assertIn(f'"{switch}"', patched)
+        self.assertEqual([], apply_switch_propagation_patch.missing_browseforge_switches(patched))
+
+    def test_repairs_partial_browseforge_switch_allowlist(self) -> None:
+        partial = RENDER_HOST_FIXTURE.replace(
+            "      switches::kDisableInProcessStackTraces,\n",
+            '      "browseforge-stealth-mode",\n'
+            '      "fingerprint-timezone",\n'
+            "      switches::kDisableInProcessStackTraces,\n",
+        )
+        self.assertIn("fingerprint-fonts-list", apply_switch_propagation_patch.missing_browseforge_switches(partial))
+        patched = apply_switch_propagation_patch.patch_switch_propagation(partial)
+        self.assertEqual([], apply_switch_propagation_patch.missing_browseforge_switches(patched))
+        self.assertIn('"fingerprint-fonts-list"', patched)
 
     def test_patch_is_idempotent(self) -> None:
         patched_once = apply_switch_propagation_patch.patch_switch_propagation(RENDER_HOST_FIXTURE)

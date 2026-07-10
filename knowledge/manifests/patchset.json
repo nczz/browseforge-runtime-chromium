@@ -691,7 +691,7 @@
         "tests/test_apply_switch_propagation_patch.py",
         "chromium/src/content/browser/renderer_host/render_process_host_impl.cc"
       ],
-      "notes": "Adds BrowseForge fingerprint and stealth command-line switches to Chromium's browser-to-renderer switch allowlist so Blink-side native patches can observe the browser-owned persona values in renderer processes. Without this patch, source-level surface overrides may compile but never receive profile-specific inputs.",
+      "notes": "Adds the complete BrowseForge fingerprint and stealth command-line switch set to Chromium's browser-to-renderer switch allowlist so Blink-side native patches can observe browser-owned persona values in renderer processes. The patch script now audits every declared switch and repairs partial older allowlists, including fingerprint-fonts-list. Without this patch, source-level surface overrides may compile but never receive profile-specific inputs.",
       "patchset_id": "surface-switch-propagation-native-audit",
       "risk_level": "high",
       "surface": "switch_propagation",
@@ -699,7 +699,10 @@
         "content::RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer",
         "kSwitchNames",
         "browseforge-stealth-mode",
-        "fingerprint-*"
+        "fingerprint-*",
+        "BROWSEFORGE_SWITCHES",
+        "missing_browseforge_switches",
+        "fingerprint-fonts-list"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_switch_propagation_patch",
