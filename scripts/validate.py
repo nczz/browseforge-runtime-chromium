@@ -777,6 +777,39 @@ def main() -> None:
         missing_gap_fields = sorted(required_gap_fields - gap.keys())
         if missing_gap_fields:
             raise SystemExit(f"detector summary coverage gap missing fields: {missing_gap_fields}")
+        if not isinstance(gap.get("container"), bool):
+            raise SystemExit("detector summary coverage gap container must be boolean")
+        expected_matrix_key = (
+            f"{gap.get('platform')}:{gap.get('detector_id')}:{gap.get('display_mode')}:"
+            f"{gap.get('network_mode')}:{'container' if gap.get('container') else 'host'}"
+        )
+        if gap.get("matrix_key") != expected_matrix_key:
+            raise SystemExit(
+                f"detector summary coverage gap matrix_key mismatch: {gap.get('matrix_key')!r} != {expected_matrix_key!r}"
+            )
+    rows = detector_summary.get("rows", [])
+    evidence_count = detector_summary.get("evidence_count")
+    if not isinstance(rows, list):
+        raise SystemExit("detector summary rows must be an array")
+    if evidence_count != len(rows):
+        raise SystemExit("detector summary evidence_count must match rows length")
+    seen_row_paths: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            raise SystemExit("detector summary rows must contain objects")
+        missing_row_fields = sorted({"detector_id", "path", "platform", "status"} - row.keys())
+        if missing_row_fields:
+            raise SystemExit(f"detector summary row missing fields: {missing_row_fields}")
+        row_path = row.get("path")
+        if not isinstance(row_path, str) or not row_path:
+            raise SystemExit("detector summary row path must be a non-empty string")
+        if row_path in seen_row_paths:
+            raise SystemExit(f"detector summary duplicate evidence row path: {row_path}")
+        seen_row_paths.add(row_path)
+        if not (ROOT / row_path).is_file():
+            raise SystemExit(f"detector summary row references missing evidence: {row_path}")
+        if row.get("status") not in {"passed", "warning", "failed", "blocked"}:
+            raise SystemExit(f"detector summary row has invalid status: {row.get('status')!r}")
     if gate_status.get("live-detector-evidence") == "passed" and (
         coverage_gap_count or detector_summary.get("blocking_findings")
     ):

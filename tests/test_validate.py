@@ -857,6 +857,50 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 self.assertRegex(message, r"detector[- ]summary|coverage_gaps", message)
                 self.assertIn(missing_field, message)
 
+    def test_validate_rejects_detector_summary_coverage_gap_matrix_key_mismatch(self) -> None:
+        """Coverage gap matrix_key must be derived from stable matrix dimensions."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            coverage_gaps = self._coverage_gaps(1)
+            coverage_gaps[0]["matrix_key"] = "linux-x64:sannysoft:headed:proxy:host"
+            self._write_detector_summary(temp_root, coverage_gaps=coverage_gaps)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("detector summary", message)
+        self.assertIn("matrix_key mismatch", message)
+
+    def test_validate_rejects_detector_summary_row_missing_evidence_file(self) -> None:
+        """Detector summary evidence rows must point at committed detector evidence files."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_json(
+                temp_root / "detector-summary.json",
+                {
+                    "blocking_findings": [],
+                    "coverage_gap_count": 0,
+                    "coverage_gaps": [],
+                    "evidence_count": 1,
+                    "rows": [
+                        {
+                            "detector_id": "sannysoft",
+                            "path": "detectors/evidence/missing-detector-evidence.json",
+                            "platform": "linux-x64",
+                            "status": "passed",
+                        }
+                    ],
+                },
+            )
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("detector summary", message)
+        self.assertIn("missing evidence", message)
+
     def test_validate_rejects_passed_live_detector_gate_with_blocking_findings(self) -> None:
         """A passed live-detector-evidence gate cannot coexist with detector blocking findings."""
         module = self._load_validate_module()
@@ -2170,6 +2214,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "blocking_findings": [] if blocking_findings is None else blocking_findings,
                 "coverage_gap_count": len(coverage_gaps) if coverage_gap_count is None else coverage_gap_count,
                 "coverage_gaps": coverage_gaps,
+                "evidence_count": 0,
                 "rows": [],
             },
         )
