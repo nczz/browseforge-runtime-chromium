@@ -314,9 +314,10 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
         "chromium/src/third_party/blink/renderer/core/frame/navigator_ua.cc",
-        "knowledge/manifests/ua-ch-grease-verification.json"
+        "knowledge/manifests/ua-ch-grease-verification.json",
+        "chromium/src/components/embedder_support/user_agent_utils.cc"
       ],
-      "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version, and an empty upstream brand_full_version_list is seeded from brand_version_list so navigator.userAgentData.getHighEntropyValues([\"fullVersionList\"]) can return full-version entries after rebuild. Grease brand entries are now expanded from major-only values to dotted full-version shape (for example 8 -> 8.0.0.0) while already-dotted grease versions are preserved, avoiding a short-version UA-CH fingerprint mismatch. Empty or absent values preserve upstream Chromium behavior; explicit non-ASCII/control strings are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version, and an empty upstream brand_full_version_list is seeded from brand_version_list so navigator.userAgentData.getHighEntropyValues([\"fullVersionList\"]) can return full-version entries after rebuild. Grease brand entries are now expanded from major-only values to dotted full-version shape (for example 8 -> 8.0.0.0) while already-dotted grease versions are preserved, avoiding a short-version UA-CH fingerprint mismatch. Empty or absent values preserve upstream Chromium behavior; explicit non-ASCII/control strings are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The same source patch now removes the default HeadlessChrome product prefix from embedder_support::GetUserAgentInternal so strict/native headless launches do not disclose headless mode when no persona UA override is supplied.",
       "patchset_id": "surface-user-agent-native-overrides",
       "risk_level": "high",
       "surface": "user_agent",
@@ -334,7 +335,8 @@
         "launcher.FingerprintConfig.UABitness",
         "launcher.FingerprintConfig.UAMobile",
         "launcher.FingerprintConfig.UAWoW64",
-        "launcher.validatePrintableASCII"
+        "launcher.validatePrintableASCII",
+        "embedder_support::GetUserAgentInternal"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_user_agent_patch",
@@ -348,7 +350,7 @@
         "docker exec bf-pixelscan-patched python3 /work/scripts/detector_harness.py collect --detector pixelscan --cdp-url http://127.0.0.1:9222 --wait-seconds 30"
       ],
       "title": "BrowseForge User-Agent and UA-CH native overrides for Chromium M150",
-      "upstream_status": "applied_to_external_checkout_release_built_verified"
+      "upstream_status": "applied_to_external_checkout_not_release_built"
     },
     {
       "detectors_addressed": [

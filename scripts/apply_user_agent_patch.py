@@ -7,6 +7,7 @@ from pathlib import Path
 DEFAULT_CHROMIUM_SRC = Path("/Users/chun/Projects/browser-source/browseforge-chromium/src")
 NAVIGATOR_BASE_CC = Path("third_party/blink/renderer/core/execution_context/navigator_base.cc")
 NAVIGATOR_UA_CC = Path("third_party/blink/renderer/core/frame/navigator_ua.cc")
+USER_AGENT_UTILS_CC = Path("components/embedder_support/user_agent_utils.cc")
 
 COMMAND_LINE_INCLUDE = '#include "base/command_line.h"\n'
 BASE_INCLUDE_ANCHOR = '#include "base/feature_list.h"\n'
@@ -267,13 +268,23 @@ UA_GREASE_FULL_VERSION_OLD = '''        BrowseForgeLooksLikeGreaseBrand(brand_ve
             ? brand_version.version
             : full_version'''
 UA_GREASE_FULL_VERSION_NEW = '''        BrowseForgeFullVersionForBrandVersion(brand_version, full_version)'''
+HEADLESS_PRODUCT_PREFIX = '''  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kHeadless)) {
+    product.insert(0, "Headless");
+  }
+
+'''
+
+PATCHED_HEADLESS_PRODUCT_PREFIX = '''  // BrowseForge keeps the default product token aligned with headed Chrome so
+  // headless execution does not emit a HeadlessChrome user-agent marker.
+'''
+
 
 
 
 def validate_chromium_src(src: Path) -> None:
     if not (src / ".git").exists():
         raise SystemExit(f"Chromium source checkout is not ready: {src}")
-    for rel in (NAVIGATOR_BASE_CC, NAVIGATOR_UA_CC):
+    for rel in (NAVIGATOR_BASE_CC, NAVIGATOR_UA_CC, USER_AGENT_UTILS_CC):
         if not (src / rel).is_file():
             raise SystemExit(f"Chromium source file is missing: {src / rel}")
 
@@ -326,6 +337,14 @@ def patch_navigator_ua(text: str) -> str:
         raise SystemExit("NavigatorUA::userAgentData metadata anchor not found")
     return patched.replace(ORIGINAL_METADATA, PATCHED_METADATA, 1)
 
+def patch_user_agent_utils(text: str) -> str:
+    if PATCHED_HEADLESS_PRODUCT_PREFIX in text:
+        return text
+    if HEADLESS_PRODUCT_PREFIX not in text:
+        raise SystemExit("user_agent_utils.cc headless product prefix anchor not found")
+    return text.replace(HEADLESS_PRODUCT_PREFIX, PATCHED_HEADLESS_PRODUCT_PREFIX, 1)
+
+
 
 def write_if_changed(path: Path, content: str) -> bool:
     original = path.read_text(encoding="utf-8")
@@ -340,11 +359,14 @@ def apply_patch(src: Path) -> list[Path]:
     changed: list[Path] = []
     base_path = src / NAVIGATOR_BASE_CC
     ua_path = src / NAVIGATOR_UA_CC
+    utils_path = src / USER_AGENT_UTILS_CC
     if write_if_changed(base_path, patch_navigator_base(base_path.read_text(encoding="utf-8"))):
         changed.append(NAVIGATOR_BASE_CC)
     if write_if_changed(ua_path, patch_navigator_ua(ua_path.read_text(encoding="utf-8"))):
         changed.append(NAVIGATOR_UA_CC)
-    return changed or [NAVIGATOR_BASE_CC, NAVIGATOR_UA_CC]
+    if write_if_changed(utils_path, patch_user_agent_utils(utils_path.read_text(encoding="utf-8"))):
+        changed.append(USER_AGENT_UTILS_CC)
+    return changed or [NAVIGATOR_BASE_CC, NAVIGATOR_UA_CC, USER_AGENT_UTILS_CC]
 
 
 def main() -> None:
@@ -358,8 +380,10 @@ def main() -> None:
     if args.check:
         patch_navigator_base((src / NAVIGATOR_BASE_CC).read_text(encoding="utf-8"))
         patch_navigator_ua((src / NAVIGATOR_UA_CC).read_text(encoding="utf-8"))
+        patch_user_agent_utils((src / USER_AGENT_UTILS_CC).read_text(encoding="utf-8"))
         print(f"ready: {src / NAVIGATOR_BASE_CC}")
         print(f"ready: {src / NAVIGATOR_UA_CC}")
+        print(f"ready: {src / USER_AGENT_UTILS_CC}")
         return
     for path in apply_patch(src):
         print(path.as_posix())

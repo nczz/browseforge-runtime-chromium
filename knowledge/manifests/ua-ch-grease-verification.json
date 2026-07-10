@@ -7,11 +7,32 @@
   ],
   "conclusion": "Patched Linux Docker runtime emits a Chromium GREASE UA-CH full version shaped as a full four-component version instead of a bare major version.",
   "detector": {
-    "id": "pixelscan",
     "botCheck": "No automated behavior detected",
     "fingerprint": "Masking detected",
+    "id": "pixelscan",
     "status": "warning",
     "verdict": "inconsistent"
+  },
+  "headless_marker_verification": {
+    "artifact_sha256": "5ab5a504c384e5218909a340eb1b75da60084d071109df67fe1c098f77204c5c",
+    "commands": [
+      "python3 scripts/chromium_docker.py build-chrome --jobs 4 --execute",
+      "python3 scripts/package_linux_runtime.py --execute --output-dir /tmp/bf-headless-ua-dist",
+      "docker exec bf-ps-headless-ua-minimal python3 /work/scripts/detector_harness.py collect --detector pixelscan --cdp-url http://127.0.0.1:9222 --wait-seconds 30"
+    ],
+    "conclusion": "Patched strict/minimal headless Docker runtime emits Chrome/150.0.0.0 rather than HeadlessChrome/150.0.0.0, clearing Pixelscan botCheck while fingerprint verdict remains inconsistent/masking.",
+    "detector": {
+      "botCheck": "No automated behavior detected",
+      "fingerprint": "Masking detected",
+      "id": "pixelscan",
+      "status": "warning",
+      "verdict": "inconsistent"
+    },
+    "observed": {
+      "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+      "webdriver": false
+    },
+    "variant_id": "minimal-native-control"
   },
   "observed": {
     "browserVersion": "Chrome/150.0.7871.101",

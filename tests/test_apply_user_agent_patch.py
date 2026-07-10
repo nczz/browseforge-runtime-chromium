@@ -73,6 +73,27 @@ NavigatorUAData* NavigatorUA::userAgentData() {
 }  // namespace blink
 '''
 
+USER_AGENT_UTILS_FIXTURE = '''#include "base/command_line.h"
+
+namespace embedder_support {
+
+namespace {
+
+std::string GetUserAgentInternal() {
+  std::string product = GetProductAndVersion();
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kHeadless)) {
+    product.insert(0, "Headless");
+  }
+
+  return BuildUserAgentFromProduct(product);
+}
+
+}  // namespace
+
+}  // namespace embedder_support
+'''
+
+
 
 class ApplyUserAgentPatchTests(unittest.TestCase):
     def test_patches_dom_user_agent_override(self) -> None:
@@ -95,6 +116,12 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         self.assertIn('return brand_version.version + ".0.0.0";', patched)
         self.assertIn("ua_data->SetFullVersionList(metadata.brand_full_version_list);", patched)
 
+    def test_patches_headless_default_user_agent_marker(self) -> None:
+        patched = apply_user_agent_patch.patch_user_agent_utils(USER_AGENT_UTILS_FIXTURE)
+        self.assertNotIn('product.insert(0, "Headless");', patched)
+        self.assertIn("does not emit a HeadlessChrome user-agent marker", patched)
+        self.assertIn("BuildUserAgentFromProduct(product)", patched)
+
     def test_patch_is_idempotent(self) -> None:
         patched_base_once = apply_user_agent_patch.patch_navigator_base(BASE_FIXTURE)
         patched_base_twice = apply_user_agent_patch.patch_navigator_base(patched_base_once)
@@ -102,6 +129,9 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         patched_ua_once = apply_user_agent_patch.patch_navigator_ua(UA_FIXTURE)
         patched_ua_twice = apply_user_agent_patch.patch_navigator_ua(patched_ua_once)
         self.assertEqual(patched_ua_once, patched_ua_twice)
+        patched_utils_once = apply_user_agent_patch.patch_user_agent_utils(USER_AGENT_UTILS_FIXTURE)
+        patched_utils_twice = apply_user_agent_patch.patch_user_agent_utils(patched_utils_once)
+        self.assertEqual(patched_utils_once, patched_utils_twice)
 
     def test_upgrades_existing_ua_ch_patch_with_full_version_list_seed(self) -> None:
         patched_once = apply_user_agent_patch.patch_navigator_ua(UA_FIXTURE)
@@ -124,22 +154,27 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
             src = Path(td) / "src"
             base_path = src / apply_user_agent_patch.NAVIGATOR_BASE_CC
             ua_path = src / apply_user_agent_patch.NAVIGATOR_UA_CC
+            utils_path = src / apply_user_agent_patch.USER_AGENT_UTILS_CC
             base_path.parent.mkdir(parents=True)
             ua_path.parent.mkdir(parents=True)
+            utils_path.parent.mkdir(parents=True)
             (src / ".git").mkdir()
             base_path.write_text(BASE_FIXTURE, encoding="utf-8")
             ua_path.write_text(UA_FIXTURE, encoding="utf-8")
+            utils_path.write_text(USER_AGENT_UTILS_FIXTURE, encoding="utf-8")
             changed = apply_user_agent_patch.apply_patch(src)
             self.assertEqual(
                 [
                     apply_user_agent_patch.NAVIGATOR_BASE_CC,
                     apply_user_agent_patch.NAVIGATOR_UA_CC,
+                    apply_user_agent_patch.USER_AGENT_UTILS_CC,
                 ],
                 changed,
             )
             self.assertIn("fingerprint-user-agent", base_path.read_text(encoding="utf-8"))
             self.assertIn("fingerprint-ua-full-version", ua_path.read_text(encoding="utf-8"))
 
+            self.assertNotIn('product.insert(0, "Headless");', utils_path.read_text(encoding="utf-8"))
 
 if __name__ == "__main__":
     unittest.main()
