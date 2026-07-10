@@ -840,7 +840,7 @@ def pixelscan_variant_summary(args) -> int:
             "allowed_committed_fields": PIXELSCAN_ISOLATION_FIELDS,
         },
         "variants": [],
-        "conclusion": "All current direct headless Docker variants still report Pixelscan inconsistent/masking with automated behavior detected; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation.",
+        "conclusion": "",
     }
     for variant in PIXELSCAN_ISOLATION_VARIANTS:
         variant_id = variant["variant_id"]
@@ -861,6 +861,15 @@ def pixelscan_variant_summary(args) -> int:
             row["status"] = "observed" if records else "empty"
             row["observation"] = _pixelscan_variant_observation(records[0]) if records else {}
         payload["variants"].append(row)
+    observed = [row.get("observation", {}) for row in payload["variants"] if row.get("status") == "observed"]
+    all_inconsistent = bool(observed) and all(row.get("verdict") == "inconsistent" and row.get("fingerprint") == "Masking detected" for row in observed)
+    all_bot_clean = bool(observed) and all(row.get("botCheck") == "No automated behavior detected" for row in observed)
+    if all_inconsistent and all_bot_clean:
+        payload["conclusion"] = "UA/UA-CH coherent direct headless Docker variants clear Pixelscan botCheck, but every active canvas/audio/WebGL/font isolation variant still reports inconsistent/masking."
+    elif all_inconsistent:
+        payload["conclusion"] = "All current direct headless Docker variants still report Pixelscan inconsistent/masking; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation."
+    else:
+        payload["conclusion"] = "Pixelscan variant outcomes are mixed; inspect per-variant verdict, fingerprint, and botCheck fields before changing native surfaces."
     out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if args.output:
         Path(args.output).write_text(out, encoding="utf-8")
