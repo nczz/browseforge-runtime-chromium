@@ -321,6 +321,10 @@ func validateNativeMode(value string) error {
 	}
 }
 
+func strictNativeMode(value string) bool {
+	return value == "strict"
+}
+
 func validateUint32(value int, field string) error {
 	if int64(value) > int64(1<<32-1) {
 		return fmt.Errorf("%s must fit uint32", field)
@@ -481,11 +485,13 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	if c.Fingerprint.CanvasNoise > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-canvas-noise=%d", c.Fingerprint.CanvasNoise))
 	}
-	if c.Fingerprint.WebGLVendor != "" {
-		args = append(args, "--fingerprint-webgl-vendor="+c.Fingerprint.WebGLVendor)
-	}
-	if c.Fingerprint.WebGLRenderer != "" {
-		args = append(args, "--fingerprint-webgl-renderer="+c.Fingerprint.WebGLRenderer)
+	if !strictNativeMode(c.Fingerprint.NativeMode) {
+		if c.Fingerprint.WebGLVendor != "" {
+			args = append(args, "--fingerprint-webgl-vendor="+c.Fingerprint.WebGLVendor)
+		}
+		if c.Fingerprint.WebGLRenderer != "" {
+			args = append(args, "--fingerprint-webgl-renderer="+c.Fingerprint.WebGLRenderer)
+		}
 	}
 	if c.Fingerprint.FontsDir != "" {
 		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)

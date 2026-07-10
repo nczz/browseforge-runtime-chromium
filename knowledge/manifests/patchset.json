@@ -565,7 +565,7 @@
         "scripts/validate.py",
         "tests/test_apply_webgl_patch.py"
       ],
-      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims. The launcher validates webgl_vendor and webgl_renderer as printable ASCII strings capped at 256 bytes before emitting the native switches, matching the Blink-side override guard.",
+      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. The launcher validates webgl_vendor/webgl_renderer strings and now suppresses these string-spoofing switches when fingerprint.native_mode is strict, because strict mode must prefer native WebGL coherence over partial string-only masking. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims.",
       "patchset_id": "surface-webgl-vendor-renderer-native-override",
       "risk_level": "high",
       "surface": "webgl",
@@ -575,7 +575,8 @@
         "blink::WebGLDebugRendererInfo::kUnmaskedVendorWebgl",
         "BrowseForgeWebGLStringOverride",
         "launcher.FingerprintConfig.WebGLVendor",
-        "launcher.FingerprintConfig.WebGLRenderer"
+        "launcher.FingerprintConfig.WebGLRenderer",
+        "launcher.strictNativeMode"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_webgl_patch",
@@ -586,7 +587,7 @@
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/webgl:webgl"
       ],
       "title": "BrowseForge WebGL debug vendor and renderer native overrides for Chromium M150",
-      "upstream_status": "applied_to_external_checkout_not_release_built"
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
     },
     {
       "detectors_addressed": [

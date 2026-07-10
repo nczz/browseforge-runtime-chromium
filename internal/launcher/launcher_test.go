@@ -459,6 +459,33 @@ func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanStrictNativeModeSuppressesWebGLStringSpoofArgs(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			NativeMode:       "strict",
+			WebGLVendor:      "Google Inc. (NVIDIA)",
+			WebGLRenderer:    "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+			NativeConfigPath: filepath.Join("testdata", "persona.json"),
+		},
+	}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, blocked := range []string{
+		"--fingerprint-webgl-vendor=Google Inc. (NVIDIA)",
+		"--fingerprint-webgl-renderer=ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+	} {
+		if containsArg(plan.Args, blocked) {
+			t.Fatalf("strict native mode must suppress incoherent WebGL string arg %q: %v", blocked, plan.Args)
+		}
+	}
+	if !containsArg(plan.Args, stealthModeArg+"=strict") {
+		t.Fatalf("missing strict native mode arg: %v", plan.Args)
+	}
+}
+
 func TestBuildPlanRejectsInvalidWebGLFingerprintArgs(t *testing.T) {
 	for name, cfg := range map[string]Config{
 		"vendor_control":   {UserDataDir: t.TempDir(), Fingerprint: FingerprintConfig{WebGLVendor: "Google\nInc."}},
