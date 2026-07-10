@@ -87,6 +87,19 @@ bool BrowseForgeLooksLikeGreaseBrand(const std::string& brand) {
          brand.find("?") != std::string::npos;
 }
 
+std::string BrowseForgeFullVersionForBrandVersion(
+    const UserAgentBrandVersion& brand_version,
+    const std::string& full_version) {
+  if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+    return full_version;
+  }
+  if (brand_version.version.find('.') != std::string::npos) {
+    return brand_version.version;
+  }
+  return brand_version.version + ".0.0.0";
+}
+
+
 void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
                                       const std::string& full_version) {
   if (!metadata.brand_full_version_list.empty()) {
@@ -96,9 +109,7 @@ void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
   for (const auto& brand_version : metadata.brand_version_list) {
     metadata.brand_full_version_list.emplace_back(
         brand_version.brand,
-        BrowseForgeLooksLikeGreaseBrand(brand_version.brand)
-            ? brand_version.version
-            : full_version);
+        BrowseForgeFullVersionForBrandVersion(brand_version, full_version));
   }
 }
 
@@ -181,7 +192,19 @@ PATCHED_METADATA = '''  UserAgentMetadata metadata = GetUserAgentMetadata();
   ua_data->SetBrandVersionList(metadata.brand_version_list);
 '''
 
-UA_FULL_VERSION_LIST_HELPER = '''void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
+UA_FULL_VERSION_LIST_HELPER = '''std::string BrowseForgeFullVersionForBrandVersion(
+    const UserAgentBrandVersion& brand_version,
+    const std::string& full_version) {
+  if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+    return full_version;
+  }
+  if (brand_version.version.find('.') != std::string::npos) {
+    return brand_version.version;
+  }
+  return brand_version.version + ".0.0.0";
+}
+
+void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,
                                       const std::string& full_version) {
   if (!metadata.brand_full_version_list.empty()) {
     return;
@@ -190,9 +213,7 @@ UA_FULL_VERSION_LIST_HELPER = '''void BrowseForgeEnsureFullVersionList(UserAgent
   for (const auto& brand_version : metadata.brand_version_list) {
     metadata.brand_full_version_list.emplace_back(
         brand_version.brand,
-        BrowseForgeLooksLikeGreaseBrand(brand_version.brand)
-            ? brand_version.version
-            : full_version);
+        BrowseForgeFullVersionForBrandVersion(brand_version, full_version));
   }
 }
 
@@ -228,6 +249,25 @@ UA_FULL_VERSION_LIST_NEW = '''    std::string major = BrowseForgeMajorVersion(fu
       }
     }
 '''
+UA_GREASE_FULL_VERSION_HELPER = '''std::string BrowseForgeFullVersionForBrandVersion(
+    const UserAgentBrandVersion& brand_version,
+    const std::string& full_version) {
+  if (!BrowseForgeLooksLikeGreaseBrand(brand_version.brand)) {
+    return full_version;
+  }
+  if (brand_version.version.find('.') != std::string::npos) {
+    return brand_version.version;
+  }
+  return brand_version.version + ".0.0.0";
+}
+
+'''
+
+UA_GREASE_FULL_VERSION_OLD = '''        BrowseForgeLooksLikeGreaseBrand(brand_version.brand)
+            ? brand_version.version
+            : full_version'''
+UA_GREASE_FULL_VERSION_NEW = '''        BrowseForgeFullVersionForBrandVersion(brand_version, full_version)'''
+
 
 
 def validate_chromium_src(src: Path) -> None:
@@ -273,6 +313,13 @@ def patch_navigator_ua(text: str) -> str:
         if switch_bool_anchor not in patched:
             raise SystemExit("NavigatorUA UA-CH helper insertion anchor not found")
         patched = patched.replace(switch_bool_anchor, UA_FULL_VERSION_LIST_HELPER + switch_bool_anchor, 1)
+    if "BrowseForgeFullVersionForBrandVersion" not in patched:
+        helper_anchor = "void BrowseForgeEnsureFullVersionList(UserAgentMetadata& metadata,"
+        if helper_anchor not in patched:
+            raise SystemExit("NavigatorUA UA-CH grease helper insertion anchor not found")
+        patched = patched.replace(helper_anchor, UA_GREASE_FULL_VERSION_HELPER + helper_anchor, 1)
+    if UA_GREASE_FULL_VERSION_OLD in patched:
+        patched = patched.replace(UA_GREASE_FULL_VERSION_OLD, UA_GREASE_FULL_VERSION_NEW, 1)
     if PATCHED_METADATA in patched:
         return patched
     if ORIGINAL_METADATA not in patched:

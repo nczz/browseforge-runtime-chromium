@@ -91,6 +91,8 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         self.assertIn('metadata.form_factors = {bool_value ? kMobileFormFactor : kDesktopFormFactor};', patched)
         self.assertIn("BrowseForgeEnsureFullVersionList(metadata, full_version);", patched)
         self.assertIn("metadata.brand_full_version_list.emplace_back", patched)
+        self.assertIn("BrowseForgeFullVersionForBrandVersion", patched)
+        self.assertIn('return brand_version.version + ".0.0.0";', patched)
         self.assertIn("ua_data->SetFullVersionList(metadata.brand_full_version_list);", patched)
 
     def test_patch_is_idempotent(self) -> None:
@@ -114,6 +116,8 @@ class ApplyUserAgentPatchTests(unittest.TestCase):
         self.assertIn("BrowseForgeEnsureFullVersionList(metadata, full_version);", upgraded)
         self.assertIn("void BrowseForgeEnsureFullVersionList", upgraded)
         self.assertIn("metadata.brand_full_version_list.emplace_back", upgraded)
+        self.assertIn("BrowseForgeFullVersionForBrandVersion", upgraded)
+        self.assertIn('return brand_version.version + ".0.0.0";', upgraded)
 
     def test_apply_patch_updates_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
