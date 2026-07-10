@@ -816,6 +816,26 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("gn_args", message)
         self.assertIn("drifted", message)
 
+    def test_validate_rejects_source_acquisition_with_linux_build_output_drift(self) -> None:
+        """A packaged linux-x64 artifact requires source-acquisition build output gates to stay true."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+            source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+            source_acquisition["chromium_base"]["build_output_status"]["linux_docker_chrome_exists"] = False
+            self._write_json(source_acquisition_path, source_acquisition)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertRegex(message, r"source[- ]acquisition", message)
+        self.assertIn("build_output_status", message)
+        self.assertIn("linux_docker_chrome_exists", message)
+
+
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
         module = self._load_validate_module()
@@ -1768,6 +1788,13 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "stage_dir": stage_rel.as_posix(),
                         "status": "packaged",
                         "wrapper_binary_sha256": wrapper_sha256,
+                    },
+                    "build_output_status": {
+                        "dev_build_ninja_exists": False,
+                        "dev_gn_args_exists": False,
+                        "linux_docker_build_ninja_exists": True,
+                        "linux_docker_chrome_exists": True,
+                        "linux_docker_gn_args_exists": True,
                     },
                     "native_build_automation": self._native_build_automation_fixture(),
                     "source_checkout_status": "checked_out_pinned_ref",

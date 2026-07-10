@@ -245,6 +245,30 @@ def validate_runtime_artifact_consistency(runtime_artifacts: dict, source_acquis
                 raise SystemExit(f"artifact archive {artifact_id} provenance {key} drifted: {provenance.get(key)!r} != {artifact.get(key)!r}")
 
 
+def validate_source_build_outputs(source_acquisition: dict, runtime_artifacts: dict) -> None:
+    chromium_base = source_acquisition.get("chromium_base", {})
+    status = chromium_base.get("build_output_status")
+    if not isinstance(status, dict):
+        raise SystemExit("source-acquisition must record build_output_status")
+    required_bool_keys = {
+        "dev_gn_args_exists",
+        "dev_build_ninja_exists",
+        "linux_docker_gn_args_exists",
+        "linux_docker_build_ninja_exists",
+        "linux_docker_chrome_exists",
+    }
+    missing = sorted(required_bool_keys - set(status))
+    if missing:
+        raise SystemExit(f"source-acquisition build_output_status missing keys: {missing}")
+    for key in required_bool_keys:
+        if not isinstance(status.get(key), bool):
+            raise SystemExit(f"source-acquisition build_output_status {key} must be boolean")
+    if any(artifact.get("platform") == "linux-x64" for artifact in runtime_artifacts.get("artifacts", [])):
+        for key in ["linux_docker_gn_args_exists", "linux_docker_build_ninja_exists", "linux_docker_chrome_exists"]:
+            if not status.get(key):
+                raise SystemExit(f"source-acquisition build_output_status {key} must remain true while linux-x64 artifact is packaged")
+
+
 def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict) -> None:
     automation = source_acquisition.get("chromium_base", {}).get("native_build_automation")
     if not isinstance(automation, dict):
@@ -955,6 +979,7 @@ def main() -> None:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     validate_native_build_automation(source_acquisition, runtime_artifacts)
+    validate_source_build_outputs(source_acquisition, runtime_artifacts)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
