@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/pixelscan-variant-plan.json",
     "knowledge/manifests/pixelscan-variant-summary.json",
+    "knowledge/manifests/ua-ch-grease-verification.json",
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/proxy-preflight.json",
     "knowledge/manifests/native-artifact-preflight.json",
