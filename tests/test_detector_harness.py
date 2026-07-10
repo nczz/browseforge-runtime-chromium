@@ -1637,14 +1637,35 @@ class DetectorHarnessTests(unittest.TestCase):
             payload["proxy"],
             {
                 "scheme": "socks5",
-                "host_redacted": "[REDACTED_IP]",
-                "port": 1080,
+                "host_redacted": "[REDACTED_PROXY_HOST]",
+                "port_redacted": "[REDACTED_PROXY_PORT]",
                 "has_credentials": True,
             },
         )
         self.assertNotIn("proxy-user", proc.stdout)
         self.assertNotIn("ghp_abcdEFGH1234567890secret", proc.stdout)
         self.assertNotIn("8.8.8.8", proc.stdout)
+
+    def test_proxy_preflight_redacts_domain_host_and_port(self):
+        proc = self.run_harness(
+            "proxy-preflight",
+            "--proxy-url",
+            "socks5://user:secret@proxy.example.net:54321",
+            "--proxy-region-redacted",
+            "external-region-redacted",
+            env={
+                "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+            },
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["proxy"]["host_redacted"], "[REDACTED_PROXY_HOST]")
+        self.assertEqual(payload["proxy"]["port_redacted"], "[REDACTED_PROXY_PORT]")
+        self.assertNotIn("proxy.example.net", proc.stdout)
+        self.assertNotIn("54321", proc.stdout)
+        self.assertNotIn("secret", proc.stdout)
 
     def test_proxy_preflight_accepts_valid_external_hostname_and_region(self):
         proc = self.run_harness(
@@ -1670,11 +1691,13 @@ class DetectorHarnessTests(unittest.TestCase):
             payload["proxy"],
             {
                 "scheme": "https",
-                "host_redacted": "proxy.example.net",
-                "port": 8443,
+                "host_redacted": "[REDACTED_PROXY_HOST]",
+                "port_redacted": "[REDACTED_PROXY_PORT]",
                 "has_credentials": False,
             },
         )
+        self.assertNotIn("proxy.example.net", proc.stdout)
+        self.assertNotIn("8443", proc.stdout)
         self.assertEqual(payload["proxy_region_redacted"], "europe-redacted")
 
     def test_list_targets_reads_current_manifest(self):

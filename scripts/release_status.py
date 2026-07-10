@@ -81,6 +81,70 @@ def source_rebuild_blockers(source_acquisition: dict[str, Any]) -> list[dict[str
         )
     return blockers
 
+def release_resource_requirements(
+    native_preflight: dict[str, Any],
+    proxy_preflight: dict[str, Any],
+    detector_summary: dict[str, Any],
+) -> list[dict[str, Any]]:
+    requirements: list[dict[str, Any]] = []
+    if proxy_preflight.get("ready") is not True:
+        missing = [str(item) for item in proxy_preflight.get("missing", [])]
+        errors = [str(item) for item in proxy_preflight.get("errors", [])]
+        requirements.append(
+            {
+                "resource_id": "external-detector-proxy",
+                "status": "missing" if missing else "invalid",
+                "severity": "critical",
+                "provide": missing or ["valid external proxy URL and redacted region label"],
+                "requirements": proxy_preflight.get("requirements", []),
+                "errors": errors,
+                "unblocks": [
+                    "external proxy exit-IP/geolocation detector evidence",
+                    "proxy/IP coherence detector matrix",
+                    "WebRTC public/private IP coherence evidence",
+                ],
+            }
+        )
+
+    for entry in native_preflight.get("platforms", []):
+        if entry.get("ready") is True:
+            continue
+        platform = str(entry.get("platform"))
+        missing = [str(item) for item in entry.get("missing_prerequisites", [])]
+        requirements.append(
+            {
+                "resource_id": f"native-artifact-{platform}",
+                "status": str(entry.get("status", "missing_native_release_artifact")),
+                "severity": "critical",
+                "provide": missing,
+                "evidence": entry.get("evidence", []),
+                "status_snapshot": entry.get("status_snapshot", {}),
+                "unblocks": [
+                    f"{platform} packaged native BrowseForge Chromium artifact",
+                    f"{platform} native detector evidence",
+                ],
+            }
+        )
+
+    proxy_gaps = [
+        gap
+        for gap in detector_summary.get("coverage_gaps", [])
+        if gap.get("network_mode") == "proxy"
+    ]
+    if proxy_gaps:
+        requirements.append(
+            {
+                "resource_id": "live-proxy-detector-matrix",
+                "status": "missing_detector_evidence",
+                "severity": "high",
+                "provide": sorted({str(gap.get("matrix_key")) for gap in proxy_gaps}),
+                "requirements": ["headed detector runs through the configured external proxy"],
+                "unblocks": ["release-grade live detector evidence gate"],
+            }
+        )
+    return requirements
+
+
 
 
 
@@ -236,6 +300,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
         "input_sha256": {path: sha256_file(root, path) for path in INPUT_PATHS},
         "inputs": INPUT_PATHS,
         "release_grade_ready": len(blockers) == 0,
+        "resource_requirements": release_resource_requirements(native_preflight, proxy_preflight, detector_summary),
         "runtime_id": RUNTIME_ID,
         "schema_version": SCHEMA_VERSION,
     }

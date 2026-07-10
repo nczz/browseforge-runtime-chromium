@@ -365,7 +365,7 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T14:46:03Z",
+  "generated_at": "2026-07-10T15:02:09Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "428297a39d02e556c699d28484ba0b93055c75ee86276c9be17c88410a712d76",
@@ -389,6 +389,122 @@
     "contracts/browseforge-integration.contract.json"
   ],
   "release_grade_ready": false,
+  "resource_requirements": [
+    {
+      "errors": [],
+      "provide": [
+        "BROWSEFORGE_DETECTOR_PROXY_URL",
+        "BROWSEFORGE_DETECTOR_PROXY_REGION"
+      ],
+      "requirements": [
+        "external proxy URL with scheme, host, and port",
+        "redacted external proxy region/geolocation label",
+        "no loopback, private, link-local, or .local proxy authority",
+        "no raw credentials or IP literals in committed evidence"
+      ],
+      "resource_id": "external-detector-proxy",
+      "severity": "critical",
+      "status": "missing",
+      "unblocks": [
+        "external proxy exit-IP/geolocation detector evidence",
+        "proxy/IP coherence detector matrix",
+        "WebRTC public/private IP coherence evidence"
+      ]
+    },
+    {
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "provide": [
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+        "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
+        "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
+        "native macOS detector evidence for the packaged artifact"
+      ],
+      "resource_id": "native-artifact-macos-arm64",
+      "severity": "critical",
+      "status": "missing_native_release_artifact",
+      "status_snapshot": {
+        "app_bundle_exists": false,
+        "build_ninja_exists": false,
+        "chromium_deps_exists": true,
+        "chromium_src_exists": true,
+        "depot_tools_exists": true,
+        "gn_binary_exists": true,
+        "host_os": "darwin",
+        "host_supported": true,
+        "native_toolchain_ready": false,
+        "out_args_exists": true,
+        "output_binary_exists": false,
+        "package_zip_exists": false,
+        "required_host_os": "darwin",
+        "xcodebuild_ok": false,
+        "xcodebuild_status": "failed"
+      },
+      "unblocks": [
+        "macos-arm64 packaged native BrowseForge Chromium artifact",
+        "macos-arm64 native detector evidence"
+      ]
+    },
+    {
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "provide": [
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
+        "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
+        "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
+        "native Windows detector evidence for the packaged artifact"
+      ],
+      "resource_id": "native-artifact-windows-x64",
+      "severity": "critical",
+      "status": "missing_native_release_artifact",
+      "status_snapshot": {
+        "build_ninja_exists": false,
+        "chromium_deps_exists": true,
+        "chromium_src_exists": true,
+        "depot_tools_exists": true,
+        "gn_binary_exists": true,
+        "host_os": "darwin",
+        "host_supported": false,
+        "native_toolchain_ready": false,
+        "out_args_exists": false,
+        "output_binary_exists": false,
+        "package_zip_exists": false,
+        "portable_layout_exists": false,
+        "required_host_os": "windows"
+      },
+      "unblocks": [
+        "windows-x64 packaged native BrowseForge Chromium artifact",
+        "windows-x64 native detector evidence"
+      ]
+    },
+    {
+      "provide": [
+        "macos-arm64:browserleaks:headed:proxy:host",
+        "macos-arm64:browserscan:headed:proxy:host",
+        "macos-arm64:creepjs:headed:proxy:host",
+        "macos-arm64:iphey:headed:proxy:host",
+        "macos-arm64:pixelscan:headed:proxy:host",
+        "macos-arm64:sannysoft:headed:proxy:host"
+      ],
+      "requirements": [
+        "headed detector runs through the configured external proxy"
+      ],
+      "resource_id": "live-proxy-detector-matrix",
+      "severity": "high",
+      "status": "missing_detector_evidence",
+      "unblocks": [
+        "release-grade live detector evidence gate"
+      ]
+    }
+  ],
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0"
 }

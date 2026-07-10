@@ -151,8 +151,8 @@ def sanitized_proxy_descriptor(proxy_url: str) -> tuple[dict[str, object] | None
         return None, errors
     descriptor = {
         "scheme": parsed.scheme,
-        "host_redacted": "[REDACTED_IP]" if SENSITIVE_RE.search(parsed.hostname or "") else (parsed.hostname or "").lower(),
-        "port": parsed.port,
+        "host_redacted": "[REDACTED_PROXY_HOST]",
+        "port_redacted": "[REDACTED_PROXY_PORT]",
         "has_credentials": bool(parsed.username or parsed.password),
     }
     return descriptor, []

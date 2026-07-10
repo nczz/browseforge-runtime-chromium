@@ -179,6 +179,15 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(native_blocker["native_toolchain_ready"], False)
         self.assertEqual(native_blocker["package_zip_exists"], False)
         self.assertEqual(set(release_status.INPUT_PATHS), set(payload["input_sha256"]))
+        resource_ids = {requirement["resource_id"] for requirement in payload["resource_requirements"]}
+        self.assertIn("external-detector-proxy", resource_ids)
+        self.assertIn("native-artifact-macos-arm64", resource_ids)
+        self.assertIn("live-proxy-detector-matrix", resource_ids)
+        proxy_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "external-detector-proxy"
+        )
+        self.assertEqual(proxy_requirement["provide"], ["BROWSEFORGE_DETECTOR_PROXY_URL"])
 
     def test_release_status_passes_only_without_blockers(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -210,6 +219,7 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(result["blockers"], [])
         self.assertEqual(result["blocker_count"], 0)
         self.assertIs(result["release_grade_ready"], True)
+        self.assertEqual(result["resource_requirements"], [])
 
 
 if __name__ == "__main__":
