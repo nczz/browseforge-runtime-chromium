@@ -1547,6 +1547,38 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertEqual(payload["errors"], [])
         self.assertIsNone(payload["proxy"])
 
+    def test_proxy_preflight_output_writes_manifest_schema_fields(self):
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "proxy-preflight.json"
+            proc = self.run_harness(
+                "proxy-preflight",
+                "--output",
+                str(output),
+                "--generated-at",
+                "2026-07-10T00:00:00Z",
+                env={
+                    "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                    "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+                },
+            )
+
+            self.assertEqual(proc.returncode, self.harness_module.EXIT_PREFLIGHT)
+            self.assertEqual(proc.stderr, "")
+            self.assertEqual(str(output), proc.stdout.strip())
+            payload = json.loads(output.read_text(encoding="utf-8"))
+        self.assertEqual(payload["runtime_id"], "browseforge-chromium")
+        self.assertEqual(payload["schema_version"], "1.0")
+        self.assertEqual(payload["generated_at"], "2026-07-10T00:00:00Z")
+        self.assertEqual(payload["status"], "failed")
+        self.assertIs(payload["ready"], False)
+        self.assertCountEqual(
+            payload["missing"],
+            [
+                "BROWSEFORGE_DETECTOR_PROXY_URL",
+                "BROWSEFORGE_DETECTOR_PROXY_REGION",
+            ],
+        )
+
     def test_proxy_preflight_rejects_loopback_and_localhost_proxy_authorities(self):
         cases = [
             ("loopback IPv4", "http://127.0.0.1:8080", "127.0.0.1"),

@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2026-07-09T21:51:50Z",
+  "generated_at": "2026-07-10T00:39:42Z",
   "missing": [
     "BROWSEFORGE_DETECTOR_PROXY_URL",
     "BROWSEFORGE_DETECTOR_PROXY_REGION"

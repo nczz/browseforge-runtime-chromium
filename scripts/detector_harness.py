@@ -170,20 +170,29 @@ def proxy_preflight(args):
     if proxy_url:
         proxy, errors = sanitized_proxy_descriptor(proxy_url)
     payload = {
-        "status": "passed" if not missing and not errors else "failed",
-        "ready": not missing and not errors,
-        "missing": missing,
         "errors": errors,
+        "generated_at": args.generated_at or dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "missing": missing,
         "proxy": proxy,
         "proxy_region_redacted": _bounded_redacted_value(proxy_region) if proxy_region else None,
+        "ready": not missing and not errors,
         "requirements": [
             "external proxy URL with scheme, host, and port",
             "redacted external proxy region/geolocation label",
             "no loopback, private, link-local, or .local proxy authority",
             "no raw credentials or IP literals in committed evidence",
         ],
+        "runtime_id": "browseforge-chromium",
+        "schema_version": "1.0",
+        "status": "passed" if not missing and not errors else "failed",
     }
-    print(json.dumps(payload, indent=2, sort_keys=True))
+    out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.output).write_text(out, encoding="utf-8")
+        print(args.output)
+    else:
+        print(out, end="")
     return 0 if payload["ready"] else EXIT_PREFLIGHT
 
 def plan(args):
@@ -1908,7 +1917,7 @@ def main(argv=None):
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
-    p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.set_defaults(func=proxy_preflight)
+    p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)
