@@ -2810,10 +2810,11 @@ class DetectorHarnessTests(unittest.TestCase):
                 container=True,
             )
 
-            proc = self.run_harness("summary", "--evidence-root", str(evidence_root), "--output", str(output))
+            proc = self.run_harness("summary", "--evidence-root", str(evidence_root), "--output", str(output), "--generated-at", "2026-07-10T21:00:00+00:00")
 
             self.assertEqual(proc.returncode, 0, proc.stderr)
             payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual("2026-07-10T21:00:00+00:00", payload["generated_at"])
             self.assertIn("coverage_gaps", payload)
             self.assertIn("coverage_gap_count", payload)
             self.assertEqual(payload["coverage_gap_count"], len(payload["coverage_gaps"]))

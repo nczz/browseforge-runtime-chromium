@@ -395,17 +395,17 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T20:30:00Z",
+  "generated_at": "2026-07-10T21:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
-    "detector-summary.json": "c8871f69cccccfa766aef0f9a8dbb33f2aa302142ff60419f2c4239c03e75343",
+    "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
     "knowledge/manifests/detector-score-comparison.json": "e50bc9b0cd0cb98a3a523c4535d7a8d7df59f14821a4e2bc197e886c23201bbc",
     "knowledge/manifests/fingerprint-surface-status.json": "b98e6d98df4bed314dec2f8bfc1c2c31683e0b0b75c1d7f1972e51f6c089a5ff",
     "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
     "knowledge/manifests/proxy-preflight.json": "a2e2c61a3a293c7ebc3ededb7b051a0543568655afef0602dfb5aad4488ec32b",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "e04e8a142e0824edfeb046bfd758580e6a875d435c70aa07b33d3efc101dec11"
+    "knowledge/manifests/source-acquisition.json": "440b75b04c090e5a26f4f910c746343d4dd7a42bef08444ab99adb2fe486fc76"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",

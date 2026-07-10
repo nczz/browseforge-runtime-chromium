@@ -1350,8 +1350,9 @@ def summary(args):
                 blocking.append({"path": str(path), "surface": result.get("surface"), "severity": result.get("severity"), "finding": result.get("finding")})
         rows.append({"path": str(path), "detector_id": evidence["detector"]["detector_id"], "platform": evidence["target"]["platform"], "status": evidence["status"]})
     coverage_gaps = matrix_coverage_gaps(evidence_rows, args.platform)
+    generated_at = args.generated_at or dt.datetime.now(dt.timezone.utc).isoformat()
     payload = {
-        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "generated_at": generated_at,
         "evidence_count": len(rows),
         "blocking_findings": blocking,
         "coverage_gap_count": len(coverage_gaps),
@@ -2242,7 +2243,7 @@ def main(argv=None):
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
     p = sub.add_parser("regenerate-kg"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=regenerate_kg)
-    p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
+    p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.add_argument("--generated-at"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("pixelscan-variant-plan"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_plan)
     p = sub.add_parser("pixelscan-materialize-variants"); p.add_argument("--base-config", required=True); p.add_argument("--output-dir", required=True); p.add_argument("--manifest-output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_materialize_variants)

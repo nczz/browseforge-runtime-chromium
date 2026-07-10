@@ -604,7 +604,7 @@
         "scripts/validate.py",
         "chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5"
       ],
-      "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, NetInfoDownlinkMax, SerialPortConnected, and WebShare to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, noDownlinkMax, missing Web Share API, and serial connected-state inventory drift. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, share UI invocation, and detector pass still require a patched Chromium artifact and live detector evidence.",
+      "notes": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, NetInfoDownlinkMax, SerialPortConnected, and WebShare to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, noDownlinkMax, missing Web Share API, and serial connected-state inventory drift. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, share UI invocation, and detector pass still require a patched Chromium artifact and live detector evidence. The rebuilt Linux x64 artifact includes this patch in the current packaged runtime; broader CreepJS/iphey/BrowserScan permissions-feature release matrix remains required.",
       "patchset_id": "surface-feature-parity-native-defaults",
       "risk_level": "high",
       "surface": "permissions_features",
@@ -625,7 +625,7 @@
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
       ],
       "title": "BrowseForge Chromium feature inventory parity defaults for ContentIndex, ContactsManager, NetInfo downlinkMax, SerialPortConnected, and WebShare",
-      "upstream_status": "applied_to_external_checkout_not_release_built"
+      "upstream_status": "applied_to_external_checkout_release_built_linux_x64_detector_tested_native_matrix_required"
     },
     {
       "detectors_addressed": [
