@@ -17,6 +17,8 @@ const (
 	WrapperVersion = "v0.1.0-alpha.0"
 )
 
+const maxStorageQuotaMB = int64(1024 * 1024 * 1024)
+
 const automationControlledArg = "--disable-blink-features=AutomationControlled"
 
 const webrtcIPHandlingArg = "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
@@ -131,6 +133,9 @@ func (c Config) Validate(requireBinary bool) error {
 	}
 	if c.Fingerprint.StorageQuotaMB < 0 || c.Fingerprint.AudioNoise < 0 || c.Fingerprint.CanvasNoise < 0 {
 		return errors.New("fingerprint.storage_quota_mb, fingerprint.audio_noise, and fingerprint.canvas_noise must be >= 0")
+	}
+	if int64(c.Fingerprint.StorageQuotaMB) > maxStorageQuotaMB {
+		return fmt.Errorf("fingerprint.storage_quota_mb must be <= %d", maxStorageQuotaMB)
 	}
 	if err := validateUint32(c.Fingerprint.AudioNoise, "fingerprint.audio_noise"); err != nil {
 		return err

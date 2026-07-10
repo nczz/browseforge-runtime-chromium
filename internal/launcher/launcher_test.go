@@ -221,6 +221,18 @@ func TestBuildPlanAddsStorageQuotaFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsStorageQuotaAboveNativeLimit(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			StorageQuotaMB: int(maxStorageQuotaMB + 1),
+		},
+	}
+	if _, err := cfg.BuildPlan(); err == nil {
+		t.Fatal("expected storage quota native limit error")
+	}
+}
+
 func TestBuildPlanAddsPluginsPDFFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

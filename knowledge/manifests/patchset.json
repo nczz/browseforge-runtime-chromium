@@ -338,14 +338,15 @@
         "browserscan"
       ],
       "files_touched": [
-        "scripts/apply_storage_quota_patch.py",
-        "tests/test_apply_storage_quota_patch.py",
-        "scripts/validate.py",
-        "internal/launcher/launcher_test.go",
+        "chromium/src/third_party/blink/renderer/modules/buckets/storage_bucket.cc",
         "chromium/src/third_party/blink/renderer/modules/quota/storage_manager.cc",
-        "chromium/src/third_party/blink/renderer/modules/buckets/storage_bucket.cc"
+        "internal/launcher/config.go",
+        "internal/launcher/launcher_test.go",
+        "scripts/apply_storage_quota_patch.py",
+        "scripts/validate.py",
+        "tests/test_apply_storage_quota_patch.py"
       ],
-      "notes": "When --fingerprint-storage-quota contains a bounded positive megabyte value, navigator.storage.estimate() and StorageBucket.estimate() report that quota in bytes while preserving the real usage value and clamping quota to at least usage. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-storage-quota contains a bounded positive megabyte value, navigator.storage.estimate() and StorageBucket.estimate() report that quota in bytes while preserving the real usage value and clamping quota to at least usage. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects storage_quota_mb values above 1073741824 MB, matching the Blink helper bound before converting to bytes.",
       "patchset_id": "surface-storage-quota-native-override",
       "risk_level": "medium",
       "surface": "storage_quota",
@@ -353,7 +354,8 @@
         "blink::StorageManager::estimate",
         "blink::StorageBucket::DidGetEstimate",
         "BrowseForgeStorageQuotaOverrideOrDefault",
-        "launcher.FingerprintConfig.StorageQuotaMB"
+        "launcher.FingerprintConfig.StorageQuotaMB",
+        "launcher.maxStorageQuotaMB"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_storage_quota_patch",
