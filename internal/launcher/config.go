@@ -18,6 +18,7 @@ const (
 )
 
 const maxStorageQuotaMB = int64(1024 * 1024 * 1024)
+const maxScreenDimension = 32768
 
 const automationControlledArg = "--disable-blink-features=AutomationControlled"
 
@@ -143,8 +144,21 @@ func (c Config) Validate(requireBinary bool) error {
 	if err := validateUint32(c.Fingerprint.CanvasNoise, "fingerprint.canvas_noise"); err != nil {
 		return err
 	}
-	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
+	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 ||
+		c.Fingerprint.ScreenAvailWidth < 0 || c.Fingerprint.ScreenAvailHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
+	}
+	if err := validateScreenDimension(c.Fingerprint.ScreenWidth, "fingerprint.screen_width"); err != nil {
+		return err
+	}
+	if err := validateScreenDimension(c.Fingerprint.ScreenHeight, "fingerprint.screen_height"); err != nil {
+		return err
+	}
+	if err := validateScreenDimension(c.Fingerprint.ScreenAvailWidth, "fingerprint.screen_avail_width"); err != nil {
+		return err
+	}
+	if err := validateScreenDimension(c.Fingerprint.ScreenAvailHeight, "fingerprint.screen_avail_height"); err != nil {
+		return err
 	}
 	if err := validateTimezone(c.Fingerprint.Timezone); err != nil {
 		return err
@@ -177,6 +191,13 @@ func (c Config) Validate(requireBinary bool) error {
 		if hasManagedPrefix(arg) {
 			return fmt.Errorf("extra arg %q collides with BrowseForge-managed runtime policy", arg)
 		}
+	}
+	return nil
+}
+
+func validateScreenDimension(value int, field string) error {
+	if value > maxScreenDimension {
+		return fmt.Errorf("%s must be <= %d", field, maxScreenDimension)
 	}
 	return nil
 }

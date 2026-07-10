@@ -263,6 +263,25 @@ func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidScreenFingerprintArgs(t *testing.T) {
+	for name, fingerprint := range map[string]FingerprintConfig{
+		"width_too_large":       {ScreenWidth: maxScreenDimension + 1},
+		"height_too_large":      {ScreenHeight: maxScreenDimension + 1},
+		"avail_width_too_large": {ScreenAvailWidth: maxScreenDimension + 1},
+		"avail_height_negative": {ScreenAvailHeight: -1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: fingerprint,
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected screen validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsStorageQuotaFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

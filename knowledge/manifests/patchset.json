@@ -151,7 +151,7 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/frame/screen.cc"
       ],
-      "notes": "When --fingerprint-screen-width, --fingerprint-screen-height, --fingerprint-screen-avail-width, or --fingerprint-screen-avail-height contains a bounded positive integer, Blink returns that value through the matching Screen API. If an available dimension is not set but the full screen dimension is set, the available dimension falls back to the full-screen override to avoid leaking the host display. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-screen-width, --fingerprint-screen-height, --fingerprint-screen-avail-width, or --fingerprint-screen-avail-height contains a bounded positive integer, Blink returns that value through the matching Screen API. If an available dimension is not set but the full screen dimension is set, the available dimension falls back to the full-screen override to avoid leaking the host display. Zero or absent values preserve upstream Chromium behavior; explicit negative values or values above 32768 are rejected by the launcher before command-plan emission, matching the Blink helper bounds. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-screen-native-overrides",
       "risk_level": "medium",
       "surface": "screen",
@@ -166,7 +166,9 @@
         "launcher.FingerprintConfig.ScreenWidth",
         "launcher.FingerprintConfig.ScreenHeight",
         "launcher.FingerprintConfig.ScreenAvailWidth",
-        "launcher.FingerprintConfig.ScreenAvailHeight"
+        "launcher.FingerprintConfig.ScreenAvailHeight",
+        "launcher.maxScreenDimension",
+        "launcher.validateScreenDimension"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_screen_patch",
