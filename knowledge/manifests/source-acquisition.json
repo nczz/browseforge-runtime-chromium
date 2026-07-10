@@ -24,6 +24,14 @@
     "gn_generation_status": "generated_linux_docker",
     "hardware_patch_status": "applied_to_external_checkout",
     "hooks_status": "completed",
+    "last_dev_baseline_probe": {
+      "command": "python3 scripts/chromium_source.py acquire --execute --step generate-dev-build",
+      "error_summary": "gn.py could not find the mac GN executable under buildtools/mac/gn, so BrowseForgeDev generation did not create args.gn or build.ninja.",
+      "next_action": "Run the macOS Chromium hooks/deps step that installs buildtools/mac/gn, or generate the dev baseline in a host/container whose platform GN binary exists, then rerun chromium_source.py acquire --execute --step generate-dev-build.",
+      "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn/gn",
+      "platform_gn_exists": false,
+      "status": "blocked_missing_platform_gn"
+    },
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "archive_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
@@ -144,6 +152,7 @@
         "python3 scripts/chromium_native.py package --platform macos-arm64 --execute"
       ]
     },
+    "platform_gn_check_contract": "python3 scripts/chromium_source.py check reports tools.platform_gn_binary and tools.platform_gn_exists so host GN wrapper failures are machine-readable before BrowseForgeDev generation.",
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
@@ -167,13 +176,13 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout. The current dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact after the WebShare feature parity patch, includes explicit artifact os=linux and arch=x64 metadata plus an alpha runtime manifest, and its live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head, chromium_src_matches_manifest, and build_outputs so pinned checkout, missing dev-baseline GN generation, and Linux release build drift are visible before source patch/build work.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout. The current dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact after the WebShare feature parity patch, includes explicit artifact os=linux and arch=x64 metadata plus an alpha runtime manifest, and its live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head, chromium_src_matches_manifest, and build_outputs so pinned checkout, missing dev-baseline GN generation, and Linux release build drift are visible before source patch/build work. A current BrowseForgeDev generation probe is blocked because buildtools/mac/gn/gn is absent; chromium_source.py check now exposes tools.platform_gn_binary and tools.platform_gn_exists for this prerequisite.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {
     "automation": {
       "apply_scaffold_script": "scripts/apply_stealth_scaffold.py",
-      "check_contract": "python3 scripts/chromium_source.py check reports tool paths, checkout presence, chromium_src_head, chromium_src_matches_manifest, and aggregate native patch/scaffold --check status against the manifest base_commit. It also reports build_outputs for BrowseForgeDev and BrowseForgeLinuxDocker artifacts.",
+      "check_contract": "python3 scripts/chromium_source.py check reports tool paths, checkout presence, chromium_src_head, chromium_src_matches_manifest, and aggregate native patch/scaffold --check status against the manifest base_commit. It also reports build_outputs for BrowseForgeDev and BrowseForgeLinuxDocker artifacts. Host platform GN availability is reported through tools.platform_gn_binary and tools.platform_gn_exists.",
       "default_git_cache": "/Users/chun/Projects/browser-source/git-cache",
       "default_workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
       "docker_base_image": "browseforge/chromium-build:ubuntu22",
@@ -242,7 +251,8 @@
     "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
     "missing_prerequisites": [
       "full Xcode selected by xcode-select for macOS host GN generation",
-      "BrowseForgeDev unpatched/dev baseline GN generation"
+      "BrowseForgeDev unpatched/dev baseline GN generation",
+      "buildtools/mac/gn/gn platform GN binary for BrowseForgeDev generation"
     ],
     "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
     "status": "pinned_checkout_linux_docker_gn_generated"

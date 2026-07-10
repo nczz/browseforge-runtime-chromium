@@ -65,6 +65,25 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIs(tools["chromium_src_exists"], True)
         self.assertIs(tools["depot_tools_exists"], True)
         self.assertTrue(set(["fetch", "gclient", "gn", "ninja", "autoninja"]).issubset(tools))
+        self.assertIn("platform_gn_binary", tools)
+        self.assertIn("platform_gn_exists", tools)
+
+    def test_check_tools_reports_platform_gn_presence(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            platform_gn = chromium_source.platform_gn_binary(src)
+            platform_gn.parent.mkdir(parents=True)
+            platform_gn.write_text("gn\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            tools = chromium_source.check_tools(plan)
+
+        self.assertEqual(str(platform_gn), tools["platform_gn_binary"])
+        self.assertIs(tools["platform_gn_exists"], True)
+
 
     def test_check_tools_reports_pinned_checkout_head(self) -> None:
         with tempfile.TemporaryDirectory() as td:

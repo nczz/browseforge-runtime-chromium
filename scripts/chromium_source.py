@@ -277,10 +277,21 @@ def git_head(src: Path) -> str | None:
     except (OSError, subprocess.CalledProcessError):
         return None
 
+def platform_gn_binary(chromium_src: Path) -> Path:
+    if sys.platform == "darwin":
+        return chromium_src / "buildtools" / "mac" / "gn" / "gn"
+    if sys.platform.startswith("linux"):
+        return chromium_src / "buildtools" / "linux64" / "gn"
+    if sys.platform.startswith("win"):
+        return chromium_src / "buildtools" / "win" / "gn.exe"
+    return chromium_src / "buildtools" / sys.platform / "gn"
+
+
 def check_tools(plan: SourcePlan) -> dict:
     depot_path = plan.path_prefix
     chromium_src = Path(plan.chromium_src_dir)
     head = git_head(chromium_src)
+    platform_gn = platform_gn_binary(chromium_src)
     return {
         "fetch": shutil.which("fetch", path=depot_path),
         "gclient": shutil.which("gclient", path=depot_path),
@@ -291,6 +302,8 @@ def check_tools(plan: SourcePlan) -> dict:
         "chromium_src_head": head,
         "chromium_src_matches_manifest": head == plan.base_commit if head else False,
         "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
+        "platform_gn_binary": str(platform_gn),
+        "platform_gn_exists": platform_gn.is_file(),
     }
 
 
