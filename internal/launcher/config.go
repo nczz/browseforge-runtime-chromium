@@ -146,6 +146,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
+	if err := validateTimezone(c.Fingerprint.Timezone); err != nil {
+		return err
+	}
 	if err := validatePluginsPDF(c.Fingerprint.PluginsPDF); err != nil {
 		return err
 	}
@@ -164,6 +167,25 @@ func (c Config) Validate(requireBinary bool) error {
 	for _, arg := range c.ExtraArgs {
 		if hasManagedPrefix(arg) {
 			return fmt.Errorf("extra arg %q collides with BrowseForge-managed runtime policy", arg)
+		}
+	}
+	return nil
+}
+
+func validateTimezone(value string) error {
+	if value == "" {
+		return nil
+	}
+	if len(value) > 64 {
+		return fmt.Errorf("fingerprint.timezone must be at most 64 bytes")
+	}
+	for _, c := range value {
+		valid := c >= 'A' && c <= 'Z' ||
+			c >= 'a' && c <= 'z' ||
+			c >= '0' && c <= '9' ||
+			c == '_' || c == '-' || c == '+' || c == '/'
+		if !valid {
+			return fmt.Errorf("fingerprint.timezone contains invalid character")
 		}
 	}
 	return nil

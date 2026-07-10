@@ -221,13 +221,14 @@
         "browserscan"
       ],
       "files_touched": [
-        "scripts/apply_timezone_patch.py",
-        "tests/test_apply_timezone_patch.py",
-        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/core/timezone/timezone_controller.cc",
+        "internal/launcher/config.go",
         "internal/launcher/launcher_test.go",
-        "chromium/src/third_party/blink/renderer/core/timezone/timezone_controller.cc"
+        "scripts/apply_timezone_patch.py",
+        "scripts/validate.py",
+        "tests/test_apply_timezone_patch.py"
       ],
-      "notes": "When --fingerprint-timezone contains a bounded ASCII IANA timezone id, blink::TimeZoneController applies it through Chromium's existing ICU/V8 timezone path during controller initialization. Invalid, empty, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-timezone contains a bounded ASCII IANA timezone id, blink::TimeZoneController applies it through Chromium's existing ICU/V8 timezone path during controller initialization. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-timezone-native-override",
       "risk_level": "medium",
       "surface": "timezone",
@@ -235,7 +236,8 @@
         "blink::TimeZoneController::TimeZoneController",
         "blink::TimeZoneController::SetIcuTimeZoneAndNotifyV8",
         "BrowseForgeTimezoneOverride",
-        "launcher.FingerprintConfig.Timezone"
+        "launcher.FingerprintConfig.Timezone",
+        "launcher.validateTimezone"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_timezone_patch",

@@ -79,6 +79,26 @@ func TestBuildPlanAddsTimezoneFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidTimezoneFingerprintArg(t *testing.T) {
+	for name, timezone := range map[string]string{
+		"space":   "Asia/Taipei Local",
+		"unicode": "Asia/Taipei\u2603",
+		"long":    strings.Repeat("A", 65),
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: FingerprintConfig{
+					Timezone: timezone,
+				},
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected timezone validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanPreservesExplicitTimezoneEnv(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
