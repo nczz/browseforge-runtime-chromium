@@ -48,6 +48,20 @@ def add_blocker(blockers: list[dict[str, Any]], *, source: str, blocker_id: str,
     blockers.append(blocker)
 
 
+def native_blocker_snapshot_fields(entry: dict[str, Any]) -> dict[str, Any]:
+    snapshot = entry.get("status_snapshot")
+    if not isinstance(snapshot, dict):
+        return {}
+    return {
+        "host_supported": snapshot.get("host_supported"),
+        "native_toolchain_ready": snapshot.get("native_toolchain_ready"),
+        "build_ninja_exists": snapshot.get("build_ninja_exists"),
+        "output_binary_exists": snapshot.get("output_binary_exists"),
+        "package_zip_exists": snapshot.get("package_zip_exists"),
+    }
+
+
+
 def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[str, Any]:
     release_gates = load_json(root, "knowledge/manifests/release-gates.json")
     native_preflight = load_json(root, "knowledge/manifests/native-artifact-preflight.json")
@@ -90,6 +104,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
                     platform=platform,
                     status=entry.get("status"),
                     evidence=entry.get("evidence"),
+                    **native_blocker_snapshot_fields(entry),
                 )
 
     if proxy_preflight.get("ready") is not True:

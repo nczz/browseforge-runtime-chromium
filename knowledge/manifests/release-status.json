@@ -156,6 +156,7 @@
     },
     {
       "blocker_id": "native-artifact:macos-arm64:0",
+      "build_ninja_exists": false,
       "detail": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -163,6 +164,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
       ],
+      "host_supported": true,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "macos-arm64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -170,6 +175,7 @@
     },
     {
       "blocker_id": "native-artifact:macos-arm64:1",
+      "build_ninja_exists": false,
       "detail": "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -177,6 +183,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
       ],
+      "host_supported": true,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "macos-arm64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -184,6 +194,7 @@
     },
     {
       "blocker_id": "native-artifact:macos-arm64:2",
+      "build_ninja_exists": false,
       "detail": "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -191,6 +202,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
       ],
+      "host_supported": true,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "macos-arm64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -198,6 +213,7 @@
     },
     {
       "blocker_id": "native-artifact:macos-arm64:3",
+      "build_ninja_exists": false,
       "detail": "native macOS detector evidence for the packaged artifact",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -205,6 +221,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
       ],
+      "host_supported": true,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "macos-arm64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -212,6 +232,7 @@
     },
     {
       "blocker_id": "native-artifact:windows-x64:0",
+      "build_ninja_exists": false,
       "detail": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -219,6 +240,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
       ],
+      "host_supported": false,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "windows-x64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -226,6 +251,7 @@
     },
     {
       "blocker_id": "native-artifact:windows-x64:1",
+      "build_ninja_exists": false,
       "detail": "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -233,6 +259,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
       ],
+      "host_supported": false,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "windows-x64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -240,6 +270,7 @@
     },
     {
       "blocker_id": "native-artifact:windows-x64:2",
+      "build_ninja_exists": false,
       "detail": "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -247,6 +278,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
       ],
+      "host_supported": false,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "windows-x64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -254,6 +289,7 @@
     },
     {
       "blocker_id": "native-artifact:windows-x64:3",
+      "build_ninja_exists": false,
       "detail": "native Windows detector evidence for the packaged artifact",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -261,6 +297,10 @@
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
       ],
+      "host_supported": false,
+      "native_toolchain_ready": false,
+      "output_binary_exists": false,
+      "package_zip_exists": false,
       "platform": "windows-x64",
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
@@ -325,7 +365,7 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T02:07:41Z",
+  "generated_at": "2026-07-10T02:15:20Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "b2e50a1593df0ed1dda639960a7bf646d1d2e172613a38129f1aef110e94923f",

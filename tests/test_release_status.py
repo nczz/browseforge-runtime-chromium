@@ -50,6 +50,13 @@ class ReleaseStatusTests(unittest.TestCase):
                         "status": "missing_native_release_artifact",
                         "missing_prerequisites": ["full Xcode selected via xcode-select"],
                         "evidence": ["python3 scripts/chromium_native.py check --platform macos-arm64"],
+                        "status_snapshot": {
+                            "host_supported": True,
+                            "native_toolchain_ready": False,
+                            "build_ninja_exists": False,
+                            "output_binary_exists": False,
+                            "package_zip_exists": False,
+                        },
                     },
                 ],
             },
@@ -152,6 +159,13 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(detector_blocker["display_mode"], "headed")
         self.assertEqual(detector_blocker["network_mode"], "proxy")
         self.assertEqual(detector_blocker["container"], False)
+        native_blocker = next(
+            blocker for blocker in payload["blockers"]
+            if blocker["blocker_id"] == "native-artifact:macos-arm64:0"
+        )
+        self.assertEqual(native_blocker["host_supported"], True)
+        self.assertEqual(native_blocker["native_toolchain_ready"], False)
+        self.assertEqual(native_blocker["package_zip_exists"], False)
         self.assertEqual(set(release_status.INPUT_PATHS), set(payload["input_sha256"]))
 
     def test_release_status_passes_only_without_blockers(self) -> None:
