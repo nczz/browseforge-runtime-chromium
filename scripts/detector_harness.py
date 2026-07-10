@@ -347,7 +347,8 @@ def ingest(args):
     kg_path = Path(args.kg_out)
     kg_path.parent.mkdir(parents=True, exist_ok=True)
     with kg_path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(kg, sort_keys=True) + "\n")
+        for record in kg["nodes"] + kg["edges"]:
+            fh.write(json.dumps(record, sort_keys=True) + "\n")
     print(str(out))
     return 0
 

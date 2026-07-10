@@ -2880,15 +2880,9 @@ class DetectorHarnessTests(unittest.TestCase):
                 Path(f"{fixture['runtime_version']}/{fixture['target']['platform']}/{fixture['detector']['detector_id']}/{fixture['run_id']}.json"),
             )
 
-            jsonl_entries = [json.loads(line) for line in (root / "kg.jsonl").read_text(encoding="utf-8").splitlines()]
-            records = []
-            for entry in jsonl_entries:
-                if "nodes" in entry or "edges" in entry:
-                    records.extend(entry.get("nodes", []))
-                    records.extend(entry.get("edges", []))
-                else:
-                    records.append(entry)
+            records = [json.loads(line) for line in (root / "kg.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertGreater(len(records), 0)
+            self.assertTrue(all(record.get("record_type") in {"node", "edge"} for record in records))
 
             edge_labels = {record.get("label", record.get("edge")) for record in records if record.get("record_type") == "edge" or "edge" in record}
             self.assertNotIn("EVIDENCES", edge_labels)
