@@ -1,0 +1,306 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/"
+  },
+  "evidence_id": "evidence_linux_x64_browserleaks_client_hints_headed_docker_proxy_20260710",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-x64:browserleaks:headed:proxy:container",
+    "network_mode": "proxy",
+    "proxy": "redacted",
+    "required": true
+  },
+  "results": [
+    {
+      "detector_check": "ua",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Configured Chromium UA is present and HeadlessChrome token is absent.",
+      "normalized_values": {
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "user_agent"
+    },
+    {
+      "detector_check": "client_hints",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Configured Linux Chromium UA-CH high entropy values and fullVersionList are available.",
+      "normalized_values": {
+        "available": true,
+        "highEntropy": {
+          "architecture": "x86",
+          "bitness": "64",
+          "brands": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150"
+            }
+          ],
+          "fullVersionList": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150.0.7871.101"
+            }
+          ],
+          "mobile": false,
+          "model": "",
+          "platform": "Linux",
+          "platformVersion": "6.8.0",
+          "wow64": false
+        },
+        "lowEntropy": {
+          "brands": [
+            {
+              "brand": "Not;A=Brand",
+              "version": "8"
+            },
+            {
+              "brand": "Chromium",
+              "version": "150"
+            }
+          ],
+          "mobile": false,
+          "platform": "Linux"
+        }
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "webdriver",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "navigator.webdriver is false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "timezone",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Timezone profile is coherent with Taiwan proxy region label.",
+      "normalized_values": {
+        "timezone": "Asia/Taipei"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "timezone"
+    },
+    {
+      "detector_check": "locale",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Language profile is zh-TW weighted fallback.",
+      "normalized_values": {
+        "languages": [
+          "zh-TW",
+          "zh;q=0.9",
+          "en;q=0.8"
+        ]
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "screen",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Configured screen metrics are exposed.",
+      "normalized_values": {
+        "availHeight": 1040,
+        "availWidth": 1920,
+        "devicePixelRatio": 1,
+        "height": 1080,
+        "width": 1920
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "screen"
+    },
+    {
+      "detector_check": "storage",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Storage quota probe returned configured quota class.",
+      "normalized_values": {
+        "quota": 8589934592,
+        "usage": 0
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "storage_quota"
+    },
+    {
+      "detector_check": "hardware",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Configured hardware concurrency and device memory are exposed.",
+      "normalized_values": {
+        "deviceMemory": 8,
+        "hardwareConcurrency": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "hardware"
+    },
+    {
+      "detector_check": "canvas",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Canvas probe recorded deterministic sanitized hashes and dimensions without raw pixels.",
+      "normalized_values": {
+        "available": true,
+        "dataUrlSha256": "36f019da63497ed6a525023761c8c19aea179b113bf4c4ad15a9265fd93746a3",
+        "height": 32,
+        "imageDataSha256": "527499fa2aad15d1e364a240509cd180f2a06af3c806c56f446bdd88a6be4248",
+        "sampleCount": 8192,
+        "width": 64
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "audio",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Audio probe recorded bounded summary values only.",
+      "normalized_values": {
+        "firstSamples": [
+          7.3e-07,
+          -2.5e-07,
+          6.4e-07,
+          -4.2e-07,
+          -5.5e-07,
+          1.2e-07,
+          1e-06,
+          -4.6e-07
+        ],
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 0.77295927,
+        "sumAbs": 83.8650422
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "fonts",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Sampled desktop font availability and bounded metrics were recorded.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 8,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "glyphSha256": "663360f9f197307ab01a85574ce11251c9089da4488aa2932defdf1248df2143",
+        "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "webrtc",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "WebRTC bounded candidate metadata recorded without committed IP literals.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 2,
+        "ipLiteralCount": 0,
+        "privateIpLiteralCount": 0,
+        "publicIpLiteralCount": 0,
+        "rawCandidateSha256": "05e547f4c142e239a86d910090e4a3b83ce06e62abab5552c986addadae72e7c",
+        "types": [
+          "host"
+        ]
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webrtc"
+    },
+    {
+      "detector_check": "proxy_ip_coherence",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "External proxy route was exercised through authenticated SOCKS5 relay; committed evidence stores only redacted target and detector region labels.",
+      "normalized_values": {
+        "browser_proxy_endpoint": "redacted-local-relay",
+        "detector_geolocation_region_redacted": "tw-redacted",
+        "proxy_exit_region_redacted": "tw-taipei-datacenter",
+        "raw_proxy_endpoint_committed": false,
+        "relay_authentication": "local-no-auth-relay-to-authenticated-upstream"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "proxy_ip_coherence"
+    }
+  ],
+  "run_id": "detrun_linux_x64_browserleaks_client_hints_headed_docker_proxy_20260710",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw detector page text, proxy endpoint, credentials, raw IPs, cookies, and screenshots are not committed; committed evidence stores sanitized structured values and redacted region labels.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-proxy-relay-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headed_docker_proxy_20260710.json",
+    "raw_capture_sha256": "1073b9dae779f154cc93d1a0359da99bbf6b936cfbb0b4c8eecdb42bc60570ce",
+    "sha256": "2aa3266a3993c2f81c498c5e9997633d7342415d1566447e0536f475cd2778af",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "8df24baa15f9b19a48c1aaa0c28150924644c564ce754d4808b660a28898a8ee"
+  },
+  "target": {
+    "arch": "amd64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "headed xvfb software",
+    "host_os": "macOS Docker Desktop linux/amd64 emulation",
+    "locale_profile": "zh-TW",
+    "platform": "linux-x64",
+    "proxy_region_redacted": "tw-taipei-datacenter",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-10T16:12:24Z"
+}

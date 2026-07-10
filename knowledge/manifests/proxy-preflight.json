@@ -1,12 +1,17 @@
 {
-  "errors": [],
-  "generated_at": "2026-07-10T00:39:42Z",
-  "missing": [
-    "BROWSEFORGE_DETECTOR_PROXY_URL",
-    "BROWSEFORGE_DETECTOR_PROXY_REGION"
+  "errors": [
+    "external proxy resource configured and redacted, but live detector proxy coverage remains blocked"
   ],
-  "proxy": null,
-  "proxy_region_redacted": null,
+  "generated_at": "2026-07-10T15:29:12Z",
+  "missing": [],
+  "notes": "Configured proxy metadata is intentionally not marked ready until live-detector-evidence gate and proxy coverage gaps clear.",
+  "proxy": {
+    "has_credentials": true,
+    "host_redacted": "[REDACTED_PROXY_HOST]",
+    "port_redacted": "[REDACTED_PROXY_PORT]",
+    "scheme": "socks5"
+  },
+  "proxy_region_redacted": "tw-taipei-datacenter",
   "ready": false,
   "requirements": [
     "external proxy URL with scheme, host, and port",

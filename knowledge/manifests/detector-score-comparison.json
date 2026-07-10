@@ -40,14 +40,14 @@
       "comparison_id": "browserleaks_audio_headless_vs_headed",
       "detector_id": "browserleaks",
       "finding": "BrowserLeaks bounded AudioContext summaries match across headless/headed evidence.",
-      "left_run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709",
+      "left_run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_proxy_20260710",
       "metric_deltas": {
         "length": 0,
         "sampleRate": 0,
         "sum": 0.0,
         "sumAbs": 0.0
       },
-      "right_run_id": "detrun_linux_x64_browserleaks_client_hints_headed_docker_direct_20260709",
+      "right_run_id": "detrun_linux_x64_browserleaks_webrtc_headed_docker_proxy_20260710",
       "status": "pass",
       "surface": "audio"
     },
@@ -70,8 +70,8 @@
         "state": true
       },
       "finding": "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields match across headless/headed evidence.",
-      "left_run_id": "detrun_linux_x64_browserleaks_audio_headless_docker_direct_20260709",
-      "right_run_id": "detrun_linux_x64_browserleaks_audio_headed_docker_direct_20260709",
+      "left_run_id": "detrun_linux_x64_browserleaks_audio_headless_docker_proxy_20260710",
+      "right_run_id": "detrun_linux_x64_browserleaks_audio_headed_docker_proxy_20260710",
       "status": "pass",
       "surface": "audio"
     },
@@ -94,10 +94,10 @@
       "candidate_count_match": true,
       "comparison_id": "browserleaks_creepjs_font_metrics",
       "finding": "BrowserLeaks/CreepJS font evidence is only partially comparable; release-grade font corpus parity remains required.",
-      "font_list_match": true,
-      "glyph_sha256_match": true,
+      "font_list_match": false,
+      "glyph_sha256_match": false,
       "left_detector_id": "browserleaks",
-      "left_run_id": "detrun_linux_x64_browserleaks_fonts_headed_docker_direct_20260709",
+      "left_run_id": "detrun_linux_x64_browserleaks_audio_headed_docker_proxy_20260710",
       "metrics_sha256_match": false,
       "right_detector_id": "creepjs",
       "right_run_id": "detrun_linux_x64_creepjs_font_metrics_headless_docker_direct_20260709",
@@ -109,9 +109,9 @@
       "comparison_id": "browserleaks_fonts_headless_vs_headed",
       "detector_id": "browserleaks",
       "finding": "BrowserLeaks bounded font metric or glyph hashes differ across headless/headed evidence; release-grade font corpus parity remains required.",
-      "font_list_match": true,
+      "font_list_match": false,
       "glyph_sha256_match": false,
-      "left_run_id": "detrun_linux_x64_browserleaks_fonts_headless_docker_direct_20260709",
+      "left_run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_proxy_20260710",
       "metrics_sha256_match": false,
       "right_run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710",
       "status": "warning",
@@ -140,10 +140,10 @@
         "types": true
       },
       "finding": "BrowserLeaks bounded WebRTC candidate metadata matches across headless/headed evidence without committed IP literals.",
-      "left_raw_candidate_sha256": "e58e8151f77509ef42e07b864a6213804e66dff05292b366789abda0532d4bbf",
-      "left_run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_direct_20260709",
-      "right_raw_candidate_sha256": "6f24a2d962bd97c09cb7ac9a78345eb02323b622d0f98e6aca6de7bb3cbf81c8",
-      "right_run_id": "detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709",
+      "left_raw_candidate_sha256": "c414abdf08b518292f28e0ea924e43ef4af7180bb05dedd0b308d42d3b4b0214",
+      "left_run_id": "detrun_linux_x64_browserleaks_webrtc_headless_docker_proxy_20260710",
+      "right_raw_candidate_sha256": "a70fd96a9d767f45618336558b2ed3b6b34b9cf9fe4027f7e4b74686db51884e",
+      "right_run_id": "detrun_linux_x64_browserleaks_webrtc_headed_docker_proxy_20260710",
       "status": "pass",
       "surface": "webrtc"
     },
@@ -159,18 +159,18 @@
         "precisionSha256": true
       },
       "left_detector_id": "browserleaks",
-      "left_run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709",
+      "left_run_id": "detrun_linux_x64_browserleaks_audio_headless_docker_proxy_20260710",
       "right_detector_id": "browserscan",
-      "right_run_id": "detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709",
+      "right_run_id": "detrun_linux_x64_browserscan_headless_docker_proxy_20260710",
       "status": "pass",
       "surface": "webgl",
       "vendor_renderer_match": true
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 30,
+  "evidence_count": 46,
   "gaps": [],
-  "generated_at": "2026-07-10T12:31:43.660068+00:00",
+  "generated_at": "2026-07-10T16:13:48.624292+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }
