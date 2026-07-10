@@ -1,0 +1,187 @@
+{
+  "conclusion": "All current direct headless Docker variants still report Pixelscan inconsistent/masking with automated behavior detected; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation.",
+  "detector_id": "pixelscan",
+  "generated_at": "2026-07-10T17:51:02.228965+00:00",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "secret_policy": {
+    "allowed_committed_fields": [
+      "verdict",
+      "fingerprint",
+      "botCheck",
+      "proxy",
+      "location_redacted",
+      "audioContextHash",
+      "canvasHash",
+      "fontHash",
+      "webglHash"
+    ],
+    "committed_raw_cdp_capture": false,
+    "committed_raw_ip": false,
+    "committed_raw_page_text": false
+  },
+  "variants": [
+    {
+      "fingerprint_overrides": {},
+      "isolated_surfaces": [],
+      "observation": {
+        "audioContextHash": "d6976ca20fa43966297c9af1d7500edb",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "b9c7e64820e4af3973ce929340341064",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "650a9244e22bb0ceb4ae64db9775ed18",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "baseline-current"
+    },
+    {
+      "fingerprint_overrides": {
+        "canvas_noise": 0
+      },
+      "isolated_surfaces": [
+        "canvas"
+      ],
+      "observation": {
+        "audioContextHash": "d6976ca20fa43966297c9af1d7500edb",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "8789d2cdf8c08a01265b482e9bf27ffd",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "canvas-off"
+    },
+    {
+      "fingerprint_overrides": {
+        "audio_noise": 0
+      },
+      "isolated_surfaces": [
+        "audio"
+      ],
+      "observation": {
+        "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "b9c7e64820e4af3973ce929340341064",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "650a9244e22bb0ceb4ae64db9775ed18",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "audio-off"
+    },
+    {
+      "fingerprint_overrides": {
+        "webgl_renderer": "",
+        "webgl_vendor": ""
+      },
+      "isolated_surfaces": [
+        "webgl"
+      ],
+      "observation": {
+        "audioContextHash": "d6976ca20fa43966297c9af1d7500edb",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "b9c7e64820e4af3973ce929340341064",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "650a9244e22bb0ceb4ae64db9775ed18",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "webgl-native"
+    },
+    {
+      "fingerprint_overrides": {
+        "fonts": [],
+        "fonts_dir": ""
+      },
+      "isolated_surfaces": [
+        "fonts"
+      ],
+      "observation": {
+        "audioContextHash": "d6976ca20fa43966297c9af1d7500edb",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "b9c7e64820e4af3973ce929340341064",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "650a9244e22bb0ceb4ae64db9775ed18",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "fonts-native"
+    },
+    {
+      "fingerprint_overrides": {
+        "audio_noise": 0,
+        "canvas_noise": 0,
+        "fonts": [],
+        "fonts_dir": "",
+        "webgl_renderer": "",
+        "webgl_vendor": ""
+      },
+      "isolated_surfaces": [
+        "audio",
+        "canvas",
+        "webgl",
+        "fonts"
+      ],
+      "observation": {
+        "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+        "botCheck": "Automated behavior detected",
+        "canvasHash": "8789d2cdf8c08a01265b482e9bf27ffd",
+        "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint",
+        "fingerprint": "Masking detected",
+        "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+        "location_redacted": "Taiwan / Taipei",
+        "proxy": "No proxy detected",
+        "severity": "medium",
+        "status": "warning",
+        "verdict": "inconsistent",
+        "webglHash": "b35a6e95ccbb64d2d42a637ad06d7297"
+      },
+      "raw_capture_committed": false,
+      "raw_capture_path_committed": false,
+      "status": "observed",
+      "variant_id": "passive-native-surfaces"
+    }
+  ]
+}

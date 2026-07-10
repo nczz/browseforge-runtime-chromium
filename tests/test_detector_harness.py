@@ -2692,6 +2692,59 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual("", passive_cfg["fingerprint"]["fonts_dir"])
             self.assertEqual({"canvas_noise": 0}, variants["canvas-off"]["fingerprint_overrides"])
 
+    def test_pixelscan_variant_summary_commits_only_sanitized_detector_fields(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            raw_dir = root / "raw"
+            raw_dir.mkdir()
+            output = root / "summary.json"
+            (raw_dir / "detrun_linux_x64_pixelscan_canvas_off_headless_docker_direct.json").write_text(json.dumps({
+                "records": [
+                    {
+                        "status": "warning",
+                        "finding": "Pixelscan fingerprint check loaded from 192.0.2.44 and reported masking.",
+                        "severity": "medium",
+                        "observed": {
+                            "pixelscanPage": {
+                                "verdict": "inconsistent",
+                                "fingerprint": "Masking detected",
+                                "botCheck": "Automated behavior detected",
+                                "proxy": "No proxy detected",
+                                "location": "Taiwan / Taipei",
+                                "audioContextHash": "audio-hash",
+                                "canvasHash": "canvas-hash",
+                                "fontHash": "font-hash",
+                                "webglHash": "webgl-hash",
+                            },
+                            "text_excerpt": "raw page text must not be copied",
+                        },
+                    }
+                ]
+            }), encoding="utf-8")
+
+            proc = self.run_harness(
+                "pixelscan-variant-summary",
+                "--input-dir",
+                str(raw_dir),
+                "--output",
+                str(output),
+                "--generated-at",
+                "2026-07-10T00:00:00+00:00",
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            summary_text = output.read_text(encoding="utf-8")
+            self.assertNotIn("192.0.2.44", summary_text)
+            self.assertNotIn("raw page text", summary_text)
+            variants = {row["variant_id"]: row for row in payload["variants"]}
+            canvas = variants["canvas-off"]
+            self.assertEqual("observed", canvas["status"])
+            self.assertFalse(canvas["raw_capture_committed"])
+            self.assertEqual("inconsistent", canvas["observation"]["verdict"])
+            self.assertEqual("[REDACTED]", canvas["observation"]["finding"].split()[-4])
+            self.assertEqual("missing", variants["audio-off"]["status"])
+
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

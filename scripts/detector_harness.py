@@ -800,6 +800,75 @@ def pixelscan_materialize_variants(args) -> int:
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
 
+def _pixelscan_variant_raw_path(input_dir: Path, variant_id: str) -> Path | None:
+    normalized = variant_id.replace("-", "_")
+    matches = sorted(input_dir.glob(f"*{normalized}*.json")) + sorted(input_dir.glob(f"*{variant_id}*.json"))
+    return matches[0] if matches else None
+
+
+def _pixelscan_variant_observation(record: dict) -> dict:
+    observed = record.get("observed", {})
+    page = observed.get("pixelscanPage") or {}
+    return {
+        "status": record.get("status"),
+        "finding": _bounded_redacted_value(record.get("finding", "")),
+        "severity": record.get("severity"),
+        "verdict": page.get("verdict"),
+        "fingerprint": page.get("fingerprint"),
+        "botCheck": page.get("botCheck"),
+        "proxy": page.get("proxy"),
+        "location_redacted": _bounded_redacted_value(page.get("location", "")),
+        "audioContextHash": page.get("audioContextHash"),
+        "canvasHash": page.get("canvasHash"),
+        "fontHash": page.get("fontHash"),
+        "webglHash": page.get("webglHash"),
+    }
+
+
+def pixelscan_variant_summary(args) -> int:
+    generated_at = args.generated_at or dt.datetime.now(dt.timezone.utc).isoformat()
+    input_dir = Path(args.input_dir)
+    payload = {
+        "runtime_id": "browseforge-chromium",
+        "schema_version": "1.0",
+        "generated_at": generated_at,
+        "detector_id": "pixelscan",
+        "secret_policy": {
+            "committed_raw_cdp_capture": False,
+            "committed_raw_page_text": False,
+            "committed_raw_ip": False,
+            "allowed_committed_fields": PIXELSCAN_ISOLATION_FIELDS,
+        },
+        "variants": [],
+        "conclusion": "All current direct headless Docker variants still report Pixelscan inconsistent/masking with automated behavior detected; active canvas/audio/WebGL/font toggles are not sufficient root-cause isolation.",
+    }
+    for variant in PIXELSCAN_ISOLATION_VARIANTS:
+        variant_id = variant["variant_id"]
+        raw_path = _pixelscan_variant_raw_path(input_dir, variant_id)
+        row = {
+            "variant_id": variant_id,
+            "isolated_surfaces": variant["isolated_surfaces"],
+            "fingerprint_overrides": variant["fingerprint_overrides"],
+            "raw_capture_committed": False,
+            "raw_capture_path_committed": False,
+        }
+        if raw_path is None:
+            row["status"] = "missing"
+            row["observation"] = {}
+        else:
+            raw = json.loads(raw_path.read_text(encoding="utf-8"))
+            records = raw.get("records", [])
+            row["status"] = "observed" if records else "empty"
+            row["observation"] = _pixelscan_variant_observation(records[0]) if records else {}
+        payload["variants"].append(row)
+    out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        Path(args.output).write_text(out, encoding="utf-8")
+    else:
+        print(out, end="")
+    return 0
+
+
 
 def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
@@ -2107,6 +2176,7 @@ def main(argv=None):
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("pixelscan-variant-plan"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_plan)
     p = sub.add_parser("pixelscan-materialize-variants"); p.add_argument("--base-config", required=True); p.add_argument("--output-dir", required=True); p.add_argument("--manifest-output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_materialize_variants)
+    p = sub.add_parser("pixelscan-variant-summary"); p.add_argument("--input-dir", required=True); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_summary)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)

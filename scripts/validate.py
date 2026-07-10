@@ -34,6 +34,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/release-gates.json",
     "knowledge/manifests/detector-score-comparison.json",
     "knowledge/manifests/pixelscan-variant-plan.json",
+    "knowledge/manifests/pixelscan-variant-summary.json",
     "knowledge/manifests/fingerprint-surface-status.json",
     "knowledge/manifests/proxy-preflight.json",
     "knowledge/manifests/native-artifact-preflight.json",
