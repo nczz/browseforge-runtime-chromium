@@ -249,6 +249,18 @@ func TestBuildPlanAddsPluginsPDFFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidPluginsPDFMode(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			PluginsPDF: "maybe",
+		},
+	}
+	if _, err := cfg.BuildPlan(); err == nil {
+		t.Fatal("expected plugins PDF mode validation error")
+	}
+}
+
 func TestBuildPlanAddsAudioNoiseFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

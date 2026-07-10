@@ -365,7 +365,7 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T13:22:30Z",
+  "generated_at": "2026-07-10T13:28:30Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "428297a39d02e556c699d28484ba0b93055c75ee86276c9be17c88410a712d76",

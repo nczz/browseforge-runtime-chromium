@@ -383,7 +383,7 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/modules/plugins/dom_plugin_array.cc"
       ],
-      "notes": "When --fingerprint-plugins-pdf is enabled/true/1, Blink exposes Chromium's fixed five-entry PDF plugin list, the matching application/pdf and text/pdf mimeTypes, and navigator.pdfViewerEnabled even when PDF plugin data is unavailable in the embedded build. When disabled/false/0, those APIs report no PDF plugin. Invalid, empty, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-plugins-pdf is enabled/true/1, Blink exposes Chromium's fixed five-entry PDF plugin list, the matching application/pdf and text/pdf mimeTypes, and navigator.pdfViewerEnabled even when PDF plugin data is unavailable in the embedded build. When disabled/false/0, those APIs report no PDF plugin. Empty or absent values preserve upstream Chromium behavior; explicit invalid values are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-plugins-pdf-native-override",
       "risk_level": "medium",
       "surface": "plugins_pdf",
@@ -392,7 +392,8 @@
         "blink::DOMPluginArray::IsPdfViewerAvailable",
         "blink::NavigatorPlugins::pdfViewerEnabled",
         "BrowseForgePluginsPDFOverrideOrDefault",
-        "launcher.FingerprintConfig.PluginsPDF"
+        "launcher.FingerprintConfig.PluginsPDF",
+        "launcher.validatePluginsPDF"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_plugins_patch",

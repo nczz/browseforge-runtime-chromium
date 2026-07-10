@@ -146,6 +146,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
+	if err := validatePluginsPDF(c.Fingerprint.PluginsPDF); err != nil {
+		return err
+	}
 	if err := validatePrintableASCII(c.Fingerprint.WebGLVendor, "fingerprint.webgl_vendor", 256); err != nil {
 		return err
 	}
@@ -164,6 +167,15 @@ func (c Config) Validate(requireBinary bool) error {
 		}
 	}
 	return nil
+}
+
+func validatePluginsPDF(value string) error {
+	switch value {
+	case "", "enabled", "true", "1", "disabled", "false", "0":
+		return nil
+	default:
+		return fmt.Errorf("fingerprint.plugins_pdf must be enabled/true/1 or disabled/false/0")
+	}
 }
 
 func validateUint32(value int, field string) error {
