@@ -2598,6 +2598,43 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
 
 
+    def test_pixelscan_variant_plan_emits_secret_safe_isolation_matrix(self):
+        proc = self.run_harness(
+            "pixelscan-variant-plan",
+            "--generated-at",
+            "2026-07-10T00:00:00+00:00",
+        )
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["runtime_id"], "browseforge-chromium")
+        self.assertEqual(payload["detector_id"], "pixelscan")
+        self.assertFalse(payload["secret_policy"]["commit_raw_proxy_url"])
+        self.assertFalse(payload["secret_policy"]["commit_raw_ip"])
+        self.assertFalse(payload["secret_policy"]["commit_raw_page_text"])
+        variants = {row["variant_id"]: row for row in payload["variants"]}
+        self.assertEqual(
+            [
+                "baseline-current",
+                "canvas-off",
+                "audio-off",
+                "webgl-native",
+                "fonts-native",
+                "passive-native-surfaces",
+            ],
+            payload["collection_order"],
+        )
+        self.assertEqual({"canvas_noise": 0}, variants["canvas-off"]["fingerprint_overrides"])
+        self.assertEqual({"audio_noise": 0}, variants["audio-off"]["fingerprint_overrides"])
+        self.assertEqual(
+            {"webgl_vendor": "", "webgl_renderer": ""},
+            variants["webgl-native"]["fingerprint_overrides"],
+        )
+        self.assertEqual({"fonts": [], "fonts_dir": ""}, variants["fonts-native"]["fingerprint_overrides"])
+        passive = variants["passive-native-surfaces"]["fingerprint_overrides"]
+        for key in ("audio_noise", "canvas_noise", "webgl_vendor", "webgl_renderer", "fonts", "fonts_dir"):
+            self.assertIn(key, passive)
+
     def test_summary_reports_required_matrix_coverage_gaps_with_normalized_evidence(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

@@ -1,0 +1,134 @@
+{
+  "collection_order": [
+    "baseline-current",
+    "canvas-off",
+    "audio-off",
+    "webgl-native",
+    "fonts-native",
+    "passive-native-surfaces"
+  ],
+  "constant_controls": [
+    "runtime artifact",
+    "profile seed",
+    "UA and UA-CH",
+    "locale and Accept-Language",
+    "timezone",
+    "screen and DPR",
+    "hardwareConcurrency and deviceMemory",
+    "storage quota",
+    "navigator.webdriver"
+  ],
+  "decision": "Run direct-network rows first because committed direct evidence already reproduces masking/inconsistent; repeat only decisive rows through an external proxy relay after a trigger is isolated.",
+  "detector_id": "pixelscan",
+  "generated_at": "2026-07-10T17:16:58.228653+00:00",
+  "pairwise_followup": [
+    [
+      "canvas",
+      "audio"
+    ],
+    [
+      "canvas",
+      "webgl"
+    ],
+    [
+      "fonts",
+      "webgl"
+    ],
+    [
+      "audio",
+      "fonts"
+    ]
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "secret_policy": {
+    "allowed_committed_fields": [
+      "verdict",
+      "fingerprint",
+      "botCheck",
+      "proxy",
+      "location_redacted",
+      "audioContextHash",
+      "canvasHash",
+      "fontHash",
+      "webglHash"
+    ],
+    "commit_raw_ip": false,
+    "commit_raw_page_text": false,
+    "commit_raw_proxy_url": false
+  },
+  "variants": [
+    {
+      "expected_arg_effect": "keeps current active canvas/audio/WebGL/font knobs",
+      "fingerprint_overrides": {},
+      "isolated_surfaces": [],
+      "purpose": "Reproduce the current Pixelscan final-verdict warning with the committed persona unchanged.",
+      "variant_id": "baseline-current"
+    },
+    {
+      "expected_arg_effect": "omits --fingerprint-canvas-noise",
+      "fingerprint_overrides": {
+        "canvas_noise": 0
+      },
+      "isolated_surfaces": [
+        "canvas"
+      ],
+      "purpose": "Determine whether native Canvas 2D readback/encoding perturbation is the Pixelscan masking trigger.",
+      "variant_id": "canvas-off"
+    },
+    {
+      "expected_arg_effect": "omits --fingerprint-audio-noise",
+      "fingerprint_overrides": {
+        "audio_noise": 0
+      },
+      "isolated_surfaces": [
+        "audio"
+      ],
+      "purpose": "Determine whether native WebAudio AudioBuffer/AnalyserNode perturbation is the Pixelscan masking trigger.",
+      "variant_id": "audio-off"
+    },
+    {
+      "expected_arg_effect": "omits --fingerprint-webgl-vendor and --fingerprint-webgl-renderer",
+      "fingerprint_overrides": {
+        "webgl_renderer": "",
+        "webgl_vendor": ""
+      },
+      "isolated_surfaces": [
+        "webgl"
+      ],
+      "purpose": "Determine whether WebGL vendor/renderer string spoofing is inconsistent with real params/extensions/precision/pixels.",
+      "variant_id": "webgl-native"
+    },
+    {
+      "expected_arg_effect": "omits --fingerprint-fonts-list and --fingerprint-fonts-dir",
+      "fingerprint_overrides": {
+        "fonts": [],
+        "fonts_dir": ""
+      },
+      "isolated_surfaces": [
+        "fonts"
+      ],
+      "purpose": "Determine whether FontFaceSet.check allowlist spoofing diverges from installed Linux font metrics/glyph corpus.",
+      "variant_id": "fonts-native"
+    },
+    {
+      "expected_arg_effect": "omits active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
+      "fingerprint_overrides": {
+        "audio_noise": 0,
+        "canvas_noise": 0,
+        "fonts": [],
+        "fonts_dir": "",
+        "webgl_renderer": "",
+        "webgl_vendor": ""
+      },
+      "isolated_surfaces": [
+        "audio",
+        "canvas",
+        "webgl",
+        "fonts"
+      ],
+      "purpose": "Disable all currently active Pixelscan masking candidates to test whether the final verdict returns to consistent.",
+      "variant_id": "passive-native-surfaces"
+    }
+  ]
+}

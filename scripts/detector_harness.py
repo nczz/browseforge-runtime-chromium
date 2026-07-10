@@ -654,6 +654,112 @@ PIXELSCAN_PAGE_SCORE_CHECKS = {
 }
 
 
+PIXELSCAN_ISOLATION_FIELDS = [
+    "verdict",
+    "fingerprint",
+    "botCheck",
+    "proxy",
+    "location_redacted",
+    "audioContextHash",
+    "canvasHash",
+    "fontHash",
+    "webglHash",
+]
+
+PIXELSCAN_ISOLATION_VARIANTS = [
+    {
+        "variant_id": "baseline-current",
+        "purpose": "Reproduce the current Pixelscan final-verdict warning with the committed persona unchanged.",
+        "fingerprint_overrides": {},
+        "isolated_surfaces": [],
+        "expected_arg_effect": "keeps current active canvas/audio/WebGL/font knobs",
+    },
+    {
+        "variant_id": "canvas-off",
+        "purpose": "Determine whether native Canvas 2D readback/encoding perturbation is the Pixelscan masking trigger.",
+        "fingerprint_overrides": {"canvas_noise": 0},
+        "isolated_surfaces": ["canvas"],
+        "expected_arg_effect": "omits --fingerprint-canvas-noise",
+    },
+    {
+        "variant_id": "audio-off",
+        "purpose": "Determine whether native WebAudio AudioBuffer/AnalyserNode perturbation is the Pixelscan masking trigger.",
+        "fingerprint_overrides": {"audio_noise": 0},
+        "isolated_surfaces": ["audio"],
+        "expected_arg_effect": "omits --fingerprint-audio-noise",
+    },
+    {
+        "variant_id": "webgl-native",
+        "purpose": "Determine whether WebGL vendor/renderer string spoofing is inconsistent with real params/extensions/precision/pixels.",
+        "fingerprint_overrides": {"webgl_vendor": "", "webgl_renderer": ""},
+        "isolated_surfaces": ["webgl"],
+        "expected_arg_effect": "omits --fingerprint-webgl-vendor and --fingerprint-webgl-renderer",
+    },
+    {
+        "variant_id": "fonts-native",
+        "purpose": "Determine whether FontFaceSet.check allowlist spoofing diverges from installed Linux font metrics/glyph corpus.",
+        "fingerprint_overrides": {"fonts": [], "fonts_dir": ""},
+        "isolated_surfaces": ["fonts"],
+        "expected_arg_effect": "omits --fingerprint-fonts-list and --fingerprint-fonts-dir",
+    },
+    {
+        "variant_id": "passive-native-surfaces",
+        "purpose": "Disable all currently active Pixelscan masking candidates to test whether the final verdict returns to consistent.",
+        "fingerprint_overrides": {
+            "audio_noise": 0,
+            "canvas_noise": 0,
+            "webgl_vendor": "",
+            "webgl_renderer": "",
+            "fonts": [],
+            "fonts_dir": "",
+        },
+        "isolated_surfaces": ["audio", "canvas", "webgl", "fonts"],
+        "expected_arg_effect": "omits active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
+    },
+]
+
+
+def pixelscan_variant_plan(args) -> int:
+    generated_at = args.generated_at or dt.datetime.now(dt.timezone.utc).isoformat()
+    payload = {
+        "runtime_id": "browseforge-chromium",
+        "schema_version": "1.0",
+        "generated_at": generated_at,
+        "detector_id": "pixelscan",
+        "decision": "Run direct-network rows first because committed direct evidence already reproduces masking/inconsistent; repeat only decisive rows through an external proxy relay after a trigger is isolated.",
+        "secret_policy": {
+            "commit_raw_proxy_url": False,
+            "commit_raw_ip": False,
+            "commit_raw_page_text": False,
+            "allowed_committed_fields": PIXELSCAN_ISOLATION_FIELDS,
+        },
+        "constant_controls": [
+            "runtime artifact",
+            "profile seed",
+            "UA and UA-CH",
+            "locale and Accept-Language",
+            "timezone",
+            "screen and DPR",
+            "hardwareConcurrency and deviceMemory",
+            "storage quota",
+            "navigator.webdriver",
+        ],
+        "collection_order": [row["variant_id"] for row in PIXELSCAN_ISOLATION_VARIANTS],
+        "variants": PIXELSCAN_ISOLATION_VARIANTS,
+        "pairwise_followup": [
+            ["canvas", "audio"],
+            ["canvas", "webgl"],
+            ["fonts", "webgl"],
+            ["audio", "fonts"],
+        ],
+    }
+    out = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        Path(args.output).write_text(out, encoding="utf-8")
+    else:
+        print(out, end="")
+    return 0
+
 def _collect_pixelscan_score_records(evidence_rows: list[dict]) -> list[dict]:
     records = []
     required = ("verdict", "fingerprint", "audioContextHash", "fontHash")
@@ -1958,6 +2064,7 @@ def main(argv=None):
     p = sub.add_parser("regenerate-kg"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=regenerate_kg)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
+    p = sub.add_parser("pixelscan-variant-plan"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_plan)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
     p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
