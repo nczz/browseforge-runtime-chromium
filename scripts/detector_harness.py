@@ -352,6 +352,26 @@ def ingest(args):
     print(str(out))
     return 0
 
+def regenerate_kg(args):
+    root = Path(args.evidence_root)
+    records = []
+    for path in sorted(root.glob("**/*.json")):
+        code, errors = validate_evidence_file(path)
+        if code:
+            for err in errors:
+                print(err, file=sys.stderr)
+            return code
+        kg = kg_edges(load_json(path))
+        records.extend(kg["nodes"])
+        records.extend(kg["edges"])
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8") as fh:
+        for record in records:
+            fh.write(json.dumps(record, sort_keys=True) + "\n")
+    print(str(out))
+    return 0
+
 def normalize_display_mode(display_mode: str) -> str:
     if display_mode.startswith("headed"):
         return "headed"
@@ -1929,6 +1949,7 @@ def main(argv=None):
     p = sub.add_parser("plan"); p.add_argument("--runtime-version", required=True); p.add_argument("--platform", required=True); p.add_argument("--format", default="json"); p.set_defaults(func=plan)
     p = sub.add_parser("validate-evidence"); p.add_argument("path"); p.add_argument("--schema", default="detectors/evidence-schema.json"); p.set_defaults(func=validate_evidence)
     p = sub.add_parser("ingest"); p.add_argument("--input", required=True); p.add_argument("--output-root", default="detectors/evidence"); p.add_argument("--kg-out", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=ingest)
+    p = sub.add_parser("regenerate-kg"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="generated/kg/detector-evidence.jsonl"); p.set_defaults(func=regenerate_kg)
     p = sub.add_parser("summary"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="detector-summary.json"); p.add_argument("--platform", default="linux-x64"); p.set_defaults(func=summary)
     p = sub.add_parser("compare-scores"); p.add_argument("--evidence-root", default="detectors/evidence"); p.add_argument("--output", default="knowledge/manifests/detector-score-comparison.json"); p.set_defaults(func=compare_scores)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)

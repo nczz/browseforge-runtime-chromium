@@ -2884,6 +2884,11 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertGreater(len(records), 0)
             self.assertTrue(all(record.get("record_type") in {"node", "edge"} for record in records))
 
+            regen_proc = self.run_harness("regenerate-kg", "--evidence-root", str(root / "evidence"), "--output", str(root / "regenerated-kg.jsonl"))
+            self.assertEqual(regen_proc.returncode, 0, regen_proc.stderr)
+            regenerated_records = [json.loads(line) for line in (root / "regenerated-kg.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(records, regenerated_records)
+
             edge_labels = {record.get("label", record.get("edge")) for record in records if record.get("record_type") == "edge" or "edge" in record}
             self.assertNotIn("EVIDENCES", edge_labels)
             self.assertNotIn("RAN_DETECTOR", edge_labels)
