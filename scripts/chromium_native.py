@@ -234,6 +234,24 @@ def native_toolchain_error(command: str, status: dict[str, object]) -> str:
     return f"{command} native toolchain is not ready{suffix}"
 
 
+def missing_command_preconditions(command: str, status: dict[str, object]) -> list[str]:
+    missing: list[str] = []
+    if command == "build-chrome" and not status["build_ninja_exists"]:
+        missing.append("build_ninja_exists=False")
+    if command == "package":
+        if not status["output_binary_exists"]:
+            missing.append("output_binary_exists=False")
+        if "app_bundle_exists" in status and not status["app_bundle_exists"]:
+            missing.append("app_bundle_exists=False")
+        if "portable_layout_exists" in status and not status["portable_layout_exists"]:
+            missing.append("portable_layout_exists=False")
+    return missing
+
+
+def command_precondition_error(command: str, missing: list[str]) -> str:
+    return f"{command} preconditions are not satisfied: {'; '.join(missing)}"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium native build helper")
     parser.add_argument("command", choices=["plan", "check", "run-hooks", "gn-gen", "build-chrome", "package"])
@@ -258,6 +276,9 @@ def main() -> None:
         raise SystemExit(f"{args.command} for {plan.platform_id} requires host_os={plan.required_host_os}; current host_os={plan.host_os}")
     if args.command in {"gn-gen", "build-chrome"} and not status["native_toolchain_ready"]:
         raise SystemExit(native_toolchain_error(args.command, status))
+    missing = missing_command_preconditions(args.command, status)
+    if missing:
+        raise SystemExit(command_precondition_error(args.command, missing))
     run_command(plan.commands[args.command], Path(plan.chromium_src_dir))
 
 

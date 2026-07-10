@@ -322,6 +322,128 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 xcodebuild_run.assert_called_once()
                 run_command.assert_not_called()
 
+    def test_execute_build_chrome_requires_build_ninja_before_running(self) -> None:
+        """Build execution refuses a ready checkout with no generated Ninja graph."""
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 0, stdout="Xcode 16.4\nBuild version 16F6\n", stderr="")
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src, _ = self._write_native_checkout_fixtures(workdir)
+            self.assertFalse((src / "out" / "TestMacArm64" / "build.ninja").exists())
+            argv = [
+                "chromium_native.py",
+                "build-chrome",
+                "--platform",
+                "macos-arm64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestMacArm64",
+                "--execute",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
+                mock.patch.object(chromium_native, "run_command") as run_command,
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    chromium_native.main()
+
+        message = str(raised.exception)
+        self.assertIn("build-chrome", message)
+        self.assertIn("build_ninja_exists=False", message)
+        xcodebuild_run.assert_called_once()
+        run_command.assert_not_called()
+
+    def test_execute_package_requires_output_binary_and_app_bundle_before_running(self) -> None:
+        """Packaging refuses to run package_runtime when the macOS browser app is missing."""
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 0, stdout="Xcode 16.4\nBuild version 16F6\n", stderr="")
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src, _ = self._write_native_checkout_fixtures(workdir)
+            out_dir = src / "out" / "TestMacArm64"
+            out_dir.mkdir(parents=True)
+            (out_dir / "build.ninja").write_text("rule chrome\n", encoding="utf-8")
+            argv = [
+                "chromium_native.py",
+                "package",
+                "--platform",
+                "macos-arm64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestMacArm64",
+                "--execute",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
+                mock.patch.object(chromium_native, "run_command") as run_command,
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    chromium_native.main()
+
+        message = str(raised.exception)
+        self.assertIn("package", message)
+        self.assertIn("output_binary_exists=False", message)
+        self.assertIn("app_bundle_exists=False", message)
+        xcodebuild_run.assert_called_once()
+        run_command.assert_not_called()
+
+    def test_execute_gn_gen_delegates_without_build_ninja_when_toolchain_ready(self) -> None:
+        """GN generation remains allowed before build.ninja exists."""
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 0, stdout="Xcode 16.4\nBuild version 16F6\n", stderr="")
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src, _ = self._write_native_checkout_fixtures(workdir)
+            self.assertFalse((src / "out" / "TestMacArm64" / "build.ninja").exists())
+            argv = [
+                "chromium_native.py",
+                "gn-gen",
+                "--platform",
+                "macos-arm64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestMacArm64",
+                "--execute",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
+                mock.patch.object(chromium_native, "run_command") as run_command,
+            ):
+                chromium_native.main()
+
+        xcodebuild_run.assert_called_once()
+        run_command.assert_called_once()
+        delegated_command, delegated_cwd = run_command.call_args.args
+        self.assertEqual(chromium_native.build_plan("macos-arm64", workdir, "out/TestMacArm64").commands["gn-gen"], delegated_command)
+        self.assertEqual(src, delegated_cwd)
+
     def test_execute_run_hooks_still_runs_with_command_line_tools_xcodebuild(self) -> None:
         """Run-hooks is allowed under CommandLineTools-only xcodebuild so it can repair checkout buildtools."""
         command_line_tools_error = (
