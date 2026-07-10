@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/proxy-preflight.json",
     "knowledge/manifests/native-artifact-preflight.json",
     "knowledge/manifests/signing-policy.json",
+    "knowledge/manifests/release-status.json",
     "knowledge/manifests/source-acquisition.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
@@ -51,6 +52,7 @@ REQUIRED_FILES = [
     "scripts/apply_stealth_scaffold.py",
     "scripts/chromium_docker.py",
     "scripts/chromium_native.py",
+    "scripts/release_status.py",
     "scripts/package_linux_runtime.py",
     "scripts/apply_webdriver_patch.py",
     "scripts/apply_hardware_patch.py",
@@ -107,6 +109,7 @@ REQUIRED_FILES = [
     "tests/test_apply_switch_propagation_patch.py",
     "tests/test_chromium_docker.py",
     "tests/test_chromium_native.py",
+    "tests/test_release_status.py",
     "internal/stealth/persona_test.go",
     "tests/test_stealth_scaffold.py",
 ]
@@ -564,6 +567,48 @@ def validate_signing_policy(signing_policy: dict, runtime_artifacts: dict, platf
     if release_ready and any(not policy.get("release_grade_allowed") for policy in policies_by_platform.values()):
         raise SystemExit("signing policy cannot be release_grade_ready while platform policies block release-grade signing")
 
+RELEASE_STATUS_INPUTS = [
+    "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/native-artifact-preflight.json",
+    "knowledge/manifests/proxy-preflight.json",
+    "detector-summary.json",
+    "knowledge/manifests/detector-score-comparison.json",
+    "knowledge/manifests/fingerprint-surface-status.json",
+    "knowledge/manifests/signing-policy.json",
+    "contracts/browseforge-integration.contract.json",
+]
+
+
+def validate_release_status(release_status: dict) -> None:
+    if release_status.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("release status runtime_id must be browseforge-chromium")
+    if release_status.get("schema_version") != "1.0":
+        raise SystemExit("release status schema_version must be 1.0")
+    blockers = release_status.get("blockers", [])
+    if not isinstance(blockers, list):
+        raise SystemExit("release status blockers must be an array")
+    blocker_count = release_status.get("blocker_count")
+    if blocker_count != len(blockers):
+        raise SystemExit("release status blocker_count must match blockers length")
+    if release_status.get("release_grade_ready") != (len(blockers) == 0):
+        raise SystemExit("release status release_grade_ready must match blockers")
+    for blocker in blockers:
+        if not isinstance(blocker, dict):
+            raise SystemExit("release status blockers must be objects")
+        for key in ["blocker_id", "source", "severity", "detail"]:
+            if not isinstance(blocker.get(key), str) or not blocker.get(key):
+                raise SystemExit(f"release status blocker missing {key}")
+    inputs = release_status.get("inputs", [])
+    if inputs != RELEASE_STATUS_INPUTS:
+        raise SystemExit(f"release status inputs drifted: {inputs!r}")
+    input_sha256 = release_status.get("input_sha256", {})
+    if not isinstance(input_sha256, dict):
+        raise SystemExit("release status input_sha256 must be an object")
+    for path in RELEASE_STATUS_INPUTS:
+        expected = hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+        if input_sha256.get(path) != expected:
+            raise SystemExit(f"release status input hash drifted for {path}")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -813,6 +858,8 @@ def main() -> None:
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     signing_policy = load_json("knowledge/manifests/signing-policy.json")
     validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
+    release_status = load_json("knowledge/manifests/release-status.json")
+    validate_release_status(release_status)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"

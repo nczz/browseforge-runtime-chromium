@@ -1,0 +1,334 @@
+{
+  "blocker_count": 31,
+  "blockers": [
+    {
+      "blocker_id": "browseforge-integration:0",
+      "detail": "external proxy exit-IP/geolocation detector evidence is missing",
+      "severity": "high",
+      "source": "contracts/browseforge-integration.contract.json"
+    },
+    {
+      "blocker_id": "browseforge-integration:1",
+      "detail": "macOS native BrowseForge Chromium release artifact is missing",
+      "severity": "high",
+      "source": "contracts/browseforge-integration.contract.json"
+    },
+    {
+      "blocker_id": "browseforge-integration:2",
+      "detail": "Windows native BrowseForge Chromium release artifact is missing",
+      "severity": "high",
+      "source": "contracts/browseforge-integration.contract.json"
+    },
+    {
+      "blocker_id": "browseforge-integration:3",
+      "detail": "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
+      "severity": "high",
+      "source": "contracts/browseforge-integration.contract.json"
+    },
+    {
+      "blocker_id": "browseforge-integration:4",
+      "detail": "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
+      "severity": "high",
+      "source": "contracts/browseforge-integration.contract.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:browserleaks:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "browserleaks",
+      "matrix_key": "macos-arm64:browserleaks:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:browserscan:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "browserscan",
+      "matrix_key": "macos-arm64:browserscan:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:creepjs:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "creepjs",
+      "matrix_key": "macos-arm64:creepjs:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:iphey:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "iphey",
+      "matrix_key": "macos-arm64:iphey:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:pixelscan:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "pixelscan",
+      "matrix_key": "macos-arm64:pixelscan:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host",
+      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
+      "detector_id": "sannysoft",
+      "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "detector-summary.json"
+    },
+    {
+      "blocker_id": "score-comparison:baseline_gaps:native_headed_font_corpus_parity_missing",
+      "detail": "{\"detector_id\": \"browserleaks,creepjs,pixelscan\", \"finding\": \"Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.\", \"gap_id\": \"native_headed_font_corpus_parity_missing\", \"required_evidence\": \"native headed Linux/macOS font corpus and detector-score comparison\", \"surface\": \"fonts\"}",
+      "severity": "medium",
+      "source": "knowledge/manifests/detector-score-comparison.json"
+    },
+    {
+      "blocker_id": "fingerprint-surface:AudioContext",
+      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating.",
+      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_native_matrix_required",
+      "severity": "medium",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "AudioContext"
+    },
+    {
+      "blocker_id": "fingerprint-surface:WebGL vendor/renderer",
+      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker.",
+      "result": "warn_linux_webgl_metadata_cross_detector_passed_native_headed_required",
+      "severity": "medium",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "WebGL vendor/renderer"
+    },
+    {
+      "blocker_id": "fingerprint-surface:cross-platform drift",
+      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed BrowserLeaks Fonts and SannySoft direct evidence also exists through the BrowseForge wrapper with installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
+      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_partial",
+      "severity": "medium",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "cross-platform drift"
+    },
+    {
+      "blocker_id": "fingerprint-surface:fonts",
+      "detail": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. New macOS arm64 host headed BrowserLeaks Fonts evidence passed coverage and records bounded native system Chrome font metrics/glyph hashes through the BrowseForge wrapper, proving local native corpus collection works; it remains non-release artifact evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium artifact. BrowserLeaks/CreepJS/Pixelscan native packaged platform corpus parity remains required.",
+      "result": "pass_macos_host_font_corpus_packaged_native_matrix_required",
+      "severity": "medium",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "fonts"
+    },
+    {
+      "blocker_id": "fingerprint-surface:proxy/IP coherence",
+      "detail": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. No external proxy exit-IP/geolocation detector run has been executed.",
+      "result": "warn_linux_browserleaks_local_proxy_and_webrtc_metadata_only",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "proxy/IP coherence"
+    },
+    {
+      "blocker_id": "native-artifact:macos-arm64:0",
+      "detail": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "platform": "macos-arm64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:macos-arm64:1",
+      "detail": "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "platform": "macos-arm64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:macos-arm64:2",
+      "detail": "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "platform": "macos-arm64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:macos-arm64:3",
+      "detail": "native macOS detector evidence for the packaged artifact",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "platform": "macos-arm64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:windows-x64:0",
+      "detail": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "platform": "windows-x64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:windows-x64:1",
+      "detail": "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "platform": "windows-x64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:windows-x64:2",
+      "detail": "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "platform": "windows-x64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "native-artifact:windows-x64:3",
+      "detail": "native Windows detector evidence for the packaged artifact",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "platform": "windows-x64",
+      "severity": "critical",
+      "source": "knowledge/manifests/native-artifact-preflight.json",
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
+      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_REGION is missing",
+      "severity": "critical",
+      "source": "knowledge/manifests/proxy-preflight.json"
+    },
+    {
+      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL",
+      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_URL is missing",
+      "severity": "critical",
+      "source": "knowledge/manifests/proxy-preflight.json"
+    },
+    {
+      "blocker_id": "release-gate:live-detector-evidence",
+      "detail": "release gate live-detector-evidence status is 'warning', not 'passed'",
+      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json, BrowserLeaks Client Hints evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json, Pixelscan UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json, iphey UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/iphey/detrun_linux_x64_iphey_uach_headless_docker_direct_20260709.json, BrowserScan UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709.json, and CreepJS UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json. The rebuilt Linux artifact verifies navigator.webdriver=false, configured Chromium UA without HeadlessChrome, UA-CH fullVersionList with Chromium 150.0.7871.101 on SannySoft/BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS, zh-TW languages, Asia/Taipei timezone, 1920x1080/1920x1040 screen, storage quota 8589934592 bytes, hardwareConcurrency/deviceMemory=8, Intel WebGL vendor/renderer, repeat-consistent sanitized Canvas 2D hashes, an unscored OfflineAudioContext probe, and an unscored FontFaceSet availability probe. Release-grade headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required; detector-score-comparison.json records CreepJS audio headless/headed deltas and BrowserLeaks/CreepJS font glyph/metric comparison while keeping release_grade=false and explicit baseline_gaps for missing BrowserLeaks audio, Pixelscan audio/fonts, and native headed font corpus evidence.",
+      "gate_id": "live-detector-evidence",
+      "severity": "high",
+      "source": "knowledge/manifests/release-gates.json",
+      "status": "warning"
+    },
+    {
+      "blocker_id": "signing-policy:linux-x64",
+      "detail": "Unsigned dev artifact is acceptable only for alpha validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing requires an explicit signing policy update.",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
+      ],
+      "platform": "linux-x64",
+      "severity": "high",
+      "source": "knowledge/manifests/signing-policy.json",
+      "status": "unsigned_alpha_dev_artifact"
+    },
+    {
+      "blocker_id": "signing-policy:macos-arm64",
+      "detail": "macOS arm64 release-grade artifacts require a BrowseForge Chromium .app built from the selected source ref plus a committed Developer ID signing and notarization decision before release_grade can pass. Host Chrome dogfood binaries are not eligible release artifacts.",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "knowledge/manifests/native-artifact-preflight.json"
+      ],
+      "platform": "macos-arm64",
+      "severity": "high",
+      "source": "knowledge/manifests/signing-policy.json",
+      "status": "decision_recorded_artifact_missing"
+    },
+    {
+      "blocker_id": "signing-policy:windows-x64",
+      "detail": "Windows x64 release-grade artifacts require a BrowseForge Chromium portable chrome.exe/DLL layout built from the selected source ref plus a committed code-signing decision before release_grade can pass.",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "knowledge/manifests/native-artifact-preflight.json"
+      ],
+      "platform": "windows-x64",
+      "severity": "high",
+      "source": "knowledge/manifests/signing-policy.json",
+      "status": "decision_recorded_artifact_missing"
+    }
+  ],
+  "generated_at": "2026-07-10T00:53:36Z",
+  "input_sha256": {
+    "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
+    "detector-summary.json": "b2e50a1593df0ed1dda639960a7bf646d1d2e172613a38129f1aef110e94923f",
+    "knowledge/manifests/detector-score-comparison.json": "f6e8fd6faff672417991d127c5f564258fc253f900a6cde4b8cc378c776f078b",
+    "knowledge/manifests/fingerprint-surface-status.json": "749551557351bbda96de6ceadeb3c8b7820c986bb5072228c1983db0cc0a0ceb",
+    "knowledge/manifests/native-artifact-preflight.json": "8350b930956901f02e2a9336ce9d4f0a184b1a303aad8654ef5253c95ab7d32d",
+    "knowledge/manifests/proxy-preflight.json": "7b872359eaa1e895ecc50bdf3cfa46823f81bf91ad1889b078c38002823fa0ba",
+    "knowledge/manifests/release-gates.json": "fc5e4fca81a648128973c934d550a4a98d4a4c31bfad81587ee6788965cf810a",
+    "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851"
+  },
+  "inputs": [
+    "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/native-artifact-preflight.json",
+    "knowledge/manifests/proxy-preflight.json",
+    "detector-summary.json",
+    "knowledge/manifests/detector-score-comparison.json",
+    "knowledge/manifests/fingerprint-surface-status.json",
+    "knowledge/manifests/signing-policy.json",
+    "contracts/browseforge-integration.contract.json"
+  ],
+  "release_grade_ready": false,
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
+}

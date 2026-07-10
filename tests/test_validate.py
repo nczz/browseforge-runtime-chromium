@@ -14,6 +14,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_SCRIPT = ROOT / "scripts" / "validate.py"
+RELEASE_STATUS_SCRIPT = ROOT / "scripts" / "release_status.py"
 GRAPH_PATH = ROOT / "generated" / "kg" / "runtime.graph.jsonl"
 RUNTIME_ARTIFACTS_MANIFEST = ROOT / "knowledge" / "manifests" / "runtime-artifacts.json"
 LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64"
@@ -263,12 +264,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             self.assertEqual({"linux-x64"}, {artifact["platform"] for artifact in manifest["artifacts"]})
             self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
 
-            original_root = module.ROOT
-            try:
-                module.ROOT = temp_root
-                module.main()
-            finally:
-                module.ROOT = original_root
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
 
     def test_validate_accepts_native_artifact_preflight_for_linux_ready_and_native_blockers(self) -> None:
         """native-artifact-preflight records the Linux artifact as ready while native OS artifacts remain blockers."""
@@ -799,15 +797,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             temp_root = Path(td)
             self._write_minimal_validate_tree(temp_root, module)
-            original_root = module.ROOT
-            try:
-                module.ROOT = temp_root
-                with self.assertRaises(SystemExit) as raised:
-                    module.main()
-            finally:
-                module.ROOT = original_root
+            message = self._run_validate_expect_exit(module, temp_root)
 
-        message = str(raised.exception).lower()
+        message = message.lower()
         self.assertRegex(message, r"artifact|linux-x64|release", message)
 
 
@@ -1118,9 +1110,20 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
 
 
+    def _refresh_release_status(self, temp_root: Path) -> None:
+        spec = importlib.util.spec_from_file_location("release_status_for_validate_tests", RELEASE_STATUS_SCRIPT)
+        self.assertIsNotNone(spec)
+        release_status_module = importlib.util.module_from_spec(spec)
+        self.assertIsNotNone(spec.loader)
+        spec.loader.exec_module(release_status_module)
+        payload = release_status_module.release_status(temp_root, "2026-07-10T00:00:00Z")
+        self._write_json(temp_root / "knowledge" / "manifests" / "release-status.json", payload)
+
+
     def _run_validate_expect_success(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
         output = io.StringIO()
+        self._refresh_release_status(temp_root)
         try:
             module.ROOT = temp_root
             with contextlib.redirect_stdout(output):
@@ -1132,6 +1135,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
     def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
+        self._refresh_release_status(temp_root)
         try:
             module.ROOT = temp_root
             with self.assertRaises(SystemExit) as raised:
