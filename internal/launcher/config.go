@@ -132,6 +132,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.StorageQuotaMB < 0 || c.Fingerprint.AudioNoise < 0 || c.Fingerprint.CanvasNoise < 0 {
 		return errors.New("fingerprint.storage_quota_mb, fingerprint.audio_noise, and fingerprint.canvas_noise must be >= 0")
 	}
+	if err := validateUint32(c.Fingerprint.CanvasNoise, "fingerprint.canvas_noise"); err != nil {
+		return err
+	}
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
@@ -151,6 +154,13 @@ func (c Config) Validate(requireBinary bool) error {
 		if hasManagedPrefix(arg) {
 			return fmt.Errorf("extra arg %q collides with BrowseForge-managed runtime policy", arg)
 		}
+	}
+	return nil
+}
+
+func validateUint32(value int, field string) error {
+	if int64(value) > int64(1<<32-1) {
+		return fmt.Errorf("%s must fit uint32", field)
 	}
 	return nil
 }

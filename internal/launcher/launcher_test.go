@@ -269,6 +269,18 @@ func TestBuildPlanAddsCanvasNoiseFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsCanvasNoiseAboveUint32(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			CanvasNoise: int(1 << 32),
+		},
+	}
+	if _, err := cfg.BuildPlan(); err == nil {
+		t.Fatal("expected canvas noise uint32 range error")
+	}
+}
+
 func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

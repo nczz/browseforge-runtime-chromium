@@ -500,7 +500,7 @@
         "chromium/src/third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.cc",
         "chromium/src/third_party/blink/renderer/platform/graphics/image_data_buffer.cc"
       ],
-      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic \u00b11 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic \u00b11 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper.",
       "patchset_id": "surface-canvas-native-noise-override",
       "risk_level": "high",
       "surface": "canvas",
@@ -511,7 +511,8 @@
         "BrowseForgeCanvasNoiseSeed",
         "BrowseForgeApplyCanvasNoise",
         "BrowseForgeMakeNoisyCanvasPixmap",
-        "launcher.FingerprintConfig.CanvasNoise"
+        "launcher.FingerprintConfig.CanvasNoise",
+        "launcher.validateUint32"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_canvas_patch",
