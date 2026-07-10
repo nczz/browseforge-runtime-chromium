@@ -354,6 +354,12 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
         raise SystemExit(f"fingerprint surface status cannot be release_grade with blockers: {sorted(release_blockers)}")
     if gate_status.get("live-detector-evidence") == "passed" and release_blockers:
         raise SystemExit(f"live-detector-evidence gate cannot pass while fingerprint surfaces block release: {sorted(release_blockers)}")
+    evidence_refs = surface_status.get("evidence_refs", [])
+    if not isinstance(evidence_refs, list) or any(not isinstance(path, str) or not path for path in evidence_refs):
+        raise SystemExit("fingerprint surface status evidence_refs must be non-empty strings")
+    for evidence_ref in evidence_refs:
+        if not (ROOT / evidence_ref).is_file():
+            raise SystemExit(f"fingerprint surface status references missing evidence_ref: {evidence_ref}")
     for source_path in surface_status.get("updated_from", []):
         if not (ROOT / source_path).is_file():
             raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")

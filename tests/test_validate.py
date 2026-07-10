@@ -1131,6 +1131,22 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("fingerprint surface", message)
         self.assertIn("missing evidence source", message)
 
+    def test_validate_rejects_surface_status_missing_evidence_ref(self) -> None:
+        """Surface status summary evidence_refs must point at committed evidence files."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            surface_status_path = temp_root / "knowledge" / "manifests" / "fingerprint-surface-status.json"
+            payload = json.loads(surface_status_path.read_text(encoding="utf-8"))
+            payload["evidence_refs"] = ["detectors/evidence/missing-ref.json"]
+            self._write_json(surface_status_path, payload)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("fingerprint surface", message)
+        self.assertIn("missing evidence_ref", message)
+
     def test_validate_accepts_committed_browseforge_integration_contract(self) -> None:
         """The committed integration contract must be current enough for release validation."""
         module = self._load_validate_module()
