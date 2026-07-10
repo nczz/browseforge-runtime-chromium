@@ -134,6 +134,24 @@ func TestBuildPlanAddsLocaleFingerprintArgs(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidLocaleFingerprintArgs(t *testing.T) {
+	for name, fingerprint := range map[string]FingerprintConfig{
+		"locale_slash":          {Locale: "zh/TW"},
+		"locale_too_long":       {Locale: strings.Repeat("a", 257)},
+		"accept_language_emoji": {AcceptLanguage: "zh-TW,\u2603"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: fingerprint,
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected locale validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

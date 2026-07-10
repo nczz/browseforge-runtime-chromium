@@ -265,7 +265,7 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/frame/navigator_language.cc"
       ],
-      "notes": "When --fingerprint-accept-language contains a bounded Accept-Language list, Blink uses it for navigator.language and navigator.languages; --fingerprint-locale is used as a fallback single-language value. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers DOM language APIs; HTTP Accept-Language header coherence remains a separate network/browser preference surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-accept-language contains a bounded Accept-Language list, Blink uses it for navigator.language and navigator.languages; --fingerprint-locale is used as a fallback single-language value. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This covers DOM language APIs; HTTP Accept-Language header coherence remains a separate network/browser preference surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-locale-native-override",
       "risk_level": "medium",
       "surface": "locale",
@@ -274,7 +274,8 @@
         "blink::NavigatorLanguage::EnsureUpdatedLanguage",
         "BrowseForgeAcceptLanguagesOverride",
         "launcher.FingerprintConfig.Locale",
-        "launcher.FingerprintConfig.AcceptLanguage"
+        "launcher.FingerprintConfig.AcceptLanguage",
+        "launcher.validateAcceptLanguages"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_locale_patch",
