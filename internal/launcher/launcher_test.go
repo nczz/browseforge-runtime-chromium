@@ -168,6 +168,26 @@ func TestBuildPlanAddsPlatformFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsInvalidPlatformFingerprintArg(t *testing.T) {
+	for name, platform := range map[string]string{
+		"slash":   "Mac/Intel",
+		"unicode": "Win32\u2603",
+		"long":    strings.Repeat("W", 65),
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := Config{
+				UserDataDir: t.TempDir(),
+				Fingerprint: FingerprintConfig{
+					Platform: platform,
+				},
+			}
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected platform validation error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsUserAgentFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

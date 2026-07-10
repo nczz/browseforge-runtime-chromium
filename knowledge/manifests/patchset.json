@@ -187,20 +187,22 @@
         "browserscan"
       ],
       "files_touched": [
-        "scripts/apply_platform_patch.py",
-        "tests/test_apply_platform_patch.py",
-        "scripts/validate.py",
+        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
+        "internal/launcher/config.go",
         "internal/launcher/launcher_test.go",
-        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc"
+        "scripts/apply_platform_patch.py",
+        "scripts/validate.py",
+        "tests/test_apply_platform_patch.py"
       ],
-      "notes": "When --fingerprint-platform contains a bounded ASCII platform token, blink::NavigatorBase::platform returns that value before Chromium's reduced platform fallback. Invalid, empty, or absent values preserve upstream Chromium behavior. This covers navigator.platform in the common window/worker path; higher-entropy UA-CH platform fields remain a separate surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-platform contains a bounded ASCII platform token, blink::NavigatorBase::platform returns that value before Chromium's reduced platform fallback. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This covers navigator.platform in the common window/worker path; higher-entropy UA-CH platform fields remain a separate surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
       "patchset_id": "surface-platform-native-override",
       "risk_level": "medium",
       "surface": "platform",
       "symbols_touched": [
         "blink::NavigatorBase::platform",
         "BrowseForgeNavigatorPlatformOverride",
-        "launcher.FingerprintConfig.Platform"
+        "launcher.FingerprintConfig.Platform",
+        "launcher.validatePlatform"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_platform_patch",
