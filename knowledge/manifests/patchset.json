@@ -478,7 +478,7 @@
         "chromium/src/third_party/blink/renderer/modules/webaudio/audio_buffer.cc",
         "chromium/src/third_party/blink/renderer/modules/webaudio/analyser_node.cc"
       ],
-      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to dense AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::getChannelData and copyFromChannel now gate perturbations on dense, non-uniform sample data so CreepJS-style sparse/uniform AudioBuffer trap probes retain native mutation semantics while rendered audio remains seed-adjusted. AudioBuffer::copyFromChannel seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, sparse/uniform, or absent values preserve upstream Chromium behavior. The patched Linux x64 package rebuilt from this patch passed BrowserLeaks JavaScript AudioContext headless/headed bounded field comparison and CreepJS audio metrics headless/headed Docker/Xvfb parity on 2026-07-10; native headed Linux/macOS/Windows detector matrix evidence is still required before release-grade cross-platform audio claims. The launcher rejects audio_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper.",
+      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to dense AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::getChannelData and copyFromChannel now gate perturbations on dense, non-uniform sample data so CreepJS-style sparse/uniform AudioBuffer trap probes retain native mutation semantics while rendered audio remains seed-adjusted. AudioBuffer::copyFromChannel seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, sparse/uniform, or absent values preserve upstream Chromium behavior. The patched Linux x64 package rebuilt from this patch passed BrowserLeaks JavaScript AudioContext headless/headed bounded field comparison and CreepJS audio metrics headless/headed Docker/Xvfb parity on 2026-07-10; native headed Linux/macOS/Windows detector matrix evidence is still required before release-grade cross-platform audio claims. The launcher rejects audio_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper. Strict native mode suppresses --fingerprint-audio-noise emission, because strict mode must prefer native AudioContext output over partial deterministic readback perturbation until the active detector matrix proves audio coherence.",
       "patchset_id": "surface-audio-native-noise-override",
       "risk_level": "high",
       "surface": "audio",
@@ -494,7 +494,8 @@
         "BrowseForgeApplyAudioNoise",
         "BrowseForgeApplyAudioByteNoise",
         "launcher.FingerprintConfig.AudioNoise",
-        "launcher.validateUint32"
+        "launcher.validateUint32",
+        "launcher.strictNativeMode"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_audio_patch",
@@ -523,7 +524,7 @@
         "chromium/src/third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.cc",
         "chromium/src/third_party/blink/renderer/platform/graphics/image_data_buffer.cc"
       ],
-      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic \u00b11 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper.",
+      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic \u00b11 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper. Strict native mode suppresses --fingerprint-canvas-noise emission, because strict mode must prefer native Canvas output over deterministic pixel perturbation until the active detector matrix proves canvas coherence.",
       "patchset_id": "surface-canvas-native-noise-override",
       "risk_level": "high",
       "surface": "canvas",
@@ -535,7 +536,8 @@
         "BrowseForgeApplyCanvasNoise",
         "BrowseForgeMakeNoisyCanvasPixmap",
         "launcher.FingerprintConfig.CanvasNoise",
-        "launcher.validateUint32"
+        "launcher.validateUint32",
+        "launcher.strictNativeMode"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_canvas_patch",
@@ -547,7 +549,7 @@
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
       ],
       "title": "BrowseForge Canvas readback deterministic native noise override for Chromium M150",
-      "upstream_status": "applied_to_external_checkout_not_release_built"
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
     },
     {
       "detectors_addressed": [
@@ -565,7 +567,7 @@
         "scripts/validate.py",
         "tests/test_apply_webgl_patch.py"
       ],
-      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. The launcher validates webgl_vendor/webgl_renderer strings and now suppresses these string-spoofing switches when fingerprint.native_mode is strict, because strict mode must prefer native WebGL coherence over partial string-only masking. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims.",
+      "notes": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. The launcher validates webgl_vendor/webgl_renderer strings and now suppresses these string-spoofing switches when fingerprint.native_mode is strict, because strict mode must prefer native WebGL coherence over partial string-only masking. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims. Strict native mode suppresses WebGL vendor/renderer string switches alongside canvas, audio, and font spoofing switches, because strict mode must prefer native surface coherence over partial masking.",
       "patchset_id": "surface-webgl-vendor-renderer-native-override",
       "risk_level": "high",
       "surface": "webgl",
@@ -637,7 +639,7 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/css/font_face_set.cc"
       ],
-      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence.",
+      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence. Strict native mode suppresses --fingerprint-fonts-dir and --fingerprint-fonts-list emission, because strict mode must prefer installed native font corpus behavior over FontFaceSet allowlist masking until metric and glyph parity are proven.",
       "patchset_id": "surface-font-face-set-native-list-override",
       "risk_level": "high",
       "surface": "fonts",
@@ -645,7 +647,8 @@
         "blink::FontFaceSet::check",
         "BrowseForgeFontFamilyAllowed",
         "launcher.FingerprintConfig.Fonts",
-        "launcher.validateFonts"
+        "launcher.validateFonts",
+        "launcher.strictNativeMode"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_fonts_patch",
@@ -656,7 +659,7 @@
         "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
       ],
       "title": "BrowseForge FontFaceSet font availability native list override for Chromium M150",
-      "upstream_status": "applied_to_external_checkout_not_release_built"
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
     },
     {
       "detectors_addressed": [

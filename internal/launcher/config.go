@@ -479,29 +479,29 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	if c.Fingerprint.PluginsPDF != "" {
 		args = append(args, "--fingerprint-plugins-pdf="+c.Fingerprint.PluginsPDF)
 	}
-	if c.Fingerprint.AudioNoise > 0 {
-		args = append(args, fmt.Sprintf("--fingerprint-audio-noise=%d", c.Fingerprint.AudioNoise))
-	}
-	if c.Fingerprint.CanvasNoise > 0 {
-		args = append(args, fmt.Sprintf("--fingerprint-canvas-noise=%d", c.Fingerprint.CanvasNoise))
-	}
 	if !strictNativeMode(c.Fingerprint.NativeMode) {
+		if c.Fingerprint.AudioNoise > 0 {
+			args = append(args, fmt.Sprintf("--fingerprint-audio-noise=%d", c.Fingerprint.AudioNoise))
+		}
+		if c.Fingerprint.CanvasNoise > 0 {
+			args = append(args, fmt.Sprintf("--fingerprint-canvas-noise=%d", c.Fingerprint.CanvasNoise))
+		}
 		if c.Fingerprint.WebGLVendor != "" {
 			args = append(args, "--fingerprint-webgl-vendor="+c.Fingerprint.WebGLVendor)
 		}
 		if c.Fingerprint.WebGLRenderer != "" {
 			args = append(args, "--fingerprint-webgl-renderer="+c.Fingerprint.WebGLRenderer)
 		}
-	}
-	if c.Fingerprint.FontsDir != "" {
-		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)
-		if err != nil {
-			return CommandPlan{}, fmt.Errorf("resolve fingerprint fonts dir: %w", err)
+		if c.Fingerprint.FontsDir != "" {
+			fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)
+			if err != nil {
+				return CommandPlan{}, fmt.Errorf("resolve fingerprint fonts dir: %w", err)
+			}
+			args = append(args, "--fingerprint-fonts-dir="+fontsDir)
 		}
-		args = append(args, "--fingerprint-fonts-dir="+fontsDir)
-	}
-	if len(c.Fingerprint.Fonts) > 0 {
-		args = append(args, "--fingerprint-fonts-list="+strings.Join(c.Fingerprint.Fonts, "|"))
+		if len(c.Fingerprint.Fonts) > 0 {
+			args = append(args, "--fingerprint-fonts-list="+strings.Join(c.Fingerprint.Fonts, "|"))
+		}
 	}
 	webrtcIP := c.Fingerprint.WebRTCIP
 	if c.Proxy.Server != "" {

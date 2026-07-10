@@ -459,13 +459,17 @@ func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	}
 }
 
-func TestBuildPlanStrictNativeModeSuppressesWebGLStringSpoofArgs(t *testing.T) {
+func TestBuildPlanStrictNativeModeSuppressesHighRiskSpoofArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
 		Fingerprint: FingerprintConfig{
 			NativeMode:       "strict",
+			AudioNoise:       17,
+			CanvasNoise:      23,
 			WebGLVendor:      "Google Inc. (NVIDIA)",
 			WebGLRenderer:    "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+			FontsDir:         filepath.Join("testdata", "fonts"),
+			Fonts:            []string{"Segoe UI", "Calibri"},
 			NativeConfigPath: filepath.Join("testdata", "persona.json"),
 		},
 	}
@@ -474,11 +478,19 @@ func TestBuildPlanStrictNativeModeSuppressesWebGLStringSpoofArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, blocked := range []string{
+		"--fingerprint-audio-noise=17",
+		"--fingerprint-canvas-noise=23",
 		"--fingerprint-webgl-vendor=Google Inc. (NVIDIA)",
 		"--fingerprint-webgl-renderer=ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
+		"--fingerprint-fonts-list=Segoe UI|Calibri",
 	} {
 		if containsArg(plan.Args, blocked) {
-			t.Fatalf("strict native mode must suppress incoherent WebGL string arg %q: %v", blocked, plan.Args)
+			t.Fatalf("strict native mode must suppress incoherent spoof arg %q: %v", blocked, plan.Args)
+		}
+	}
+	for _, arg := range plan.Args {
+		if strings.HasPrefix(arg, "--fingerprint-fonts-dir=") {
+			t.Fatalf("strict native mode must suppress fonts dir arg %q: %v", arg, plan.Args)
 		}
 	}
 	if !containsArg(plan.Args, stealthModeArg+"=strict") {
