@@ -606,6 +606,17 @@ class ChromiumNativePlanTests(unittest.TestCase):
             "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
             entries["windows-x64"]["missing_prerequisites"],
         )
+        macos_snapshot = entries["macos-arm64"]["status_snapshot"]
+        self.assertIs(macos_snapshot["host_supported"], True)
+        self.assertIs(macos_snapshot["native_toolchain_ready"], False)
+        self.assertIs(macos_snapshot["package_zip_exists"], False)
+        self.assertEqual("failed", macos_snapshot["xcodebuild_status"])
+        self.assertIs(macos_snapshot["app_bundle_exists"], False)
+        windows_snapshot = entries["windows-x64"]["status_snapshot"]
+        self.assertIs(windows_snapshot["host_supported"], False)
+        self.assertEqual("windows", windows_snapshot["required_host_os"])
+        self.assertIs(windows_snapshot["portable_layout_exists"], False)
+
 
     def test_preflight_execute_writes_manifest(self) -> None:
         """The preflight command writes native-artifact-preflight.json only when --execute is explicit."""

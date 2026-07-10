@@ -299,6 +299,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "runtime-artifacts artifact missing",
                         platforms[platform]["missing_prerequisites"],
                     )
+                    snapshot = platforms[platform]["status_snapshot"]
+                    self.assertIs(snapshot["package_zip_exists"], False)
+                    self.assertIs(snapshot["native_toolchain_ready"], False)
+                    self.assertIn("host_supported", snapshot)
 
             output = self._run_validate_expect_success(module, temp_root)
 
@@ -430,6 +434,26 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 self.assertIn("native artifact preflight", message)
                 self.assertIn(platform, message)
                 self.assertIn("runtime-artifacts", message)
+
+    def test_validate_rejects_native_artifact_preflight_missing_status_snapshot(self) -> None:
+        """Native preflight rows must preserve the host/toolchain booleans behind each blocker."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+            preflight = self._write_native_artifact_preflight(temp_root, runtime_manifest=runtime_manifest)
+            for entry in preflight["platforms"]:
+                if entry["platform"] == "macos-arm64":
+                    del entry["status_snapshot"]
+            self._write_json(temp_root / "knowledge" / "manifests" / "native-artifact-preflight.json", preflight)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("native artifact preflight", message)
+        self.assertIn("macos-arm64", message)
+        self.assertIn("status_snapshot", message)
 
     def test_validate_rejects_native_artifact_preflight_release_grade_ready_with_blocked_platform(self) -> None:
         """release_grade_ready cannot be true while any supported package platform remains not ready."""
@@ -2051,6 +2075,36 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
 
+    def _native_status_snapshot_fixture(self, platform: str) -> dict[str, Any] | None:
+        if platform == "linux-x64":
+            return None
+        snapshot: dict[str, Any] = {
+            "host_os": "darwin",
+            "required_host_os": "darwin" if platform == "macos-arm64" else "windows",
+            "host_supported": platform == "macos-arm64",
+            "chromium_src_exists": False,
+            "chromium_deps_exists": False,
+            "depot_tools_exists": False,
+            "gn_binary_exists": False,
+            "out_args_exists": False,
+            "build_ninja_exists": False,
+            "output_binary_exists": False,
+            "package_zip_exists": False,
+            "native_toolchain_ready": False,
+        }
+        if platform == "macos-arm64":
+            snapshot.update(
+                {
+                    "xcodebuild_ok": False,
+                    "xcodebuild_status": "failed",
+                    "app_bundle_exists": False,
+                }
+            )
+        if platform == "windows-x64":
+            snapshot["portable_layout_exists"] = False
+        return snapshot
+
+
     def _write_native_artifact_preflight(
         self,
         root: Path,
@@ -2080,6 +2134,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "ready": False,
                 "status": "blocked",
             }
+            status_snapshot = self._native_status_snapshot_fixture(platform)
+            if status_snapshot is not None:
+                entry["status_snapshot"] = status_snapshot
             if artifact is not None:
                 entry.update(
                     {

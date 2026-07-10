@@ -484,6 +484,44 @@ def validate_release_gate_artifact_evidence(release_gates: dict, runtime_artifac
         if missing:
             raise SystemExit(f"release gate {gate_id} evidence has stale runtime artifact metadata: {missing}")
 
+def validate_native_status_snapshot(platform: str, entry: dict) -> None:
+    if platform == "linux-x64":
+        return
+    snapshot = entry.get("status_snapshot")
+    if not isinstance(snapshot, dict):
+        raise SystemExit(f"native artifact preflight {platform} status_snapshot must be an object")
+    required_keys = {
+        "host_os",
+        "required_host_os",
+        "host_supported",
+        "chromium_src_exists",
+        "chromium_deps_exists",
+        "depot_tools_exists",
+        "gn_binary_exists",
+        "out_args_exists",
+        "build_ninja_exists",
+        "output_binary_exists",
+        "package_zip_exists",
+        "native_toolchain_ready",
+    }
+    if platform == "macos-arm64":
+        required_keys.update({"xcodebuild_ok", "xcodebuild_status", "app_bundle_exists"})
+    if platform == "windows-x64":
+        required_keys.add("portable_layout_exists")
+    missing_keys = sorted(required_keys - set(snapshot))
+    if missing_keys:
+        raise SystemExit(f"native artifact preflight {platform} status_snapshot missing keys: {missing_keys}")
+    boolean_keys = required_keys - {"host_os", "required_host_os", "xcodebuild_status"}
+    for key in sorted(boolean_keys):
+        if not isinstance(snapshot.get(key), bool):
+            raise SystemExit(f"native artifact preflight {platform} status_snapshot {key} must be boolean")
+    for key in ("host_os", "required_host_os"):
+        if not isinstance(snapshot.get(key), str) or not snapshot.get(key):
+            raise SystemExit(f"native artifact preflight {platform} status_snapshot {key} must be a non-empty string")
+    if platform == "macos-arm64" and snapshot.get("xcodebuild_status") not in {"ok", "failed", "missing"}:
+        raise SystemExit(f"native artifact preflight {platform} status_snapshot xcodebuild_status is invalid")
+
+
 def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts: dict) -> None:
     if native_preflight.get("runtime_id") != "browseforge-chromium":
         raise SystemExit("native artifact preflight runtime_id must be browseforge-chromium")
@@ -518,6 +556,7 @@ def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts
             raise SystemExit(f"native artifact preflight {platform} missing_prerequisites must be non-empty strings")
         if not isinstance(evidence, list) or any(not isinstance(item, str) or not item for item in evidence):
             raise SystemExit(f"native artifact preflight {platform} evidence must be non-empty strings")
+        validate_native_status_snapshot(platform, entry)
         artifact = artifacts_by_platform.get(platform)
         if ready:
             if missing:

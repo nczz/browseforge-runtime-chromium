@@ -312,6 +312,29 @@ def native_status_evidence(platform_id: str, status: dict[str, object]) -> str:
         parts.append(f"portable_layout_exists={status.get('portable_layout_exists')}")
     return f"python3 scripts/chromium_native.py check --platform {platform_id}: " + ", ".join(parts)
 
+def native_status_snapshot(platform_id: str, status: dict[str, object]) -> dict[str, object]:
+    keys = [
+        "host_os",
+        "required_host_os",
+        "host_supported",
+        "chromium_src_exists",
+        "chromium_deps_exists",
+        "depot_tools_exists",
+        "gn_binary_exists",
+        "out_args_exists",
+        "build_ninja_exists",
+        "output_binary_exists",
+        "package_zip_exists",
+        "native_toolchain_ready",
+    ]
+    if platform_id == "macos-arm64":
+        keys.extend(["xcodebuild_ok", "xcodebuild_status", "app_bundle_exists"])
+    if platform_id == "windows-x64":
+        keys.append("portable_layout_exists")
+    return {key: status[key] for key in keys if key in status}
+
+
+
 
 def platform_display_name(platform_id: str) -> str:
     if platform_id == "macos-arm64":
@@ -351,6 +374,7 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
         "platform": platform_id,
         "ready": not missing,
         "status": "packaged_detector_tested" if not missing else "missing_native_release_artifact",
+        "status_snapshot": native_status_snapshot(platform_id, status),
         "missing_prerequisites": missing,
     }
     if status["package_zip_exists"]:
