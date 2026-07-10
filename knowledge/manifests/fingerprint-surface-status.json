@@ -7,12 +7,14 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, captures unscored WebAudio and FontFaceSet probes, and now records bounded BrowserLeaks/Pixelscan Permissions API plus feature-availability probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage.",
+  "decision": "Keep release-grade live-detector-evidence gate at warning. Rebuilt Linux smoke now passes UA, UA-CH fullVersionList on SannySoft, BrowserLeaks Client Hints, Pixelscan fingerprint-check, iphey, BrowserScan, and CreepJS, webdriver, locale/timezone, screen, storage quota, hardware, WebGL configured values, and repeat-consistent sanitized Canvas 2D probe hashes, captures unscored WebAudio and FontFaceSet probes, and now records bounded BrowserLeaks/Pixelscan Permissions API plus feature-availability probes. Full headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains incomplete. Local macOS arm64 host headless SannySoft evidence now records a non-release warning that host Chrome still exposes HeadlessChrome; it improves macOS gap visibility but does not satisfy headed/native release coverage. macOS arm64 host headed BrowserLeaks Audio and WebGL direct evidence now extends native host drift coverage, but it is explicitly non-release because packaged macOS BrowseForge Chromium and external proxy matrix evidence remain missing.",
   "evidence_refs": [
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headless_docker_direct_20260710.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_audio_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_host_direct_20260710.json"
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -84,17 +86,17 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker.",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
       "release_blocker": true,
-      "result": "warn_linux_webgl_metadata_cross_detector_passed_native_headed_required",
+      "result": "warn_linux_webgl_metadata_cross_detector_passed_macos_host_webgl_recorded_native_headed_required",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
       "release_blocker": true,
-      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_native_matrix_required",
+      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_plus_macos_host_audio_packaged_native_matrix_required",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "AudioContext"
@@ -156,9 +158,9 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed BrowserLeaks Fonts and SannySoft direct evidence also exists through the BrowseForge wrapper with installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
+      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed SannySoft plus BrowserLeaks Fonts, Audio, and WebGL direct evidence also exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
       "release_blocker": true,
-      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_partial",
+      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_audio_fonts_webgl_partial",
       "severity": "medium",
       "status": "detector_tested",
       "surface": "cross-platform drift"
@@ -190,6 +192,8 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_webrtc_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_score_headed_docker_direct_20260709.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_host_direct_20260710.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_audio_headed_host_direct_20260710.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_host_direct_20260710.json"
   ]
 }

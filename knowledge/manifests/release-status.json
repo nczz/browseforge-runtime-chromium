@@ -111,8 +111,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:AudioContext",
-      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating.",
-      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_native_matrix_required",
+      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
+      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_plus_macos_host_audio_packaged_native_matrix_required",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -120,8 +120,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:WebGL vendor/renderer",
-      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker.",
-      "result": "warn_linux_webgl_metadata_cross_detector_passed_native_headed_required",
+      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
+      "result": "warn_linux_webgl_metadata_cross_detector_passed_macos_host_webgl_recorded_native_headed_required",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -129,8 +129,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
-      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed BrowserLeaks Fonts and SannySoft direct evidence also exists through the BrowseForge wrapper with installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
-      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_partial",
+      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed SannySoft plus BrowserLeaks Fonts, Audio, and WebGL direct evidence also exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
+      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_audio_fonts_webgl_partial",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -365,12 +365,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-10T11:38:59Z",
+  "generated_at": "2026-07-10T12:19:06Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
-    "detector-summary.json": "b2e50a1593df0ed1dda639960a7bf646d1d2e172613a38129f1aef110e94923f",
-    "knowledge/manifests/detector-score-comparison.json": "f6e8fd6faff672417991d127c5f564258fc253f900a6cde4b8cc378c776f078b",
-    "knowledge/manifests/fingerprint-surface-status.json": "06e8f1f1fe6de0bae02d66fb11270000a512d293348716c7de7733872d52aa1a",
+    "detector-summary.json": "6cc9d201f2a908d943ec40f8c8847785e6ac3f91b6303e6585f9d56058b0a93f",
+    "knowledge/manifests/detector-score-comparison.json": "e3125cf924e9abad40464028d0c5b6018b4705f0cb76fe49260935d5009d239b",
+    "knowledge/manifests/fingerprint-surface-status.json": "8a4dcabeb1d9693e64f8bbd4a9c2035e01b799eacb5becc31acf957446b93f85",
     "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
     "knowledge/manifests/proxy-preflight.json": "7b872359eaa1e895ecc50bdf3cfa46823f81bf91ad1889b078c38002823fa0ba",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
