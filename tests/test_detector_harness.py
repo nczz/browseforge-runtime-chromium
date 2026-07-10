@@ -2632,8 +2632,9 @@ class DetectorHarnessTests(unittest.TestCase):
         )
         self.assertEqual({"fonts": [], "fonts_dir": ""}, variants["fonts-native"]["fingerprint_overrides"])
         passive = variants["passive-native-surfaces"]["fingerprint_overrides"]
-        for key in ("audio_noise", "canvas_noise", "webgl_vendor", "webgl_renderer", "fonts", "fonts_dir"):
+        for key in ("audio_noise", "canvas_noise", "webgl_vendor", "webgl_renderer", "fonts", "fonts_dir", "native_mode"):
             self.assertIn(key, passive)
+        self.assertEqual("strict", passive["native_mode"])
 
     def test_pixelscan_materialize_variants_writes_local_configs_and_secret_safe_manifest(self):
         with tempfile.TemporaryDirectory() as td:
@@ -2690,6 +2691,7 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual("", passive_cfg["fingerprint"]["webgl_renderer"])
             self.assertEqual([], passive_cfg["fingerprint"]["fonts"])
             self.assertEqual("", passive_cfg["fingerprint"]["fonts_dir"])
+            self.assertEqual("strict", passive_cfg["fingerprint"]["native_mode"])
             self.assertEqual({"canvas_noise": 0}, variants["canvas-off"]["fingerprint_overrides"])
 
     def test_pixelscan_variant_summary_commits_only_sanitized_detector_fields(self):

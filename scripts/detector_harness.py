@@ -713,9 +713,10 @@ PIXELSCAN_ISOLATION_VARIANTS = [
             "webgl_renderer": "",
             "fonts": [],
             "fonts_dir": "",
+            "native_mode": "strict",
         },
         "isolated_surfaces": ["audio", "canvas", "webgl", "fonts"],
-        "expected_arg_effect": "omits active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
+        "expected_arg_effect": "sets native_mode=strict so the wrapper suppresses active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
     },
 ]
 

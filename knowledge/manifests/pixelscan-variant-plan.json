@@ -20,7 +20,7 @@
   ],
   "decision": "Run direct-network rows first because committed direct evidence already reproduces masking/inconsistent; repeat only decisive rows through an external proxy relay after a trigger is isolated.",
   "detector_id": "pixelscan",
-  "generated_at": "2026-07-10T17:16:58.228653+00:00",
+  "generated_at": "2026-07-10T18:07:37.998693+00:00",
   "pairwise_followup": [
     [
       "canvas",
@@ -112,12 +112,13 @@
       "variant_id": "fonts-native"
     },
     {
-      "expected_arg_effect": "omits active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
+      "expected_arg_effect": "sets native_mode=strict so the wrapper suppresses active audio/canvas/WebGL/font spoofing flags while keeping UA/UA-CH/locale/timezone/screen/hardware unchanged",
       "fingerprint_overrides": {
         "audio_noise": 0,
         "canvas_noise": 0,
         "fonts": [],
         "fonts_dir": "",
+        "native_mode": "strict",
         "webgl_renderer": "",
         "webgl_vendor": ""
       },
