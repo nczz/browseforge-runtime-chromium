@@ -22,6 +22,31 @@ func TestBuildPlanAddsProxyWebRTCPolicy(t *testing.T) {
 	}
 }
 
+func TestBuildPlanMapsProxyExitIPToWebRTCOverride(t *testing.T) {
+	cfg := Config{UserDataDir: t.TempDir(), Proxy: ProxyConfig{Server: "socks5://proxy.example:9050", ExitIP: "203.0.113.10"}}
+	plan, err := cfg.BuildPlan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(plan.Args, "\n")
+	if !strings.Contains(joined, "--fingerprint-webrtc-ip=203.0.113.10") {
+		t.Fatalf("missing proxy exit WebRTC arg: %v", plan.Args)
+	}
+}
+
+func TestBuildPlanRejectsInvalidWebRTCIP(t *testing.T) {
+	for name, cfg := range map[string]Config{
+		"fingerprint": {UserDataDir: t.TempDir(), Fingerprint: FingerprintConfig{WebRTCIP: "not-an-ip"}},
+		"proxy":       {UserDataDir: t.TempDir(), Proxy: ProxyConfig{Server: "socks5://proxy.example:9050", ExitIP: "auto"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := cfg.BuildPlan(); err == nil {
+				t.Fatal("expected invalid WebRTC IP error")
+			}
+		})
+	}
+}
+
 func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir()}
 	plan, err := cfg.BuildPlan()

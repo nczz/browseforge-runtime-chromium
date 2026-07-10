@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -134,10 +135,32 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.HardwareConcurrency < 0 || c.Fingerprint.ScreenWidth < 0 || c.Fingerprint.ScreenHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
+	if err := validateWebRTCIP(c.Fingerprint.WebRTCIP, "fingerprint.webrtc_ip", true); err != nil {
+		return err
+	}
+	if err := validateWebRTCIP(c.Proxy.ExitIP, "proxy.exit_ip", false); err != nil {
+		return err
+	}
 	for _, arg := range c.ExtraArgs {
 		if hasManagedPrefix(arg) {
 			return fmt.Errorf("extra arg %q collides with BrowseForge-managed runtime policy", arg)
 		}
+	}
+	return nil
+}
+
+func validateWebRTCIP(value, field string, allowAuto bool) error {
+	if value == "" {
+		return nil
+	}
+	if allowAuto && value == "auto" {
+		return nil
+	}
+	if net.ParseIP(value) == nil {
+		if allowAuto {
+			return fmt.Errorf("%s must be auto or an IP literal", field)
+		}
+		return fmt.Errorf("%s must be an IP literal", field)
 	}
 	return nil
 }

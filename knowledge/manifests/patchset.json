@@ -410,12 +410,14 @@
         "creepjs"
       ],
       "files_touched": [
+        "chromium/src/third_party/blink/renderer/modules/peerconnection/rtc_ice_candidate.cc",
+        "internal/launcher/config.go",
+        "internal/launcher/launcher_test.go",
         "scripts/apply_webrtc_patch.py",
-        "tests/test_apply_webrtc_patch.py",
         "scripts/validate.py",
-        "chromium/src/third_party/blink/renderer/modules/peerconnection/rtc_ice_candidate.cc"
+        "tests/test_apply_webrtc_patch.py"
       ],
-      "notes": "When --fingerprint-webrtc-ip contains a bounded IPv4/IPv6 literal, Blink rewrites surfaced RTCIceCandidate candidate strings, address, relatedAddress, and toJSON().candidate to that value. Empty, auto, invalid, or absent values preserve upstream Chromium behavior; the launcher still applies Chromium disable_non_proxied_udp policy by default and maps proxy exit_ip to --fingerprint-webrtc-ip. This is a DOM-surfacing mitigation, not a complete network-stack relay guarantee; release detector pass still requires a patched Chromium artifact and live WebRTC detector evidence.",
+      "notes": "When --fingerprint-webrtc-ip contains a bounded IPv4/IPv6 literal, Blink rewrites surfaced RTCIceCandidate candidate strings, address, relatedAddress, and toJSON().candidate to that value. Empty, auto, invalid, or absent values preserve upstream Chromium behavior; the launcher still applies Chromium disable_non_proxied_udp policy by default and maps proxy exit_ip to --fingerprint-webrtc-ip. This is a DOM-surfacing mitigation, not a complete network-stack relay guarantee; release detector pass still requires a patched Chromium artifact and live WebRTC detector evidence. The launcher now validates explicit fingerprint.webrtc_ip and proxy.exit_ip values as IP literals before emitting --fingerprint-webrtc-ip, while still allowing auto only as the managed proxy fallback.",
       "patchset_id": "surface-webrtc-ice-candidate-native-override",
       "risk_level": "high",
       "surface": "webrtc",
