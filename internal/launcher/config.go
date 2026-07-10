@@ -132,6 +132,9 @@ func (c Config) Validate(requireBinary bool) error {
 	if c.Fingerprint.StorageQuotaMB < 0 || c.Fingerprint.AudioNoise < 0 || c.Fingerprint.CanvasNoise < 0 {
 		return errors.New("fingerprint.storage_quota_mb, fingerprint.audio_noise, and fingerprint.canvas_noise must be >= 0")
 	}
+	if err := validateUint32(c.Fingerprint.AudioNoise, "fingerprint.audio_noise"); err != nil {
+		return err
+	}
 	if err := validateUint32(c.Fingerprint.CanvasNoise, "fingerprint.canvas_noise"); err != nil {
 		return err
 	}

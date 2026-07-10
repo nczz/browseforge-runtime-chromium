@@ -253,6 +253,18 @@ func TestBuildPlanAddsAudioNoiseFingerprintArg(t *testing.T) {
 	}
 }
 
+func TestBuildPlanRejectsAudioNoiseAboveUint32(t *testing.T) {
+	cfg := Config{
+		UserDataDir: t.TempDir(),
+		Fingerprint: FingerprintConfig{
+			AudioNoise: int(1 << 32),
+		},
+	}
+	if _, err := cfg.BuildPlan(); err == nil {
+		t.Fatal("expected audio noise uint32 range error")
+	}
+}
+
 func TestBuildPlanAddsCanvasNoiseFingerprintArg(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),

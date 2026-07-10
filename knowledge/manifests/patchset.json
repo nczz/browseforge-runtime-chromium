@@ -456,7 +456,7 @@
         "chromium/src/third_party/blink/renderer/modules/webaudio/audio_buffer.cc",
         "chromium/src/third_party/blink/renderer/modules/webaudio/analyser_node.cc"
       ],
-      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to dense AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::getChannelData and copyFromChannel now gate perturbations on dense, non-uniform sample data so CreepJS-style sparse/uniform AudioBuffer trap probes retain native mutation semantics while rendered audio remains seed-adjusted. AudioBuffer::copyFromChannel seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, sparse/uniform, or absent values preserve upstream Chromium behavior. The patched Linux x64 package rebuilt from this patch passed BrowserLeaks JavaScript AudioContext headless/headed bounded field comparison and CreepJS audio metrics headless/headed Docker/Xvfb parity on 2026-07-10; native headed Linux/macOS/Windows detector matrix evidence is still required before release-grade cross-platform audio claims.",
+      "notes": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to dense AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::getChannelData and copyFromChannel now gate perturbations on dense, non-uniform sample data so CreepJS-style sparse/uniform AudioBuffer trap probes retain native mutation semantics while rendered audio remains seed-adjusted. AudioBuffer::copyFromChannel seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, sparse/uniform, or absent values preserve upstream Chromium behavior. The patched Linux x64 package rebuilt from this patch passed BrowserLeaks JavaScript AudioContext headless/headed bounded field comparison and CreepJS audio metrics headless/headed Docker/Xvfb parity on 2026-07-10; native headed Linux/macOS/Windows detector matrix evidence is still required before release-grade cross-platform audio claims. The launcher rejects audio_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper.",
       "patchset_id": "surface-audio-native-noise-override",
       "risk_level": "high",
       "surface": "audio",
@@ -471,7 +471,8 @@
         "BrowseForgeShouldApplyAudioNoise",
         "BrowseForgeApplyAudioNoise",
         "BrowseForgeApplyAudioByteNoise",
-        "launcher.FingerprintConfig.AudioNoise"
+        "launcher.FingerprintConfig.AudioNoise",
+        "launcher.validateUint32"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_audio_patch",
