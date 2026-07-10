@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 import ipaddress
 import json
@@ -585,6 +586,15 @@ def validate_release_status(release_status: dict) -> None:
         raise SystemExit("release status runtime_id must be browseforge-chromium")
     if release_status.get("schema_version") != "1.0":
         raise SystemExit("release status schema_version must be 1.0")
+    generated_at = release_status.get("generated_at")
+    if not isinstance(generated_at, str) or not generated_at.endswith("Z"):
+        raise SystemExit("release status generated_at must be a UTC Z timestamp")
+    try:
+        parsed_generated_at = dt.datetime.fromisoformat(generated_at[:-1] + "+00:00")
+    except ValueError as err:
+        raise SystemExit("release status generated_at must be a valid UTC Z timestamp") from err
+    if parsed_generated_at.utcoffset() != dt.timedelta(0) or parsed_generated_at.microsecond != 0:
+        raise SystemExit("release status generated_at must be a whole-second UTC Z timestamp")
     blockers = release_status.get("blockers", [])
     if not isinstance(blockers, list):
         raise SystemExit("release status blockers must be an array")
@@ -605,6 +615,9 @@ def validate_release_status(release_status: dict) -> None:
             raise SystemExit(f"release status duplicate blocker_id: {blocker_id}")
         seen_blocker_ids.add(blocker_id)
     inputs = release_status.get("inputs", [])
+    blocker_order = [(blocker["source"], blocker["blocker_id"]) for blocker in blockers]
+    if blocker_order != sorted(blocker_order):
+        raise SystemExit("release status blockers must be sorted by source and blocker_id")
     if inputs != RELEASE_STATUS_INPUTS:
         raise SystemExit(f"release status inputs drifted: {inputs!r}")
     input_sha256 = release_status.get("input_sha256", {})

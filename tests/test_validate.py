@@ -910,6 +910,47 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("duplicate blocker_id", str(raised.exception))
 
+    def test_validate_rejects_release_status_non_utc_generated_at(self) -> None:
+        """Release-status timestamps must be stable whole-second UTC Z values."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._refresh_release_status(temp_root)
+            payload = json.loads((temp_root / "knowledge" / "manifests" / "release-status.json").read_text(encoding="utf-8"))
+            payload["generated_at"] = "2026-07-10T00:00:00+00:00"
+
+            original_root = module.ROOT
+            try:
+                module.ROOT = temp_root
+                with self.assertRaises(SystemExit) as raised:
+                    module.validate_release_status(payload)
+            finally:
+                module.ROOT = original_root
+
+        self.assertIn("generated_at", str(raised.exception))
+
+    def test_validate_rejects_release_status_unsorted_blockers(self) -> None:
+        """Release-status blockers must remain sorted for stable diffs and deterministic automation."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._refresh_release_status(temp_root)
+            payload = json.loads((temp_root / "knowledge" / "manifests" / "release-status.json").read_text(encoding="utf-8"))
+            self.assertGreaterEqual(len(payload["blockers"]), 2)
+            payload["blockers"] = [payload["blockers"][1], payload["blockers"][0], *payload["blockers"][2:]]
+
+            original_root = module.ROOT
+            try:
+                module.ROOT = temp_root
+                with self.assertRaises(SystemExit) as raised:
+                    module.validate_release_status(payload)
+            finally:
+                module.ROOT = original_root
+
+        self.assertIn("sorted", str(raised.exception))
+
 
     def test_validate_accepts_safe_failed_proxy_preflight_manifest(self) -> None:
         """A failed proxy preflight is valid release metadata when it redacts proxy inputs and names missing env prerequisites."""
