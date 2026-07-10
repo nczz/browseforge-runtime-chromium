@@ -1343,9 +1343,13 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("const features = await (async () => {", expr)
         self.assertIn("'geolocation'", expr)
         self.assertIn("'notifications'", expr)
+        self.assertIn("'idle-detection'", expr)
+        self.assertIn("'local-fonts'", expr)
         self.assertIn("navigator.permissions.query({name})", expr)
         self.assertIn("contactsManager", expr)
         self.assertIn("contentIndex", expr)
+        self.assertIn("localFonts", expr)
+        self.assertIn("windowControlsOverlay", expr)
         self.assertIn("return {title, url: location.href", expr)
         self.assertIn("canvas: canvasProbe, features, webgl: gl", expr)
 
