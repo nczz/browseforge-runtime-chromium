@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import datetime as dt
 import os
 import shutil
 import subprocess
@@ -251,16 +252,160 @@ def missing_command_preconditions(command: str, status: dict[str, object]) -> li
 def command_precondition_error(command: str, missing: list[str]) -> str:
     return f"{command} preconditions are not satisfied: {'; '.join(missing)}"
 
+def load_json(path: Path) -> dict[str, object]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def generated_at_utc() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def linux_preflight_entry(root: Path, runtime_artifacts: dict[str, object]) -> dict[str, object]:
+    artifacts = runtime_artifacts.get("artifacts", [])
+    artifact = next((item for item in artifacts if isinstance(item, dict) and item.get("platform") == "linux-x64"), None)
+    evidence = ["knowledge/manifests/runtime-artifacts.json"]
+    missing: list[str] = []
+    artifact_id = None
+    if artifact is None:
+        missing.append("committed linux-x64 runtime artifact manifest entry")
+    else:
+        artifact_id = str(artifact.get("artifact_id"))
+        archive = root / "dist" / f"{artifact_id}.zip"
+        evidence.append(f"dist/{artifact_id}.zip")
+        if not archive.is_file():
+            missing.append(f"dist/{artifact_id}.zip")
+    linux_smoke = root / "knowledge" / "manifests" / "linux-package-smoke.json"
+    if linux_smoke.is_file():
+        evidence.append("knowledge/manifests/linux-package-smoke.json")
+    else:
+        missing.append("knowledge/manifests/linux-package-smoke.json")
+    detector_smoke = runtime_artifacts.get("detector_smoke_evidence")
+    if isinstance(detector_smoke, str) and detector_smoke:
+        evidence.append(detector_smoke)
+        if not (root / detector_smoke).is_file():
+            missing.append(detector_smoke)
+    else:
+        missing.append("packaged linux-x64 detector evidence")
+    entry: dict[str, object] = {
+        "evidence": evidence,
+        "platform": "linux-x64",
+        "ready": not missing,
+        "status": "packaged_detector_tested" if not missing else "missing_linux_artifact_evidence",
+        "missing_prerequisites": missing,
+    }
+    if artifact_id is not None:
+        entry["artifact_id"] = artifact_id
+    return entry
+
+
+def native_status_evidence(platform_id: str, status: dict[str, object]) -> str:
+    parts = [
+        f"host_supported={status.get('host_supported')}",
+        f"native_toolchain_ready={status.get('native_toolchain_ready')}",
+        f"build_ninja_exists={status.get('build_ninja_exists')}",
+        f"output_binary_exists={status.get('output_binary_exists')}",
+        f"package_zip_exists={status.get('package_zip_exists')}",
+    ]
+    if platform_id == "macos-arm64":
+        parts.append(f"xcodebuild_ok={status.get('xcodebuild_ok')}")
+    if platform_id == "windows-x64":
+        parts.append(f"portable_layout_exists={status.get('portable_layout_exists')}")
+    return f"python3 scripts/chromium_native.py check --platform {platform_id}: " + ", ".join(parts)
+
+
+def platform_display_name(platform_id: str) -> str:
+    if platform_id == "macos-arm64":
+        return "macOS"
+    if platform_id == "windows-x64":
+        return "Windows"
+    return platform_id
+
+
+def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[str, object]:
+    missing: list[str] = []
+    if not status["package_zip_exists"]:
+        missing.append(f"dist/browseforge-runtime-chromium-{RUNTIME_VERSION}-{platform_id}.zip")
+    if not status["host_supported"]:
+        missing.append(
+            "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run"
+            if platform_id == "windows-x64"
+            else f"{platform_id} host/toolchain selected so native Chromium packaging can run"
+        )
+    elif platform_id == "macos-arm64" and not status.get("xcodebuild_ok"):
+        missing.append("full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK")
+    elif not status["native_toolchain_ready"]:
+        missing.append(f"{platform_id} native Chromium toolchain ready")
+    if platform_id == "macos-arm64" and not status.get("app_bundle_exists"):
+        missing.append("BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101")
+    if platform_id == "windows-x64" and not status.get("portable_layout_exists"):
+        missing.append("BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101")
+    if not status["package_zip_exists"]:
+        missing.append(f"native {platform_display_name(platform_id)} detector evidence for the packaged artifact")
+    entry: dict[str, object] = {
+        "evidence": [
+            "knowledge/manifests/platform-matrix.json",
+            "contracts/browseforge-integration.contract.json",
+            "knowledge/manifests/signing-policy.json",
+            native_status_evidence(platform_id, status),
+        ],
+        "platform": platform_id,
+        "ready": not missing,
+        "status": "packaged_detector_tested" if not missing else "missing_native_release_artifact",
+        "missing_prerequisites": missing,
+    }
+    if status["package_zip_exists"]:
+        entry["artifact_id"] = status["package_artifact_id"]
+    return entry
+
+
+def native_artifact_preflight_manifest(root: Path, workdir: Path, generated_at: str | None = None, jobs: int = DEFAULT_JOBS) -> dict[str, object]:
+    runtime_artifacts = load_json(root / "knowledge" / "manifests" / "runtime-artifacts.json")
+    supported = list(runtime_artifacts.get("supported_package_platforms", []))
+    entries = []
+    if "linux-x64" in supported:
+        entries.append(linux_preflight_entry(root, runtime_artifacts))
+    for platform_id in sorted(set(SUPPORTED_NATIVE_PLATFORMS).intersection(supported)):
+        entries.append(native_preflight_entry(platform_id, check(build_plan(platform_id, workdir, None, jobs))))
+    return {
+        "generated_at": generated_at or generated_at_utc(),
+        "release_grade_ready": all(bool(entry.get("ready")) for entry in entries),
+        "requirements": [
+            "every supported package platform has a committed runtime artifact manifest entry",
+            "every supported package platform artifact has sha256 and size metadata",
+            "macOS artifacts are BrowseForge Chromium .app bundles built from the selected source ref, not host Chrome dogfood binaries",
+            "Windows artifacts are BrowseForge Chromium portable executable/DLL layouts built from the selected source ref",
+            "native platform artifacts have detector evidence before release_grade can pass",
+        ],
+        "runtime_id": "browseforge-chromium",
+        "schema_version": "1.0",
+        "platforms": entries,
+        "supported_package_platforms": supported,
+    }
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium native build helper")
-    parser.add_argument("command", choices=["plan", "check", "run-hooks", "gn-gen", "build-chrome", "package"])
-    parser.add_argument("--platform", choices=sorted(SUPPORTED_NATIVE_PLATFORMS), required=True)
+    parser.add_argument("command", choices=["plan", "check", "preflight", "run-hooks", "gn-gen", "build-chrome", "package"])
+    parser.add_argument("--platform", choices=sorted(SUPPORTED_NATIVE_PLATFORMS))
     parser.add_argument("--workdir", type=Path, default=DEFAULT_WORKDIR)
     parser.add_argument("--out-dir")
     parser.add_argument("--jobs", type=int, default=DEFAULT_JOBS)
+    parser.add_argument("--output", type=Path, default=ROOT / "knowledge" / "manifests" / "native-artifact-preflight.json")
+    parser.add_argument("--generated-at")
     parser.add_argument("--execute", action="store_true", help="required for commands that mutate the checkout or package artifacts")
     args = parser.parse_args()
+
+    if args.command == "preflight":
+        payload = native_artifact_preflight_manifest(ROOT, args.workdir, args.generated_at, args.jobs)
+        if args.execute:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print(args.output)
+        else:
+            emit_json(payload)
+        return
+    if args.platform is None:
+        raise SystemExit(f"{args.command} requires --platform")
 
     plan = build_plan(args.platform, args.workdir, args.out_dir, args.jobs)
     if args.command == "plan":

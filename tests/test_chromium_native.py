@@ -530,6 +530,120 @@ class ChromiumNativePlanTests(unittest.TestCase):
         )
         run_command.assert_not_called()
 
+    def test_preflight_generates_supported_platform_manifest_without_platform_arg(self) -> None:
+        """Native preflight emits a full supported-platform manifest from runtime artifacts and native checks."""
+        command_line_tools_error = (
+            "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory "
+            "'/Library/Developer/CommandLineTools' is a command line tools instance\n"
+        )
+
+        def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(("xcodebuild", ["-version"]), (Path(command[0]).name, command[1:]))
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr=command_line_tools_error)
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            runtime_root = tmp_path / "runtime"
+            manifests = runtime_root / "knowledge" / "manifests"
+            manifests.mkdir(parents=True)
+            artifact_id = f"browseforge-runtime-chromium-{chromium_native.RUNTIME_VERSION}-linux-x64"
+            (runtime_root / "dist").mkdir()
+            (runtime_root / "dist" / f"{artifact_id}.zip").write_text("zip", encoding="utf-8")
+            (manifests / "linux-package-smoke.json").write_text("{}", encoding="utf-8")
+            detector_path = runtime_root / "detectors" / "evidence" / "linux-smoke.json"
+            detector_path.parent.mkdir(parents=True)
+            detector_path.write_text("{}", encoding="utf-8")
+            (manifests / "runtime-artifacts.json").write_text(
+                json.dumps(
+                    {
+                        "detector_smoke_evidence": "detectors/evidence/linux-smoke.json",
+                        "supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"],
+                        "artifacts": [
+                            {
+                                "artifact_id": artifact_id,
+                                "platform": "linux-x64",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            workdir = tmp_path / "chromium"
+            self._write_native_checkout_fixtures(workdir)
+            stdout = io.StringIO()
+            argv = [
+                "chromium_native.py",
+                "preflight",
+                "--workdir",
+                str(workdir),
+                "--generated-at",
+                "2026-07-10T00:00:00Z",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
+                mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run),
+                mock.patch("sys.stdout", stdout),
+            ):
+                chromium_native.main()
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual("2026-07-10T00:00:00Z", payload["generated_at"])
+        self.assertIs(payload["release_grade_ready"], False)
+        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], payload["supported_package_platforms"])
+        entries = {entry["platform"]: entry for entry in payload["platforms"]}
+        self.assertIs(entries["linux-x64"]["ready"], True)
+        self.assertEqual(artifact_id, entries["linux-x64"]["artifact_id"])
+        self.assertIs(entries["macos-arm64"]["ready"], False)
+        self.assertIn(
+            "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
+            entries["macos-arm64"]["missing_prerequisites"],
+        )
+        self.assertIs(entries["windows-x64"]["ready"], False)
+        self.assertIn(
+            "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
+            entries["windows-x64"]["missing_prerequisites"],
+        )
+
+    def test_preflight_execute_writes_manifest(self) -> None:
+        """The preflight command writes native-artifact-preflight.json only when --execute is explicit."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            runtime_root = tmp_path / "runtime"
+            manifests = runtime_root / "knowledge" / "manifests"
+            manifests.mkdir(parents=True)
+            (manifests / "runtime-artifacts.json").write_text(
+                json.dumps({"supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"], "artifacts": []}),
+                encoding="utf-8",
+            )
+            output = tmp_path / "native-artifact-preflight.json"
+            argv = [
+                "chromium_native.py",
+                "preflight",
+                "--workdir",
+                str(tmp_path / "chromium"),
+                "--generated-at",
+                "2026-07-10T00:00:00Z",
+                "--output",
+                str(output),
+                "--execute",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch.object(chromium_native.shutil, "which", return_value=None),
+                mock.patch("sys.stdout", io.StringIO()) as stdout,
+            ):
+                chromium_native.main()
+
+            self.assertEqual(str(output), stdout.getvalue().strip())
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual("browseforge-chromium", payload["runtime_id"])
+            self.assertIs(payload["release_grade_ready"], False)
+
 
 if __name__ == "__main__":
     unittest.main()

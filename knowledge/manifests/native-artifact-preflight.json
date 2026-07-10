@@ -1,5 +1,54 @@
 {
-  "generated_at": "2026-07-09T22:12:38Z",
+  "generated_at": "2026-07-10T00:31:31Z",
+  "platforms": [
+    {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
+        "knowledge/manifests/linux-package-smoke.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json"
+      ],
+      "missing_prerequisites": [],
+      "platform": "linux-x64",
+      "ready": true,
+      "status": "packaged_detector_tested"
+    },
+    {
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+      ],
+      "missing_prerequisites": [
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+        "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
+        "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
+        "native macOS detector evidence for the packaged artifact"
+      ],
+      "platform": "macos-arm64",
+      "ready": false,
+      "status": "missing_native_release_artifact"
+    },
+    {
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+      ],
+      "missing_prerequisites": [
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
+        "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
+        "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
+        "native Windows detector evidence for the packaged artifact"
+      ],
+      "platform": "windows-x64",
+      "ready": false,
+      "status": "missing_native_release_artifact"
+    }
+  ],
   "release_grade_ready": false,
   "requirements": [
     "every supported package platform has a committed runtime artifact manifest entry",
@@ -10,55 +59,6 @@
   ],
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
-  "platforms": [
-    {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "evidence": [
-        "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-        "knowledge/manifests/linux-package-smoke.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json"
-      ],
-      "platform": "linux-x64",
-      "ready": true,
-      "status": "packaged_detector_tested",
-      "missing_prerequisites": []
-    },
-    {
-      "evidence": [
-        "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute: blocked by xcodebuild requiring full Xcode instead of CommandLineTools"
-      ],
-      "platform": "macos-arm64",
-      "ready": false,
-      "status": "missing_native_release_artifact",
-      "missing_prerequisites": [
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
-        "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
-        "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
-        "native macOS detector evidence for the packaged artifact"
-      ]
-    },
-    {
-      "evidence": [
-        "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=false on darwin host and native Windows output binary is missing"
-      ],
-      "platform": "windows-x64",
-      "ready": false,
-      "status": "missing_native_release_artifact",
-      "missing_prerequisites": [
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
-        "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
-        "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
-        "native Windows detector evidence for the packaged artifact"
-      ]
-    }
-  ],
   "supported_package_platforms": [
     "linux-x64",
     "macos-arm64",
