@@ -136,17 +136,41 @@
       }
     ],
     "locale_patch_status": "applied_to_external_checkout",
-    "macos_host_preflight_status": "blocked_full_xcode_required_after_dev_args_written",
+    "macos_arm64_artifact": {
+      "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+      "archive_sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
+      "archive_size_bytes": 403233897,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+      "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+      "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
+      "smoke_evidence": "knowledge/manifests/macos-package-smoke.json",
+      "status": "packaged_launch_smoked",
+      "verification": [
+        "python3 scripts/chromium_native.py check --platform macos-arm64",
+        "/usr/bin/unzip -q dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip -d <tempdir>",
+        "./browseforge-runtime-chromium metadata",
+        "./browseforge-runtime-chromium doctor --browser-binary Chromium.app/Contents/MacOS/Chromium ...",
+        "./browseforge-runtime-chromium launch ...; GET /json/version",
+        "python3 scripts/detector_harness.py collect --detector browserleaks --page client-hints --url about:blank"
+      ],
+      "wrapper_binary_sha256": "96f5921334f282940cdb67199f517635423ca4d37fac99c4fdfc84f345de62c2"
+    },
+    "macos_host_preflight_status": "native_toolchain_ready_build_output_and_package_present",
     "native_build_automation": {
       "last_macos_preflight": {
-        "blocking_error": "xcodebuild requires full Xcode; active developer directory is /Library/Developer/CommandLineTools",
+        "app_bundle_exists": true,
+        "build_ninja_exists": true,
         "deps_sync_status": "passed_with_macos_host_hooks",
         "gn_binary_status": "present_after_deps_sync",
-        "gn_generation_status": "blocked_full_xcode_required",
-        "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports native_toolchain_ready=false, xcodebuild_ok=false, and build_ninja_exists=false",
-        "native_toolchain_ready": false,
-        "next_action": "Install/select full Xcode, then rerun python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
-        "runhooks_status": "passed"
+        "gn_generation_status": "generated",
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform macos-arm64 reports host_supported=true, native_toolchain_ready=true, build_ninja_exists=true, output_binary_exists=true, package_zip_exists=true",
+        "native_toolchain_ready": true,
+        "output_binary_exists": true,
+        "package_zip_exists": true,
+        "smoke_status": "knowledge/manifests/macos-package-smoke.json records metadata, doctor, CDP launch, and about:blank collector smoke passed",
+        "status": "packaged_launch_smoked",
+        "xcodebuild_ok": true,
+        "xcodebuild_status": "ok"
       },
       "last_windows_preflight": {
         "build_ninja_status": "missing_until_windows_gn_generation_runs_on_windows_host",
@@ -167,7 +191,7 @@
           "out_dir": "out/BrowseForgeMacArm64",
           "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
           "required_host_os": "darwin",
-          "status": "preflight_ready_artifact_missing"
+          "status": "packaged_launch_smoked"
         },
         "windows-x64": {
           "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
@@ -179,7 +203,7 @@
         }
       },
       "script": "scripts/chromium_native.py",
-      "status": "plan_and_preflight_ready_artifacts_missing",
+      "status": "macos_packaged_launch_smoked_windows_artifact_missing",
       "verification": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64",
         "python3 scripts/chromium_native.py check --platform macos-arm64",
@@ -195,7 +219,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present in the shared checkout, BrowseForgeDev args.gn now exists, and GN generation is blocked before build.ninja by full Xcode selection because xcode-select points at CommandLineTools. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact, but the shared checkout dependency profile should not be treated as simultaneously linux and mac ready; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the packaged macOS arm64 archive launches on this host with CDP reachable. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "source_workdir_isolation_status": "helpers_support_profile_specific_workdirs_with_shared_fallback",
@@ -221,7 +245,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present in the shared checkout, BrowseForgeDev args.gn now exists, and GN generation is blocked before build.ninja by full Xcode selection because xcode-select points at CommandLineTools. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact, but the shared checkout dependency profile should not be treated as simultaneously linux and mac ready; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the packaged macOS arm64 archive launches on this host with CDP reachable. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {
@@ -295,11 +319,9 @@
     "gclient": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gclient",
     "gn": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/gn",
     "missing_prerequisites": [
-      "full Xcode selected by xcode-select for macOS host GN generation",
-      "BrowseForgeDev unpatched/dev baseline GN generation",
-      "full Xcode selected by xcode-select for BrowseForgeDev macOS GN generation"
+      "Windows host/toolchain for windows-x64 native artifact"
     ],
     "ninja": "/Users/chun/Projects/browser-source/browseforge-chromium/depot_tools/ninja",
-    "status": "pinned_checkout_linux_docker_gn_generated"
+    "status": "pinned_checkout_macos_and_linux_package_baselines_ready_windows_pending"
   }
 }

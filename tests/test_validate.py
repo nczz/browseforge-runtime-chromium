@@ -870,6 +870,23 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("gn_args", message)
         self.assertIn("drifted", message)
 
+    def test_validate_accepts_packaged_native_status_when_artifact_exists(self) -> None:
+        """A native platform may advance past preflight once runtime-artifacts lists its archive."""
+        module = self._load_validate_module()
+        source_acquisition = {
+            "chromium_base": {
+                "native_build_automation": self._native_build_automation_fixture(),
+            }
+        }
+        source_acquisition["chromium_base"]["native_build_automation"]["platforms"]["macos-arm64"][
+            "status"
+        ] = "packaged_launch_smoked"
+
+        module.validate_native_build_automation(
+            source_acquisition,
+            {"supported_package_platforms": ["macos-arm64"], "artifacts": [{"platform": "macos-arm64"}]},
+        )
+
     def test_validate_rejects_source_acquisition_with_linux_build_output_drift(self) -> None:
         """A packaged linux-x64 artifact requires source-acquisition build output gates to stay true."""
         module = self._load_validate_module()

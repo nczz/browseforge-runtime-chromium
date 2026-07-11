@@ -30,6 +30,12 @@
       "status": "packaged_detector_tested"
     },
     {
+      "evidence": {
+        "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
+        "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/artifact-manifest.json",
+        "package_smoke": "knowledge/manifests/macos-package-smoke.json",
+        "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json"
+      },
       "id": "macos-arm64",
       "priority": 2,
       "required_evidence": [
@@ -40,7 +46,7 @@
         "BrowseForge launches profile",
         "detector run exists"
       ],
-      "status": "packager_contract_defined"
+      "status": "packaged_launch_smoked"
     },
     {
       "id": "macos-x64",

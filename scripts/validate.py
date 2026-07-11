@@ -391,13 +391,22 @@ def validate_native_build_automation(source_acquisition: dict, runtime_artifacts
             "required_host_os": "windows",
         },
     }
+    artifacts_by_platform = {
+        artifact.get("platform"): artifact
+        for artifact in runtime_artifacts.get("artifacts", [])
+        if isinstance(artifact, dict)
+    }
     for platform_id in expected_platforms:
         platform = platforms.get(platform_id, {})
         for key, expected in required[platform_id].items():
             if platform.get(key) != expected:
                 raise SystemExit(f"source-acquisition native_build_automation {platform_id} {key} drifted: {platform.get(key)!r} != {expected!r}")
-        if platform.get("status") != "preflight_ready_artifact_missing":
-            raise SystemExit(f"source-acquisition native_build_automation {platform_id} must remain preflight_ready_artifact_missing until artifact exists")
+        has_artifact = platform_id in artifacts_by_platform
+        expected_statuses = {"preflight_ready_artifact_missing"}
+        if has_artifact:
+            expected_statuses.add("packaged_launch_smoked")
+        if platform.get("status") not in expected_statuses:
+            raise SystemExit(f"source-acquisition native_build_automation {platform_id} status drifted: {platform.get('status')!r} not in {sorted(expected_statuses)!r}")
 
 def validate_evidence_schema_contract(evidence_schema: dict) -> None:
     properties = evidence_schema.get("properties", {})
