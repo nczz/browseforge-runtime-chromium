@@ -50,7 +50,8 @@
     "Packaged macOS SannySoft headed direct evidence now records bounded automation, UA-CH, WebGL, Canvas, AudioContext, fonts, screen/locale, permissions/features, and webdriver values for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS Pixelscan headed direct WebGL evidence now records full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers.",
-    "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8."
+    "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8.",
+    "BrowseForge runtime CLI now binds the remaining native fingerprint surface flags covered by launcher BuildPlan: Accept-Language, UA/UA-CH, screen available dimensions, plugins PDF policy, audio/canvas noise, WebGL vendor/renderer, and repeatable font families; go run dry-run emitted the corresponding native Chromium flags."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -146,9 +147,9 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift. Packaged detector evidence covers font surfaces; BrowseForge runtime CLI now binds repeatable -fingerprint-font values into --fingerprint-fonts-list so config and flag paths both reach the native font list switch when not in strict native mode.",
       "release_blocker": false,
-      "result": "pass_native_headed_font_corpus_browserleaks_creepjs_pixelscan_direct",
+      "result": "pass_cli_fonts_binding",
       "severity": "info",
       "status": "detector_tested",
       "surface": "fonts"
