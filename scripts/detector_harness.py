@@ -504,6 +504,25 @@ def _shared_context_pair(left_records: list[dict], right_records: list[dict]) ->
             return left, right
     return None, None
 
+def _shared_context_pairs(left_records: list[dict], right_records: list[dict]) -> list[tuple[dict, dict]]:
+    right_by_context: dict[tuple[object, object, bool], dict] = {}
+    for record in right_records:
+        right_by_context.setdefault(_record_context(record), record)
+    pairs = []
+    for left in sorted(left_records, key=lambda record: tuple(str(part) for part in _record_context(record))):
+        right = right_by_context.get(_record_context(left))
+        if right is not None:
+            pairs.append((left, right))
+    return pairs
+
+def _webgl_comparison_id(record: dict) -> str:
+    context = _comparison_context(record)
+    if context == {"platform": "linux-x64", "network_mode": "direct", "container": True}:
+        return "webgl_metadata_cross_detector"
+    container = "docker" if context["container"] else "host"
+    return f"webgl_metadata_cross_detector:{context['platform']}:{context['network_mode']}:{container}"
+
+
 def _numeric_metric_deltas(left: dict, right: dict) -> dict:
     deltas = {}
     for key in sorted(set(left) & set(right)):
@@ -1296,46 +1315,47 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
     complete_webgl = [record for record in webgl_records if not record["missing_metadata"]]
     browserleaks_webgl_candidates = [record for record in complete_webgl if record["detector_id"] == "browserleaks"]
     webgl_peer_candidates = [record for record in complete_webgl if record["detector_id"] != "browserleaks"]
-    browserleaks_webgl, comparison_peer = _shared_context_pair(browserleaks_webgl_candidates, webgl_peer_candidates)
-    if browserleaks_webgl and comparison_peer:
-        hash_matches = {
-            field: browserleaks_webgl["hashes"][field] == comparison_peer["hashes"][field]
-            for field in WEBGL_HASH_METADATA_FIELDS
-        }
-        extension_count_match = browserleaks_webgl["extension_count"] == comparison_peer["extension_count"]
-        extension_profile_match = extension_count_match and hash_matches["extensionSha256"]
-        vendor_renderer_match = (
-            browserleaks_webgl["vendor"] == comparison_peer["vendor"]
-            and browserleaks_webgl["renderer"] == comparison_peer["renderer"]
-        )
-        all_match = vendor_renderer_match and extension_profile_match and all(hash_matches.values())
-        comparisons.append({
-            "comparison_id": "webgl_metadata_cross_detector",
-            "surface": "webgl",
-            "status": "pass" if all_match else "warning",
-            "left_detector_id": browserleaks_webgl["detector_id"],
-            "left_run_id": browserleaks_webgl["run_id"],
-            "right_detector_id": comparison_peer["detector_id"],
-            "right_run_id": comparison_peer["run_id"],
-            "left_context": _comparison_context(browserleaks_webgl),
-            "right_context": _comparison_context(comparison_peer),
-            "vendor_renderer_match": vendor_renderer_match,
-            "extension_count_match": extension_count_match,
-            "extension_profile_match": extension_profile_match,
-            "hash_matches": hash_matches,
-            "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata differs across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
-        })
+    webgl_pairs = _shared_context_pairs(browserleaks_webgl_candidates, webgl_peer_candidates)
+    if webgl_pairs:
+        for browserleaks_webgl, comparison_peer in webgl_pairs:
+            hash_matches = {
+                field: browserleaks_webgl["hashes"][field] == comparison_peer["hashes"][field]
+                for field in WEBGL_HASH_METADATA_FIELDS
+            }
+            extension_count_match = browserleaks_webgl["extension_count"] == comparison_peer["extension_count"]
+            extension_profile_match = extension_count_match and hash_matches["extensionSha256"]
+            vendor_renderer_match = (
+                browserleaks_webgl["vendor"] == comparison_peer["vendor"]
+                and browserleaks_webgl["renderer"] == comparison_peer["renderer"]
+            )
+            all_match = vendor_renderer_match and extension_profile_match and all(hash_matches.values())
+            comparisons.append({
+                "comparison_id": _webgl_comparison_id(browserleaks_webgl),
+                "surface": "webgl",
+                "status": "pass" if all_match else "warning",
+                "left_detector_id": browserleaks_webgl["detector_id"],
+                "left_run_id": browserleaks_webgl["run_id"],
+                "right_detector_id": comparison_peer["detector_id"],
+                "right_run_id": comparison_peer["run_id"],
+                "left_context": _comparison_context(browserleaks_webgl),
+                "right_context": _comparison_context(comparison_peer),
+                "vendor_renderer_match": vendor_renderer_match,
+                "extension_count_match": extension_count_match,
+                "extension_profile_match": extension_profile_match,
+                "hash_matches": hash_matches,
+                "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata differs across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
+            })
     else:
         missing = (
             ["shared browserleaks/peer context"]
             if browserleaks_webgl_candidates and webgl_peer_candidates
             else sorted(
                 label
-                for label, record in {
-                    "browserleaks_complete_webgl_metadata": browserleaks_webgl,
-                    "peer_complete_webgl_metadata": comparison_peer,
+                for label, records in {
+                    "browserleaks_complete_webgl_metadata": browserleaks_webgl_candidates,
+                    "peer_complete_webgl_metadata": webgl_peer_candidates,
                 }.items()
-                if record is None
+                if not records
             )
         )
         gaps.append({

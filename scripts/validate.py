@@ -550,21 +550,27 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
         raise SystemExit(f"detector score comparison has unknown baseline gaps: {unknown_baseline_gap_ids}")
 
     gap_ids = {gap.get("gap_id") for gap in score_comparison.get("gaps", [])}
-    webgl_comparison = next((comparison for comparison in comparisons if comparison.get("comparison_id") == "webgl_metadata_cross_detector"), None)
-    if webgl_comparison is None:
+    webgl_comparisons = [
+        comparison
+        for comparison in comparisons
+        if str(comparison.get("comparison_id", "")).startswith("webgl_metadata_cross_detector")
+    ]
+    if not webgl_comparisons:
         for gap_id in ["webgl_metadata_hashes_missing", "webgl_cross_detector_metadata_comparison_missing"]:
             if gap_id not in gap_ids:
                 raise SystemExit(f"detector score comparison missing WebGL comparison blocker {gap_id}")
     else:
-        for field in ["vendor_renderer_match", "extension_count_match", "extension_profile_match", "hash_matches"]:
-            if field not in webgl_comparison:
-                raise SystemExit(f"detector score comparison WebGL comparison missing field {field}")
-        hash_matches = webgl_comparison.get("hash_matches")
-        if not isinstance(hash_matches, dict):
-            raise SystemExit("detector score comparison WebGL hash_matches must be an object")
-        for field in ["extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256"]:
-            if field not in hash_matches:
-                raise SystemExit(f"detector score comparison WebGL hash_matches missing {field}")
+        for webgl_comparison in webgl_comparisons:
+            comparison_id = webgl_comparison.get("comparison_id")
+            for field in ["vendor_renderer_match", "extension_count_match", "extension_profile_match", "hash_matches"]:
+                if field not in webgl_comparison:
+                    raise SystemExit(f"detector score comparison WebGL comparison {comparison_id} missing field {field}")
+            hash_matches = webgl_comparison.get("hash_matches")
+            if not isinstance(hash_matches, dict):
+                raise SystemExit(f"detector score comparison WebGL comparison {comparison_id} hash_matches must be an object")
+            for field in ["extensionSha256", "parameterSha256", "precisionSha256", "pixelSha256"]:
+                if field not in hash_matches:
+                    raise SystemExit(f"detector score comparison WebGL comparison {comparison_id} hash_matches missing {field}")
 
     if gate_status.get("live-detector-evidence") == "passed":
         warning_comparisons = [comparison.get("comparison_id") for comparison in comparisons if comparison.get("status") == "warning"]

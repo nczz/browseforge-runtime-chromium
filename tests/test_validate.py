@@ -1399,6 +1399,120 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("webgl", message)
         self.assertIn("extension_profile_match", message)
 
+    def test_validate_accepts_multiple_contextual_webgl_comparison_ids(self) -> None:
+        """Validation must accept one complete WebGL comparison per target context."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            linux_context = {"platform": "linux-x64", "network_mode": "direct", "container": True}
+            macos_context = {"platform": "macos-arm64", "network_mode": "direct", "container": False}
+
+            def webgl_comparison(comparison_id: str, context: dict[str, Any]) -> dict[str, Any]:
+                return {
+                    "comparison_id": comparison_id,
+                    "extension_count_match": True,
+                    "extension_profile_match": True,
+                    "hash_matches": {
+                        "extensionSha256": True,
+                        "parameterSha256": True,
+                        "precisionSha256": True,
+                        "pixelSha256": True,
+                    },
+                    "left_context": context,
+                    "right_context": context,
+                    "status": "pass",
+                    "vendor_renderer_match": True,
+                }
+
+            self._write_score_comparison(
+                temp_root,
+                comparisons=[
+                    {
+                        "comparison_id": "creepjs_audio_headless_vs_headed",
+                        "left_context": linux_context,
+                        "right_context": linux_context,
+                    },
+                    {
+                        "comparison_id": "browserleaks_creepjs_font_metrics",
+                        "left_context": linux_context,
+                        "right_context": linux_context,
+                    },
+                    webgl_comparison("webgl_metadata_cross_detector", linux_context),
+                    webgl_comparison("webgl_metadata_cross_detector:macos-arm64:direct:host", macos_context),
+                ],
+                gaps=[],
+            )
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_contextual_webgl_comparison_missing_required_field(self) -> None:
+        """Every WebGL comparison id variant must carry the required parity fields."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            linux_context = {"platform": "linux-x64", "network_mode": "direct", "container": True}
+            macos_context = {"platform": "macos-arm64", "network_mode": "direct", "container": False}
+            webgl_base = {
+                "comparison_id": "webgl_metadata_cross_detector",
+                "extension_count_match": True,
+                "extension_profile_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "left_context": linux_context,
+                "right_context": linux_context,
+                "status": "pass",
+                "vendor_renderer_match": True,
+            }
+            webgl_macos_missing_field = {
+                "comparison_id": "webgl_metadata_cross_detector:macos-arm64:direct:host",
+                "extension_count_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "left_context": macos_context,
+                "right_context": macos_context,
+                "status": "pass",
+                "vendor_renderer_match": True,
+            }
+            self._write_score_comparison(
+                temp_root,
+                comparisons=[
+                    {
+                        "comparison_id": "creepjs_audio_headless_vs_headed",
+                        "left_context": linux_context,
+                        "right_context": linux_context,
+                    },
+                    {
+                        "comparison_id": "browserleaks_creepjs_font_metrics",
+                        "left_context": linux_context,
+                        "right_context": linux_context,
+                    },
+                    webgl_base,
+                    webgl_macos_missing_field,
+                ],
+                gaps=[],
+            )
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("webgl", message)
+        self.assertIn("extension_profile_match", message)
+
     def test_validate_accepts_resolved_native_font_baseline_gap(self) -> None:
         """Detector score comparison may omit the native font gap once native evidence exists."""
         module = self._load_validate_module()

@@ -26,13 +26,16 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711.json",
     "knowledge/manifests/local-dogfood.json",
     "knowledge/manifests/pixelscan-variant-summary.json",
-    "knowledge/manifests/ua-ch-grease-verification.json"
+    "knowledge/manifests/ua-ch-grease-verification.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserscan/detrun_v0.1.0-alpha.0_macos-arm64_browserscan_webgl_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_webgl_headed_packaged_direct_20260711.json"
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
     "Packaged macOS BrowserLeaks direct evidence covers WebGL/audio/fonts/WebRTC against the built BrowseForge Chromium app; proxy matrix evidence remains blocked by missing external proxy settings.",
     "Packaged macOS CreepJS and Pixelscan headed direct evidence now records native font metrics/availability, closing the native headed direct font corpus baseline gap; proxy and Windows matrix coverage remain tracked under proxy/IP coherence and cross-platform drift.",
-    "Packaged macOS CreepJS now passes platform-aware macOS arm64 UA-CH classification with bounded audio metrics, and packaged macOS Pixelscan records a consistent fingerprint plus bounded AudioContext hash; AudioContext is no longer tracked as an independent release-blocking surface, while proxy, Windows, and cross-platform matrix coverage remain blockers."
+    "Packaged macOS CreepJS now passes platform-aware macOS arm64 UA-CH classification with bounded audio metrics, and packaged macOS Pixelscan records a consistent fingerprint plus bounded AudioContext hash; AudioContext is no longer tracked as an independent release-blocking surface, while proxy, Windows, and cross-platform matrix coverage remain blockers.",
+    "Packaged macOS BrowserLeaks, BrowserScan, and CreepJS headed direct WebGL evidence now carries full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata; detector-score-comparison records a passing macOS direct host WebGL cross-detector comparison, so WebGL is no longer an independent release-blocking surface."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -112,10 +115,10 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records sanitized WebGL vendor/renderer, extension count/hash, parameter hash, shader precision hash, and rendered pixel hash.",
-      "release_blocker": true,
-      "result": "warn_linux_webgl_cross_detector_plus_macos_packaged_browserleaks_webgl_peer_native_required",
-      "severity": "medium",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector escapes embedded SDP newlines correctly, and committed Linux BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json records passing Linux direct, Linux proxy, and macOS packaged direct host BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparisons. Packaged macOS BrowserLeaks, BrowserScan, and CreepJS headed direct evidence all record the same sanitized Google Inc. (Apple) / ANGLE Metal Renderer profile, extension profile, parameter hash, shader precision hash, and rendered pixel hash without committing raw parameters, extensions, or pixels. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual WebGL surface.",
+      "release_blocker": false,
+      "result": "pass_linux_and_macos_packaged_webgl_cross_detector_metadata",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "WebGL vendor/renderer"
     },
@@ -226,6 +229,8 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711.json",
     "detectors/local-sannysoft-dogfood.sanitized.json",
     "knowledge/manifests/linux-package-smoke.json",
-    "knowledge/manifests/local-dogfood.json"
+    "knowledge/manifests/local-dogfood.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserscan/detrun_v0.1.0-alpha.0_macos-arm64_browserscan_webgl_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_webgl_headed_packaged_direct_20260711.json"
   ]
 }

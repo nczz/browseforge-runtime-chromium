@@ -247,12 +247,70 @@
       "status": "pass",
       "surface": "webgl",
       "vendor_renderer_match": true
+    },
+    {
+      "comparison_id": "webgl_metadata_cross_detector:linux-x64:proxy:docker",
+      "extension_count_match": true,
+      "extension_profile_match": true,
+      "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence.",
+      "hash_matches": {
+        "extensionSha256": true,
+        "parameterSha256": true,
+        "pixelSha256": true,
+        "precisionSha256": true
+      },
+      "left_context": {
+        "container": true,
+        "network_mode": "proxy",
+        "platform": "linux-x64"
+      },
+      "left_detector_id": "browserleaks",
+      "left_run_id": "detrun_linux_x64_browserleaks_client_hints_headless_docker_proxy_20260710",
+      "right_context": {
+        "container": true,
+        "network_mode": "proxy",
+        "platform": "linux-x64"
+      },
+      "right_detector_id": "browserscan",
+      "right_run_id": "detrun_linux_x64_browserscan_headless_docker_proxy_20260710",
+      "status": "pass",
+      "surface": "webgl",
+      "vendor_renderer_match": true
+    },
+    {
+      "comparison_id": "webgl_metadata_cross_detector:macos-arm64:direct:host",
+      "extension_count_match": true,
+      "extension_profile_match": true,
+      "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence.",
+      "hash_matches": {
+        "extensionSha256": true,
+        "parameterSha256": true,
+        "pixelSha256": true,
+        "precisionSha256": true
+      },
+      "left_context": {
+        "container": false,
+        "network_mode": "direct",
+        "platform": "macos-arm64"
+      },
+      "left_detector_id": "browserleaks",
+      "left_run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_packaged_direct_20260711",
+      "right_context": {
+        "container": false,
+        "network_mode": "direct",
+        "platform": "macos-arm64"
+      },
+      "right_detector_id": "browserscan",
+      "right_run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserscan_webgl_headed_packaged_direct_20260711",
+      "status": "pass",
+      "surface": "webgl",
+      "vendor_renderer_match": true
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 53,
+  "evidence_count": 55,
   "gaps": [],
-  "generated_at": "2026-07-11T11:20:14.991412+00:00",
+  "generated_at": "2026-07-11T11:37:07.834651+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

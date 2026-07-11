@@ -1,5 +1,5 @@
 {
-  "blocker_count": 23,
+  "blocker_count": 22,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -96,15 +96,6 @@
       "platform": "macos-arm64",
       "severity": "high",
       "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "fingerprint-surface:WebGL vendor/renderer",
-      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records sanitized WebGL vendor/renderer, extension count/hash, parameter hash, shader precision hash, and rendered pixel hash.",
-      "result": "warn_linux_webgl_cross_detector_plus_macos_packaged_browserleaks_webgl_peer_native_required",
-      "severity": "medium",
-      "source": "knowledge/manifests/fingerprint-surface-status.json",
-      "status": "detector_tested",
-      "surface": "WebGL vendor/renderer"
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
@@ -261,12 +252,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T13:10:00Z",
+  "generated_at": "2026-07-11T13:30:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
-    "detector-summary.json": "d5762c33c786b8afa979be5393327831681882fdd68c8b857f884f537e6b1d37",
-    "knowledge/manifests/detector-score-comparison.json": "358f24afb5e46bcf6f91458e221523695974dbcc3ed96d16b51ad4dab85593be",
-    "knowledge/manifests/fingerprint-surface-status.json": "6e5a605e4fb08c4702e25699802d1b289fe9dd12d187065c89d9e644e67afe6b",
+    "detector-summary.json": "b8764bd468421b4be7a77633101dd8412f5ccc7ca45ccc83f01b9cfdb2c76c8e",
+    "knowledge/manifests/detector-score-comparison.json": "469175f33106c938c22e9f85a970deaf7e8da7e14397a2db71885af40bf89c1c",
+    "knowledge/manifests/fingerprint-surface-status.json": "5d68a993e807e6a56236b6827b7f4929bbe84de984cef653d742ed339abf464b",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "db3ec009736f3b41a157796bfd2d6a9aabd223e587b30cdfff913e567f74cceb",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",

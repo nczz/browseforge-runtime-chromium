@@ -2128,6 +2128,73 @@ class DetectorHarnessTests(unittest.TestCase):
                 payload["gaps"],
             )
 
+    def test_compare_scores_writes_webgl_cross_detector_comparisons_per_shared_context(self):
+        """Linux Docker evidence must not mask macOS packaged-host WebGL parity coverage."""
+        def evidence_row(*, detector_id, platform, container, run_id):
+            return {
+                "detector": {"detector_id": detector_id},
+                "matrix": {"display_mode": "headless", "network_mode": "direct", "container": container},
+                "results": [self.webgl_score_result()],
+                "run_id": run_id,
+                "status": "passed",
+                "target": {"platform": platform},
+            }
+
+        comparisons, gaps = self.harness_module.detector_score_comparisons(
+            [
+                evidence_row(
+                    detector_id="browserleaks",
+                    platform="linux-x64",
+                    container=True,
+                    run_id="detrun_linux_browserleaks_webgl",
+                ),
+                evidence_row(
+                    detector_id="pixelscan",
+                    platform="linux-x64",
+                    container=True,
+                    run_id="detrun_linux_pixelscan_webgl",
+                ),
+                evidence_row(
+                    detector_id="browserleaks",
+                    platform="macos-arm64",
+                    container=False,
+                    run_id="detrun_macos_browserleaks_webgl",
+                ),
+                evidence_row(
+                    detector_id="pixelscan",
+                    platform="macos-arm64",
+                    container=False,
+                    run_id="detrun_macos_pixelscan_webgl",
+                ),
+            ]
+        )
+
+        webgl_comparisons = [item for item in comparisons if item.get("surface") == "webgl"]
+        comparison_ids = {item["comparison_id"] for item in webgl_comparisons}
+        self.assertEqual(
+            {
+                "webgl_metadata_cross_detector",
+                "webgl_metadata_cross_detector:macos-arm64:direct:host",
+            },
+            comparison_ids,
+        )
+        self.assertFalse(
+            any(gap.get("gap_id") == "webgl_cross_detector_metadata_comparison_missing" for gap in gaps),
+            gaps,
+        )
+        macos_comparison = next(
+            item
+            for item in webgl_comparisons
+            if item["comparison_id"] == "webgl_metadata_cross_detector:macos-arm64:direct:host"
+        )
+        self.assertEqual(
+            {"platform": "macos-arm64", "network_mode": "direct", "container": False},
+            macos_comparison["left_context"],
+        )
+        self.assertEqual(macos_comparison["left_context"], macos_comparison["right_context"])
+        self.assertEqual("detrun_macos_browserleaks_webgl", macos_comparison["left_run_id"])
+        self.assertEqual("detrun_macos_pixelscan_webgl", macos_comparison["right_run_id"])
+
     def test_compare_scores_passes_pixelscan_audio_and_font_counterparts_when_headed_matches(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
