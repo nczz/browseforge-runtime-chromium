@@ -1,5 +1,5 @@
 {
-  "blocker_count": 36,
+  "blocker_count": 38,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -408,14 +408,32 @@
       "source": "knowledge/manifests/source-acquisition.json"
     },
     {
+      "blocker_id": "source-acquisition:dev-baseline:full-xcode",
+      "detail": "BrowseForgeDev generation reached platform GN but is blocked until xcode-select points at a full Xcode installation.",
+      "error_summary": "GN started after mac platform GN was installed, wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools. Subsequent Linux Docker deps sync returned the shared checkout to a linux dependency profile.",
+      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "severity": "medium",
+      "source": "knowledge/manifests/source-acquisition.json",
+      "status": "blocked_full_xcode_required_after_platform_gn_installed"
+    },
+    {
       "blocker_id": "source-acquisition:dev-baseline:gn-args",
       "dependency_profile": "linux_docker_deps",
       "detail": "BrowseForgeDev GN args are missing, so the local development baseline has not been generated.",
       "severity": "medium",
       "source": "knowledge/manifests/source-acquisition.json"
+    },
+    {
+      "blocker_id": "source-acquisition:dev-baseline:platform-gn",
+      "dependency_profile": "linux_docker_deps",
+      "detail": "BrowseForgeDev generation is blocked because the active source dependency profile does not expose the macOS GN binary.",
+      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn",
+      "severity": "medium",
+      "source": "knowledge/manifests/source-acquisition.json"
     }
   ],
-  "generated_at": "2026-07-11T02:40:00Z",
+  "generated_at": "2026-07-11T02:50:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",

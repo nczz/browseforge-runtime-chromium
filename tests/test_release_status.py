@@ -143,7 +143,13 @@ class ReleaseStatusTests(unittest.TestCase):
                         "dev_build_ninja_exists": False,
                         "dev_gn_args_exists": False,
                     },
-                    "dependency_profile_status": {"current_checkout_profile": "linux_docker_deps"},
+                    "dependency_profile_status": {"current_checkout_profile": "linux_docker_deps", "mac_gn_exists": False},
+                    "source_build_status": {
+                        "status": "blocked_full_xcode_required_after_platform_gn_installed",
+                        "platform_gn_binary": "/tmp/chromium/src/buildtools/mac/gn",
+                        "error_summary": "xcodebuild requires full Xcode while xcode-select points at CommandLineTools",
+                        "next_action": "Select full Xcode, then rerun generate-dev-build",
+                    },
                 }
             },
         )
@@ -171,6 +177,8 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("source-acquisition:artifact-rebuild:0", blocker_ids)
         self.assertIn("source-acquisition:dev-baseline:gn-args", blocker_ids)
         self.assertIn("source-acquisition:dev-baseline:build-ninja", blocker_ids)
+        self.assertIn("source-acquisition:dev-baseline:platform-gn", blocker_ids)
+        self.assertIn("source-acquisition:dev-baseline:full-xcode", blocker_ids)
         detector_blocker = next(
             blocker for blocker in payload["blockers"]
             if blocker["blocker_id"] == "detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host"

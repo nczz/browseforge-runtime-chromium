@@ -66,6 +66,12 @@ def objective_audit(root: Path = ROOT, generated_at: str | None = None) -> dict[
     scaffold = patchsets.get("scaffold-browseforge-stealth-substrate", {})
     source_profile = chromium.get("dependency_profile_status", {}) if isinstance(chromium, dict) else {}
     workdir_contract = source_profile.get("profile_isolated_workdir_contract", {}) if isinstance(source_profile, dict) else {}
+    source_build_status = chromium.get("source_build_status") or chromium.get("last_dev_baseline_probe", {}) if isinstance(chromium, dict) else {}
+    source_build_blockers = [f"missing build output: {key}" for key in missing_build_outputs]
+    if missing_build_outputs and isinstance(source_profile, dict) and source_profile.get("mac_gn_exists") is False:
+        source_build_blockers.append("missing host dependency profile: mac_gn_exists")
+    if missing_build_outputs and isinstance(source_build_status, dict) and str(source_build_status.get("status", "")).startswith("blocked_full_xcode"):
+        source_build_blockers.append("blocked host toolchain: full Xcode required")
     surfaces = surface_status.get("surfaces", [])
     release_blocking_surfaces = [str(surface.get("surface")) for surface in surfaces if isinstance(surface, dict) and surface.get("release_blocker") is True]
     native_missing = [
@@ -89,7 +95,7 @@ def objective_audit(root: Path = ROOT, generated_at: str | None = None) -> dict[
                 "knowledge/manifests/source-acquisition.json:chromium_base.build_output_status",
                 "python3 scripts/chromium_source.py check",
             ],
-            blockers=[f"missing build output: {key}" for key in missing_build_outputs],
+            blockers=source_build_blockers,
         ),
         deliverable(
             "native_stealth_substrate_patchset",

@@ -89,6 +89,13 @@ def source_baseline_blockers(source_acquisition: dict[str, Any]) -> list[dict[st
     if not isinstance(status, dict):
         return []
 
+    profile = chromium.get("dependency_profile_status", {})
+    if not isinstance(profile, dict):
+        profile = {}
+    source_build_status = chromium.get("source_build_status") or chromium.get("last_dev_baseline_probe", {})
+    if not isinstance(source_build_status, dict):
+        source_build_status = {}
+
     blockers = []
     if status.get("dev_gn_args_exists") is False:
         blockers.append(
@@ -97,9 +104,7 @@ def source_baseline_blockers(source_acquisition: dict[str, Any]) -> list[dict[st
                 "detail": "BrowseForgeDev GN args are missing, so the local development baseline has not been generated.",
                 "severity": "medium",
                 "source": "knowledge/manifests/source-acquisition.json",
-                "dependency_profile": chromium.get("dependency_profile_status", {}).get("current_checkout_profile")
-                if isinstance(chromium.get("dependency_profile_status"), dict)
-                else None,
+                "dependency_profile": profile.get("current_checkout_profile"),
             }
         )
     if status.get("dev_build_ninja_exists") is False:
@@ -109,9 +114,31 @@ def source_baseline_blockers(source_acquisition: dict[str, Any]) -> list[dict[st
                 "detail": "BrowseForgeDev build.ninja is missing, so the local development baseline cannot be built.",
                 "severity": "medium",
                 "source": "knowledge/manifests/source-acquisition.json",
-                "dependency_profile": chromium.get("dependency_profile_status", {}).get("current_checkout_profile")
-                if isinstance(chromium.get("dependency_profile_status"), dict)
-                else None,
+                "dependency_profile": profile.get("current_checkout_profile"),
+            }
+        )
+    if (status.get("dev_gn_args_exists") is False or status.get("dev_build_ninja_exists") is False) and profile.get("mac_gn_exists") is False:
+        blockers.append(
+            {
+                "blocker_id": "source-acquisition:dev-baseline:platform-gn",
+                "detail": "BrowseForgeDev generation is blocked because the active source dependency profile does not expose the macOS GN binary.",
+                "severity": "medium",
+                "source": "knowledge/manifests/source-acquisition.json",
+                "dependency_profile": profile.get("current_checkout_profile"),
+                "platform_gn_binary": source_build_status.get("platform_gn_binary"),
+                "next_action": source_build_status.get("next_action"),
+            }
+        )
+    if (status.get("dev_gn_args_exists") is False or status.get("dev_build_ninja_exists") is False) and str(source_build_status.get("status", "")).startswith("blocked_full_xcode"):
+        blockers.append(
+            {
+                "blocker_id": "source-acquisition:dev-baseline:full-xcode",
+                "detail": "BrowseForgeDev generation reached platform GN but is blocked until xcode-select points at a full Xcode installation.",
+                "severity": "medium",
+                "source": "knowledge/manifests/source-acquisition.json",
+                "status": source_build_status.get("status"),
+                "error_summary": source_build_status.get("error_summary"),
+                "next_action": source_build_status.get("next_action"),
             }
         )
     return blockers

@@ -37,11 +37,15 @@ class ObjectiveAuditTests(unittest.TestCase):
                         "linux_docker_chrome_exists": True,
                     },
                     "dependency_profile_status": {
+                        "mac_gn_exists": ready,
                         "profile_isolated_workdir_contract": {
                             "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
                             "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
                             "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
-                        }
+                        },
+                    },
+                    "source_build_status": {
+                        "status": "ok" if ready else "blocked_full_xcode_required_after_platform_gn_installed",
                     },
                 }
             },
@@ -118,6 +122,8 @@ class ObjectiveAuditTests(unittest.TestCase):
         deliverables = {entry["deliverable_id"]: entry for entry in payload["deliverables"]}
         self.assertFalse(deliverables["source_build_baseline"]["satisfied"])
         self.assertIn("missing build output: dev_gn_args_exists", deliverables["source_build_baseline"]["blockers"])
+        self.assertIn("missing host dependency profile: mac_gn_exists", deliverables["source_build_baseline"]["blockers"])
+        self.assertIn("blocked host toolchain: full Xcode required", deliverables["source_build_baseline"]["blockers"])
         self.assertFalse(deliverables["native_release_artifacts"]["satisfied"])
         self.assertIn("native platform not ready: macos-arm64", deliverables["native_release_artifacts"]["blockers"])
         self.assertFalse(deliverables["release_grade_cutover"]["satisfied"])
