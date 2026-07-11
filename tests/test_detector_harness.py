@@ -1824,6 +1824,14 @@ class DetectorHarnessTests(unittest.TestCase):
                 "BROWSEFORGE_DETECTOR_PROXY_REGION",
             ],
         )
+        self.assertEqual(len(payload["next_commands"]), len(self.harness_module.SUPPORTED_COLLECTORS))
+        self.assertTrue(all("--network-mode proxy" in command for command in payload["next_commands"]))
+        self.assertTrue(all("$BROWSEFORGE_DETECTOR_PROXY_URL" in command for command in payload["next_commands"]))
+        self.assertTrue(all("<redacted-region>" in command for command in payload["next_commands"]))
+        self.assertTrue(
+            any("run every detector in proxy network mode" in item for item in payload["requirements"]),
+            payload["requirements"],
+        )
 
     def test_proxy_preflight_rejects_loopback_and_localhost_proxy_authorities(self):
         cases = [
@@ -1885,6 +1893,8 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertNotIn("proxy-user", proc.stdout)
         self.assertNotIn("ghp_abcdEFGH1234567890secret", proc.stdout)
         self.assertNotIn("8.8.8.8", proc.stdout)
+        self.assertEqual(len(payload["next_commands"]), len(self.harness_module.SUPPORTED_COLLECTORS))
+        self.assertTrue(all("<configured-region>" in command for command in payload["next_commands"]))
 
     def test_proxy_preflight_redacts_domain_host_and_port(self):
         proc = self.run_harness(

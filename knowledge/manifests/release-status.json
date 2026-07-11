@@ -252,14 +252,14 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T16:05:00Z",
+  "generated_at": "2026-07-11T18:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "210e23a4aff447aab1a52d70bee9cdab17a2eb2bb015e3aa3968d950c153e6c6",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "bc3fbf1b2a506caa12c5e039881f8e8396f6013df6dead224d3faed37cf8f479",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
-    "knowledge/manifests/proxy-preflight.json": "db3ec009736f3b41a157796bfd2d6a9aabd223e587b30cdfff913e567f74cceb",
+    "knowledge/manifests/proxy-preflight.json": "dabb5e576a1a977f0372c14b846da3ee64f6ece5da046009a2a8f17dd3654a73",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
     "knowledge/manifests/signing-policy.json": "521c2680e4130eedb9625d08c09cf37afd2f16849b0b8ddcf0e13b3f7efdba21",
     "knowledge/manifests/source-acquisition.json": "68c9158724617ff140ab7721aaf6a55a7a5919aa59ae4dcfa76636745936feec"
@@ -287,7 +287,8 @@
         "external proxy URL with scheme, host, and port",
         "redacted external proxy region/geolocation label",
         "no loopback, private, link-local, or .local proxy authority",
-        "no raw credentials or IP literals in committed evidence"
+        "no raw credentials or IP literals in committed evidence",
+        "run every detector in proxy network mode before clearing proxy release blockers"
       ],
       "resource_id": "external-detector-proxy",
       "severity": "critical",

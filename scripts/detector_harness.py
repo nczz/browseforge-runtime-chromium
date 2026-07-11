@@ -158,6 +158,24 @@ def sanitized_proxy_descriptor(proxy_url: str) -> tuple[dict[str, object] | None
     }
     return descriptor, []
 
+def proxy_detector_matrix_commands(proxy_region: str) -> list[str]:
+    region_arg = "<redacted-region>" if not proxy_region else "<configured-region>"
+    commands = []
+    for detector_id in sorted(SUPPORTED_COLLECTORS):
+        commands.append(
+            "python3 scripts/detector_harness.py run "
+            f"--detector {detector_id} "
+            "--artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 "
+            "--platform macos-arm64 "
+            "--browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium "
+            "--proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" "
+            "--network-mode proxy "
+            f"--proxy-region {region_arg} "
+            "--display headed"
+        )
+    return commands
+
+
 def proxy_preflight(args):
     proxy_url = args.proxy_url or os.environ.get("BROWSEFORGE_DETECTOR_PROXY_URL", "")
     proxy_region = args.proxy_region or os.environ.get("BROWSEFORGE_DETECTOR_PROXY_REGION", "")
@@ -182,7 +200,9 @@ def proxy_preflight(args):
             "redacted external proxy region/geolocation label",
             "no loopback, private, link-local, or .local proxy authority",
             "no raw credentials or IP literals in committed evidence",
+            "run every detector in proxy network mode before clearing proxy release blockers",
         ],
+        "next_commands": proxy_detector_matrix_commands(proxy_region),
         "runtime_id": "browseforge-chromium",
         "schema_version": "1.0",
         "status": "passed" if not missing and not errors else "failed",
