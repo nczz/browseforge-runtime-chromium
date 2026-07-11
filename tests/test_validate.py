@@ -639,6 +639,40 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("runtime framework validation ok", output)
 
+    def test_validate_rejects_runtime_manifest_missing_required_fingerprint_surface(self) -> None:
+        """runtime.manifest.json cannot drop a fingerprint surface required by the KG contract."""
+        removed_surface = "seed_identity"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest_path = temp_root / "contracts" / "runtime.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["fingerprint"]["surfaces"].remove(removed_surface)
+            self._write_json(manifest_path, manifest)
+
+            message = self._run_validate_expect_exit(module, temp_root)
+
+        self.assertIn("runtime manifest missing required fingerprint surfaces", message)
+        self.assertIn(removed_surface, message)
+
+    def test_validate_rejects_runtime_manifest_unknown_fingerprint_surface(self) -> None:
+        """runtime.manifest.json cannot advertise fingerprint surfaces outside the KG contract."""
+        unknown_surface = "legacy_plugin_entropy"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest_path = temp_root / "contracts" / "runtime.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["fingerprint"]["surfaces"].append(unknown_surface)
+            self._write_json(manifest_path, manifest)
+
+            message = self._run_validate_expect_exit(module, temp_root)
+
+        self.assertIn("runtime manifest declares unknown fingerprint surfaces", message)
+        self.assertIn(unknown_surface, message)
+
     def test_validate_rejects_graph_queries_missing_manifest_source_tokens(self) -> None:
         """Graph queries must cover Manifest provenance nodes and DECLARES_SOURCE edges."""
         required_tokens = [
@@ -1482,7 +1516,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "id": "browseforge-chromium",
                 "family": "chromium",
                 "browseforge": {"profile_field": "runtime_id"},
-                "fingerprint": {"surfaces": ["automation_signals", "canvas", "locale", "webgl"]},
+                "fingerprint": {"surfaces": list(self.REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS)},
             },
         )
         self._write_browseforge_integration_contract(

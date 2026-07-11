@@ -44,6 +44,7 @@
   "fingerprint": {
     "seed_input": "uint32",
     "surfaces": [
+      "seed_identity",
       "user_agent",
       "client_hints",
       "timezone",

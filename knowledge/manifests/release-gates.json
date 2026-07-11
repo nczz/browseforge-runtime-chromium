@@ -31,7 +31,7 @@
       "status": "passed"
     },
     {
-      "evidence": "python3 scripts/package_linux_runtime.py --execute --release-channel alpha produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0 and size 567803677 bytes; artifact-manifest.json/provenance.json/SBOM.json include explicit os=linux and arch=x64 target metadata; packaged runtime.manifest.json records alpha status and linux-x64 packaged=true; docker linux/amd64 packaged smoke must be rerun for the rebuilt WebShare parity artifact before release-grade detector coverage is claimed.",
+      "evidence": "python3 scripts/package_linux_runtime.py --execute --release-channel alpha produced launchable dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip with sha256 6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448 and size 567877597 bytes; artifact-manifest.json/provenance.json/SBOM.json include explicit os=linux and arch=x64 target metadata; packaged runtime.manifest.json records alpha status and linux-x64 packaged=true; docker linux/amd64 packaged smoke must be rerun for the rebuilt WebShare parity artifact before release-grade detector coverage is claimed.",
       "gate_id": "runtime-artifact-produced",
       "status": "passed"
     },
@@ -41,7 +41,7 @@
       "status": "warning"
     },
     {
-      "evidence": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; artifact/provenance/SBOM metadata carry platform linux-x64 plus os linux and arch x64; python3 -m json.tool validated JSON metadata, unzip -t validates the archive, and manifests record sha256 7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0 and size 567803677 bytes.",
+      "evidence": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, patched chrome, ICU/resources/locales/crashpad/GPU runtime sidecars; artifact/provenance/SBOM metadata carry platform linux-x64 plus os linux and arch x64; python3 -m json.tool validated JSON metadata, unzip -t validates the archive, and manifests record sha256 6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448 and size 567877597 bytes.",
       "gate_id": "sbom-provenance-release-assets",
       "status": "passed"
     }

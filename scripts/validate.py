@@ -923,6 +923,12 @@ def main() -> None:
     if missing_detectors:
         raise SystemExit(f"missing detector ids: {missing_detectors}")
     runtime_surfaces = set(manifest["fingerprint"]["surfaces"])
+    missing_manifest_surfaces = sorted(REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS - runtime_surfaces)
+    if missing_manifest_surfaces:
+        raise SystemExit(f"runtime manifest missing required fingerprint surfaces: {missing_manifest_surfaces}")
+    unexpected_manifest_surfaces = sorted(runtime_surfaces - REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS)
+    if unexpected_manifest_surfaces:
+        raise SystemExit(f"runtime manifest declares unknown fingerprint surfaces: {unexpected_manifest_surfaces}")
     for det in detectors["detectors"]:
         if det.get("required") is not True:
             raise SystemExit(f"detector {det['detector_id']} must declare required=true")

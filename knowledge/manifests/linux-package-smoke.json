@@ -1,14 +1,14 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
-  "artifact_size_bytes": 567803677,
+  "artifact_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
+  "artifact_size_bytes": 567877597,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "observed": {
-        "archive_sha256": "7c6a0f60b51cbaac1323bcecdcbfaadc2b07147492640b8b44ab58eb79539ef0",
-        "archive_size_bytes": 567803677
+        "archive_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
+        "archive_size_bytes": 567877597
       },
       "status": "passed"
     },
