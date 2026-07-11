@@ -1764,7 +1764,10 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       oscillator.connect(compressor);
       compressor.connect(ctx.destination);
       oscillator.start(0);
-      const buffer = await ctx.startRendering();
+      const buffer = await Promise.race([
+        ctx.startRendering(),
+        new Promise((_, reject) => setTimeout(() => reject({name: 'offline_audio_context_timeout'}), 3000)),
+      ]);
       const data = buffer.getChannelData(0);
       let sum = 0;
       let sumAbs = 0;

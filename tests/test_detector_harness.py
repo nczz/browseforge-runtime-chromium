@@ -1349,6 +1349,14 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("pc.localDescription.sdp.split('\\n')", expr)
         self.assertNotIn("pc.localDescription.sdp.split('\n')", expr)
 
+    def test_collect_page_expression_bounds_offline_audio_rendering_with_timeout(self):
+        expr = self.collect_page_expression()
+        self.assertIn("offline_audio_context_timeout", expr)
+        self.assertRegex(
+            expr,
+            r"Promise\.race\s*\(\s*\[[\s\S]*(ctx\.startRendering\(\)[\s\S]*setTimeout|setTimeout[\s\S]*ctx\.startRendering\(\))[\s\S]*\]\s*\)",
+        )
+
     def test_collect_page_expression_records_permission_feature_surface(self):
         expr = self.collect_page_expression()
         self.assertIn("const features = await (async () => {", expr)
