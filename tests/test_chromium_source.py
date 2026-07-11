@@ -52,6 +52,9 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIn("generate-dev-build", step_ids)
         checkout = next(step for step in plan.steps if step.id == "checkout-pinned-ref")
         self.assertEqual(checkout.command, ["git", "checkout", plan.base_ref])
+        sync = next(step for step in plan.steps if step.id == "sync-deps")
+        if chromium_source.host_deps_argument():
+            self.assertIn(chromium_source.host_deps_argument(), sync.command)
 
     def test_check_tools_reports_checkout_presence(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -67,6 +70,29 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertTrue(set(["fetch", "gclient", "gn", "ninja", "autoninja"]).issubset(tools))
         self.assertIn("platform_gn_binary", tools)
         self.assertIn("platform_gn_exists", tools)
+        self.assertIn("dependency_profiles", tools)
+
+    def test_check_tools_reports_dependency_profile_gn_presence(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            (src / "buildtools" / "linux64").mkdir(parents=True)
+            (src / "buildtools" / "linux64" / "gn").write_text("gn\n", encoding="utf-8")
+            (src / "buildtools" / "mac").mkdir(parents=True)
+            (src / "buildtools" / "mac" / "gn").write_text("gn\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            tools = chromium_source.check_tools(plan)
+
+        self.assertEqual(
+            {
+                "linux_gn_exists": True,
+                "mac_gn_exists": True,
+                "windows_gn_exists": False,
+            },
+            tools["dependency_profiles"],
+        )
 
     def test_check_tools_reports_platform_gn_presence(self) -> None:
         with tempfile.TemporaryDirectory() as td:

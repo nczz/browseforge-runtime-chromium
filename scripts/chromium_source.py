@@ -138,12 +138,24 @@ def load_manifest(path: Path = MANIFEST) -> dict:
         return json.load(fh)
 
 
+def host_deps_argument() -> str | None:
+    if sys.platform == "darwin":
+        return "--deps=mac"
+    if sys.platform.startswith("win"):
+        return "--deps=win"
+    return None
+
+
 def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CACHE) -> SourcePlan:
     manifest = load_manifest()
     chromium = manifest["chromium_base"]
     depot_tools = workdir / "depot_tools"
     src = workdir / "src"
     path_prefix = str(depot_tools) + os.pathsep + os.environ.get("PATH", "")
+    sync_command = ["gclient", "sync", "--with_branch_heads", "--with_tags"]
+    deps_arg = host_deps_argument()
+    if deps_arg:
+        sync_command.append(deps_arg)
     return SourcePlan(
         runtime_id=manifest["runtime_id"],
         base_version=chromium["base_version"],
@@ -193,7 +205,7 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
                 id="sync-deps",
                 description="Sync Chromium DEPS for the pinned ref",
                 cwd=str(src),
-                command=["gclient", "sync", "--with_branch_heads", "--with_tags"],
+                command=sync_command,
             ),
             Step(
                 id="run-hooks",
@@ -279,7 +291,7 @@ def git_head(src: Path) -> str | None:
 
 def platform_gn_binary(chromium_src: Path) -> Path:
     if sys.platform == "darwin":
-        return chromium_src / "buildtools" / "mac" / "gn" / "gn"
+        return chromium_src / "buildtools" / "mac" / "gn"
     if sys.platform.startswith("linux"):
         return chromium_src / "buildtools" / "linux64" / "gn"
     if sys.platform.startswith("win"):
@@ -287,11 +299,20 @@ def platform_gn_binary(chromium_src: Path) -> Path:
     return chromium_src / "buildtools" / sys.platform / "gn"
 
 
+def dependency_profile_tools(chromium_src: Path) -> dict[str, bool]:
+    return {
+        "linux_gn_exists": (chromium_src / "buildtools" / "linux64" / "gn").is_file(),
+        "mac_gn_exists": (chromium_src / "buildtools" / "mac" / "gn").is_file(),
+        "windows_gn_exists": (chromium_src / "buildtools" / "win" / "gn.exe").is_file(),
+    }
+
+
 def check_tools(plan: SourcePlan) -> dict:
     depot_path = plan.path_prefix
     chromium_src = Path(plan.chromium_src_dir)
     head = git_head(chromium_src)
     platform_gn = platform_gn_binary(chromium_src)
+    dependency_profiles = dependency_profile_tools(chromium_src)
     return {
         "fetch": shutil.which("fetch", path=depot_path),
         "gclient": shutil.which("gclient", path=depot_path),
@@ -304,6 +325,7 @@ def check_tools(plan: SourcePlan) -> dict:
         "depot_tools_exists": Path(plan.depot_tools_dir).is_dir(),
         "platform_gn_binary": str(platform_gn),
         "platform_gn_exists": platform_gn.is_file(),
+        "dependency_profiles": dependency_profiles,
     }
 
 
