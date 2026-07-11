@@ -50,6 +50,7 @@ class ReleaseStatusTests(unittest.TestCase):
                         "status": "missing_native_release_artifact",
                         "missing_prerequisites": ["full Xcode selected via xcode-select"],
                         "evidence": ["python3 scripts/chromium_native.py check --platform macos-arm64"],
+                        "next_commands": ["python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute"],
                         "status_snapshot": {
                             "host_supported": True,
                             "native_toolchain_ready": False,
@@ -200,6 +201,10 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(native_blocker["host_supported"], True)
         self.assertEqual(native_blocker["native_toolchain_ready"], False)
         self.assertEqual(native_blocker["package_zip_exists"], False)
+        self.assertEqual(
+            native_blocker["remediation_commands"],
+            ["python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute"],
+        )
         self.assertEqual(set(release_status.INPUT_PATHS), set(payload["input_sha256"]))
         resource_ids = {requirement["resource_id"] for requirement in payload["resource_requirements"]}
         self.assertIn("external-detector-proxy", resource_ids)

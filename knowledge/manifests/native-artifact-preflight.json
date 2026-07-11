@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T11:15:00Z",
+  "generated_at": "2026-07-11T19:00:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -23,6 +23,15 @@
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True"
       ],
       "missing_prerequisites": [],
+      "next_commands": [
+        "python3 scripts/chromium_native.py plan --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "go build -o bin/browseforge-runtime-chromium ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
       "platform": "macos-arm64",
       "ready": true,
       "status": "packaged_detector_tested",
@@ -58,6 +67,15 @@
         "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
         "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
         "native Windows detector evidence for the packaged artifact"
+      ],
+      "next_commands": [
+        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
       ],
       "platform": "windows-x64",
       "ready": false,

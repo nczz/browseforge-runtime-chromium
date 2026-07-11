@@ -267,6 +267,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
                     platform=platform,
                     status=entry.get("status"),
                     evidence=entry.get("evidence"),
+                    remediation_commands=entry.get("next_commands"),
                     **native_blocker_snapshot_fields(entry),
                 )
 

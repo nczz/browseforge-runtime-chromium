@@ -136,6 +136,15 @@
       "output_binary_exists": false,
       "package_zip_exists": false,
       "platform": "windows-x64",
+      "remediation_commands": [
+        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
       "status": "missing_native_release_artifact"
@@ -155,6 +164,15 @@
       "output_binary_exists": false,
       "package_zip_exists": false,
       "platform": "windows-x64",
+      "remediation_commands": [
+        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
       "status": "missing_native_release_artifact"
@@ -174,6 +192,15 @@
       "output_binary_exists": false,
       "package_zip_exists": false,
       "platform": "windows-x64",
+      "remediation_commands": [
+        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
       "status": "missing_native_release_artifact"
@@ -193,6 +220,15 @@
       "output_binary_exists": false,
       "package_zip_exists": false,
       "platform": "windows-x64",
+      "remediation_commands": [
+        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
       "severity": "critical",
       "source": "knowledge/manifests/native-artifact-preflight.json",
       "status": "missing_native_release_artifact"
@@ -258,13 +294,13 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T18:30:00Z",
+  "generated_at": "2026-07-11T19:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "210e23a4aff447aab1a52d70bee9cdab17a2eb2bb015e3aa3968d950c153e6c6",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "bc3fbf1b2a506caa12c5e039881f8e8396f6013df6dead224d3faed37cf8f479",
-    "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
+    "knowledge/manifests/native-artifact-preflight.json": "951f960e1584e1b6290570a21c51ebf26fb11518019e03b9e3cb2319c6b03afe",
     "knowledge/manifests/proxy-preflight.json": "dabb5e576a1a977f0372c14b846da3ee64f6ece5da046009a2a8f17dd3654a73",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
     "knowledge/manifests/signing-policy.json": "521c2680e4130eedb9625d08c09cf37afd2f16849b0b8ddcf0e13b3f7efdba21",

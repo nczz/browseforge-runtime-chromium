@@ -5,6 +5,7 @@ import argparse
 import json
 import datetime as dt
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -364,6 +365,22 @@ def platform_display_name(platform_id: str) -> str:
     return platform_id
 
 
+def native_preflight_next_commands(platform_id: str, status: dict[str, object]) -> list[str]:
+    workdir = shlex.quote(str(status.get("workdir") or DEFAULT_WORKDIR))
+    commands = [
+        f"python3 scripts/chromium_native.py plan --platform {platform_id} --workdir {workdir}",
+        f"python3 scripts/chromium_native.py check --platform {platform_id} --workdir {workdir}",
+        f"python3 scripts/chromium_native.py run-hooks --platform {platform_id} --workdir {workdir} --execute",
+        f"python3 scripts/chromium_native.py gn-gen --platform {platform_id} --workdir {workdir} --execute",
+        f"python3 scripts/chromium_native.py build-chrome --platform {platform_id} --workdir {workdir} --execute",
+    ]
+    if platform_id == "windows-x64":
+        commands.append("GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium")
+    else:
+        commands.append("go build -o bin/browseforge-runtime-chromium ./cmd/browseforge-runtime-chromium")
+    commands.append(f"python3 scripts/chromium_native.py package --platform {platform_id} --workdir {workdir} --execute")
+    return commands
+
 def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[str, object]:
     missing: list[str] = []
     if not status["package_zip_exists"]:
@@ -396,6 +413,7 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
         "status": "packaged_detector_tested" if not missing else "missing_native_release_artifact",
         "status_snapshot": native_status_snapshot(platform_id, status),
         "missing_prerequisites": missing,
+        "next_commands": native_preflight_next_commands(platform_id, status),
     }
     if status["package_zip_exists"]:
         entry["artifact_id"] = status["package_artifact_id"]

@@ -642,6 +642,12 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertIs(windows_snapshot["host_supported"], False)
         self.assertEqual("windows", windows_snapshot["required_host_os"])
         self.assertIs(windows_snapshot["portable_layout_exists"], False)
+        windows_commands = entries["windows-x64"]["next_commands"]
+        self.assertTrue(any("--platform windows-x64" in command for command in windows_commands))
+        self.assertTrue(any("GOOS=windows GOARCH=amd64 go build" in command for command in windows_commands))
+        self.assertTrue(any("build-chrome" in command and "--execute" in command for command in windows_commands))
+        self.assertTrue(any("package" in command and "--execute" in command for command in windows_commands))
+
 
 
     def test_preflight_execute_writes_manifest(self) -> None:
