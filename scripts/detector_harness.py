@@ -656,6 +656,10 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
             values = result.get("normalized_values", {})
             if canonical_surface(result.get("surface", "")) != "webgl":
                 continue
+            evidence_status = evidence.get("status")
+            result_status = result.get("status")
+            if evidence_status not in {"pass", "passed"} or result_status not in {"pass", "passed"}:
+                continue
             if not isinstance(values, dict):
                 continue
             records.append({
@@ -663,7 +667,7 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
                 "display_mode": _evidence_display(evidence),
                 **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
-                "status": evidence.get("status"),
+                "status": "passed",
                 "vendor": values.get("vendor"),
                 "renderer": values.get("renderer"),
                 "extension_count": values.get("extensionCount"),

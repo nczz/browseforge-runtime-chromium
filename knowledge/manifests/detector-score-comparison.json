@@ -259,30 +259,8 @@
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
   "evidence_count": 47,
-  "gaps": [
-    {
-      "detectors": [
-        "sannysoft"
-      ],
-      "finding": "WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.",
-      "gap_id": "webgl_metadata_hashes_missing",
-      "missing_records": [
-        {
-          "detector_id": "sannysoft",
-          "missing": [
-            "extensionCount",
-            "extensionSha256",
-            "parameterSha256",
-            "precisionSha256",
-            "pixelSha256"
-          ],
-          "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711"
-        }
-      ],
-      "surface": "webgl"
-    }
-  ],
-  "generated_at": "2026-07-11T09:58:34.001415+00:00",
+  "gaps": [],
+  "generated_at": "2026-07-11T10:11:02.257495+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

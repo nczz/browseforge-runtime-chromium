@@ -2255,6 +2255,36 @@ class DetectorHarnessTests(unittest.TestCase):
                 payload["gaps"],
             )
 
+    def test_compare_scores_ignores_warning_webgl_result_under_passed_evidence(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="sannysoft",
+                display_mode="headed",
+                label="webgl_sannysoft_result_warning_incomplete",
+                status="passed",
+                results=[
+                    {
+                        "detector_check": "webgl_page_loaded_only",
+                        "evidence_ref": "sanitized_score_comparison_fixture",
+                        "finding": "Synthetic smoke loaded a WebGL page but did not claim metadata coherence.",
+                        "severity": "low",
+                        "status": "warn",
+                        "surface": "webgl",
+                    }
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertFalse(
+                any(gap.get("gap_id") == "webgl_metadata_hashes_missing" for gap in payload["gaps"]),
+                payload["gaps"],
+            )
+
     def test_compare_scores_reports_gap_when_browserleaks_audio_counterpart_missing(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

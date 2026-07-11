@@ -1,5 +1,5 @@
 {
-  "blocker_count": 27,
+  "blocker_count": 26,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -100,12 +100,6 @@
     {
       "blocker_id": "score-comparison:baseline_gaps:native_headed_font_corpus_parity_missing",
       "detail": "{\"detector_id\": \"browserleaks,creepjs,pixelscan\", \"finding\": \"Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.\", \"gap_id\": \"native_headed_font_corpus_parity_missing\", \"required_evidence\": \"native headed Linux/macOS font corpus and detector-score comparison\", \"surface\": \"fonts\"}",
-      "severity": "medium",
-      "source": "knowledge/manifests/detector-score-comparison.json"
-    },
-    {
-      "blocker_id": "score-comparison:gaps:webgl_metadata_hashes_missing",
-      "detail": "{\"detectors\": [\"sannysoft\"], \"finding\": \"WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.\", \"gap_id\": \"webgl_metadata_hashes_missing\", \"missing_records\": [{\"detector_id\": \"sannysoft\", \"missing\": [\"extensionCount\", \"extensionSha256\", \"parameterSha256\", \"precisionSha256\", \"pixelSha256\"], \"run_id\": \"detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711\"}], \"surface\": \"webgl\"}",
       "severity": "medium",
       "source": "knowledge/manifests/detector-score-comparison.json"
     },
@@ -291,11 +285,11 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T11:30:00Z",
+  "generated_at": "2026-07-11T11:45:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
     "detector-summary.json": "c442889d53bc1f909a0ca457543584702b7400e43cc570a95ba31609fb5e1e6c",
-    "knowledge/manifests/detector-score-comparison.json": "2b0b469b35dfbd939f46254e3004743e2752eb1a3d708432ad50ab9e0150c935",
+    "knowledge/manifests/detector-score-comparison.json": "6d3064f32594f12d419342470ae01899617cc50751e890470f46ba0b769a4cfe",
     "knowledge/manifests/fingerprint-surface-status.json": "f2fa53d1446d3072831d6818945f54b7c6bef31c7a52d38ff753d15a42053ab5",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
