@@ -81,6 +81,41 @@ def source_rebuild_blockers(source_acquisition: dict[str, Any]) -> list[dict[str
         )
     return blockers
 
+def source_baseline_blockers(source_acquisition: dict[str, Any]) -> list[dict[str, Any]]:
+    chromium = source_acquisition.get("chromium_base", {})
+    if not isinstance(chromium, dict):
+        return []
+    status = chromium.get("build_output_status", {})
+    if not isinstance(status, dict):
+        return []
+
+    blockers = []
+    if status.get("dev_gn_args_exists") is False:
+        blockers.append(
+            {
+                "blocker_id": "source-acquisition:dev-baseline:gn-args",
+                "detail": "BrowseForgeDev GN args are missing, so the local development baseline has not been generated.",
+                "severity": "medium",
+                "source": "knowledge/manifests/source-acquisition.json",
+                "dependency_profile": chromium.get("dependency_profile_status", {}).get("current_checkout_profile")
+                if isinstance(chromium.get("dependency_profile_status"), dict)
+                else None,
+            }
+        )
+    if status.get("dev_build_ninja_exists") is False:
+        blockers.append(
+            {
+                "blocker_id": "source-acquisition:dev-baseline:build-ninja",
+                "detail": "BrowseForgeDev build.ninja is missing, so the local development baseline cannot be built.",
+                "severity": "medium",
+                "source": "knowledge/manifests/source-acquisition.json",
+                "dependency_profile": chromium.get("dependency_profile_status", {}).get("current_checkout_profile")
+                if isinstance(chromium.get("dependency_profile_status"), dict)
+                else None,
+            }
+        )
+    return blockers
+
 def release_resource_requirements(
     native_preflight: dict[str, Any],
     proxy_preflight: dict[str, Any],
@@ -177,6 +212,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
             )
 
     blockers.extend(source_rebuild_blockers(source_acquisition))
+    blockers.extend(source_baseline_blockers(source_acquisition))
 
     if native_preflight.get("release_grade_ready") is not True:
         for entry in native_preflight.get("platforms", []):
