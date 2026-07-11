@@ -47,11 +47,11 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
-      "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
+      "sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 403236086,
+      "size_bytes": 403257580,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b",
+      "wrapper_binary_sha256": "51bfcd1fe8c7455c46c6bb35cdf3fb7b764430220f7a4edfd221e57785c17dff",
       "wrapper_version": "v0.1.0-alpha.0"
     },
     {
@@ -92,7 +92,7 @@
     ],
     "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
     "size_bytes": 403236086,
-    "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b"
+    "wrapper_binary_sha256": "51bfcd1fe8c7455c46c6bb35cdf3fb7b764430220f7a4edfd221e57785c17dff"
   },
   "packager_contract": "build/package_runtime.py supports linux-x64 runtime dependency layout, macos-arm64 .app bundle layout, and windows-x64 portable Chromium directory layout; platforms not listed in supported_package_platforms cannot be generated without an explicit runtime asset contract.",
   "policy": {

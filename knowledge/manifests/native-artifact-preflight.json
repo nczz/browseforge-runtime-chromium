@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T20:30:00Z",
+  "generated_at": "2026-07-12T07:40:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -20,7 +20,8 @@
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True"
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True",
+        "knowledge/manifests/accept-language-header-smoke.json"
       ],
       "missing_prerequisites": [],
       "next_commands": [

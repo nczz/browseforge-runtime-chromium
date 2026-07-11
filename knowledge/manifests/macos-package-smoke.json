@@ -1,14 +1,14 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-  "artifact_sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
-  "artifact_size_bytes": 403236086,
+  "artifact_sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
+  "artifact_size_bytes": 403257580,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -q dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip -d <tempdir>",
       "observed": {
-        "archive_sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
-        "archive_size_bytes": 403233897
+        "archive_sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
+        "archive_size_bytes": 403257580
       },
       "status": "passed"
     },
@@ -25,13 +25,13 @@
       "check": "wrapper_metadata_on_macos_host",
       "command": "./browseforge-runtime-chromium metadata",
       "observed": {
-        "capabilities": [
-          "native_proxy",
-          "persistent_context",
-          "playwright_bind",
-          "seed_fingerprint",
-          "webrtc_masking"
-        ],
+        "capabilities": {
+          "native_proxy": true,
+          "persistent_context": true,
+          "playwright_bind": true,
+          "seed_fingerprint": true,
+          "webrtc_masking": true
+        },
         "family": "chromium",
         "runtime_id": "browseforge-chromium",
         "wrapper_version": "v0.1.0-alpha.0"
@@ -40,7 +40,7 @@
     },
     {
       "check": "wrapper_doctor_plan_on_macos_host",
-      "command": "./browseforge-runtime-chromium doctor --browser-binary Chromium.app/Contents/MacOS/Chromium ...",
+      "command": "./browseforge-runtime-chromium doctor --browser-binary Chromium.app/Contents/MacOS/Chromium --dry-run-json ...",
       "observed": {
         "arch": "arm64",
         "ok": true,
@@ -82,7 +82,7 @@
       "status": "passed"
     }
   ],
-  "generated_at": "2026-07-11T09:23:18Z",
+  "generated_at": "2026-07-12T07:40:00Z",
   "limitations": [
     "This is a packaged runtime launch/CDP smoke, not a release-grade live detector matrix.",
     "Python zipfile.extractall does not restore executable mode bits even though the archive records them; smoke extraction uses /usr/bin/unzip.",

@@ -1,0 +1,26 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "artifact_sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
+  "browser_version": "150.0.7871.101",
+  "generated_at": "2026-07-12T07:40:00Z",
+  "observed": {
+    "accept_language": "en-US,en;q=0.9",
+    "path": "/probe",
+    "user_agent_family": "Chromium"
+  },
+  "probe": {
+    "mode": "local_http_header_observer",
+    "network": "loopback_not_committed",
+    "raw_capture_committed": false
+  },
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "status": "passed",
+  "surfaces": [
+    "locale"
+  ],
+  "switches": {
+    "fingerprint_accept_language": "en-US",
+    "fingerprint_locale": "zh-TW"
+  }
+}
