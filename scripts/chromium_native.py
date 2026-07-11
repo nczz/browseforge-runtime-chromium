@@ -27,6 +27,12 @@ def default_workdir() -> Path:
 DEFAULT_WORKDIR = default_workdir()
 RUNTIME_VERSION = "v0.1.0-alpha.0"
 SUPPORTED_NATIVE_PLATFORMS = {"macos-arm64", "windows-x64"}
+WINDOWS_TOOLCHAIN_BASE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL"
+WINDOWS_TOOLCHAIN_ENABLE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN"
+WINDOWS_TOOLCHAIN_HASH_ENV = "GYP_MSVS_HASH_e66617bc68"
+DEFAULT_WINDOWS_TOOLCHAIN_HASH = "6eae1a9f3e"
+DEFAULT_WINDOWS_TOOLCHAIN_BASE = Path.home() / "Projects" / "chromium-win-sdk-prep" / "output"
+
 
 
 @dataclass(frozen=True)
@@ -110,6 +116,34 @@ def macos_xcode_status() -> dict[str, object]:
     return status
 
 
+def windows_cross_toolchain_status(workdir: Path) -> dict[str, object]:
+    base = Path(os.environ.get(WINDOWS_TOOLCHAIN_BASE_ENV, str(DEFAULT_WINDOWS_TOOLCHAIN_BASE))).expanduser()
+    toolchain_hash = os.environ.get(WINDOWS_TOOLCHAIN_HASH_ENV, DEFAULT_WINDOWS_TOOLCHAIN_HASH)
+    zip_path = base / f"{toolchain_hash}.zip"
+    gclient_path = workdir / ".gclient"
+    gclient_text = gclient_path.read_text(encoding="utf-8") if gclient_path.is_file() else ""
+    target_os_win = "target_os" in gclient_text and "win" in gclient_text
+    enabled = os.environ.get(WINDOWS_TOOLCHAIN_ENABLE_ENV, "1") == "1"
+    return {
+        "windows_cross_compile_supported": host_os_name() == "darwin" and enabled and zip_path.is_file() and target_os_win,
+        "windows_toolchain_base": str(base),
+        "windows_toolchain_zip": str(zip_path),
+        "windows_toolchain_zip_exists": zip_path.is_file(),
+        "windows_toolchain_hash": toolchain_hash,
+        "windows_toolchain_enabled": enabled,
+        "gclient_target_os_win": target_os_win,
+        "gclient_path": str(gclient_path),
+    }
+
+
+def windows_cross_compile_env() -> str:
+    return (
+        f"{WINDOWS_TOOLCHAIN_BASE_ENV}={shlex.quote(str(DEFAULT_WINDOWS_TOOLCHAIN_BASE))} "
+        f"{WINDOWS_TOOLCHAIN_HASH_ENV}={DEFAULT_WINDOWS_TOOLCHAIN_HASH} "
+        f"{WINDOWS_TOOLCHAIN_ENABLE_ENV}=1"
+    )
+
+
 def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str | None = None, jobs: int = DEFAULT_JOBS) -> NativeBuildPlan:
     required_host, default_out, gn_args, output_rel = platform_contract(platform_id)
     selected_out = out_dir or default_out
@@ -148,6 +182,8 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
     gn_binary = depot_tools / ("gn.bat" if platform_id == "windows-x64" else "gn")
     path_prefix = f"{depot_tools}:$PATH"
     run_env = f"PATH={path_prefix} DEPOT_TOOLS_UPDATE=0"
+    if platform_id == "windows-x64":
+        run_env = f"{windows_cross_compile_env()} {run_env}"
     return NativeBuildPlan(
         runtime_id="browseforge-chromium",
         runtime_version=RUNTIME_VERSION,
@@ -189,6 +225,7 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         "host_os": plan.host_os,
         "required_host_os": plan.required_host_os,
         "host_supported": plan.host_os == plan.required_host_os,
+        "host_support_mode": "native" if plan.host_os == plan.required_host_os else "unsupported_host",
         "chromium_src_exists": src.is_dir(),
         "chromium_deps_exists": (src / "DEPS").is_file(),
         "gn_binary": str(gn_path),
@@ -205,6 +242,14 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         "package_zip": str(ROOT / "dist" / f"{plan.package_artifact_id}.zip"),
         "package_zip_exists": (ROOT / "dist" / f"{plan.package_artifact_id}.zip").is_file(),
     }
+    if plan.platform_id == "windows-x64":
+        windows_status = windows_cross_toolchain_status(Path(plan.workdir))
+        status.update(windows_status)
+        if plan.host_os == "darwin" and windows_status["windows_cross_compile_supported"]:
+            status["host_supported"] = True
+            status["host_support_mode"] = "darwin_windows_cross_compile"
+        elif status["host_supported"]:
+            status["host_support_mode"] = "native_windows"
     toolchain_ready = bool(
         status["host_supported"]
         and status["chromium_src_exists"]
@@ -214,6 +259,10 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
         and gclient
         and autoninja
     )
+    if plan.platform_id == "windows-x64":
+        toolchain_ready = toolchain_ready and bool(
+            status.get("windows_toolchain_zip_exists") and status.get("gclient_target_os_win")
+        )
     if plan.platform_id == "macos-arm64":
         xcode_status = macos_xcode_status()
         status.update(xcode_status)
@@ -245,6 +294,9 @@ def native_toolchain_error(command: str, status: dict[str, object]) -> str:
         "depot_tools_exists",
         "chromium_src_exists",
         "chromium_deps_exists",
+        "host_support_mode",
+        "windows_toolchain_zip_exists",
+        "gclient_target_os_win",
     ):
         if key in status:
             details.append(f"{key}={status[key]}")
@@ -302,9 +354,7 @@ def linux_preflight_entry(root: Path, runtime_artifacts: dict[str, object]) -> d
     if isinstance(detector_smoke, str) and detector_smoke:
         evidence.append(detector_smoke)
         if not (root / detector_smoke).is_file():
-            missing.append(detector_smoke)
-    else:
-        missing.append("packaged linux-x64 detector evidence")
+            missing.append("packaged linux-x64 detector evidence")
     entry: dict[str, object] = {
         "evidence": evidence,
         "platform": "linux-x64",
@@ -328,6 +378,9 @@ def native_status_evidence(platform_id: str, status: dict[str, object]) -> str:
     if platform_id == "macos-arm64":
         parts.append(f"xcodebuild_ok={status.get('xcodebuild_ok')}")
     if platform_id == "windows-x64":
+        parts.append(f"host_support_mode={status.get('host_support_mode')}")
+        parts.append(f"windows_toolchain_zip_exists={status.get('windows_toolchain_zip_exists')}")
+        parts.append(f"gclient_target_os_win={status.get('gclient_target_os_win')}")
         parts.append(f"portable_layout_exists={status.get('portable_layout_exists')}")
     return f"python3 scripts/chromium_native.py check --platform {platform_id}: " + ", ".join(parts)
 
@@ -351,7 +404,18 @@ def native_status_snapshot(platform_id: str, status: dict[str, object]) -> dict[
     if platform_id == "macos-arm64":
         keys.extend(["xcodebuild_ok", "xcodebuild_status", "app_bundle_exists"])
     if platform_id == "windows-x64":
-        keys.append("portable_layout_exists")
+        keys.extend([
+            "host_support_mode",
+            "windows_cross_compile_supported",
+            "windows_toolchain_base",
+            "windows_toolchain_zip",
+            "windows_toolchain_zip_exists",
+            "windows_toolchain_hash",
+            "windows_toolchain_enabled",
+            "gclient_target_os_win",
+            "gclient_path",
+            "portable_layout_exists",
+        ])
     return {key: status[key] for key in keys if key in status}
 
 

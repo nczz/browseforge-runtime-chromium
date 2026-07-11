@@ -126,8 +126,8 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual(str(host_workdir), payload["workdir"])
         self.assertEqual(str(host_workdir / "src"), payload["chromium_src_dir"])
 
-    def test_windows_plan_targets_x64_chrome_exe_and_windows_host(self) -> None:
-        """The Windows native plan cross-targets win/x64 but declares that execution requires Windows."""
+    def test_windows_plan_targets_x64_chrome_exe_and_cross_compile_env(self) -> None:
+        """The Windows native plan cross-targets win/x64 and carries the macOS cross-toolchain env."""
         with tempfile.TemporaryDirectory() as td:
             workdir = Path(td) / "chromium"
             payload = self._json_from_script(
@@ -146,6 +146,10 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual(str(workdir / "src" / "out" / "TestWindowsX64" / "chrome.exe"), payload["output_binary"])
         package_command = payload["package_command"]
         self.assertEqual("windows-x64", package_command[package_command.index("--platform") + 1])
+        gn_command = payload["commands"]["gn-gen"][2]
+        self.assertIn("DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=", gn_command)
+        self.assertIn("GYP_MSVS_HASH_e66617bc68=6eae1a9f3e", gn_command)
+        self.assertIn("DEPOT_TOOLS_WIN_TOOLCHAIN=1", gn_command)
 
     def test_plan_exposes_checkout_depot_tools_and_wraps_native_commands(self) -> None:
         """Run-hooks/build commands execute with the checkout depot_tools first in PATH."""
@@ -555,6 +559,51 @@ class ChromiumNativePlanTests(unittest.TestCase):
             str(raised.exception),
         )
         run_command.assert_not_called()
+
+    def test_windows_check_accepts_macos_cross_toolchain_fixture(self) -> None:
+        """A macOS host can satisfy Windows host support when the pinned toolchain zip and target_os are present."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src, depot_tools = self._write_native_checkout_fixtures(workdir)
+            (depot_tools / "gn.bat").write_text("@echo off\n", encoding="utf-8")
+            (workdir / ".gclient").write_text("target_os = ['win']\n", encoding="utf-8")
+            toolchain_dir = tmp_path / "toolchain"
+            toolchain_dir.mkdir()
+            (toolchain_dir / "6eae1a9f3e.zip").write_text("zip", encoding="utf-8")
+            argv = [
+                "chromium_native.py",
+                "check",
+                "--platform",
+                "windows-x64",
+                "--workdir",
+                str(workdir),
+                "--out-dir",
+                "out/TestWindowsX64",
+            ]
+            stdout = io.StringIO()
+            with (
+                mock.patch.dict(
+                    os.environ,
+                    {
+                        "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL": str(toolchain_dir),
+                        "GYP_MSVS_HASH_e66617bc68": "6eae1a9f3e",
+                        "DEPOT_TOOLS_WIN_TOOLCHAIN": "1",
+                    },
+                ),
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch("sys.stdout", stdout),
+            ):
+                chromium_native.main()
+
+        status = json.loads(stdout.getvalue())["status"]
+        self.assertIs(status["host_supported"], True)
+        self.assertEqual("darwin_windows_cross_compile", status["host_support_mode"])
+        self.assertIs(status["windows_cross_compile_supported"], True)
+        self.assertIs(status["windows_toolchain_zip_exists"], True)
+        self.assertIs(status["gclient_target_os_win"], True)
+        self.assertIs(status["native_toolchain_ready"], True)
 
     def test_preflight_generates_supported_platform_manifest_without_platform_arg(self) -> None:
         """Native preflight emits a full supported-platform manifest from runtime artifacts and native checks."""

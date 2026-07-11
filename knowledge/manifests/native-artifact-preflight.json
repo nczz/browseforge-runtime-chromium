@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T19:00:00Z",
+  "generated_at": "2026-07-11T19:30:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -60,12 +60,10 @@
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=False, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, portable_layout_exists=False"
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=False, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
       ],
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
-        "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
-        "BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101",
         "native Windows detector evidence for the packaged artifact"
       ],
       "next_commands": [
@@ -81,20 +79,29 @@
       "ready": false,
       "status": "missing_native_release_artifact",
       "status_snapshot": {
-        "build_ninja_exists": false,
+        "build_ninja_exists": true,
         "chromium_deps_exists": true,
         "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
         "chromium_src_exists": true,
         "depot_tools_exists": true,
+        "gclient_path": "/Users/chun/Projects/browser-source/browseforge-chromium/.gclient",
+        "gclient_target_os_win": true,
         "gn_binary_exists": true,
         "host_os": "darwin",
-        "host_supported": false,
-        "native_toolchain_ready": false,
-        "out_args_exists": false,
+        "host_support_mode": "darwin_windows_cross_compile",
+        "host_supported": true,
+        "native_toolchain_ready": true,
+        "out_args_exists": true,
         "output_binary_exists": false,
         "package_zip_exists": false,
-        "portable_layout_exists": false,
+        "portable_layout_exists": true,
         "required_host_os": "windows",
+        "windows_cross_compile_supported": true,
+        "windows_toolchain_base": "/Users/chun/Projects/chromium-win-sdk-prep/output",
+        "windows_toolchain_enabled": true,
+        "windows_toolchain_hash": "6eae1a9f3e",
+        "windows_toolchain_zip": "/Users/chun/Projects/chromium-win-sdk-prep/output/6eae1a9f3e.zip",
+        "windows_toolchain_zip_exists": true,
         "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
       }
     }

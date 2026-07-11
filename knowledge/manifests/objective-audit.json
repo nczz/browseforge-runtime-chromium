@@ -1,5 +1,5 @@
 {
-  "blocker_count": 25,
+  "blocker_count": 23,
   "deliverables": [
     {
       "blockers": [],
@@ -132,8 +132,6 @@
         "fingerprint-surface:proxy/IP coherence",
         "native-artifact:windows-x64:0",
         "native-artifact:windows-x64:1",
-        "native-artifact:windows-x64:2",
-        "native-artifact:windows-x64:3",
         "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
         "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL",
         "release-gate:live-detector-evidence",
@@ -154,7 +152,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-11T19:00:00Z",
+  "generated_at": "2026-07-11T19:30:00Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,
