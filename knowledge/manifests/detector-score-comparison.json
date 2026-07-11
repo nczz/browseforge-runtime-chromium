@@ -308,9 +308,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 56,
+  "evidence_count": 57,
   "gaps": [],
-  "generated_at": "2026-07-11T11:57:48.246608+00:00",
+  "generated_at": "2026-07-11T12:10:27.259879+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

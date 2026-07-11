@@ -2276,7 +2276,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
   return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, pixelscanPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
-    evaluate_timeout = max(30, wait_seconds + 20)
+    evaluate_timeout = max(60 if detector_id == "iphey" else 30, wait_seconds + 20)
     result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=evaluate_timeout)
     value = result.get("result", {}).get("value", {})
     elapsed = round(time.time() - started, 2)

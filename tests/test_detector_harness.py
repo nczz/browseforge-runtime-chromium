@@ -982,39 +982,94 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("Pixelscan fingerprint check", record["observed"]["text_excerpt"])
 
     def test_collect_page_uses_bounded_extended_runtime_evaluate_timeout(self):
-        value = self.pixelscan_client_hints_value()
-        value["text"] = "Pixelscan fingerprint check"
+        module = self.harness_module
+        original_sleep = module.time.sleep
+        self.addCleanup(setattr, module.time, "sleep", original_sleep)
+        module.time.sleep = lambda seconds: None
 
-        class FakeCDP:
-            def __init__(self, page_value):
-                self.page_value = page_value
-                self.evaluate_timeout = None
+        for name, wait_seconds, expected_timeout in (
+            ("short normal detector wait uses 30 second floor", 0, 30),
+            ("long normal detector wait extends beyond floor", 30, 50),
+        ):
+            with self.subTest(name=name):
+                value = self.pixelscan_client_hints_value()
+                value["text"] = "Pixelscan fingerprint check"
 
-            def call(self, method, params=None, *, session_id=None, timeout=20):
-                if method == "Target.createTarget":
-                    return {"targetId": "target-1"}, []
-                if method == "Target.attachToTarget":
-                    return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
-                    return {}, []
-                if method == "Runtime.evaluate":
-                    self.evaluate_timeout = timeout
-                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
-                raise AssertionError(f"unexpected CDP method: {method}")
+                class FakeCDP:
+                    def __init__(self, page_value):
+                        self.page_value = page_value
+                        self.evaluate_timeout = None
 
-            def events_until(self, predicate, *, timeout=30):
-                return []
+                    def call(self, method, params=None, *, session_id=None, timeout=20):
+                        if method == "Target.createTarget":
+                            return {"targetId": "target-1"}, []
+                        if method == "Target.attachToTarget":
+                            return {"sessionId": "session-1"}, []
+                        if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                            return {}, []
+                        if method == "Runtime.evaluate":
+                            self.evaluate_timeout = timeout
+                            return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                        raise AssertionError(f"unexpected CDP method: {method}")
 
-        cdp = FakeCDP(value)
-        self.harness_module.collect_page(
-            cdp,
-            "pixelscan",
-            "Pixelscan",
-            "https://pixelscan.net/fingerprint-check",
-            wait_seconds=30,
-        )
+                    def events_until(self, predicate, *, timeout=30):
+                        return []
 
-        self.assertEqual(cdp.evaluate_timeout, 50)
+                cdp = FakeCDP(value)
+                self.harness_module.collect_page(
+                    cdp,
+                    "pixelscan",
+                    "Pixelscan",
+                    "https://pixelscan.net/fingerprint-check",
+                    wait_seconds=wait_seconds,
+                )
+
+                self.assertEqual(cdp.evaluate_timeout, expected_timeout)
+
+    def test_collect_page_uses_iphey_minimum_runtime_evaluate_timeout(self):
+        module = self.harness_module
+        original_sleep = module.time.sleep
+        self.addCleanup(setattr, module.time, "sleep", original_sleep)
+        module.time.sleep = lambda seconds: None
+
+        for name, wait_seconds, expected_timeout in (
+            ("short iphey wait uses 60 second floor", 0, 60),
+            ("long iphey wait extends beyond floor", 45, 65),
+        ):
+            with self.subTest(name=name):
+                value = self.iphey_client_hints_value()
+                value["text"] = "iphey fingerprint check"
+
+                class FakeCDP:
+                    def __init__(self, page_value):
+                        self.page_value = page_value
+                        self.evaluate_timeout = None
+
+                    def call(self, method, params=None, *, session_id=None, timeout=20):
+                        if method == "Target.createTarget":
+                            return {"targetId": "target-1"}, []
+                        if method == "Target.attachToTarget":
+                            return {"sessionId": "session-1"}, []
+                        if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                            return {}, []
+                        if method == "Runtime.evaluate":
+                            self.evaluate_timeout = timeout
+                            return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                        raise AssertionError(f"unexpected CDP method: {method}")
+
+                    def events_until(self, predicate, *, timeout=30):
+                        return []
+
+                cdp = FakeCDP(value)
+                self.harness_module.collect_page(
+                    cdp,
+                    "iphey",
+                    "iphey",
+                    "https://iphey.com/",
+                    wait_seconds=wait_seconds,
+                )
+
+                self.assertEqual(cdp.evaluate_timeout, expected_timeout)
 
     def test_collect_page_uses_iphey_classifier_without_raw_text_payload(self):
         value = self.iphey_client_hints_value()

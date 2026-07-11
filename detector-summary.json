@@ -58,8 +58,8 @@
     }
   ],
   "coverage_platform": "macos-arm64",
-  "evidence_count": 56,
-  "generated_at": "2026-07-11T13:45:00Z",
+  "evidence_count": 57,
+  "generated_at": "2026-07-11T14:00:00Z",
   "rows": [
     {
       "detector_id": "browserleaks",
@@ -364,6 +364,12 @@
     {
       "detector_id": "creepjs",
       "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_webgl_headed_packaged_direct_20260711.json",
+      "platform": "macos-arm64",
+      "status": "passed"
+    },
+    {
+      "detector_id": "iphey",
+      "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/iphey/detrun_v0.1.0-alpha.0_macos-arm64_iphey_headed_packaged_direct_20260711.json",
       "platform": "macos-arm64",
       "status": "passed"
     },

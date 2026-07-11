@@ -99,8 +99,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
-      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 packaged headed SannySoft evidence plus packaged BrowserLeaks WebGL/audio/fonts/WebRTC, BrowserScan client-hints/audio/fonts/canvas/storage/permissions/automation, BrowserScan WebGL, CreepJS WebGL/audio/fonts, and Pixelscan audio/fonts/canvas evidence exists for the built BrowseForge Chromium app; older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows, external proxy, and remaining packaged native macOS/Windows detector matrix coverage remain absent.",
-      "result": "linux_headless_headed_xvfb_plus_macos_packaged_browserleaks_browserscan_creepjs_pixelscan_direct_partial",
+      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, iphey, and CreepJS smokes now exist in both headless and headed/Xvfb display modes where supported. macOS arm64 packaged headed SannySoft evidence plus packaged BrowserLeaks WebGL/audio/fonts/WebRTC, BrowserScan client-hints/audio/fonts/canvas/storage/permissions/automation, BrowserScan WebGL, iphey client-hints/audio/fonts/canvas/locale/permissions/automation, CreepJS WebGL/audio/fonts, and Pixelscan audio/fonts/canvas evidence exists for the built BrowseForge Chromium app; older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows, external proxy, and remaining packaged native macOS/Windows detector matrix coverage remain absent.",
+      "result": "linux_headless_headed_xvfb_plus_macos_packaged_browserleaks_browserscan_iphey_creepjs_pixelscan_direct_partial",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -252,12 +252,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T13:45:00Z",
+  "generated_at": "2026-07-11T14:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "bba0d513de052e48027bf0fd00aff15738d8275552719aa3636b54df8610ca8a",
-    "detector-summary.json": "436c27b138809d340d2417dc3b9a01ea66a7a5ed3e08776ee343042414bab185",
-    "knowledge/manifests/detector-score-comparison.json": "195089375529bb044d96c48b4b866d214490d95406ae09265860b3a285c5145e",
-    "knowledge/manifests/fingerprint-surface-status.json": "e5d2e168dc6d76fea5770af8eee25e9ccb74bf26fdb310adb610d604269f69bc",
+    "detector-summary.json": "226f85900404bfafc55d72d91f0096456d9f2fd84c16e0d7e8897d7766e5a45b",
+    "knowledge/manifests/detector-score-comparison.json": "fa670c6d96f6a0daf037b4f2fabc23ae70926f93353a116039e6e0b9a29e9fd3",
+    "knowledge/manifests/fingerprint-surface-status.json": "8e8a2f330657dc9bb94d5eab3fc49ecf8eed74c6511ed48d3df502a570dbe338",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "db3ec009736f3b41a157796bfd2d6a9aabd223e587b30cdfff913e567f74cceb",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
