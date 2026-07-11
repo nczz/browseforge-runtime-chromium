@@ -99,8 +99,14 @@ class ChromiumNativePlanTests(unittest.TestCase):
             payload["package_artifact_id"],
         )
         package_command = payload["package_command"]
+        self.assertEqual("package", package_command[2])
+        self.assertEqual("package", payload["commands"]["package"][2])
+        self.assertNotIn("--execute", payload["commands"]["package"])
         self.assertEqual("macos-arm64", package_command[package_command.index("--platform") + 1])
         self.assertEqual("macos-arm64", payload["commands"]["package"][package_command.index("--platform") + 1])
+        self.assertEqual(str(ROOT / "dist"), package_command[package_command.index("--output-dir") + 1])
+        self.assertEqual("surface-switch-propagation-native-audit", package_command[package_command.index("--patchset-id") + 1])
+        self.assertEqual("alpha", package_command[package_command.index("--release-channel") + 1])
 
     def test_cli_default_workdir_can_use_host_profile_env(self) -> None:
         with tempfile.TemporaryDirectory() as td:

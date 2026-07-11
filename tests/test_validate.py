@@ -259,7 +259,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
 
     def test_runtime_artifact_manifest_distinguishes_supported_contracts_from_artifacts(self) -> None:
-        """macos-arm64 and windows-x64 have packager contracts, but artifacts still list only produced packages."""
+        """macos-arm64 is packaged while windows-x64 remains a supported contract without an artifact."""
         with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
             manifest = json.load(fh)
 
@@ -271,7 +271,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertNotIn("windows-x64", unsupported)
 
         artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
-        self.assertEqual({"linux-x64"}, artifact_platforms)
+        self.assertEqual({"linux-x64", "macos-arm64"}, artifact_platforms)
         self.assertGreater(set(manifest["supported_package_platforms"]), artifact_platforms)
 
     def test_validate_allows_supported_package_contract_without_artifact(self) -> None:

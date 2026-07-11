@@ -27,6 +27,32 @@
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
       "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6",
       "wrapper_version": "v0.1.0-alpha.0"
+    },
+    {
+      "arch": "arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+      "browseforge_compatibility": {
+        "min_version": "v2.0.0",
+        "profile_field": "runtime_id"
+      },
+      "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
+      "browser_version": "150.0.7871.101",
+      "created_at": "2026-07-11T08:43:17.017577+00:00",
+      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "os": "macos",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "platform": "macos-arm64",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/provenance.json",
+      "release_channel": "alpha",
+      "runtime_id": "browseforge-chromium",
+      "runtime_version": "v0.1.0-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
+      "sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
+      "signature": "unsigned-dev-artifact",
+      "size_bytes": 403233897,
+      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "wrapper_binary_sha256": "96f5921334f282940cdb67199f517635423ca4d37fac99c4fdfc84f345de62c2",
+      "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
   "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",

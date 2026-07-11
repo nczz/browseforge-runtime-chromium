@@ -1,5 +1,5 @@
 {
-  "blocker_count": 40,
+  "blocker_count": 36,
   "deliverables": [
     {
       "blockers": [],
@@ -104,7 +104,6 @@
     },
     {
       "blockers": [
-        "native platform not ready: macos-arm64",
         "native platform not ready: windows-x64"
       ],
       "deliverable_id": "native_release_artifacts",
@@ -142,9 +141,6 @@
         "fingerprint-surface:cross-platform drift",
         "fingerprint-surface:fonts",
         "fingerprint-surface:proxy/IP coherence",
-        "native-artifact:macos-arm64:0",
-        "native-artifact:macos-arm64:1",
-        "native-artifact:macos-arm64:2",
         "native-artifact:windows-x64:0",
         "native-artifact:windows-x64:1",
         "native-artifact:windows-x64:2",
@@ -169,7 +165,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-11T05:31:00Z",
+  "generated_at": "2026-07-11T10:30:00Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,
