@@ -289,6 +289,24 @@ def validate_source_dependency_profile(source_acquisition: dict) -> None:
     note = profile.get("profile_switching_note")
     if not isinstance(note, str) or "shared external checkout" not in note:
         raise SystemExit("source-acquisition dependency_profile_status must document shared checkout profile switching")
+    workdir_contract = profile.get("profile_isolated_workdir_contract")
+    if not isinstance(workdir_contract, dict):
+        raise SystemExit("source-acquisition dependency_profile_status must record profile_isolated_workdir_contract")
+    required_workdir_envs = {
+        "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
+        "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
+        "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
+    }
+    for key, expected in required_workdir_envs.items():
+        if workdir_contract.get(key) != expected:
+            raise SystemExit(f"source-acquisition profile_isolated_workdir_contract {key} must be {expected}")
+    helper_notes = [
+        str(workdir_contract.get("source_helper_default", "")),
+        str(workdir_contract.get("docker_helper_default", "")),
+    ]
+    for expected in required_workdir_envs.values():
+        if not any(expected in note for note in helper_notes):
+            raise SystemExit(f"source-acquisition profile_isolated_workdir_contract must document {expected}")
 
 
 def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict) -> None:

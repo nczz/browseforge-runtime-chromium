@@ -857,6 +857,25 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("dependency_profile_status", message)
         self.assertIn("--deps=mac", message)
 
+    def test_validate_rejects_source_acquisition_without_profile_isolated_workdirs(self) -> None:
+        """source-acquisition.json must gate host and Linux Docker profile-specific checkout paths."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+            source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+            source_acquisition["chromium_base"]["dependency_profile_status"].pop("profile_isolated_workdir_contract")
+            self._write_json(source_acquisition_path, source_acquisition)
+
+            message = self._run_validate_expect_exit(module, temp_root)
+
+        self.assertRegex(message, r"source[- ]acquisition", message)
+        self.assertIn("profile_isolated_workdir_contract", message)
+        self.assertIn("dependency_profile_status", message)
+
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
         module = self._load_validate_module()
@@ -1824,6 +1843,13 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "windows_gn_exists": False,
                         "source_sync_command_uses_host_deps": "python3 scripts/chromium_source.py acquire --execute --step sync-deps expands to gclient sync --with_branch_heads --with_tags --deps=mac on Darwin",
                         "profile_switching_note": "The shared external checkout is dependency-profile specific; Docker linux sync and Darwin mac sync must not be treated as simultaneously ready.",
+                        "profile_isolated_workdir_contract": {
+                            "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
+                            "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
+                            "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
+                            "source_helper_default": "scripts/chromium_source.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before BROWSEFORGE_CHROMIUM_WORKDIR.",
+                            "docker_helper_default": "scripts/chromium_docker.py uses BROWSEFORGE_CHROMIUM_LINUX_WORKDIR before BROWSEFORGE_CHROMIUM_WORKDIR.",
+                        },
                     },
                     "native_build_automation": self._native_build_automation_fixture(),
                     "source_checkout_status": "checked_out_pinned_ref",

@@ -415,7 +415,7 @@
       "source": "knowledge/manifests/source-acquisition.json"
     }
   ],
-  "generated_at": "2026-07-11T01:40:00Z",
+  "generated_at": "2026-07-11T01:48:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
@@ -425,7 +425,7 @@
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "14ca25dd85cef8e942e428e6492112c60afed5094419db4b7d007a736b849a25"
+    "knowledge/manifests/source-acquisition.json": "3aed6f66fafac67a8a63c9170d1b1878addda2962b00da7e93b31193facb8da0"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",
