@@ -42,6 +42,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/signing-policy.json",
     "knowledge/manifests/release-status.json",
     "knowledge/manifests/source-acquisition.json",
+    "knowledge/manifests/objective-audit.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
     "browser/stealth/stealth_switches.h",
@@ -57,6 +58,7 @@ REQUIRED_FILES = [
     "scripts/chromium_docker.py",
     "scripts/chromium_native.py",
     "scripts/release_status.py",
+    "scripts/objective_audit.py",
     "scripts/package_linux_runtime.py",
     "scripts/apply_webdriver_patch.py",
     "scripts/patch_ops.py",
@@ -115,6 +117,7 @@ REQUIRED_FILES = [
     "tests/test_chromium_docker.py",
     "tests/test_chromium_native.py",
     "tests/test_release_status.py",
+    "tests/test_objective_audit.py",
     "internal/stealth/persona_test.go",
     "tests/test_stealth_scaffold.py",
 ]
@@ -746,6 +749,52 @@ def validate_release_status(release_status: dict) -> None:
         if input_sha256.get(path) != expected:
             raise SystemExit(f"release status input hash drifted for {path}")
 
+
+OBJECTIVE_AUDIT_DELIVERABLES = {
+    "source_build_baseline",
+    "native_stealth_substrate_patchset",
+    "source_acquisition_automation",
+    "manifest_gates",
+    "browseforge_integration_path",
+    "fingerprint_surface_implementation",
+    "native_release_artifacts",
+    "release_grade_cutover",
+}
+
+
+def validate_objective_audit(objective_audit: dict, release_status: dict) -> None:
+    if objective_audit.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("objective audit runtime_id must be browseforge-chromium")
+    if objective_audit.get("schema_version") != "1.0":
+        raise SystemExit("objective audit schema_version must be 1.0")
+    deliverables = objective_audit.get("deliverables", [])
+    if not isinstance(deliverables, list):
+        raise SystemExit("objective audit deliverables must be an array")
+    deliverable_ids = [entry.get("deliverable_id") for entry in deliverables if isinstance(entry, dict)]
+    if set(deliverable_ids) != OBJECTIVE_AUDIT_DELIVERABLES:
+        raise SystemExit(f"objective audit deliverables drifted: {deliverable_ids!r}")
+    if len(deliverable_ids) != len(set(deliverable_ids)):
+        raise SystemExit("objective audit deliverable ids must be unique")
+    blocker_total = 0
+    for entry in deliverables:
+        if not isinstance(entry, dict):
+            raise SystemExit("objective audit deliverables must be objects")
+        for key in ["deliverable_id", "title"]:
+            if not isinstance(entry.get(key), str) or not entry.get(key):
+                raise SystemExit(f"objective audit deliverable missing {key}")
+        if not isinstance(entry.get("satisfied"), bool):
+            raise SystemExit(f"objective audit deliverable {entry.get('deliverable_id')} satisfied must be boolean")
+        for key in ["requirements", "evidence", "blockers"]:
+            if not isinstance(entry.get(key), list):
+                raise SystemExit(f"objective audit deliverable {entry.get('deliverable_id')} {key} must be an array")
+        blocker_total += len(entry["blockers"])
+    if objective_audit.get("blocker_count") != blocker_total:
+        raise SystemExit("objective audit blocker_count must match deliverable blockers")
+    if objective_audit.get("overall_ready") != all(entry["satisfied"] for entry in deliverables):
+        raise SystemExit("objective audit overall_ready must match deliverables")
+    if objective_audit.get("release_grade_ready") != release_status.get("release_grade_ready"):
+        raise SystemExit("objective audit release_grade_ready must match release-status")
+
 STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no runtime graph index",
     "no detector baseline",
@@ -1032,6 +1081,8 @@ def main() -> None:
     validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
     release_status = load_json("knowledge/manifests/release-status.json")
     validate_release_status(release_status)
+    objective_audit = load_json("knowledge/manifests/objective-audit.json")
+    validate_objective_audit(objective_audit, release_status)
     for artifact in runtime_artifacts.get("artifacts", []):
         artifact_id = artifact["artifact_id"]
         node_id = f"RuntimeArtifact:{artifact_id}"

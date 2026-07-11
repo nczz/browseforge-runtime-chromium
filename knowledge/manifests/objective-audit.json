@@ -1,0 +1,184 @@
+{
+  "blocker_count": 45,
+  "deliverables": [
+    {
+      "blockers": [
+        "missing build output: dev_gn_args_exists",
+        "missing build output: dev_build_ninja_exists"
+      ],
+      "deliverable_id": "source_build_baseline",
+      "evidence": [
+        "knowledge/manifests/source-acquisition.json:chromium_base.source_checkout_status",
+        "knowledge/manifests/source-acquisition.json:chromium_base.build_output_status",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "requirements": [
+        "Pinned Chromium source checkout matches source-acquisition manifest",
+        "BrowseForgeDev GN args and build.ninja exist",
+        "BrowseForgeLinuxDocker args.gn/build.ninja/chrome exist"
+      ],
+      "satisfied": false,
+      "title": "Reproducible Chromium source/build baseline"
+    },
+    {
+      "blockers": [],
+      "deliverable_id": "native_stealth_substrate_patchset",
+      "evidence": [
+        "knowledge/manifests/patchset.json:scaffold-browseforge-stealth-substrate",
+        "browser/stealth/*",
+        "scripts/apply_stealth_scaffold.py"
+      ],
+      "requirements": [
+        "Stealth substrate patchset is recorded",
+        "Patchset names Chromium and runtime files touched",
+        "Patchset status proves scaffold copied or linked into source checkout"
+      ],
+      "satisfied": true,
+      "title": "Native stealth substrate and source-level patchset scaffold"
+    },
+    {
+      "blockers": [],
+      "deliverable_id": "source_acquisition_automation",
+      "evidence": [
+        "scripts/chromium_source.py",
+        "scripts/chromium_docker.py",
+        "scripts/chromium_native.py",
+        "knowledge/manifests/source-acquisition.json:dependency_profile_status.profile_isolated_workdir_contract"
+      ],
+      "requirements": [
+        "Source acquisition helper pins Chromium ref and syncs host deps",
+        "Host/native and Linux Docker dependency profiles can use separate checkout paths",
+        "Manifest records the workdir isolation contract"
+      ],
+      "satisfied": true,
+      "title": "Source acquisition automation and dependency profile isolation"
+    },
+    {
+      "blockers": [],
+      "deliverable_id": "manifest_gates",
+      "evidence": [
+        "knowledge/manifests/release-status.json",
+        "scripts/release_status.py",
+        "scripts/validate.py"
+      ],
+      "requirements": [
+        "Release status is generated from manifest inputs",
+        "Unmet objective requirements are machine-readable blockers",
+        "Validation suite fails closed on manifest drift"
+      ],
+      "satisfied": true,
+      "title": "Manifest gates and release audit state"
+    },
+    {
+      "blockers": [],
+      "deliverable_id": "browseforge_integration_path",
+      "evidence": [
+        "contracts/browseforge-integration.contract.json"
+      ],
+      "requirements": [
+        "BrowseForge integration contract declares runtime surfaces",
+        "Adapter requirements cover config, profiles, sessions, MCP, workflow, dashboard, Docker seed",
+        "Release blockers remain explicit until artifacts and detector evidence pass"
+      ],
+      "satisfied": true,
+      "title": "BrowseForge integration path"
+    },
+    {
+      "blockers": [
+        "release-blocking surface: WebGL vendor/renderer",
+        "release-blocking surface: AudioContext",
+        "release-blocking surface: fonts",
+        "release-blocking surface: proxy/IP coherence",
+        "release-blocking surface: cross-platform drift"
+      ],
+      "deliverable_id": "fingerprint_surface_implementation",
+      "evidence": [
+        "knowledge/manifests/fingerprint-surface-status.json",
+        "detector-summary.json",
+        "knowledge/manifests/detector-score-comparison.json"
+      ],
+      "requirements": [
+        "Every fingerprint surface is implemented or accepted",
+        "Release-blocking detector surfaces have live evidence",
+        "Cross-platform drift matrix is complete"
+      ],
+      "satisfied": false,
+      "title": "Fingerprint surface implementation and detector evidence"
+    },
+    {
+      "blockers": [
+        "native platform not ready: macos-arm64",
+        "native platform not ready: windows-x64"
+      ],
+      "deliverable_id": "native_release_artifacts",
+      "evidence": [
+        "knowledge/manifests/native-artifact-preflight.json",
+        "knowledge/manifests/runtime-artifacts.json"
+      ],
+      "requirements": [
+        "macOS artifact is a BrowseForge Chromium .app built from the selected source ref",
+        "Windows artifact is a portable chrome.exe/DLL layout built from the selected source ref",
+        "Native artifacts have detector evidence before release_grade passes"
+      ],
+      "satisfied": false,
+      "title": "Native macOS and Windows BrowseForge Chromium release artifacts"
+    },
+    {
+      "blockers": [
+        "browseforge-integration:0",
+        "browseforge-integration:1",
+        "browseforge-integration:2",
+        "browseforge-integration:3",
+        "browseforge-integration:4",
+        "detector:coverage-gap:linux-x64:browserleaks:headed:direct:host",
+        "detector:coverage-gap:linux-x64:browserleaks:headed:proxy:host",
+        "detector:coverage-gap:linux-x64:browserscan:headed:proxy:host",
+        "detector:coverage-gap:linux-x64:creepjs:headed:proxy:host",
+        "detector:coverage-gap:linux-x64:iphey:headed:proxy:host",
+        "detector:coverage-gap:linux-x64:pixelscan:headed:proxy:container",
+        "detector:coverage-gap:linux-x64:pixelscan:headed:proxy:host",
+        "detector:coverage-gap:linux-x64:sannysoft:headed:direct:host",
+        "detector:coverage-gap:linux-x64:sannysoft:headed:proxy:host",
+        "score-comparison:baseline_gaps:native_headed_font_corpus_parity_missing",
+        "fingerprint-surface:AudioContext",
+        "fingerprint-surface:WebGL vendor/renderer",
+        "fingerprint-surface:cross-platform drift",
+        "fingerprint-surface:fonts",
+        "fingerprint-surface:proxy/IP coherence",
+        "native-artifact:macos-arm64:0",
+        "native-artifact:macos-arm64:1",
+        "native-artifact:macos-arm64:2",
+        "native-artifact:macos-arm64:3",
+        "native-artifact:windows-x64:0",
+        "native-artifact:windows-x64:1",
+        "native-artifact:windows-x64:2",
+        "native-artifact:windows-x64:3",
+        "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
+        "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL",
+        "release-gate:live-detector-evidence",
+        "signing-policy:linux-x64",
+        "signing-policy:macos-arm64",
+        "signing-policy:windows-x64",
+        "source-acquisition:dev-baseline:build-ninja",
+        "source-acquisition:dev-baseline:gn-args"
+      ],
+      "deliverable_id": "release_grade_cutover",
+      "evidence": [
+        "knowledge/manifests/release-status.json"
+      ],
+      "requirements": [
+        "All release gates pass",
+        "No release-status blockers remain",
+        "Supported platform artifacts and detector gates pass"
+      ],
+      "satisfied": false,
+      "title": "Release-grade source-level anti-detect runtime cutover"
+    }
+  ],
+  "generated_at": "2026-07-11T02:31:00Z",
+  "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
+  "overall_ready": false,
+  "release_grade_ready": false,
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
+}

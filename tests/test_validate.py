@@ -15,6 +15,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_SCRIPT = ROOT / "scripts" / "validate.py"
 RELEASE_STATUS_SCRIPT = ROOT / "scripts" / "release_status.py"
+OBJECTIVE_AUDIT_SCRIPT = ROOT / "scripts" / "objective_audit.py"
 GRAPH_PATH = ROOT / "generated" / "kg" / "runtime.graph.jsonl"
 RUNTIME_ARTIFACTS_MANIFEST = ROOT / "knowledge" / "manifests" / "runtime-artifacts.json"
 LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64"
@@ -1327,11 +1328,22 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         payload = release_status_module.release_status(temp_root, "2026-07-10T00:00:00Z")
         self._write_json(temp_root / "knowledge" / "manifests" / "release-status.json", payload)
 
+    def _refresh_objective_audit(self, temp_root: Path) -> None:
+        spec = importlib.util.spec_from_file_location("objective_audit_for_validate_tests", OBJECTIVE_AUDIT_SCRIPT)
+        self.assertIsNotNone(spec)
+        objective_audit_module = importlib.util.module_from_spec(spec)
+        self.assertIsNotNone(spec.loader)
+        spec.loader.exec_module(objective_audit_module)
+        payload = objective_audit_module.objective_audit(temp_root, "2026-07-10T00:00:00Z")
+        self._write_json(temp_root / "knowledge" / "manifests" / "objective-audit.json", payload)
+
+
 
     def _run_validate_expect_success(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
         output = io.StringIO()
         self._refresh_release_status(temp_root)
+        self._refresh_objective_audit(temp_root)
         try:
             module.ROOT = temp_root
             with contextlib.redirect_stdout(output):
@@ -1344,6 +1356,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
     def _run_validate_expect_exit(self, module: Any, temp_root: Path) -> str:
         original_root = module.ROOT
         self._refresh_release_status(temp_root)
+        self._refresh_objective_audit(temp_root)
         try:
             module.ROOT = temp_root
             with self.assertRaises(SystemExit) as raised:
