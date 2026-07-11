@@ -504,6 +504,20 @@ class DetectorHarnessTests(unittest.TestCase):
         }
         return value
 
+    def browserleaks_screen_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "JavaScript Browser Information - BrowserLeaks"
+        value["url"] = "https://browserleaks.com/javascript"
+        value["screen"] = {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1080,
+            "devicePixelRatio": 2,
+        }
+        return value
+
+
     def browserleaks_fonts_value(self):
         value = self.browserleaks_client_hints_value()
         value["title"] = "BrowserLeaks - Fonts"
@@ -651,6 +665,16 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("Audio", finding)
         self.assertIn("release-grade", finding)
 
+    def test_classify_browserleaks_dispatches_screen_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_screen_value(),
+            "https://browserleaks.com/javascript",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("Screen Object", finding)
+        self.assertIn("devicePixelRatio", finding)
+
     def test_classify_browserleaks_dispatches_fonts_page_without_claiming_release_pass(self):
         status, finding, severity = self.harness_module.classify_browserleaks(
             self.browserleaks_fonts_value(),
@@ -714,6 +738,9 @@ class DetectorHarnessTests(unittest.TestCase):
     def test_classify_browserleaks_surface_pages_report_missing_summaries(self):
         audio = self.browserleaks_audio_value()
         del audio["audio"]["sumAbs"]
+        screen = self.browserleaks_screen_value()
+        del screen["screen"]["devicePixelRatio"]
+
         fonts = self.browserleaks_fonts_value()
         del fonts["fonts"]["metrics"]["glyphSha256"]
 
@@ -726,6 +753,7 @@ class DetectorHarnessTests(unittest.TestCase):
 
         cases = [
             (audio, "https://browserleaks.com/javascript#audio", "sumAbs"),
+            (screen, "https://browserleaks.com/javascript", "devicePixelRatio"),
             (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
             (webgl, "https://browserleaks.com/webgl", "parameter"),
             (webrtc, "https://browserleaks.com/webrtc", "candidateCount"),
@@ -1660,17 +1688,21 @@ class DetectorHarnessTests(unittest.TestCase):
     def test_collect_page_alias_selects_browserleaks_surface_url(self):
         module = self.harness_module
 
-        self.assertEqual(
-            module.resolve_collect_url("browserleaks", page="audio", url=None),
-            "https://browserleaks.com/javascript#audio",
-        )
+        cases = [
+            ("audio", "https://browserleaks.com/javascript#audio"),
+            ("fonts", "https://browserleaks.com/fonts"),
+            ("screen", "https://browserleaks.com/javascript"),
+        ]
+        for page, expected_url in cases:
+            with self.subTest(page=page):
+                self.assertEqual(
+                    module.resolve_collect_url("browserleaks", page=page, url=None),
+                    expected_url,
+                )
+
         self.assertNotEqual(
             module.resolve_collect_url("browserleaks", page="audio", url=None),
             "https://browserleaks.com/javascript/audio",
-        )
-        self.assertEqual(
-            module.resolve_collect_url("browserleaks", page="fonts", url=None),
-            "https://browserleaks.com/fonts",
         )
 
     def test_collect_page_alias_rejects_unknown_page_before_cdp_connection(self):

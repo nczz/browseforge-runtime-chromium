@@ -1712,6 +1712,15 @@ def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
 
 
 
+def classify_browserleaks_screen_probe(value: dict) -> tuple[str, str, str]:
+    screen = value.get("screen") or {}
+    required = {"width", "height", "availWidth", "availHeight", "devicePixelRatio"}
+    missing = sorted(field for field in required if screen.get(field) is None)
+    if missing:
+        return "warning", f"BrowserLeaks JavaScript page loaded, but sanitized Screen Object summary is missing fields: {missing}", "medium"
+    return "warning", "BrowserLeaks JavaScript page reported bounded Screen Object dimensions and devicePixelRatio; release-grade cross-platform screen parity remains required.", "medium"
+
+
 def classify_browserleaks_webrtc_probe(value: dict) -> tuple[str, str, str]:
     webrtc = value.get("webrtc") or {}
     if not webrtc.get("available"):
@@ -1731,8 +1740,10 @@ def classify_browserleaks_webrtc_probe(value: dict) -> tuple[str, str, str]:
 
 def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
     page_url = value.get("url") or url
-    if "/javascript" in page_url and ("#audio" in page_url or value.get("title") == "JavaScript Browser Information - BrowserLeaks"):
+    if "/javascript" in page_url and "#audio" in page_url:
         return classify_browserleaks_audio_probe(value)
+    if "/javascript" in page_url:
+        return classify_browserleaks_screen_probe(value)
     if "/fonts" in page_url:
         return classify_browserleaks_fonts_probe(value)
     if "/webgl" in page_url:
@@ -2333,6 +2344,7 @@ SUPPORTED_COLLECTOR_PAGES = {
         "fonts": "https://browserleaks.com/fonts",
         "webgl": "https://browserleaks.com/webgl",
         "webrtc": "https://browserleaks.com/webrtc",
+        "screen": "https://browserleaks.com/javascript",
     },
 }
 
