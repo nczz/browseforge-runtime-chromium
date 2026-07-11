@@ -42,6 +42,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         "knowledge/manifests/native-artifact-preflight.json",
         "knowledge/manifests/signing-policy.json",
         "knowledge/manifests/release-status.json",
+        "knowledge/manifests/objective-audit.json",
         "knowledge/manifests/source-acquisition.json",
     )
 
