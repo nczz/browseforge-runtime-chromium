@@ -17,6 +17,11 @@ HOST_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_HOST_WORKDIR"
 SHARED_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_WORKDIR"
 DEFAULT_SHARED_WORKDIR = "/Users/chun/Projects/browser-source/browseforge-chromium"
 DEFAULT_GIT_CACHE = Path(os.environ.get("GIT_CACHE_PATH", "/Users/chun/Projects/browser-source/git-cache"))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from build.package_runtime import LINUX_CHROMIUM_RUNTIME_DIRS, LINUX_CHROMIUM_RUNTIME_FILES
+
 
 
 def default_workdir() -> Path:
@@ -340,20 +345,33 @@ def check_tools(plan: SourcePlan) -> dict:
 
 def check_build_outputs(plan: SourcePlan) -> dict:
     chromium_src = Path(plan.chromium_src_dir)
+    linux_out = chromium_src / "out" / "BrowseForgeLinuxDocker"
     outputs = {
         "dev_gn_args": chromium_src / "out" / "BrowseForgeDev" / "args.gn",
         "dev_build_ninja": chromium_src / "out" / "BrowseForgeDev" / "build.ninja",
-        "linux_docker_gn_args": chromium_src / "out" / "BrowseForgeLinuxDocker" / "args.gn",
-        "linux_docker_build_ninja": chromium_src / "out" / "BrowseForgeLinuxDocker" / "build.ninja",
-        "linux_docker_chrome": chromium_src / "out" / "BrowseForgeLinuxDocker" / "chrome",
+        "linux_docker_gn_args": linux_out / "args.gn",
+        "linux_docker_build_ninja": linux_out / "build.ninja",
+        "linux_docker_chrome": linux_out / "chrome",
     }
-    return {
+    status = {
         key: {
             "path": str(path),
             "exists": path.exists(),
         }
         for key, path in outputs.items()
     }
+    missing_sidecars = [
+        rel
+        for rel in LINUX_CHROMIUM_RUNTIME_FILES
+        if not (linux_out / rel).is_file()
+    ]
+    for rel in LINUX_CHROMIUM_RUNTIME_DIRS:
+        sidecar_dir = linux_out / rel
+        if not sidecar_dir.is_dir() or not any(path.is_file() for path in sidecar_dir.rglob("*")):
+            missing_sidecars.append(f"{rel}/")
+    status["linux_docker_runtime_sidecars_exist"] = not missing_sidecars
+    status["linux_docker_missing_runtime_sidecars"] = missing_sidecars
+    return status
 
 
 def emit_json(payload: object) -> None:

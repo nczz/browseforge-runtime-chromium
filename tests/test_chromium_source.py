@@ -23,6 +23,43 @@ spec.loader.exec_module(chromium_source)
 
 
 class ChromiumSourcePlanTests(unittest.TestCase):
+    REQUIRED_LINUX_DOCKER_RUNTIME_SIDECARS = (
+        "icudtl.dat",
+        "resources.pak",
+        "chrome_100_percent.pak",
+        "chrome_200_percent.pak",
+        "chrome_crashpad_handler",
+        "libEGL.so",
+        "libGLESv2.so",
+        "libvk_swiftshader.so",
+        "libvulkan.so.1",
+        "vk_swiftshader_icd.json",
+        "v8_context_snapshot.bin",
+        "snapshot_blob.bin",
+        "headless_command_resources.pak",
+        "locales/en-US.pak",
+    )
+
+    def _write_linux_docker_build_output(self, output_dir: Path, *, omit: set[str] | None = None) -> None:
+        omitted = omit or set()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for relative_path, contents in {
+            "args.gn": "is_debug=false\n",
+            "build.ninja": "rule noop\n",
+            "chrome": "binary\n",
+        }.items():
+            if relative_path in omitted:
+                continue
+            path = output_dir / relative_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(contents, encoding="utf-8")
+        for relative_path in self.REQUIRED_LINUX_DOCKER_RUNTIME_SIDECARS:
+            if relative_path in omitted:
+                continue
+            path = output_dir / relative_path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("runtime sidecar\n", encoding="utf-8")
+
     def test_build_plan_uses_manifest_ref_and_external_paths(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp_path = Path(td)
@@ -191,11 +228,8 @@ class ChromiumSourcePlanTests(unittest.TestCase):
             workdir = tmp_path / "chromium"
             src = workdir / "src"
             (src / "out" / "BrowseForgeDev").mkdir(parents=True)
-            (src / "out" / "BrowseForgeLinuxDocker").mkdir(parents=True)
             (src / "out" / "BrowseForgeDev" / "args.gn").write_text("is_debug=false\n", encoding="utf-8")
-            (src / "out" / "BrowseForgeLinuxDocker" / "args.gn").write_text("is_debug=false\n", encoding="utf-8")
-            (src / "out" / "BrowseForgeLinuxDocker" / "build.ninja").write_text("rule noop\n", encoding="utf-8")
-            (src / "out" / "BrowseForgeLinuxDocker" / "chrome").write_text("binary\n", encoding="utf-8")
+            self._write_linux_docker_build_output(src / "out" / "BrowseForgeLinuxDocker")
             plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
 
             outputs = chromium_source.check_build_outputs(plan)
@@ -205,6 +239,22 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIs(outputs["linux_docker_gn_args"]["exists"], True)
         self.assertIs(outputs["linux_docker_build_ninja"]["exists"], True)
         self.assertIs(outputs["linux_docker_chrome"]["exists"], True)
+        self.assertIs(outputs["linux_docker_runtime_sidecars_exist"], True)
+        self.assertEqual([], outputs["linux_docker_missing_runtime_sidecars"])
+
+    def test_check_build_outputs_reports_missing_linux_runtime_sidecars(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            output_dir = workdir / "src" / "out" / "BrowseForgeLinuxDocker"
+            self._write_linux_docker_build_output(output_dir, omit={"icudtl.dat"})
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            outputs = chromium_source.check_build_outputs(plan)
+
+        self.assertIs(outputs["linux_docker_chrome"]["exists"], True)
+        self.assertIs(outputs["linux_docker_runtime_sidecars_exist"], False)
+        self.assertEqual(["icudtl.dat"], outputs["linux_docker_missing_runtime_sidecars"])
 
 
 

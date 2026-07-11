@@ -889,6 +889,37 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("build_output_status", message)
         self.assertIn("linux_docker_chrome_exists", message)
 
+    def test_validate_rejects_source_acquisition_with_linux_runtime_sidecar_status_drift(self) -> None:
+        """A packaged linux-x64 artifact requires the recorded runtime sidecar gate to stay present and true."""
+        sidecar_key = "linux_docker_runtime_sidecars_exist"
+        cases: tuple[tuple[str, object], ...] = (
+            ("false", False),
+            ("non_boolean", "true"),
+            ("missing", None),
+        )
+        for case_name, value in cases:
+            with self.subTest(case=case_name):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+                    source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+                    status = source_acquisition["chromium_base"]["build_output_status"]
+                    if case_name == "missing":
+                        status.pop(sidecar_key)
+                    else:
+                        status[sidecar_key] = value
+                    self._write_json(source_acquisition_path, source_acquisition)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertRegex(message, r"source[- ]acquisition", message)
+                self.assertIn("build_output_status", message)
+                self.assertIn(sidecar_key, message)
+
 
     def test_validate_rejects_source_acquisition_without_dependency_profile_contract(self) -> None:
         """source-acquisition.json must document the active Chromium dependency profile and Darwin sync contract."""
@@ -1909,6 +1940,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "linux_docker_build_ninja_exists": True,
                         "linux_docker_chrome_exists": True,
                         "linux_docker_gn_args_exists": True,
+                        "linux_docker_runtime_sidecars_exist": True,
                     },
                     "dependency_profile_status": {
                         "current_checkout_profile": "linux_docker_deps",

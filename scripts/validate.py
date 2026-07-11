@@ -302,6 +302,7 @@ def validate_source_build_outputs(source_acquisition: dict, runtime_artifacts: d
         "linux_docker_gn_args_exists",
         "linux_docker_build_ninja_exists",
         "linux_docker_chrome_exists",
+        "linux_docker_runtime_sidecars_exist",
     }
     missing = sorted(required_bool_keys - set(status))
     if missing:
@@ -310,7 +311,7 @@ def validate_source_build_outputs(source_acquisition: dict, runtime_artifacts: d
         if not isinstance(status.get(key), bool):
             raise SystemExit(f"source-acquisition build_output_status {key} must be boolean")
     if any(artifact.get("platform") == "linux-x64" for artifact in runtime_artifacts.get("artifacts", [])):
-        for key in ["linux_docker_gn_args_exists", "linux_docker_build_ninja_exists", "linux_docker_chrome_exists"]:
+        for key in ["linux_docker_gn_args_exists", "linux_docker_build_ninja_exists", "linux_docker_chrome_exists", "linux_docker_runtime_sidecars_exist"]:
             if not status.get(key):
                 raise SystemExit(f"source-acquisition build_output_status {key} must remain true while linux-x64 artifact is packaged")
 

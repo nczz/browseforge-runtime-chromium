@@ -7,13 +7,14 @@
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "base_ref": "refs/tags/150.0.7871.101",
     "base_version": "150.0.7871.101",
-    "build_output_check_contract": "python3 scripts/chromium_source.py check reports build_outputs for BrowseForgeDev GN args/build.ninja and BrowseForgeLinuxDocker args.gn/build.ninja/chrome so missing baseline generation and release build drift are machine-readable.",
+    "build_output_check_contract": "python3 scripts/chromium_source.py check reports build_outputs for BrowseForgeDev GN args/build.ninja, BrowseForgeLinuxDocker args.gn/build.ninja/chrome, and required Linux runtime sidecars/locales so missing baseline generation and incomplete packageable release outputs are machine-readable.",
     "build_output_status": {
       "dev_build_ninja_exists": false,
       "dev_gn_args_exists": false,
       "linux_docker_build_ninja_exists": true,
       "linux_docker_chrome_exists": true,
-      "linux_docker_gn_args_exists": true
+      "linux_docker_gn_args_exists": true,
+      "linux_docker_runtime_sidecars_exist": true
     },
     "canvas_patch_status": "applied_to_external_checkout",
     "dependency_profile_status": {
@@ -51,6 +52,7 @@
       "platform_gn_exists_during_probe": true,
       "status": "blocked_full_xcode_required_after_platform_gn_installed"
     },
+    "linux_docker_missing_runtime_sidecars": [],
     "linux_docker_rebuild_resume": {
       "commands": [
         "python3 scripts/chromium_docker.py sync-linux-deps --execute",
