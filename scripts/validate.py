@@ -544,11 +544,10 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
             raise SystemExit(f"detector score comparison missing {comparison_id}")
 
     baseline_gap_ids = {gap.get("gap_id") for gap in score_comparison.get("baseline_gaps", [])}
-    for gap_id in [
-        "native_headed_font_corpus_parity_missing",
-    ]:
-        if gap_id not in baseline_gap_ids:
-            raise SystemExit(f"detector score comparison missing baseline gap {gap_id}")
+    known_baseline_gap_ids = {"native_headed_font_corpus_parity_missing"}
+    unknown_baseline_gap_ids = sorted(baseline_gap_ids - known_baseline_gap_ids)
+    if unknown_baseline_gap_ids:
+        raise SystemExit(f"detector score comparison has unknown baseline gaps: {unknown_baseline_gap_ids}")
 
     gap_ids = {gap.get("gap_id") for gap in score_comparison.get("gaps", [])}
     webgl_comparison = next((comparison for comparison in comparisons if comparison.get("comparison_id") == "webgl_metadata_cross_detector"), None)

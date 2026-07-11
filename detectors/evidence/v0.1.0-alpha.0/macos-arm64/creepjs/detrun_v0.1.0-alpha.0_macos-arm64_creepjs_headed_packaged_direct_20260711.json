@@ -1,0 +1,168 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "cross_surface_consistency",
+    "detector_id": "creepjs",
+    "manifest_ref": "knowledge/manifests/detectors.json#creepjs",
+    "name": "CreepJS",
+    "url": "https://abrahamjuliot.github.io/creepjs/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_creepjs_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:creepjs:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "creepjs_audio_metrics_macos_packaged_headed_direct",
+      "evidence_ref": "packaged_collect_observed.detector_metrics.audio",
+      "finding": "CreepJS packaged macOS headed direct run produced bounded audio metric summaries for native parity comparison; page classifier still warns on UA-CH platform/architecture drift against the current Linux expectation helper.",
+      "normalized_values": {
+        "freq": 164533.38303375244,
+        "gain": -20.538288116455078,
+        "sum": 124.04347624466754,
+        "time": 502.5999314116161,
+        "trap": 0.7944105271600209,
+        "unique": 4736.0
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "creepjs_font_metrics_macos_packaged_headed_direct",
+      "evidence_ref": "packaged_collect_observed.fonts.metrics",
+      "finding": "CreepJS packaged macOS headed direct run produced bounded font availability, metric rows, glyph hash, and metrics hash for native corpus parity comparison.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "glyphSampleCount": 73728,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 22.5,
+            "width": 256.039
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 22.5,
+            "width": 225.43
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 22.5,
+            "width": 205.813
+          }
+        ],
+        "metricsSha256": "f5449dac4834c05e5b063adc4b753f3381d6b5de8551cfbd8f5f1aa951a02057",
+        "true_count": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "creepjs_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "CreepJS packaged macOS page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for CreepJS; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-creepjs-macos-packaged-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "8a4378f9776c38c980c543188e180ad081a48e8ff226fdc837d84d381061bf3b",
+    "sha256": "1c4b1a87c7ac25763bfae57abd0e61d80a21f00327b1e28bc02511a560d14d16",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "8162fe709e2245dc4edb21a269672752e2cafdfdde71e159cc0750250b6dbf66"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T12:35:00Z"
+}

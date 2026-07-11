@@ -1399,6 +1399,38 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("webgl", message)
         self.assertIn("extension_profile_match", message)
 
+    def test_validate_accepts_resolved_native_font_baseline_gap(self) -> None:
+        """Detector score comparison may omit the native font gap once native evidence exists."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_score_comparison(temp_root, baseline_gaps=[])
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_unknown_score_baseline_gap(self) -> None:
+        """Detector score comparison baseline gaps must stay in the known release vocabulary."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_score_comparison(
+                temp_root,
+                baseline_gaps=[{"gap_id": "unexpected_native_metric_gap"}],
+            )
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("unknown baseline gaps", message)
+        self.assertIn("unexpected_native_metric_gap", message)
+
 
     def test_validate_rejects_webgl_comparison_without_contexts(self) -> None:
         """Context-sensitive detector score comparisons must identify both target contexts."""

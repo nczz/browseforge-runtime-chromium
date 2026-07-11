@@ -1,0 +1,160 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "pixelscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#pixelscan",
+    "name": "Pixelscan",
+    "url": "https://pixelscan.net/fingerprint-check"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_pixelscan_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:pixelscan:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "pixelscan_fingerprint_page_status",
+      "evidence_ref": "packaged_collect_observed.pixelscanPage_and_fonts",
+      "finding": "Pixelscan packaged macOS headed direct run reported a consistent fingerprint, no masking detected, no automated behavior detected, and bounded font availability/hash evidence.",
+      "normalized_values": {
+        "audioContextHash": "d5fd5af484a22270a47c03b6cb818c0f",
+        "botCheck": "No automated behavior detected",
+        "candidateCount": 8,
+        "canvasHash": "9d32a2c8a3460a701a1e4553144b1d36",
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "fingerprint": "No masking detected",
+        "fontHash": "24d9fa4d7560080fd70da371973bafeb",
+        "glyphSampleCount": 73728,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 45,
+            "width": 503.766
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 45,
+            "width": 442.547
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 45,
+            "width": 403.313
+          }
+        ],
+        "metricsSha256": "1b3f2da683a16d348bd81ddcb9323b3c54132615975cb76eb20986e0c5dd8c43",
+        "proxy": "No proxy detected",
+        "true_count": 8,
+        "verdict": "consistent",
+        "webglHash": "ba2a631d5086ac3136a37e18a8fad865"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "pixelscan_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Pixelscan packaged macOS page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for Pixelscan; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-pixelscan-macos-packaged-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "6fe654e75f24883187ccec89d6c7687378a786eca94ec42f1035b6795f6fd399",
+    "sha256": "e6aea9bb3f3af5c9464d3f58f752982288a319f4dd81ed7031f4a31dea8a6b6c",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "9dc867debf0fdb6bdb93b96a632987207da3a1bd3dd602db6da52dfab62241d4"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T12:35:00Z"
+}

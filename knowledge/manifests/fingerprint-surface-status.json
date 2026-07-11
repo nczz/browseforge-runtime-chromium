@@ -20,6 +20,8 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_host_direct_20260710.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_host_direct_20260710.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711.json",
     "knowledge/manifests/local-dogfood.json",
@@ -28,7 +30,8 @@
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
-    "Packaged macOS BrowserLeaks direct evidence covers WebGL/audio/fonts/WebRTC against the built BrowseForge Chromium app; proxy matrix evidence remains blocked by missing external proxy settings."
+    "Packaged macOS BrowserLeaks direct evidence covers WebGL/audio/fonts/WebRTC against the built BrowseForge Chromium app; proxy matrix evidence remains blocked by missing external proxy settings.",
+    "Packaged macOS CreepJS and Pixelscan headed direct evidence now records native font metrics/availability, closing the native headed direct font corpus baseline gap; proxy and Windows matrix coverage remain tracked under proxy/IP coherence and cross-platform drift."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -124,10 +127,10 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. New macOS arm64 host headed BrowserLeaks Fonts evidence passed coverage and records bounded native system Chrome font metrics/glyph hashes through the BrowseForge wrapper, proving local native corpus collection works; it remains non-release artifact evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium artifact. BrowserLeaks/CreepJS/Pixelscan native packaged platform corpus parity remains required. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records bounded font metric rows plus glyph and metrics SHA-256 values; native CreepJS and Pixelscan peers remain missing for release-grade font corpus parity.",
-      "release_blocker": true,
-      "result": "pass_macos_packaged_browserleaks_font_corpus_peer_native_matrix_required",
-      "severity": "medium",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift.",
+      "release_blocker": false,
+      "result": "pass_native_headed_font_corpus_browserleaks_creepjs_pixelscan_direct",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "fonts"
     },
