@@ -378,6 +378,17 @@ def emit_json(payload: object) -> None:
     print(json.dumps(payload, indent=2, sort_keys=True))
 
 
+def preflight_step(plan: SourcePlan, step: Step) -> None:
+    if step.id != "generate-dev-build":
+        return
+    platform_gn = platform_gn_binary(Path(plan.chromium_src_dir))
+    if not platform_gn.is_file():
+        raise SystemExit(
+            "generate-dev-build requires Chromium platform GN at "
+            f"{platform_gn}; run sync-deps and run-hooks for this checkout before generating BrowseForgeDev"
+        )
+
+
 def run_step(step: Step, env: dict[str, str]) -> None:
     Path(step.cwd).mkdir(parents=True, exist_ok=True)
     if step.creates and Path(step.creates).exists():
@@ -393,6 +404,7 @@ def execute(plan: SourcePlan, step_ids: Sequence[str]) -> None:
     Path(plan.git_cache_dir).mkdir(parents=True, exist_ok=True)
     for step in plan.steps:
         if step.id in selected:
+            preflight_step(plan, step)
             run_step(step, env)
 
 

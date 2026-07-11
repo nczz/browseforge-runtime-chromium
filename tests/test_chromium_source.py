@@ -171,6 +171,34 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIs(tools["platform_gn_exists"], True)
 
 
+    def test_generate_dev_build_rejects_missing_platform_gn_before_subprocess(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            depot_tools = workdir / "depot_tools"
+            src = workdir / "src"
+            depot_tools.mkdir(parents=True)
+            src.mkdir(parents=True)
+            fake_gn = depot_tools / "gn"
+            fake_gn.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            fake_gn.chmod(0o755)
+            git_cache = tmp_path / "git-cache"
+            plan = chromium_source.build_plan(workdir, git_cache)
+
+            with mock.patch.object(
+                chromium_source.subprocess,
+                "run",
+                side_effect=AssertionError("subprocess.run must not run without Chromium buildtools GN"),
+            ) as run_spy:
+                with self.assertRaises(SystemExit) as raised:
+                    chromium_source.execute(plan, ["generate-dev-build"])
+
+            self.assertFalse(run_spy.called)
+            message = str(raised.exception)
+            self.assertRegex(message, r"(?i)platform\s+GN|GN.*platform")
+            self.assertIn("buildtools", message)
+            self.assertRegex(message, r"\b(run-hooks|sync-deps)\b")
+
     def test_check_tools_reports_pinned_checkout_head(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp_path = Path(td)
