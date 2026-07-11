@@ -1321,6 +1321,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "precisionSha256": True,
                     "pixelSha256": True,
                 },
+                "left_context": {"platform": "linux-x64", "network_mode": "direct", "container": True},
+                "right_context": {"platform": "linux-x64", "network_mode": "direct", "container": True},
                 "status": "pass",
             }
             self._write_score_comparison(temp_root, webgl_comparison=comparison, gaps=[])
@@ -1330,6 +1332,81 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("webgl", message)
         self.assertIn("extension_profile_match", message)
 
+
+    def test_validate_rejects_webgl_comparison_without_contexts(self) -> None:
+        """Context-sensitive detector score comparisons must identify both target contexts."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            shared_context = {"platform": "linux-x64", "network_mode": "direct", "container": True}
+            comparison = {
+                "comparison_id": "webgl_metadata_cross_detector",
+                "vendor_renderer_match": True,
+                "extension_count_match": True,
+                "extension_profile_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "status": "pass",
+            }
+            self._write_score_comparison(
+                temp_root,
+                comparisons=[
+                    {
+                        "comparison_id": "creepjs_audio_headless_vs_headed",
+                        "left_context": shared_context,
+                        "right_context": shared_context,
+                    },
+                    {
+                        "comparison_id": "browserleaks_creepjs_font_metrics",
+                        "left_context": shared_context,
+                        "right_context": shared_context,
+                    },
+                    comparison,
+                ],
+                gaps=[],
+            )
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("detector score comparison context", message)
+        self.assertIn("webgl_metadata_cross_detector", message)
+
+    def test_validate_rejects_webgl_comparison_mismatched_contexts(self) -> None:
+        """Context-sensitive detector score comparisons cannot mix platform/network/container targets."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            comparison = {
+                "comparison_id": "webgl_metadata_cross_detector",
+                "vendor_renderer_match": True,
+                "extension_count_match": True,
+                "extension_profile_match": True,
+                "hash_matches": {
+                    "extensionSha256": True,
+                    "parameterSha256": True,
+                    "precisionSha256": True,
+                    "pixelSha256": True,
+                },
+                "left_context": {"platform": "linux-x64", "network_mode": "direct", "container": True},
+                "right_context": {"platform": "macos-arm64", "network_mode": "proxy", "container": False},
+                "status": "pass",
+            }
+            self._write_score_comparison(temp_root, webgl_comparison=comparison, gaps=[])
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("detector score comparison context", message)
+        self.assertIn("webgl_metadata_cross_detector", message)
 
     def test_validate_rejects_surface_status_missing_updated_source(self) -> None:
         """Surface status provenance must point at committed evidence sources."""
@@ -2133,9 +2210,11 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         root: Path,
         *,
         webgl_comparison: dict[str, Any] | None = None,
+        comparisons: list[dict[str, Any]] | None = None,
         gaps: list[dict[str, Any]] | None = None,
         baseline_gaps: list[dict[str, Any]] | None = None,
     ) -> None:
+        shared_context = {"platform": "linux-x64", "network_mode": "direct", "container": True}
         if webgl_comparison is None:
             webgl_comparison = {
                 "comparison_id": "webgl_metadata_cross_detector",
@@ -2147,9 +2226,29 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "precisionSha256": True,
                     "pixelSha256": True,
                 },
+                "left_context": shared_context,
+                "right_context": shared_context,
                 "status": "pass",
                 "vendor_renderer_match": True,
             }
+        else:
+            webgl_comparison = dict(webgl_comparison)
+            webgl_comparison.setdefault("left_context", shared_context)
+            webgl_comparison.setdefault("right_context", shared_context)
+        if comparisons is None:
+            comparisons = [
+                {
+                    "comparison_id": "creepjs_audio_headless_vs_headed",
+                    "left_context": shared_context,
+                    "right_context": shared_context,
+                },
+                {
+                    "comparison_id": "browserleaks_creepjs_font_metrics",
+                    "left_context": shared_context,
+                    "right_context": shared_context,
+                },
+                webgl_comparison,
+            ]
         if baseline_gaps is None:
             baseline_gaps = [
                 {"gap_id": "native_headed_font_corpus_parity_missing"},
@@ -2159,11 +2258,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {
                 "runtime_id": "browseforge-chromium",
                 "release_grade": False,
-                "comparisons": [
-                    {"comparison_id": "creepjs_audio_headless_vs_headed"},
-                    {"comparison_id": "browserleaks_creepjs_font_metrics"},
-                    webgl_comparison,
-                ],
+                "comparisons": comparisons,
                 "baseline_gaps": baseline_gaps,
                 "gaps": [] if gaps is None else gaps,
             },

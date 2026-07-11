@@ -487,6 +487,13 @@ def _display_pair_by_context(records: list[dict]) -> tuple[dict | None, dict | N
     missing = sorted({"headless", "headed"} - observed_displays)
     return None, None, missing or ["shared headless/headed context"]
 
+def _comparison_context(record: dict) -> dict:
+    return {
+        "platform": record.get("platform"),
+        "network_mode": record.get("network_mode"),
+        "container": bool(record.get("container")),
+    }
+
 def _shared_context_pair(left_records: list[dict], right_records: list[dict]) -> tuple[dict | None, dict | None]:
     right_by_context: dict[tuple[object, object, bool], dict] = {}
     for record in right_records:
@@ -1034,6 +1041,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if identical else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "metric_deltas": deltas,
             "matching_metrics": matching_metrics,
             "drift_metrics": drift_metrics,
@@ -1060,6 +1069,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if identical else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "metric_deltas": deltas,
             "finding": "BrowserLeaks bounded AudioContext summaries match across headless/headed evidence." if identical else "BrowserLeaks bounded AudioContext summaries differ across headless/headed evidence; release-grade BrowserLeaks audio score baseline remains required.",
         })
@@ -1087,6 +1098,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if all_match else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "field_matches": value_matches,
             "finding": "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields match across headless/headed evidence." if all_match else "BrowserLeaks JavaScript Web Audio page AudioContext/AnalyserNode fields differ across headless/headed evidence; release-grade BrowserLeaks audio score baseline remains required.",
         })
@@ -1111,6 +1124,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if identical else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "metric_deltas": deltas,
             "finding": "Pixelscan bounded AudioContext summaries match across headless/headed evidence." if identical else "Pixelscan bounded AudioContext summaries differ across headless/headed evidence; release-grade Pixelscan baseline remains required.",
         })
@@ -1139,6 +1154,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "left_run_id": browserleaks_fonts["run_id"],
             "right_detector_id": "creepjs",
             "right_run_id": creepjs_fonts["run_id"],
+            "left_context": _comparison_context(browserleaks_fonts),
+            "right_context": _comparison_context(creepjs_fonts),
             "candidate_count_match": browserleaks_fonts["candidate_count"] == creepjs_fonts["candidate_count"],
             "font_list_match": same_fonts,
             "glyph_sha256_match": same_glyph,
@@ -1176,6 +1193,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if all_match else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "candidate_count_match": headless["candidate_count"] == headed["candidate_count"],
             "font_list_match": same_fonts,
             "glyph_sha256_match": same_glyph,
@@ -1202,6 +1221,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if same_checks else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "font_check_match": same_checks,
             "true_count_delta": headed["true_count"] - headless["true_count"] if isinstance(headless["true_count"], int) and isinstance(headed["true_count"], int) else None,
             "false_count_delta": headed["false_count"] - headless["false_count"] if isinstance(headless["false_count"], int) and isinstance(headed["false_count"], int) else None,
@@ -1234,6 +1255,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "status": "pass" if all_match else "warning",
             "left_run_id": headless["run_id"],
             "right_run_id": headed["run_id"],
+            "left_context": _comparison_context(headless),
+            "right_context": _comparison_context(headed),
             "field_matches": value_matches,
             "left_raw_candidate_sha256": headless["raw_candidate_sha256"],
             "right_raw_candidate_sha256": headed["raw_candidate_sha256"],
@@ -1290,6 +1313,8 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "left_run_id": browserleaks_webgl["run_id"],
             "right_detector_id": comparison_peer["detector_id"],
             "right_run_id": comparison_peer["run_id"],
+            "left_context": _comparison_context(browserleaks_webgl),
+            "right_context": _comparison_context(comparison_peer),
             "vendor_renderer_match": vendor_renderer_match,
             "extension_count_match": extension_count_match,
             "extension_profile_match": extension_profile_match,

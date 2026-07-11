@@ -433,11 +433,11 @@
       "source": "knowledge/manifests/source-acquisition.json"
     }
   ],
-  "generated_at": "2026-07-11T04:20:00Z",
+  "generated_at": "2026-07-11T04:35:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
-    "knowledge/manifests/detector-score-comparison.json": "b1fe49fd40d671d51e192030de3763bc0da547bcd708a3f72bb1ea62f730f069",
+    "knowledge/manifests/detector-score-comparison.json": "e386a9934d36bf3e33349ab84d9c0ec7cfd465783cfb9c131e28e9603738159a",
     "knowledge/manifests/fingerprint-surface-status.json": "f2fa53d1446d3072831d6818945f54b7c6bef31c7a52d38ff753d15a42053ab5",
     "knowledge/manifests/native-artifact-preflight.json": "3144ae450167a4b83a5e006433db4789e0faf30753fbb57ef146b34059a98beb",
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",

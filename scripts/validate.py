@@ -488,6 +488,36 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
         if not (ROOT / source_path).is_file():
             raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")
 
+CONTEXT_SENSITIVE_SCORE_COMPARISONS = {
+    "creepjs_audio_headless_vs_headed",
+    "browserleaks_audio_headless_vs_headed",
+    "browserleaks_javascript_audio_page_context_headless_vs_headed",
+    "pixelscan_audio_headless_vs_headed",
+    "browserleaks_creepjs_font_metrics",
+    "browserleaks_fonts_headless_vs_headed",
+    "pixelscan_fonts_headless_vs_headed",
+    "browserleaks_webrtc_headless_vs_headed",
+    "webgl_metadata_cross_detector",
+}
+
+SCORE_COMPARISON_CONTEXT_FIELDS = ("platform", "network_mode", "container")
+
+
+def validate_score_comparison_context(comparison: dict) -> None:
+    comparison_id = comparison.get("comparison_id")
+    if comparison_id not in CONTEXT_SENSITIVE_SCORE_COMPARISONS:
+        return
+    left_context = comparison.get("left_context")
+    right_context = comparison.get("right_context")
+    if not isinstance(left_context, dict) or not isinstance(right_context, dict):
+        raise SystemExit(f"detector score comparison context missing for {comparison_id}")
+    for field in SCORE_COMPARISON_CONTEXT_FIELDS:
+        if field not in left_context or field not in right_context:
+            raise SystemExit(f"detector score comparison context for {comparison_id} missing {field}")
+        if left_context[field] != right_context[field]:
+            raise SystemExit(f"detector score comparison context mismatch for {comparison_id} field {field}: {left_context[field]!r} != {right_context[field]!r}")
+
+
 def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict[str, str | None]) -> None:
     if score_comparison.get("runtime_id") != "browseforge-chromium":
         raise SystemExit("detector score comparison runtime_id must be browseforge-chromium")
@@ -495,6 +525,10 @@ def validate_score_comparison_manifest(score_comparison: dict, gate_status: dict
         raise SystemExit("offline detector score comparison must not claim release grade")
 
     comparisons = score_comparison.get("comparisons", [])
+    for comparison in comparisons:
+        if not isinstance(comparison, dict):
+            raise SystemExit("detector score comparison entries must be objects")
+        validate_score_comparison_context(comparison)
     comparison_ids = {comparison.get("comparison_id") for comparison in comparisons}
     for comparison_id in ["creepjs_audio_headless_vs_headed", "browserleaks_creepjs_font_metrics"]:
         if comparison_id not in comparison_ids:
