@@ -1,5 +1,5 @@
 {
-  "blocker_count": 24,
+  "blocker_count": 23,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -96,15 +96,6 @@
       "platform": "macos-arm64",
       "severity": "high",
       "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "fingerprint-surface:AudioContext",
-      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records bounded JavaScript AudioContext/AnalyserNode field summaries.",
-      "result": "pass_linux_parity_plus_macos_packaged_browserleaks_audio_peer_native_matrix_required",
-      "severity": "medium",
-      "source": "knowledge/manifests/fingerprint-surface-status.json",
-      "status": "detector_tested",
-      "surface": "AudioContext"
     },
     {
       "blocker_id": "fingerprint-surface:WebGL vendor/renderer",
@@ -270,12 +261,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T12:40:00Z",
+  "generated_at": "2026-07-11T13:10:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
-    "detector-summary.json": "3745f17077bfa482ce4409222f4d2c3fb4e9d3a1c0960cca6422a4fd856053da",
-    "knowledge/manifests/detector-score-comparison.json": "69fda87c94a41e90b4393dcf2f07ccd78db296ce7941c0748b7506680326cbef",
-    "knowledge/manifests/fingerprint-surface-status.json": "075e728e5de15a3acd91907bd16a5c81b53f749c603ed5b2dc236a6e985bea66",
+    "detector-summary.json": "d5762c33c786b8afa979be5393327831681882fdd68c8b857f884f537e6b1d37",
+    "knowledge/manifests/detector-score-comparison.json": "358f24afb5e46bcf6f91458e221523695974dbcc3ed96d16b51ad4dab85593be",
+    "knowledge/manifests/fingerprint-surface-status.json": "6e5a605e4fb08c4702e25699802d1b289fe9dd12d187065c89d9e644e67afe6b",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "db3ec009736f3b41a157796bfd2d6a9aabd223e587b30cdfff913e567f74cceb",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",

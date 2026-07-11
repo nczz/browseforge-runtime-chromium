@@ -1601,6 +1601,27 @@ def _brand_version(entry: object) -> str:
 def _is_grease_brand(brand: str) -> bool:
     return not brand or "Not" in brand or ";" in brand
 
+def _expected_client_hint_values(value: dict, high: dict) -> tuple[dict, str]:
+    ua = str(value.get("ua") or "")
+    platform = str(value.get("platform") or "")
+    observed_platform = str(high.get("platform") or "")
+    if observed_platform == "macOS" or "Macintosh" in ua or platform == "MacIntel":
+        return {
+            "platform": "macOS",
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": False,
+            "wow64": False,
+        }, "macOS arm64 Chromium"
+    return {
+        "platform": "Linux",
+        "architecture": "x86",
+        "bitness": "64",
+        "mobile": False,
+        "wow64": False,
+    }, "Linux Chromium"
+
+
 def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
     ua_data = value.get("uaData") or {}
     if not ua_data.get("available"):
@@ -1618,13 +1639,7 @@ def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
     ]
     if not chromium_versions:
         return "failed", "BrowserLeaks Client Hints high entropy data is missing a non-GREASE Chromium fullVersionList entry.", "high"
-    expected = {
-        "platform": "Linux",
-        "architecture": "x86",
-        "bitness": "64",
-        "mobile": False,
-        "wow64": False,
-    }
+    expected, expected_label = _expected_client_hint_values(value, high)
     mismatches = {
         key: {"expected": expected_value, "observed": high.get(key)}
         for key, expected_value in expected.items()
@@ -1634,7 +1649,7 @@ def classify_browserleaks_client_hints(value: dict) -> tuple[str, str, str]:
         return "warning", f"BrowserLeaks Client Hints fullVersionList is present, but high entropy values drifted: {mismatches}", "medium"
     if not any(re.fullmatch(r"\d+\.\d+\.\d+\.\d+", version) for version in chromium_versions):
         return "warning", "BrowserLeaks Client Hints fullVersionList is present, but Chromium version is not full dotted version.", "medium"
-    return "passed", "BrowserLeaks Client Hints loaded with configured Linux Chromium high entropy values and fullVersionList.", "low"
+    return "passed", f"BrowserLeaks Client Hints loaded with configured {expected_label} high entropy values and fullVersionList.", "low"
 
 def classify_browserleaks_audio_probe(value: dict) -> tuple[str, str, str]:
     audio = value.get("audio") or {}

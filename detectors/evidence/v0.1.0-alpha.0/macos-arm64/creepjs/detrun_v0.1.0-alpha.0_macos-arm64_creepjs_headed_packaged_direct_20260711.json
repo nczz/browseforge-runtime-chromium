@@ -27,7 +27,7 @@
     {
       "detector_check": "creepjs_audio_metrics_macos_packaged_headed_direct",
       "evidence_ref": "packaged_collect_observed.detector_metrics.audio",
-      "finding": "CreepJS packaged macOS headed direct run produced bounded audio metric summaries for native parity comparison; page classifier still warns on UA-CH platform/architecture drift against the current Linux expectation helper.",
+      "finding": "CreepJS packaged macOS headed direct run produced bounded audio metric summaries under platform-aware UA-CH classification for native parity comparison.",
       "normalized_values": {
         "freq": 164533.38303375244,
         "gain": -20.538288116455078,
@@ -36,8 +36,8 @@
         "trap": 0.7944105271600209,
         "unique": 4736.0
       },
-      "severity": "medium",
-      "status": "warn",
+      "severity": "info",
+      "status": "pass",
       "surface": "audio"
     },
     {
@@ -135,7 +135,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for CreepJS; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for CreepJS with platform-aware macOS arm64 UA-CH classification; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-creepjs-macos-packaged-headed-1",
@@ -143,7 +143,7 @@
     "tokens_redacted": true
   },
   "schema_version": "1.1",
-  "status": "warning",
+  "status": "passed",
   "storage": {
     "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_packaged_direct_20260711.json",
     "raw_capture_sha256": "8a4378f9776c38c980c543188e180ad081a48e8ff226fdc837d84d381061bf3b",

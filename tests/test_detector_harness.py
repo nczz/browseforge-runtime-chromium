@@ -480,6 +480,17 @@ class DetectorHarnessTests(unittest.TestCase):
             },
         }
 
+    def browserleaks_macos_client_hints_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["ua"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36"
+        value["platform"] = "MacIntel"
+        value["uaData"]["lowEntropy"]["platform"] = "macOS"
+        value["uaData"]["highEntropy"]["architecture"] = "arm"
+        value["uaData"]["highEntropy"]["platform"] = "macOS"
+        value["uaData"]["highEntropy"]["platformVersion"] = "15.0.0"
+        return value
+
+
     def browserleaks_audio_value(self):
         value = self.browserleaks_client_hints_value()
         value["title"] = "JavaScript Browser Information - BrowserLeaks"
@@ -595,6 +606,14 @@ class DetectorHarnessTests(unittest.TestCase):
 
         self.assertEqual((status, severity), ("passed", "low"))
         self.assertIn("Linux", finding)
+
+    def test_classify_browserleaks_client_hints_accepts_macos_arm64_chromium_ua_ch(self):
+        status, finding, severity = self.harness_module.classify_browserleaks_client_hints(
+            self.browserleaks_macos_client_hints_value()
+        )
+
+        self.assertEqual((status, severity), ("passed", "low"))
+        self.assertIn("macOS arm64", finding)
 
     def test_classify_browserleaks_client_hints_flags_missing_high_entropy_data(self):
         missing_full_version = self.browserleaks_client_hints_value()

@@ -31,7 +31,8 @@
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
     "Packaged macOS BrowserLeaks direct evidence covers WebGL/audio/fonts/WebRTC against the built BrowseForge Chromium app; proxy matrix evidence remains blocked by missing external proxy settings.",
-    "Packaged macOS CreepJS and Pixelscan headed direct evidence now records native font metrics/availability, closing the native headed direct font corpus baseline gap; proxy and Windows matrix coverage remain tracked under proxy/IP coherence and cross-platform drift."
+    "Packaged macOS CreepJS and Pixelscan headed direct evidence now records native font metrics/availability, closing the native headed direct font corpus baseline gap; proxy and Windows matrix coverage remain tracked under proxy/IP coherence and cross-platform drift.",
+    "Packaged macOS CreepJS now passes platform-aware macOS arm64 UA-CH classification with bounded audio metrics, and packaged macOS Pixelscan records a consistent fingerprint plus bounded AudioContext hash; AudioContext is no longer tracked as an independent release-blocking surface, while proxy, Windows, and cross-platform matrix coverage remain blockers."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -119,10 +120,10 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records bounded JavaScript AudioContext/AnalyserNode field summaries.",
-      "release_blocker": true,
-      "result": "pass_linux_parity_plus_macos_packaged_browserleaks_audio_peer_native_matrix_required",
-      "severity": "medium",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. Packaged macOS arm64 BrowserLeaks JavaScript audio evidence records bounded AudioContext summaries, packaged macOS CreepJS evidence records bounded audio metrics under platform-aware macOS arm64 UA-CH classification, and packaged macOS Pixelscan evidence records a bounded AudioContext hash while reporting a consistent fingerprint and no masking detected. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual surface.",
+      "release_blocker": false,
+      "result": "pass_linux_parity_plus_macos_packaged_browserleaks_creepjs_pixelscan_direct_audio",
+      "severity": "info",
       "status": "detector_tested",
       "surface": "AudioContext"
     },

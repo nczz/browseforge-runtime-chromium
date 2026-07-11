@@ -27,12 +27,10 @@
     {
       "detector_check": "pixelscan_fingerprint_page_status",
       "evidence_ref": "packaged_collect_observed.pixelscanPage_and_fonts",
-      "finding": "Pixelscan packaged macOS headed direct run reported a consistent fingerprint, no masking detected, no automated behavior detected, and bounded font availability/hash evidence.",
+      "finding": "Pixelscan packaged macOS headed direct run reported a consistent fingerprint, no masking detected, no automated behavior detected, and bounded font availability/hash evidence; audio and canvas hashes are tracked as separate sanitized surface records, while WebGL hash-only data is not promoted to WebGL parity evidence.",
       "normalized_values": {
-        "audioContextHash": "d5fd5af484a22270a47c03b6cb818c0f",
         "botCheck": "No automated behavior detected",
         "candidateCount": 8,
-        "canvasHash": "9d32a2c8a3460a701a1e4553144b1d36",
         "checks": {
           "Arial": true,
           "Calibri": true,
@@ -101,12 +99,33 @@
         "metricsSha256": "1b3f2da683a16d348bd81ddcb9323b3c54132615975cb76eb20986e0c5dd8c43",
         "proxy": "No proxy detected",
         "true_count": 8,
-        "verdict": "consistent",
-        "webglHash": "ba2a631d5086ac3136a37e18a8fad865"
+        "verdict": "consistent"
       },
       "severity": "info",
       "status": "pass",
       "surface": "fonts"
+    },
+    {
+      "detector_check": "pixelscan_audio_hash_macos_packaged_headed_direct",
+      "evidence_ref": "packaged_collect_observed.pixelscanPage.audioContextHash",
+      "finding": "Pixelscan packaged macOS headed direct run produced a bounded AudioContext hash while reporting a consistent fingerprint and no masking detected.",
+      "normalized_values": {
+        "audioContextHash": "d5fd5af484a22270a47c03b6cb818c0f"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "pixelscan_canvas_hash_macos_packaged_headed_direct",
+      "evidence_ref": "packaged_collect_observed.pixelscanPage.canvasHash",
+      "finding": "Pixelscan packaged macOS headed direct run produced a bounded Canvas hash while reporting a consistent fingerprint and no masking detected.",
+      "normalized_values": {
+        "canvasHash": "9d32a2c8a3460a701a1e4553144b1d36"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
     },
     {
       "detector_check": "pixelscan_packaged_macos_webdriver",
@@ -127,7 +146,7 @@
     "cookies_storage_redacted": true,
     "credentials_redacted": true,
     "ip_redacted": true,
-    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for Pixelscan; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for Pixelscan; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed. Pixelscan WebGL hash-only output is retained in raw capture digest only and is not promoted to parity evidence without full sanitized WebGL metadata fields.",
     "profiles_redacted": true,
     "raw_capture_committed": false,
     "sanitizer_version": "source-detector-harness-pixelscan-macos-packaged-headed-1",
