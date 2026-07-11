@@ -26,12 +26,67 @@
     "launch path assembles deterministic profile-specific args without mutating unrelated runtimes",
     "Playwright bind endpoint is reachable for launched sessions",
     "browser cache version marker prevents stale seeded runtime reuse",
-    "smoke rest and smoke mcp pass under Docker"
+    "smoke rest and smoke mcp pass under Docker",
+    "launch path propagates profile fingerprint UA/UA-CH, locale, hardware, screen, plugins, canvas, audio, fonts, WebGL, and native stealth config switches into BrowseForge Chromium"
   ],
   "release_blockers": [
     "external proxy exit-IP/geolocation detector evidence is missing",
     "Windows native BrowseForge Chromium release artifact is missing",
     "native headed proxy and Windows detector matrix remains incomplete",
     "runtime release_grade must remain false until supported platform artifacts and live detector gates pass"
-  ]
+  ],
+  "browseforge_repository_evidence": {
+    "repository": "github.com:nczz/BrowseForge.git",
+    "branch": "main",
+    "commit": "9a36ca2",
+    "summary": "BrowseForge launch_chromium propagates profile fingerprint identity into BrowseForge Chromium native switches and config.default.json enables plugins_pdf for browseforge-chromium.",
+    "files": [
+      "config.default.json",
+      "internal/browser/launch_chromium.go",
+      "internal/browser/manager_test.go",
+      "internal/config/config.go",
+      "internal/config/config_test.go"
+    ],
+    "verification": [
+      "go test ./internal/browser",
+      "go test ./internal/config"
+    ]
+  },
+  "runtime_switch_contract": {
+    "identity": [
+      "--user-agent",
+      "--fingerprint-user-agent",
+      "--fingerprint-ua-full-version",
+      "--fingerprint-ua-platform",
+      "--fingerprint-ua-architecture",
+      "--fingerprint-ua-bitness"
+    ],
+    "locale": [
+      "--fingerprint-timezone",
+      "--fingerprint-locale",
+      "--fingerprint-accept-language"
+    ],
+    "hardware": [
+      "--fingerprint-hardware-concurrency",
+      "--fingerprint-device-memory"
+    ],
+    "screen": [
+      "--fingerprint-screen-width",
+      "--fingerprint-screen-height",
+      "--fingerprint-screen-avail-width",
+      "--fingerprint-screen-avail-height"
+    ],
+    "surfaces": [
+      "--fingerprint-plugins-pdf",
+      "--fingerprint-canvas-noise",
+      "--fingerprint-audio-noise",
+      "--fingerprint-fonts-list",
+      "--fingerprint-webgl-vendor",
+      "--fingerprint-webgl-renderer"
+    ],
+    "native_substrate": [
+      "--browseforge-stealth-config",
+      "--browseforge-stealth-mode"
+    ]
+  }
 }

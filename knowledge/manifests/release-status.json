@@ -252,9 +252,9 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T15:25:00Z",
+  "generated_at": "2026-07-11T15:45:00Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "bba0d513de052e48027bf0fd00aff15738d8275552719aa3636b54df8610ca8a",
+    "contracts/browseforge-integration.contract.json": "210e23a4aff447aab1a52d70bee9cdab17a2eb2bb015e3aa3968d950c153e6c6",
     "detector-summary.json": "867d53403c8eab30f23ebb5db2f171c0c64fe50c3c9404ae089f99f7a32312b8",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "bc3fbf1b2a506caa12c5e039881f8e8396f6013df6dead224d3faed37cf8f479",
