@@ -30,7 +30,6 @@
   ],
   "release_blockers": [
     "external proxy exit-IP/geolocation detector evidence is missing",
-    "macOS native BrowseForge Chromium release artifact is missing",
     "Windows native BrowseForge Chromium release artifact is missing",
     "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
     "runtime release_grade must remain false until supported platform artifacts and live detector gates pass"

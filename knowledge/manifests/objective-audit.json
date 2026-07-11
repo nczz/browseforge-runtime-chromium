@@ -1,5 +1,5 @@
 {
-  "blocker_count": 36,
+  "blocker_count": 35,
   "deliverables": [
     {
       "blockers": [],
@@ -125,7 +125,6 @@
         "browseforge-integration:1",
         "browseforge-integration:2",
         "browseforge-integration:3",
-        "browseforge-integration:4",
         "detector:coverage-gap:linux-x64:browserleaks:headed:direct:host",
         "detector:coverage-gap:linux-x64:browserleaks:headed:proxy:host",
         "detector:coverage-gap:linux-x64:browserscan:headed:proxy:host",
@@ -165,7 +164,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-11T10:30:00Z",
+  "generated_at": "2026-07-11T10:45:00Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,

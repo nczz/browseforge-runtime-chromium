@@ -1,5 +1,5 @@
 {
-  "blocker_count": 30,
+  "blocker_count": 29,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -9,24 +9,18 @@
     },
     {
       "blocker_id": "browseforge-integration:1",
-      "detail": "macOS native BrowseForge Chromium release artifact is missing",
-      "severity": "high",
-      "source": "contracts/browseforge-integration.contract.json"
-    },
-    {
-      "blocker_id": "browseforge-integration:2",
       "detail": "Windows native BrowseForge Chromium release artifact is missing",
       "severity": "high",
       "source": "contracts/browseforge-integration.contract.json"
     },
     {
-      "blocker_id": "browseforge-integration:3",
+      "blocker_id": "browseforge-integration:2",
       "detail": "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
       "severity": "high",
       "source": "contracts/browseforge-integration.contract.json"
     },
     {
-      "blocker_id": "browseforge-integration:4",
+      "blocker_id": "browseforge-integration:3",
       "detail": "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
       "severity": "high",
       "source": "contracts/browseforge-integration.contract.json"
@@ -327,9 +321,9 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T10:30:00Z",
+  "generated_at": "2026-07-11T10:45:00Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
+    "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
     "knowledge/manifests/detector-score-comparison.json": "e386a9934d36bf3e33349ab84d9c0ec7cfd465783cfb9c131e28e9603738159a",
     "knowledge/manifests/fingerprint-surface-status.json": "f2fa53d1446d3072831d6818945f54b7c6bef31c7a52d38ff753d15a42053ab5",
