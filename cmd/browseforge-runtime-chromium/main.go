@@ -116,6 +116,7 @@ func bindLaunchFlags(fs *flag.FlagSet) (*launcher.Config, *string, *bool, *strin
 	fs.StringVar(&cfg.Fingerprint.Locale, "fingerprint-locale", "", "locale tag")
 	fs.StringVar(&cfg.Fingerprint.Platform, "fingerprint-platform", "", "fingerprint platform")
 	fs.IntVar(&cfg.Fingerprint.HardwareConcurrency, "fingerprint-hardware-concurrency", 0, "hardware concurrency")
+	fs.IntVar(&cfg.Fingerprint.DeviceMemoryGB, "fingerprint-device-memory", 0, "device memory GB")
 	fs.IntVar(&cfg.Fingerprint.ScreenWidth, "fingerprint-screen-width", 0, "screen width")
 	fs.IntVar(&cfg.Fingerprint.ScreenHeight, "fingerprint-screen-height", 0, "screen height")
 	fs.IntVar(&cfg.Fingerprint.StorageQuotaMB, "fingerprint-storage-quota", 0, "storage quota MB")
@@ -156,6 +157,9 @@ func mergeConfig(dst *launcher.Config, flags launcher.Config) {
 	}
 	if flags.Fingerprint.HardwareConcurrency != 0 {
 		dst.Fingerprint.HardwareConcurrency = flags.Fingerprint.HardwareConcurrency
+	}
+	if flags.Fingerprint.DeviceMemoryGB != 0 {
+		dst.Fingerprint.DeviceMemoryGB = flags.Fingerprint.DeviceMemoryGB
 	}
 	if flags.Fingerprint.ScreenWidth != 0 {
 		dst.Fingerprint.ScreenWidth = flags.Fingerprint.ScreenWidth

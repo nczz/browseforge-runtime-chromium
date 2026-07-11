@@ -49,7 +49,8 @@
     "Packaged macOS BrowserLeaks JavaScript Screen Object headed direct evidence now records bounded screen dimensions and devicePixelRatio for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS SannySoft headed direct evidence now records bounded automation, UA-CH, WebGL, Canvas, AudioContext, fonts, screen/locale, permissions/features, and webdriver values for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS Pixelscan headed direct WebGL evidence now records full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
-    "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers."
+    "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers.",
+    "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -113,9 +114,9 @@
       "surface": "screen/window/DPR"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported hardwareConcurrency=8 and deviceMemory=8 from configured fingerprint profile.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke reported hardwareConcurrency=8 and deviceMemory=8 from configured fingerprint profile. The runtime launcher BuildPlan already emits --fingerprint-device-memory, and cmd/browseforge-runtime-chromium now binds and merges -fingerprint-device-memory so CLI and config paths both reach the native deviceMemory patch; go run launch dry-run emitted --fingerprint-device-memory=8.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft",
+      "result": "pass_linux_sannysoft_plus_cli_device_memory_binding",
       "severity": "info",
       "status": "detector_tested",
       "surface": "hardwareConcurrency/deviceMemory"
