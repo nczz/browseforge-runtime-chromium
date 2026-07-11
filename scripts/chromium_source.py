@@ -237,7 +237,7 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
                     "out/BrowseForgeDev",
                     "--args=is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
                 ],
-                creates=str(src / "out" / "BrowseForgeDev" / "args.gn"),
+                creates=str(src / "out" / "BrowseForgeDev" / "build.ninja"),
             ),
         ],
     )
@@ -321,13 +321,62 @@ def dependency_profile_tools(chromium_src: Path) -> dict[str, bool]:
     }
 
 
+def bounded_message(text: str, *, limit: int = 300) -> str:
+    normalized = " ".join(text.split())
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[:limit].rstrip() + "…"
+
+
+def macos_xcode_status() -> dict[str, object]:
+    xcodebuild = shutil.which("xcodebuild")
+    status: dict[str, object] = {
+        "xcodebuild": xcodebuild,
+        "xcodebuild_ok": False,
+    }
+    if xcodebuild is None:
+        status["xcodebuild_status"] = "missing"
+        status["xcodebuild_error"] = "xcodebuild not found"
+        return status
+    result = subprocess.run(
+        ["xcodebuild", "-version"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    output = bounded_message((result.stdout or "") + " " + (result.stderr or ""))
+    status["xcodebuild_ok"] = result.returncode == 0
+    status["xcodebuild_status"] = "ok" if result.returncode == 0 else "failed"
+    if output:
+        key = "xcodebuild_version" if result.returncode == 0 else "xcodebuild_error"
+        status[key] = output
+    return status
+
+
+def host_toolchain_status() -> dict[str, object]:
+    if sys.platform == "darwin":
+        return macos_xcode_status()
+    return {}
+
+
+def host_toolchain_preflight_error(status: dict[str, object]) -> str | None:
+    if sys.platform != "darwin" or status.get("xcodebuild_ok") is True:
+        return None
+    detail = status.get("xcodebuild_error") or status.get("xcodebuild_status") or "xcodebuild -version failed"
+    return (
+        "generate-dev-build requires full Xcode before Chromium GN generation; "
+        f"xcodebuild is not ready: {detail}"
+    )
+
+
 def check_tools(plan: SourcePlan) -> dict:
     depot_path = plan.path_prefix
     chromium_src = Path(plan.chromium_src_dir)
     head = git_head(chromium_src)
     platform_gn = platform_gn_binary(chromium_src)
     dependency_profiles = dependency_profile_tools(chromium_src)
-    return {
+    status = {
         "fetch": shutil.which("fetch", path=depot_path),
         "gclient": shutil.which("gclient", path=depot_path),
         "gn": shutil.which("gn", path=depot_path),
@@ -341,6 +390,8 @@ def check_tools(plan: SourcePlan) -> dict:
         "platform_gn_exists": platform_gn.is_file(),
         "dependency_profiles": dependency_profiles,
     }
+    status.update(host_toolchain_status())
+    return status
 
 
 def check_build_outputs(plan: SourcePlan) -> dict:
@@ -387,7 +438,9 @@ def preflight_step(plan: SourcePlan, step: Step) -> None:
             "generate-dev-build requires Chromium platform GN at "
             f"{platform_gn}; run sync-deps and run-hooks for this checkout before generating BrowseForgeDev"
         )
-
+    host_error = host_toolchain_preflight_error(host_toolchain_status())
+    if host_error is not None:
+        raise SystemExit(host_error)
 
 def run_step(step: Step, env: dict[str, str]) -> None:
     Path(step.cwd).mkdir(parents=True, exist_ok=True)

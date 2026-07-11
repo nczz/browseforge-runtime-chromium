@@ -1,11 +1,8 @@
 {
-  "blocker_count": 45,
+  "blocker_count": 40,
   "deliverables": [
     {
-      "blockers": [
-        "missing build output: dev_build_ninja_exists",
-        "blocked host toolchain: full Xcode required"
-      ],
+      "blockers": [],
       "deliverable_id": "source_build_baseline",
       "evidence": [
         "knowledge/manifests/source-acquisition.json:chromium_base.source_checkout_status",
@@ -17,7 +14,7 @@
         "BrowseForgeDev GN args and build.ninja exist",
         "BrowseForgeLinuxDocker args.gn/build.ninja/chrome exist"
       ],
-      "satisfied": false,
+      "satisfied": true,
       "title": "Reproducible Chromium source/build baseline"
     },
     {
@@ -148,7 +145,6 @@
         "native-artifact:macos-arm64:0",
         "native-artifact:macos-arm64:1",
         "native-artifact:macos-arm64:2",
-        "native-artifact:macos-arm64:3",
         "native-artifact:windows-x64:0",
         "native-artifact:windows-x64:1",
         "native-artifact:windows-x64:2",
@@ -158,9 +154,7 @@
         "release-gate:live-detector-evidence",
         "signing-policy:linux-x64",
         "signing-policy:macos-arm64",
-        "signing-policy:windows-x64",
-        "source-acquisition:dev-baseline:build-ninja",
-        "source-acquisition:dev-baseline:full-xcode"
+        "signing-policy:windows-x64"
       ],
       "deliverable_id": "release_grade_cutover",
       "evidence": [
@@ -175,7 +169,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-11T04:50:00Z",
+  "generated_at": "2026-07-11T05:31:00Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,

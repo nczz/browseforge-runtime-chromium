@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T04:50:00Z",
+  "generated_at": "2026-07-11T05:30:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -19,11 +19,10 @@
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=False, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=False"
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=False, output_binary_exists=False, package_zip_exists=False, xcodebuild_ok=True"
       ],
       "missing_prerequisites": [
         "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
-        "full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK",
         "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101",
         "native macOS detector evidence for the packaged artifact"
       ],
@@ -40,14 +39,14 @@
         "gn_binary_exists": true,
         "host_os": "darwin",
         "host_supported": true,
-        "native_toolchain_ready": false,
+        "native_toolchain_ready": true,
         "out_args_exists": false,
         "output_binary_exists": false,
         "package_zip_exists": false,
         "required_host_os": "darwin",
         "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
-        "xcodebuild_ok": false,
-        "xcodebuild_status": "failed"
+        "xcodebuild_ok": true,
+        "xcodebuild_status": "ok"
       }
     },
     {

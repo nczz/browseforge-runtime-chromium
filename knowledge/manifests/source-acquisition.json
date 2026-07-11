@@ -9,7 +9,7 @@
     "base_version": "150.0.7871.101",
     "build_output_check_contract": "python3 scripts/chromium_source.py check reports build_outputs for BrowseForgeDev GN args/build.ninja, BrowseForgeLinuxDocker args.gn/build.ninja/chrome, and required Linux runtime sidecars/locales so missing baseline generation and incomplete packageable release outputs are machine-readable.",
     "build_output_status": {
-      "dev_build_ninja_exists": false,
+      "dev_build_ninja_exists": true,
       "dev_gn_args_exists": true,
       "linux_docker_build_ninja_exists": true,
       "linux_docker_chrome_exists": true,
@@ -38,18 +38,22 @@
     "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
     "feature_parity_patch_status": "applied_to_external_checkout_with_contacts_content_index_netinfo_serial_port_connected_webshare",
     "fonts_patch_status": "applied_to_external_checkout",
-    "gn_generation_status": "dev_args_written_blocked_full_xcode_before_build_ninja",
+    "gn_generation_status": "dev_build_ninja_generated_with_full_xcode",
     "hardware_patch_status": "applied_to_external_checkout",
     "hooks_status": "completed_after_macos_host_deps_sync",
     "last_dev_baseline_probe": {
-      "command": "python3 scripts/chromium_source.py acquire --execute --step sync-deps && python3 scripts/chromium_source.py acquire --execute --step run-hooks && python3 scripts/chromium_source.py acquire --execute --step generate-dev-build",
-      "dev_build_ninja_exists_current": false,
+      "command": "python3 scripts/chromium_source.py acquire --execute --step generate-dev-build",
+      "dev_build_ninja_exists_current": true,
       "dev_gn_args_exists_current": true,
-      "error_summary": "GN started after mac platform GN was installed and wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools.",
-      "next_action": "Select full Xcode, then rerun python3 scripts/chromium_source.py acquire --execute --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "error_summary": "",
+      "next_action": "Continue from the reproducible BrowseForgeDev GN baseline; run the selected build command when native macOS artifact production is in scope.",
       "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn",
       "platform_gn_exists_current": true,
-      "status": "blocked_full_xcode_required_after_dev_args_written"
+      "status": "generated_dev_build_ninja",
+      "xcodebuild": "/usr/bin/xcodebuild",
+      "xcodebuild_ok": true,
+      "xcodebuild_status": "ok",
+      "xcodebuild_version": "Xcode 26.6 Build version 17F113"
     },
     "linux_docker_missing_runtime_sidecars": [],
     "linux_docker_rebuild_resume": {

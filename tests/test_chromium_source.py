@@ -115,6 +115,8 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         sync = next(step for step in plan.steps if step.id == "sync-deps")
         if chromium_source.host_deps_argument():
             self.assertIn(chromium_source.host_deps_argument(), sync.command)
+        generate = next(step for step in plan.steps if step.id == "generate-dev-build")
+        self.assertTrue(str(generate.creates).endswith("out/BrowseForgeDev/build.ninja"))
 
     def test_check_tools_reports_checkout_presence(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -199,19 +201,92 @@ class ChromiumSourcePlanTests(unittest.TestCase):
             self.assertIn("buildtools", message)
             self.assertRegex(message, r"\b(run-hooks|sync-deps)\b")
 
+    def test_generate_dev_build_rejects_unavailable_macos_xcode_before_step_subprocess(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            platform_gn = src / "buildtools" / "mac" / "gn"
+            platform_gn.parent.mkdir(parents=True)
+            platform_gn.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            def run_side_effect(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+                if command == ["xcodebuild", "-version"]:
+                    return subprocess.CompletedProcess(
+                        command,
+                        1,
+                        stdout="",
+                        stderr="xcode-select: error: tool 'xcodebuild' requires Xcode",
+                    )
+                raise AssertionError(f"unexpected subprocess after Xcode preflight failure: {command!r}")
+
+            with (
+                mock.patch.object(chromium_source.sys, "platform", "darwin"),
+                mock.patch.object(chromium_source.shutil, "which", return_value="/usr/bin/xcodebuild"),
+                mock.patch.object(chromium_source.subprocess, "run", side_effect=run_side_effect) as run_spy,
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    chromium_source.execute(plan, ["generate-dev-build"])
+
+            self.assertEqual(
+                [
+                    mock.call(
+                        ["xcodebuild", "-version"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        check=False,
+                    )
+                ],
+                run_spy.call_args_list,
+            )
+            message = str(raised.exception)
+            self.assertIn("full Xcode", message)
+            self.assertIn("xcodebuild", message)
+            self.assertNotIn("CalledProcessError", message)
+
+    def test_generate_dev_build_runs_step_subprocess_when_macos_xcode_is_ready(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            platform_gn = src / "buildtools" / "mac" / "gn"
+            platform_gn.parent.mkdir(parents=True)
+            platform_gn.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+            generate_step = next(step for step in plan.steps if step.id == "generate-dev-build")
+
+            def run_side_effect(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+                if command == ["xcodebuild", "-version"]:
+                    return subprocess.CompletedProcess(
+                        command,
+                        0,
+                        stdout="Xcode 16.4\nBuild version 16F6",
+                        stderr="",
+                    )
+                return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+            with (
+                mock.patch.object(chromium_source.sys, "platform", "darwin"),
+                mock.patch.object(chromium_source.shutil, "which", return_value="/usr/bin/xcodebuild"),
+                mock.patch.object(chromium_source.subprocess, "run", side_effect=run_side_effect) as run_spy,
+            ):
+                chromium_source.execute(plan, ["generate-dev-build"])
+
+            self.assertEqual(2, run_spy.call_count)
+            self.assertEqual(["xcodebuild", "-version"], run_spy.call_args_list[0].args[0])
+            self.assertEqual(generate_step.command, run_spy.call_args_list[1].args[0])
+
     def test_check_tools_reports_pinned_checkout_head(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp_path = Path(td)
             workdir = tmp_path / "chromium"
             src = workdir / "src"
             src.mkdir(parents=True)
-            subprocess.run(["git", "init"], cwd=src, check=True, stdout=subprocess.DEVNULL)
-            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=src, check=True)
-            subprocess.run(["git", "config", "user.name", "Test User"], cwd=src, check=True)
-            (src / "README").write_text("fixture\n", encoding="utf-8")
-            subprocess.run(["git", "add", "README"], cwd=src, check=True)
-            subprocess.run(["git", "commit", "-m", "fixture"], cwd=src, check=True, stdout=subprocess.DEVNULL)
-            head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=src, text=True).strip()
+            head = "a" * 40
             plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
             plan = chromium_source.SourcePlan(
                 runtime_id=plan.runtime_id,
@@ -226,7 +301,8 @@ class ChromiumSourcePlanTests(unittest.TestCase):
                 steps=plan.steps,
             )
 
-            tools = chromium_source.check_tools(plan)
+            with mock.patch.object(chromium_source, "git_head", return_value=head):
+                tools = chromium_source.check_tools(plan)
 
         self.assertEqual(tools["chromium_src_head"], head)
         self.assertIs(tools["chromium_src_matches_manifest"], True)
@@ -237,17 +313,13 @@ class ChromiumSourcePlanTests(unittest.TestCase):
             workdir = tmp_path / "chromium"
             src = workdir / "src"
             src.mkdir(parents=True)
-            subprocess.run(["git", "init"], cwd=src, check=True, stdout=subprocess.DEVNULL)
-            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=src, check=True)
-            subprocess.run(["git", "config", "user.name", "Test User"], cwd=src, check=True)
-            (src / "README").write_text("fixture\n", encoding="utf-8")
-            subprocess.run(["git", "add", "README"], cwd=src, check=True)
-            subprocess.run(["git", "commit", "-m", "fixture"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+            checkout_head = "b" * 40
             plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
 
-            tools = chromium_source.check_tools(plan)
+            with mock.patch.object(chromium_source, "git_head", return_value=checkout_head):
+                tools = chromium_source.check_tools(plan)
 
-        self.assertRegex(tools["chromium_src_head"], r"^[0-9a-f]{40}$")
+        self.assertEqual(tools["chromium_src_head"], checkout_head)
         self.assertIs(tools["chromium_src_matches_manifest"], False)
 
     def test_check_build_outputs_reports_baseline_and_release_artifacts(self) -> None:
