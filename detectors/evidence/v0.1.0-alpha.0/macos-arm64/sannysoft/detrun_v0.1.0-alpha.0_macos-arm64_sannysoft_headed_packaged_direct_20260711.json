@@ -1,0 +1,247 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:sannysoft:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "sannysoft_automation_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.automation",
+      "finding": "SannySoft packaged macOS headed direct run loaded and reported navigator.webdriver=false without HeadlessChrome in the configured user agent.",
+      "normalized_values": {
+        "navigator.webdriver": false,
+        "headlessInUserAgent": false,
+        "title": "Antibot"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "sannysoft_client_hints_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.uaData",
+      "finding": "SannySoft packaged macOS headed direct run exposed configured macOS arm64 Chromium high-entropy UA-CH values and a Chromium 150 fullVersionList entry.",
+      "normalized_values": {
+        "architecture": "arm",
+        "bitness": "64",
+        "platform": "macOS",
+        "platformVersion": "26.5.1",
+        "mobile": false,
+        "wow64": false,
+        "fullVersionListBrands": [
+          "Not;A=Brand",
+          "Chromium"
+        ],
+        "hasChromiumFullVersion": true
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "sannysoft_webgl_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.webgl",
+      "finding": "SannySoft packaged macOS headed direct run reported bounded WebGL vendor/renderer and metadata from the page-context collector.",
+      "normalized_values": {
+        "available": true,
+        "vendor": "Google Inc. (Apple)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "extensionCount": 39,
+        "extensionSha256": "607b9f27fb876a17fac9bf146ca9b5cdb083fb5631930a88fe9f5436c33820c9",
+        "parameterSha256": "70312f56c46aed3e5318487bb6c73d257fa9f758faed0cad6581a5177fdb945b",
+        "precisionSha256": "ed6e07a200f3c248aca734ca2fd9a2c5707287e921f979d5e2a36e0437a51bb9",
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "pixelHeight": 16
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "sannysoft_canvas_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.canvas",
+      "finding": "SannySoft packaged macOS headed direct run produced bounded Canvas probe hashes without committing raw pixels or data URLs.",
+      "normalized_values": {
+        "available": true,
+        "width": 64,
+        "height": 32,
+        "sampleCount": 8192,
+        "dataUrlSha256": "71cf4062038917e0d78ecd3c478b5124efdcc1509aa022b6d06006d636dd3c80",
+        "imageDataSha256": "f8d7606fac2326d6ff99d2af69c7805d12df136550883ab1c65b55b11dc9bf15"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "sannysoft_audio_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.audio",
+      "finding": "SannySoft packaged macOS headed direct run produced bounded OfflineAudioContext summary metrics without committing raw AudioBuffer payloads.",
+      "normalized_values": {
+        "available": true,
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 0.77295988,
+        "sumAbs": 83.86503121
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "sannysoft_fonts_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.fonts",
+      "finding": "SannySoft packaged macOS headed direct run reported document.fonts availability plus bounded font metric and glyph hashes.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 8,
+        "glyphSampleCount": 73728,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricsSha256": "25b20319648fc1d52776a83bdbd6accbc160502115c70ad7db2044ec3c0d843d",
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        }
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "sannysoft_screen_locale_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.screen_locale",
+      "finding": "SannySoft packaged macOS headed direct run reported configured screen dimensions, zh-TW locale, and Asia/Taipei timezone.",
+      "normalized_values": {
+        "screen": {
+          "width": 1920,
+          "height": 1080,
+          "availWidth": 1920,
+          "availHeight": 1080,
+          "devicePixelRatio": 2
+        },
+        "languages": [
+          "zh-TW"
+        ],
+        "timezone": "Asia/Taipei"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "sannysoft_permissions_features_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.features",
+      "finding": "SannySoft packaged macOS headed direct run recorded bounded Permissions API states and desktop feature availability without requesting device access.",
+      "normalized_values": {
+        "available": true,
+        "featureFlags": {
+          "contactsManager": true,
+          "contentIndex": true,
+          "idleDetector": true,
+          "keyboardLock": true,
+          "localFonts": true,
+          "networkInformation": true,
+          "presentation": true,
+          "storageBuckets": true,
+          "virtualKeyboard": true,
+          "webBluetooth": true,
+          "webHid": true,
+          "webNfc": false,
+          "webSerial": true,
+          "webShare": true,
+          "webShareData": true,
+          "webUsb": true,
+          "windowControlsOverlay": true
+        },
+        "notificationPermission": "default",
+        "permissionStates": {
+          "accelerometer": "granted",
+          "background-sync": "granted",
+          "camera": "prompt",
+          "clipboard-read": "prompt",
+          "clipboard-write": "granted",
+          "geolocation": "prompt",
+          "gyroscope": "granted",
+          "idle-detection": "prompt",
+          "local-fonts": "prompt",
+          "magnetometer": "granted",
+          "microphone": "prompt",
+          "midi": "prompt",
+          "notifications": "prompt",
+          "payment-handler": "granted",
+          "persistent-storage": "prompt",
+          "push": "error:NotSupportedError",
+          "window-management": "prompt"
+        },
+        "permissionsApi": true
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "permissions"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for SannySoft direct headed coverage; no raw page text, screenshots, storage details, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed. Only text_sha256 and bounded normalized values are retained.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-sannysoft-macos-packaged-headed-direct-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "7ec858326810baded880565ca95f626199c16f6569e9cfdeed6d56f2160ff704",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "57b98f3d4bb6af3cca6e1165726f1d03c5cd9d0bf54977e325469569424d543c",
+    "sha256": "0a065e9a49f3c4fa50bd7c9097d93c3960910437ab9050f30012b64ebe79b9f8"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T14:35:00Z"
+}
