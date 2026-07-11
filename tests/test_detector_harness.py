@@ -518,6 +518,21 @@ class DetectorHarnessTests(unittest.TestCase):
         return value
 
 
+    def browserleaks_canvas_value(self):
+        value = self.browserleaks_client_hints_value()
+        value["title"] = "BrowserLeaks - Canvas Fingerprinting"
+        value["url"] = "https://browserleaks.com/canvas"
+        value["canvas"] = {
+            "available": True,
+            "width": 64,
+            "height": 32,
+            "sampleCount": 8192,
+            "imageDataSha256": "5" * 64,
+            "dataUrlSha256": "6" * 64,
+        }
+        return value
+
+
     def browserleaks_fonts_value(self):
         value = self.browserleaks_client_hints_value()
         value["title"] = "BrowserLeaks - Fonts"
@@ -675,6 +690,17 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("Screen Object", finding)
         self.assertIn("devicePixelRatio", finding)
 
+    def test_classify_browserleaks_dispatches_canvas_page_without_claiming_release_pass(self):
+        status, finding, severity = self.harness_module.classify_browserleaks(
+            self.browserleaks_canvas_value(),
+            "https://browserleaks.com/canvas",
+        )
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("Canvas", finding)
+        self.assertIn("data URL hashes", finding)
+
+
     def test_classify_browserleaks_dispatches_fonts_page_without_claiming_release_pass(self):
         status, finding, severity = self.harness_module.classify_browserleaks(
             self.browserleaks_fonts_value(),
@@ -740,6 +766,9 @@ class DetectorHarnessTests(unittest.TestCase):
         del audio["audio"]["sumAbs"]
         screen = self.browserleaks_screen_value()
         del screen["screen"]["devicePixelRatio"]
+        canvas = self.browserleaks_canvas_value()
+        del canvas["canvas"]["dataUrlSha256"]
+
 
         fonts = self.browserleaks_fonts_value()
         del fonts["fonts"]["metrics"]["glyphSha256"]
@@ -754,6 +783,7 @@ class DetectorHarnessTests(unittest.TestCase):
         cases = [
             (audio, "https://browserleaks.com/javascript#audio", "sumAbs"),
             (screen, "https://browserleaks.com/javascript", "devicePixelRatio"),
+            (canvas, "https://browserleaks.com/canvas", "dataUrlSha256"),
             (fonts, "https://browserleaks.com/fonts", "glyphSha256"),
             (webgl, "https://browserleaks.com/webgl", "parameter"),
             (webrtc, "https://browserleaks.com/webrtc", "candidateCount"),
@@ -1690,6 +1720,7 @@ class DetectorHarnessTests(unittest.TestCase):
 
         cases = [
             ("audio", "https://browserleaks.com/javascript#audio"),
+            ("canvas", "https://browserleaks.com/canvas"),
             ("fonts", "https://browserleaks.com/fonts"),
             ("screen", "https://browserleaks.com/javascript"),
         ]

@@ -1,0 +1,144 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/canvas"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_canvas_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.canvas",
+      "finding": "BrowserLeaks Canvas packaged macOS headed direct run reported bounded Canvas 2D image and data URL hashes from the built BrowseForge Chromium app without committing raw pixels or data URLs.",
+      "normalized_values": {
+        "available": true,
+        "dataUrlSha256": "71cf4062038917e0d78ecd3c478b5124efdcc1509aa022b6d06006d636dd3c80",
+        "height": 32,
+        "imageDataSha256": "f8d7606fac2326d6ff99d2af69c7805d12df136550883ab1c65b55b11dc9bf15",
+        "sampleCount": 8192,
+        "width": 64
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "browserleaks_canvas_page_text_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.text_sha256",
+      "finding": "BrowserLeaks Canvas page text was not committed; bounded text hash confirms the Canvas Fingerprinting page loaded.",
+      "normalized_values": {
+        "textSha256": "3c5b3e6fac4e5ae3d2819a47e145aa9576f55098fa671cd90edc681a4683d644",
+        "title": "Canvas Fingerprinting - BrowserLeaks"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "browserleaks_canvas_storage_quota_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.storage",
+      "finding": "BrowserLeaks Canvas packaged macOS headed direct run reported the configured storage quota through navigator.storage.estimate.",
+      "normalized_values": {
+        "quota": 8589934592
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "storage_quota"
+    },
+    {
+      "detector_check": "browserleaks_canvas_screen_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.screen",
+      "finding": "BrowserLeaks Canvas packaged macOS headed direct run reported configured screen dimensions and devicePixelRatio from the packaged runtime profile.",
+      "normalized_values": {
+        "availHeight": 1080,
+        "availWidth": 1920,
+        "devicePixelRatio": 2,
+        "height": 1080,
+        "width": 1920
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "screen"
+    },
+    {
+      "detector_check": "browserleaks_canvas_locale_timezone_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.locale_timezone",
+      "finding": "BrowserLeaks Canvas packaged macOS headed direct run reported the configured zh-TW locale and Asia/Taipei timezone profile.",
+      "normalized_values": {
+        "languages": [
+          "zh-TW"
+        ],
+        "timezone": "Asia/Taipei"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "browserleaks_canvas_webdriver_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.webdriver",
+      "finding": "BrowserLeaks Canvas packaged macOS headed direct run reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium wrapper/CDP collector for BrowserLeaks Canvas direct headed coverage; no raw page text, screenshots, storage details, IP literals, raw WebGL parameters/extensions/pixels, raw Canvas pixels/data URLs, or raw AudioBuffer payloads are committed. Only text_sha256 and bounded normalized values are retained.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-canvas-macos-packaged-headed-direct-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "f09be4cd569db1547f3a32d878928fe87ff81e8aab595f1383404059ef00d21d",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "3c5b3e6fac4e5ae3d2819a47e145aa9576f55098fa671cd90edc681a4683d644",
+    "sha256": "3c2b31a19556e2c06913aa68362fa9670712e7dbd085c40ba7b70941e9019338"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T14:55:00Z"
+}

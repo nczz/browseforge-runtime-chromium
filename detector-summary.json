@@ -58,8 +58,8 @@
     }
   ],
   "coverage_platform": "macos-arm64",
-  "evidence_count": 61,
-  "generated_at": "2026-07-11T14:45:00Z",
+  "evidence_count": 62,
+  "generated_at": "2026-07-11T14:55:00Z",
   "rows": [
     {
       "detector_id": "browserleaks",
@@ -304,6 +304,12 @@
     {
       "detector_id": "browserleaks",
       "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_audio_headed_packaged_direct_20260711.json",
+      "platform": "macos-arm64",
+      "status": "passed"
+    },
+    {
+      "detector_id": "browserleaks",
+      "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json",
       "platform": "macos-arm64",
       "status": "passed"
     },

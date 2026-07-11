@@ -1712,6 +1712,17 @@ def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
 
 
 
+def classify_browserleaks_canvas_probe(value: dict) -> tuple[str, str, str]:
+    canvas = value.get("canvas") or {}
+    if not canvas.get("available"):
+        return "warning", "BrowserLeaks Canvas page loaded, but the bounded Canvas probe is unavailable.", "medium"
+    required = {"width", "height", "sampleCount", "imageDataSha256", "dataUrlSha256"}
+    missing = sorted(field for field in required if canvas.get(field) is None)
+    if missing:
+        return "warning", f"BrowserLeaks Canvas page loaded, but sanitized Canvas summary is missing fields: {missing}", "medium"
+    return "warning", "BrowserLeaks Canvas page reported bounded Canvas 2D image and data URL hashes; release-grade cross-detector canvas parity remains required.", "medium"
+
+
 def classify_browserleaks_screen_probe(value: dict) -> tuple[str, str, str]:
     screen = value.get("screen") or {}
     required = {"width", "height", "availWidth", "availHeight", "devicePixelRatio"}
@@ -1744,6 +1755,8 @@ def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
         return classify_browserleaks_audio_probe(value)
     if "/javascript" in page_url:
         return classify_browserleaks_screen_probe(value)
+    if "/canvas" in page_url:
+        return classify_browserleaks_canvas_probe(value)
     if "/fonts" in page_url:
         return classify_browserleaks_fonts_probe(value)
     if "/webgl" in page_url:
@@ -2341,6 +2354,7 @@ SUPPORTED_COLLECTOR_PAGES = {
     "browserleaks": {
         "client-hints": "https://browserleaks.com/client-hints",
         "audio": "https://browserleaks.com/javascript#audio",
+        "canvas": "https://browserleaks.com/canvas",
         "fonts": "https://browserleaks.com/fonts",
         "webgl": "https://browserleaks.com/webgl",
         "webrtc": "https://browserleaks.com/webrtc",

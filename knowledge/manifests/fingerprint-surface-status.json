@@ -34,7 +34,8 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_client_hints_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_screen_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json"
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
@@ -47,7 +48,8 @@
     "Packaged macOS BrowserLeaks Client Hints headed direct evidence now records bounded UA-CH, screen, locale/timezone, hardware, storage quota, canvas, audio, permissions/features, and webdriver values for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS BrowserLeaks JavaScript Screen Object headed direct evidence now records bounded screen dimensions and devicePixelRatio for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS SannySoft headed direct evidence now records bounded automation, UA-CH, WebGL, Canvas, AudioContext, fonts, screen/locale, permissions/features, and webdriver values for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
-    "Packaged macOS Pixelscan headed direct WebGL evidence now records full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers."
+    "Packaged macOS Pixelscan headed direct WebGL evidence now records full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
+    "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -119,9 +121,9 @@
       "surface": "hardwareConcurrency/deviceMemory"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP collector rendered a deterministic 64x32 Canvas 2D probe twice from fresh container launches with fingerprint.canvas_noise=23; sanitized data_url_sha256 and image_data_sha256 matched across repeats, and no raw data URL or pixel payload is committed.",
+      "evidence": "Packaged Linux SannySoft/CDP collector rendered deterministic Canvas 2D probe hashes across repeated launches, and packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded imageDataSha256/dataUrlSha256 without raw pixel/data URL payloads; proxy and Windows matrix coverage remain tracked separately.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft_canvas_probe_repeat_consistent",
+      "result": "pass_linux_repeat_consistent_plus_macos_packaged_browserleaks_canvas_direct",
       "severity": "info",
       "status": "detector_tested",
       "surface": "Canvas"
@@ -199,7 +201,7 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, iphey, and CreepJS smokes now exist in both headless and headed/Xvfb display modes where supported. macOS arm64 packaged headed SannySoft full direct evidence plus packaged BrowserLeaks Client Hints/Screen/WebGL/audio/fonts/WebRTC, BrowserScan client-hints/audio/fonts/canvas/storage/permissions/automation, BrowserScan WebGL, Pixelscan WebGL/audio/fonts/canvas, iphey client-hints/audio/fonts/canvas/locale/permissions/automation, and CreepJS WebGL/audio/fonts evidence exists for the built BrowseForge Chromium app; older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows and external proxy detector matrix coverage remain absent.",
+      "evidence": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, iphey, and CreepJS smokes now exist in both headless and headed/Xvfb display modes where supported. macOS arm64 packaged headed SannySoft full direct evidence plus packaged BrowserLeaks Client Hints/Screen/Canvas/WebGL/audio/fonts/WebRTC, BrowserScan client-hints/audio/fonts/canvas/storage/permissions/automation, BrowserScan WebGL, Pixelscan WebGL/audio/fonts/canvas, iphey client-hints/audio/fonts/canvas/locale/permissions/automation, and CreepJS WebGL/audio/fonts evidence exists for the built BrowseForge Chromium app; older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows and external proxy detector matrix coverage remain absent.",
       "release_blocker": true,
       "result": "linux_headless_headed_xvfb_plus_macos_packaged_sannysoft_browserleaks_browserscan_pixelscan_iphey_creepjs_direct_partial",
       "severity": "medium",
@@ -249,6 +251,7 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_client_hints_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_screen_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json"
   ]
 }
