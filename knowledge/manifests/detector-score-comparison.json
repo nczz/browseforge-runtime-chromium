@@ -2,8 +2,12 @@
   "baseline_gaps": [
     {
       "detector_id": "browserleaks,creepjs,pixelscan",
-      "finding": "Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.",
+      "finding": "Native headed font corpus parity is incomplete; Linux Docker/Xvfb comparisons are not enough for release-grade font evidence.",
       "gap_id": "native_headed_font_corpus_parity_missing",
+      "missing": [
+        "creepjs native headed direct font metrics",
+        "pixelscan native headed direct font availability"
+      ],
       "required_evidence": "native headed Linux/macOS font corpus and detector-score comparison",
       "surface": "fonts"
     }
@@ -258,9 +262,9 @@
     }
   ],
   "decision": "Offline comparisons summarize committed sanitized evidence only; Linux BrowserLeaks WebRTC bounded candidate metadata and WebGL cross-detector metadata now have passing comparisons, while live release-grade detector baselines, external proxy/geolocation evidence, and native/headed WebGL coverage remain required before release claims.",
-  "evidence_count": 47,
+  "evidence_count": 51,
   "gaps": [],
-  "generated_at": "2026-07-11T10:11:02.257495+00:00",
+  "generated_at": "2026-07-11T10:41:14.163275+00:00",
   "release_grade": false,
   "runtime_id": "browseforge-chromium"
 }

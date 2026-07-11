@@ -1346,16 +1346,52 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
         })
     return comparisons, gaps
 
+def _native_headed_font_corpus_missing(evidence_rows: list[dict]) -> list[str]:
+    font_records = _collect_font_metric_records(evidence_rows)
+    browserleaks_native = any(
+        record["detector_id"] == "browserleaks"
+        and record.get("display_mode") == "headed"
+        and record.get("platform") in {"linux-x64", "macos-arm64"}
+        and record.get("network_mode") == "direct"
+        and record.get("container") is False
+        for record in font_records
+    )
+    creepjs_native = any(
+        record["detector_id"] == "creepjs"
+        and record.get("display_mode") == "headed"
+        and record.get("platform") in {"linux-x64", "macos-arm64"}
+        and record.get("network_mode") == "direct"
+        and record.get("container") is False
+        for record in font_records
+    )
+    pixelscan_native = any(
+        record.get("display_mode") == "headed"
+        and record.get("platform") in {"linux-x64", "macos-arm64"}
+        and record.get("network_mode") == "direct"
+        and record.get("container") is False
+        for record in _collect_font_availability_records(evidence_rows, "pixelscan")
+    )
+    missing = []
+    if not browserleaks_native:
+        missing.append("browserleaks native headed direct font metrics")
+    if not creepjs_native:
+        missing.append("creepjs native headed direct font metrics")
+    if not pixelscan_native:
+        missing.append("pixelscan native headed direct font availability")
+    return missing
+
 def detector_score_baseline_gaps(evidence_rows: list[dict]) -> list[dict]:
-    gaps = [
-        {
+    gaps = []
+    missing_native_fonts = _native_headed_font_corpus_missing(evidence_rows)
+    if missing_native_fonts:
+        gaps.append({
             "gap_id": "native_headed_font_corpus_parity_missing",
             "surface": "fonts",
             "detector_id": "browserleaks,creepjs,pixelscan",
-            "finding": "Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.",
+            "missing": missing_native_fonts,
+            "finding": "Native headed font corpus parity is incomplete; Linux Docker/Xvfb comparisons are not enough for release-grade font evidence.",
             "required_evidence": "native headed Linux/macOS font corpus and detector-score comparison",
-        },
-    ]
+        })
     if not _collect_pixelscan_score_records(evidence_rows):
         gaps.insert(1, {
             "gap_id": "pixelscan_audio_font_score_baseline_missing",

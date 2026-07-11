@@ -99,14 +99,14 @@
     },
     {
       "blocker_id": "score-comparison:baseline_gaps:native_headed_font_corpus_parity_missing",
-      "detail": "{\"detector_id\": \"browserleaks,creepjs,pixelscan\", \"finding\": \"Font corpus parity is only checked from Linux Docker/Xvfb bounded probes; native headed platform corpus evidence is missing.\", \"gap_id\": \"native_headed_font_corpus_parity_missing\", \"required_evidence\": \"native headed Linux/macOS font corpus and detector-score comparison\", \"surface\": \"fonts\"}",
+      "detail": "{\"detector_id\": \"browserleaks,creepjs,pixelscan\", \"finding\": \"Native headed font corpus parity is incomplete; Linux Docker/Xvfb comparisons are not enough for release-grade font evidence.\", \"gap_id\": \"native_headed_font_corpus_parity_missing\", \"missing\": [\"creepjs native headed direct font metrics\", \"pixelscan native headed direct font availability\"], \"required_evidence\": \"native headed Linux/macOS font corpus and detector-score comparison\", \"surface\": \"fonts\"}",
       "severity": "medium",
       "source": "knowledge/manifests/detector-score-comparison.json"
     },
     {
       "blocker_id": "fingerprint-surface:AudioContext",
-      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
-      "result": "pass_linux_headless_headed_creepjs_browserleaks_audio_parity_plus_macos_host_audio_packaged_native_matrix_required",
+      "detail": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. New macOS arm64 host headed BrowserLeaks JavaScript audio evidence records bounded AudioContext fields plus OfflineAudioContext sampleRate/length/sum/sumAbs summaries from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records bounded JavaScript AudioContext/AnalyserNode field summaries.",
+      "result": "pass_linux_parity_plus_macos_packaged_browserleaks_audio_peer_native_matrix_required",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -114,8 +114,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:WebGL vendor/renderer",
-      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists.",
-      "result": "warn_linux_webgl_metadata_cross_detector_passed_macos_host_webgl_recorded_native_headed_required",
+      "detail": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparison and ignores warning-only non-release WebGL rows for release metadata gaps; headed/native detector confirmation remains a blocker. New macOS arm64 host headed BrowserLeaks WebGL evidence records native Apple/ANGLE vendor/renderer, extension count/hash, parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions from installed system Chrome; it remains non-release artifact evidence until a signed packaged macOS BrowseForge Chromium exists. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records sanitized WebGL vendor/renderer, extension count/hash, parameter hash, shader precision hash, and rendered pixel hash.",
+      "result": "warn_linux_webgl_cross_detector_plus_macos_packaged_browserleaks_webgl_peer_native_required",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -123,8 +123,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
-      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 packaged headed SannySoft evidence exists for the built BrowseForge Chromium app, and host headed BrowserLeaks Fonts, Audio, and WebGL direct evidence exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
-      "result": "linux_headless_headed_xvfb_plus_macos_packaged_sannysoft_and_host_browserleaks_partial",
+      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 packaged headed SannySoft evidence plus packaged BrowserLeaks WebGL/audio/fonts/WebRTC direct evidence exists for the built BrowseForge Chromium app, and older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
+      "result": "linux_headless_headed_xvfb_plus_macos_packaged_sannysoft_browserleaks_direct_partial",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -132,8 +132,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:fonts",
-      "detail": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. New macOS arm64 host headed BrowserLeaks Fonts evidence passed coverage and records bounded native system Chrome font metrics/glyph hashes through the BrowseForge wrapper, proving local native corpus collection works; it remains non-release artifact evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium artifact. BrowserLeaks/CreepJS/Pixelscan native packaged platform corpus parity remains required.",
-      "result": "pass_macos_host_font_corpus_packaged_native_matrix_required",
+      "detail": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; knowledge/manifests/detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. New macOS arm64 host headed BrowserLeaks Fonts evidence passed coverage and records bounded native system Chrome font metrics/glyph hashes through the BrowseForge wrapper, proving local native corpus collection works; it remains non-release artifact evidence because it used installed system Chrome rather than a signed BrowseForge macOS Chromium artifact. BrowserLeaks/CreepJS/Pixelscan native packaged platform corpus parity remains required. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records bounded font metric rows plus glyph and metrics SHA-256 values; native CreepJS and Pixelscan peers remain missing for release-grade font corpus parity.",
+      "result": "pass_macos_packaged_browserleaks_font_corpus_peer_native_matrix_required",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -285,12 +285,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T12:10:00Z",
+  "generated_at": "2026-07-11T12:20:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
-    "detector-summary.json": "c442889d53bc1f909a0ca457543584702b7400e43cc570a95ba31609fb5e1e6c",
-    "knowledge/manifests/detector-score-comparison.json": "6d3064f32594f12d419342470ae01899617cc50751e890470f46ba0b769a4cfe",
-    "knowledge/manifests/fingerprint-surface-status.json": "20523e710ec5e283212984cc17bc554c826832c787a102f269ee104cd1860bd6",
+    "detector-summary.json": "ea8aafa66f923a2499e5662834d86bcb774464a64e557cbc5d942652276a157f",
+    "knowledge/manifests/detector-score-comparison.json": "5aea3afdfea595da2d29902573ed9c8280f6df8be1b42a5e1e6d07cd51fd5ecc",
+    "knowledge/manifests/fingerprint-surface-status.json": "996606187026d673fd68e4096a5a80c0af24f1314ba458e8db9dd34af3e500bf",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "db3ec009736f3b41a157796bfd2d6a9aabd223e587b30cdfff913e567f74cceb",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",

@@ -2739,7 +2739,7 @@ class DetectorHarnessTests(unittest.TestCase):
                 "native_headed_font_corpus_parity_missing": {
                     "surface": "fonts",
                     "detector_id": "browserleaks,creepjs,pixelscan",
-                    "finding": "native headed platform corpus evidence is missing",
+                    "finding": "Native headed font corpus parity is incomplete",
                 },
             }
             for gap_id, expected in expected_baseline_gaps.items():
@@ -2788,6 +2788,51 @@ class DetectorHarnessTests(unittest.TestCase):
             baseline_gap_ids = {gap.get("gap_id") for gap in payload["baseline_gaps"]}
             self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
             self.assertIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
+
+    def test_compare_scores_omits_native_font_baseline_gap_when_native_coverage_exists(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            glyph_hash = "f" * 64
+            metrics_hash = "a" * 64
+            for detector_id in ("browserleaks", "creepjs"):
+                self.write_synthetic_score_evidence(
+                    evidence_root,
+                    detector_id=detector_id,
+                    display_mode="headed",
+                    platform="macos-arm64",
+                    container=False,
+                    label=f"{detector_id}_native_fonts",
+                    results=[
+                        self.font_score_result(
+                            detector_check=f"{detector_id}_native_font_metrics",
+                            metrics_sha256=metrics_hash,
+                            glyph_sha256=glyph_hash,
+                        )
+                    ],
+                )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="pixelscan",
+                display_mode="headed",
+                platform="macos-arm64",
+                container=False,
+                label="pixelscan_native_font_availability",
+                results=[
+                    self.font_availability_result(
+                        detector_check="pixelscan_native_font_availability",
+                        checks={"Arial": True, "Courier New": True},
+                    ),
+                    self.pixelscan_page_status_result(),
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            baseline_gap_ids = {gap.get("gap_id") for gap in payload["baseline_gaps"]}
+            self.assertNotIn("native_headed_font_corpus_parity_missing", baseline_gap_ids)
+            self.assertNotIn("pixelscan_audio_font_score_baseline_missing", baseline_gap_ids)
 
 
     def test_pixelscan_variant_plan_emits_secret_safe_isolation_matrix(self):

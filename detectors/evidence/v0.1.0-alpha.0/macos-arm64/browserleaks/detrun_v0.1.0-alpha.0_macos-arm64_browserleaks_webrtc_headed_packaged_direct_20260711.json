@@ -1,0 +1,94 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/webrtc"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_webrtc_macos_packaged_headed_candidate_metadata",
+      "evidence_ref": "packaged_collect_observed.webrtc",
+      "finding": "BrowserLeaks WebRTC page loaded in packaged macOS BrowseForge Chromium headed mode and recorded sanitized ICE candidate metadata without committed IP literals.",
+      "normalized_values": {
+        "available": true,
+        "candidateCount": 4,
+        "ipLiteralCount": 0,
+        "privateIpLiteralCount": 0,
+        "publicIpLiteralCount": 0,
+        "rawCandidateSha256": "357a5add632405604847f1721029f031864805622980c7ecccdfe7eee6ff4578",
+        "types": [
+          "host"
+        ]
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webrtc"
+    },
+    {
+      "detector_check": "browserleaks_webrtc_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged macOS BrowserLeaks webrtc page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for BrowserLeaks webrtc; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-webrtc-macos-packaged-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webrtc_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "478a0db6b277fff6846fbab6c7c385890efdec9ddcef6df927be24f0ff326d43",
+    "sha256": "663e1114f79db7398d39b03597a173305710189683a464ba3a761910014949ee",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "d22584e6e91374b631210a7050f1fb26d4d1b0c9a9857f212edeb4b606e2c268"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T12:20:00Z"
+}

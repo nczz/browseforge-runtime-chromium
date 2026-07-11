@@ -1,0 +1,150 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/fonts"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_fonts_macos_packaged_headed_metrics",
+      "evidence_ref": "packaged_collect_observed.fonts.metrics",
+      "finding": "BrowserLeaks Fonts page loaded in packaged macOS BrowseForge Chromium headed mode and produced bounded font metric/glyph summaries.",
+      "normalized_values": {
+        "candidateCount": 8,
+        "checks": {
+          "Arial": true,
+          "Calibri": true,
+          "Consolas": true,
+          "Courier New": true,
+          "DejaVu Sans": true,
+          "Noto Sans CJK TC": true,
+          "Segoe UI": true,
+          "Times New Roman": true
+        },
+        "false_count": 0,
+        "glyphSha256": "16e0fc482eaaec4880bf7218c3500797467f76153159c53390c13a60292ed9ed",
+        "metricRows": [
+          {
+            "check": true,
+            "font": "Arial",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Calibri",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Consolas",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Courier New",
+            "height": 45,
+            "width": 512.078
+          },
+          {
+            "check": true,
+            "font": "DejaVu Sans",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Noto Sans CJK TC",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Segoe UI",
+            "height": 45,
+            "width": 450.859
+          },
+          {
+            "check": true,
+            "font": "Times New Roman",
+            "height": 45,
+            "width": 411.625
+          }
+        ],
+        "metricsSha256": "25b20319648fc1d52776a83bdbd6accbc160502115c70ad7db2044ec3c0d843d",
+        "true_count": 8
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "browserleaks_fonts_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged macOS BrowserLeaks fonts page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for BrowserLeaks fonts; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-fonts-macos-packaged-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_fonts_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "a46f62d3b27a368b84432b12921c4affa7861dc57fd29ea034f3e2ddae6c3664",
+    "sha256": "c258d9ffef83d37f693640579aa22ad746b7bb9587a8fc5845472931c8b6a0cf",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "5d8985e5e81d72055be9c35b524b59a8586b36917a47ebdffacef6f04f1708f8"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T12:20:00Z"
+}

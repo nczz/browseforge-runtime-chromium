@@ -1,0 +1,95 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/webgl"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_webgl_macos_packaged_headed_metadata",
+      "evidence_ref": "packaged_collect_observed.webgl",
+      "finding": "BrowserLeaks WebGL page loaded in packaged macOS BrowseForge Chromium headed mode and reported sanitized vendor/renderer, extension count/hash, parameter hash, shader precision hash, and rendered pixel hash.",
+      "normalized_values": {
+        "available": true,
+        "extensionCount": 39,
+        "extensionSha256": "607b9f27fb876a17fac9bf146ca9b5cdb083fb5631930a88fe9f5436c33820c9",
+        "parameterSha256": "70312f56c46aed3e5318487bb6c73d257fa9f758faed0cad6581a5177fdb945b",
+        "pixelHeight": 16,
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "precisionSha256": "ed6e07a200f3c248aca734ca2fd9a2c5707287e921f979d5e2a36e0437a51bb9",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "vendor": "Google Inc. (Apple)"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "browserleaks_webgl_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged macOS BrowserLeaks webgl page context reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for BrowserLeaks webgl; no raw page text, storage, screenshots, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-webgl-macos-packaged-headed-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_webgl_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "629db7a34ee539b66ca8862726c64788d89310f3b32e91560eb54479faaa8344",
+    "sha256": "1278f1bcf720f7a6dbef59e8741ced4ba0ec4ff095024469dbf7ac3c17407a89",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "de901d598e1c19ac778163ba685fb47c88dcc2a8c580a699445d77bffb81ce90"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T12:20:00Z"
+}
