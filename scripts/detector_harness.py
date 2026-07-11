@@ -1513,7 +1513,10 @@ class CDPClient:
         events = []
         while time.time() < end:
             self.sock.settimeout(max(0.1, end - time.time()))
-            message = ws_recv(self.sock)
+            try:
+                message = ws_recv(self.sock)
+            except socket.timeout:
+                break
             if message.get("id") == msg_id:
                 if "error" in message:
                     raise RuntimeError(message["error"])
@@ -1526,7 +1529,10 @@ class CDPClient:
         events = []
         while time.time() < end:
             self.sock.settimeout(max(0.1, end - time.time()))
-            msg = ws_recv(self.sock)
+            try:
+                msg = ws_recv(self.sock)
+            except socket.timeout:
+                continue
             events.append(msg)
             if predicate(msg):
                 return events
@@ -1696,7 +1702,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     cdp.call("Page.enable", session_id=session_id)
     cdp.call("Runtime.enable", session_id=session_id)
     started = time.time()
-    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=10)
+    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=30)
     cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
     time.sleep(wait_seconds)
     expr = """
@@ -2195,7 +2201,8 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
   return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, pixelscanPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
-    result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=10)
+    evaluate_timeout = max(30, wait_seconds + 20)
+    result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=evaluate_timeout)
     value = result.get("result", {}).get("value", {})
     elapsed = round(time.time() - started, 2)
     cdp.call("Target.closeTarget", {"targetId": target_id}, timeout=5)

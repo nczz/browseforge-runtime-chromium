@@ -1,0 +1,95 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:sannysoft:headed:direct:host",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "SannySoft WebDriver and HeadlessChrome checks",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged macOS SannySoft collection loaded successfully; webdriver was false and the configured user agent did not expose HeadlessChrome.",
+      "mitigation": "Packaged BrowseForge runtime owns automation flag filtering and launches with AutomationControlled disabled.",
+      "normalized_values": {
+        "headless_in_user_agent": false,
+        "navigator.webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "navigator.languages and timezone profile",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged macOS run used the requested zh-TW locale and Asia/Taipei timezone profile.",
+      "normalized_values": {
+        "languages": [
+          "zh-TW"
+        ],
+        "timezone": "Asia/Taipei"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "SannySoft WebGL rows",
+      "evidence_ref": "packaged_collect_observed_summary",
+      "finding": "Packaged smoke confirmed SannySoft page execution; pixel-level WebGL consistency remains covered by the broader detector matrix.",
+      "severity": "low",
+      "status": "warn",
+      "surface": "webgl"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Committed evidence is a sanitized summary of a successful detector_harness collect run. Raw DOM, endpoint, token, profile/session identifiers, cookies/storage, screenshots, IPs, and local paths were omitted.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "0.1.0",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711.json",
+    "sha256": "11e1e30da7ea348570cedeec1a814f4c7e5ea5c625d12ddf9c2364e3b394d471"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "Chrome/150.0.7871.101",
+    "container": false,
+    "gpu_mode": "host",
+    "host_os": "darwin",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T09:57:39Z"
+}

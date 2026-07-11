@@ -1,92 +1,65 @@
 {
   "blocking_findings": [],
-  "coverage_gap_count": 9,
+  "coverage_gap_count": 6,
   "coverage_gaps": [
     {
       "container": false,
       "detector_id": "browserleaks",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:browserleaks:headed:direct:host",
-      "network_mode": "direct",
-      "platform": "linux-x64",
-      "required_evidence": "headed / native/host / direct network sanitized detector evidence"
-    },
-    {
-      "container": false,
-      "detector_id": "browserleaks",
-      "display_mode": "headed",
-      "matrix_key": "linux-x64:browserleaks:headed:proxy:host",
+      "matrix_key": "macos-arm64:browserleaks:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     },
     {
       "container": false,
       "detector_id": "browserscan",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:browserscan:headed:proxy:host",
+      "matrix_key": "macos-arm64:browserscan:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     },
     {
       "container": false,
       "detector_id": "creepjs",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:creepjs:headed:proxy:host",
+      "matrix_key": "macos-arm64:creepjs:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     },
     {
       "container": false,
       "detector_id": "iphey",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:iphey:headed:proxy:host",
+      "matrix_key": "macos-arm64:iphey:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     },
     {
       "container": false,
       "detector_id": "pixelscan",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:pixelscan:headed:proxy:host",
+      "matrix_key": "macos-arm64:pixelscan:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     },
     {
-      "container": true,
-      "detector_id": "pixelscan",
-      "display_mode": "headed",
-      "matrix_key": "linux-x64:pixelscan:headed:proxy:container",
-      "network_mode": "proxy",
-      "platform": "linux-x64",
-      "required_evidence": "headed / Docker/container / external proxy exit-IP/geolocation sanitized detector evidence"
-    },
-    {
       "container": false,
       "detector_id": "sannysoft",
       "display_mode": "headed",
-      "matrix_key": "linux-x64:sannysoft:headed:direct:host",
-      "network_mode": "direct",
-      "platform": "linux-x64",
-      "required_evidence": "headed / native/host / direct network sanitized detector evidence"
-    },
-    {
-      "container": false,
-      "detector_id": "sannysoft",
-      "display_mode": "headed",
-      "matrix_key": "linux-x64:sannysoft:headed:proxy:host",
+      "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
       "network_mode": "proxy",
-      "platform": "linux-x64",
+      "platform": "macos-arm64",
       "required_evidence": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence"
     }
   ],
-  "coverage_platform": "linux-x64",
-  "evidence_count": 46,
-  "generated_at": "2026-07-10T21:00:00+00:00",
+  "coverage_platform": "macos-arm64",
+  "evidence_count": 47,
+  "generated_at": "2026-07-11T11:30:00Z",
   "rows": [
     {
       "detector_id": "browserleaks",
@@ -363,6 +336,12 @@
       "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_local-dogfood_rerun1.json",
       "platform": "macos-arm64",
       "status": "warning"
+    },
+    {
+      "detector_id": "sannysoft",
+      "path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_packaged_smoke_20260711.json",
+      "platform": "macos-arm64",
+      "status": "passed"
     }
   ]
 }

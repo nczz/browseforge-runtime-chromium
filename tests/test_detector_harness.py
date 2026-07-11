@@ -396,6 +396,55 @@ class DetectorHarnessTests(unittest.TestCase):
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
 
+    def test_cdp_events_until_tolerates_idle_socket_timeouts(self):
+        class FakeSocket:
+            def settimeout(self, timeout):
+                self.timeout = timeout
+
+        client = self.harness_module.CDPClient.__new__(self.harness_module.CDPClient)
+        client.sock = FakeSocket()
+        calls = {"count": 0}
+        original_ws_recv = self.harness_module.ws_recv
+
+        def fake_ws_recv(sock):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise self.harness_module.socket.timeout("timed out")
+            return {"method": "Page.loadEventFired"}
+
+        self.harness_module.ws_recv = fake_ws_recv
+        try:
+            events = client.events_until(lambda msg: msg.get("method") == "Page.loadEventFired", timeout=1)
+        finally:
+            self.harness_module.ws_recv = original_ws_recv
+
+        self.assertEqual(events, [{"method": "Page.loadEventFired"}])
+
+    def test_cdp_call_reports_method_on_idle_socket_timeout(self):
+        class FakeSocket:
+            def settimeout(self, timeout):
+                self.timeout = timeout
+
+        client = self.harness_module.CDPClient.__new__(self.harness_module.CDPClient)
+        client.sock = FakeSocket()
+        client.next_id = 1
+        sent = []
+        original_ws_recv = self.harness_module.ws_recv
+        original_ws_send = self.harness_module.ws_send
+
+        self.harness_module.ws_send = lambda sock, payload: sent.append(payload)
+        self.harness_module.ws_recv = lambda sock: (_ for _ in ()).throw(
+            self.harness_module.socket.timeout("timed out")
+        )
+        try:
+            with self.assertRaisesRegex(TimeoutError, "Runtime.evaluate"):
+                client.call("Runtime.evaluate", timeout=1)
+        finally:
+            self.harness_module.ws_recv = original_ws_recv
+            self.harness_module.ws_send = original_ws_send
+
+        self.assertEqual(sent[0]["method"], "Runtime.evaluate")
+
     def browserleaks_client_hints_value(self):
         return {
             "title": "BrowserLeaks - Client Hints",
@@ -912,6 +961,41 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertNotIn("text", record["observed"])
         self.assertRegex(record["observed"]["text_sha256"], r"^[0-9a-f]{64}$")
         self.assertIn("Pixelscan fingerprint check", record["observed"]["text_excerpt"])
+
+    def test_collect_page_uses_bounded_extended_runtime_evaluate_timeout(self):
+        value = self.pixelscan_client_hints_value()
+        value["text"] = "Pixelscan fingerprint check"
+
+        class FakeCDP:
+            def __init__(self, page_value):
+                self.page_value = page_value
+                self.evaluate_timeout = None
+
+            def call(self, method, params=None, *, session_id=None, timeout=20):
+                if method == "Target.createTarget":
+                    return {"targetId": "target-1"}, []
+                if method == "Target.attachToTarget":
+                    return {"sessionId": "session-1"}, []
+                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                    return {}, []
+                if method == "Runtime.evaluate":
+                    self.evaluate_timeout = timeout
+                    return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
+                raise AssertionError(f"unexpected CDP method: {method}")
+
+            def events_until(self, predicate, *, timeout=30):
+                return []
+
+        cdp = FakeCDP(value)
+        self.harness_module.collect_page(
+            cdp,
+            "pixelscan",
+            "Pixelscan",
+            "https://pixelscan.net/fingerprint-check",
+            wait_seconds=30,
+        )
+
+        self.assertEqual(cdp.evaluate_timeout, 50)
 
     def test_collect_page_uses_iphey_classifier_without_raw_text_payload(self):
         value = self.iphey_client_hints_value()
