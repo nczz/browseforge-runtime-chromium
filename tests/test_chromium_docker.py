@@ -69,6 +69,24 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertEqual(4, payload["jobs"])
 
 
+    def test_cli_default_workdir_can_use_linux_profile_env(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            linux_workdir = Path(td) / "chromium-linux"
+            env = os.environ.copy()
+            env["BROWSEFORGE_CHROMIUM_LINUX_WORKDIR"] = str(linux_workdir)
+            env["BROWSEFORGE_CHROMIUM_WORKDIR"] = str(Path(td) / "chromium-shared")
+            completed = self._run_script(
+                "plan",
+                "--git-cache",
+                str(Path(td) / "git-cache"),
+                env=env,
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(str(linux_workdir), payload["workdir"])
+        self.assertEqual(str(linux_workdir / "src"), payload["chromium_src_dir"])
+
     def test_plan_allows_higher_build_job_count(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             workdir = Path(td) / "chromium"

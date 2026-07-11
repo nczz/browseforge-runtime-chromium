@@ -13,8 +13,17 @@ from typing import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "knowledge" / "manifests" / "source-acquisition.json"
-DEFAULT_WORKDIR = Path(os.environ.get("BROWSEFORGE_CHROMIUM_WORKDIR", "/Users/chun/Projects/browser-source/browseforge-chromium"))
+HOST_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_HOST_WORKDIR"
+SHARED_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_WORKDIR"
+DEFAULT_SHARED_WORKDIR = "/Users/chun/Projects/browser-source/browseforge-chromium"
 DEFAULT_GIT_CACHE = Path(os.environ.get("GIT_CACHE_PATH", "/Users/chun/Projects/browser-source/git-cache"))
+
+
+def default_workdir() -> Path:
+    return Path(os.environ.get(HOST_WORKDIR_ENV) or os.environ.get(SHARED_WORKDIR_ENV, DEFAULT_SHARED_WORKDIR))
+
+
+DEFAULT_WORKDIR = default_workdir()
 
 PATCH_CHECKS = [
     {

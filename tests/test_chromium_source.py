@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import importlib.util
+import os
 import json
 import shlex
 import subprocess
@@ -32,6 +33,28 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertEqual(plan.chromium_src_dir, str(tmp_path / "chromium" / "src"))
         self.assertFalse(Path(plan.chromium_src_dir).is_relative_to(ROOT))
         self.assertIn("depot_tools", plan.path_prefix)
+
+
+    def test_cli_default_workdir_can_use_host_profile_env(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            host_workdir = Path(td) / "chromium-host"
+            env = os.environ.copy()
+            env["BROWSEFORGE_CHROMIUM_HOST_WORKDIR"] = str(host_workdir)
+            env["BROWSEFORGE_CHROMIUM_WORKDIR"] = str(Path(td) / "chromium-shared")
+            completed = subprocess.run(
+                [sys.executable, str(SCRIPT), "plan", "--git-cache", str(Path(td) / "git-cache")],
+                cwd=ROOT,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(str(host_workdir), payload["workdir"])
+        self.assertEqual(str(host_workdir / "src"), payload["chromium_src_dir"])
 
     def test_plan_contains_reproducible_source_steps(self) -> None:
         with tempfile.TemporaryDirectory() as td:

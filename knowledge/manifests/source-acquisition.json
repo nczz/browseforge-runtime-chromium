@@ -20,7 +20,14 @@
       "current_checkout_profile": "linux_docker_deps",
       "linux_gn_exists": true,
       "mac_gn_exists": false,
-      "profile_switching_note": "The shared external checkout cannot be treated as simultaneously mac and linux dependency-profile ready; Docker linux sync removes mac buildtools, and mac sync restores platform GN for BrowseForgeDev before full-Xcode GN generation.",
+      "profile_isolated_workdir_contract": {
+        "docker_helper_default": "scripts/chromium_docker.py uses BROWSEFORGE_CHROMIUM_LINUX_WORKDIR before the shared checkout fallback so Linux Docker deps no longer have to clobber a host-profile checkout.",
+        "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
+        "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
+        "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
+        "source_helper_default": "scripts/chromium_source.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before the shared checkout fallback so macOS/Windows host deps can keep a dedicated profile checkout."
+      },
+      "profile_switching_note": "The shared external checkout cannot be treated as simultaneously mac and linux dependency-profile ready; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR for host/native deps and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for Docker linux deps when maintaining parallel baselines.",
       "source_sync_command_uses_host_deps": "python3 scripts/chromium_source.py acquire --execute --step sync-deps now expands to gclient sync --with_branch_heads --with_tags --deps=mac on Darwin",
       "windows_gn_exists": false
     },
@@ -37,7 +44,7 @@
       "dev_build_ninja_exists_current": false,
       "dev_gn_args_exists_current": false,
       "error_summary": "GN started after mac platform GN was installed, wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools. Subsequent Linux Docker deps sync returned the shared checkout to a linux dependency profile.",
-      "next_action": "Use a dedicated macOS checkout/profile or rerun source sync-deps/run-hooks on Darwin after selecting full Xcode, then rerun generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
       "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn",
       "platform_gn_exists_current_after_linux_deps_sync": false,
       "platform_gn_exists_during_probe": true,
@@ -184,6 +191,11 @@
     "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and the linux-x64 artifact was rebuilt and repackaged after the WebShare feature parity patch. Source automation now pins Darwin dependency sync with --deps=mac, but the current shared checkout is in linux_docker_deps profile after Docker sync; BrowseForgeDev remains blocked by full Xcode, and the linux chrome output was restored from the packaged artifact after an Apple Silicon Docker/Rosetta rebuild resume failed.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
+    "source_workdir_isolation_status": "helpers_support_profile_specific_workdirs_with_shared_fallback",
+    "source_workdir_isolation_verification": [
+      "python3 -m unittest tests.test_chromium_source",
+      "python3 -m unittest tests.test_chromium_docker"
+    ],
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
     "storage_quota_patch_status": "applied_to_external_checkout",
     "switch_propagation_patch_status": "applied_to_external_checkout",

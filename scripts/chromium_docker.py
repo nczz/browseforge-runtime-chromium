@@ -11,10 +11,19 @@ from pathlib import Path
 from typing import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_WORKDIR = Path(os.environ.get("BROWSEFORGE_CHROMIUM_WORKDIR", "/Users/chun/Projects/browser-source/browseforge-chromium"))
+LINUX_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR"
+SHARED_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_WORKDIR"
+DEFAULT_SHARED_WORKDIR = "/Users/chun/Projects/browser-source/browseforge-chromium"
 DEFAULT_IMAGE = os.environ.get("BROWSEFORGE_CHROMIUM_BUILD_IMAGE", "browseforge/chromium-build:ubuntu22")
 DEFAULT_OUT = os.environ.get("BROWSEFORGE_CHROMIUM_DOCKER_OUT", "out/BrowseForgeLinuxDocker")
 DEFAULT_GIT_CACHE = Path(os.environ.get("GIT_CACHE_PATH", "/Users/chun/Projects/browser-source/git-cache"))
+
+
+def default_workdir() -> Path:
+    return Path(os.environ.get(LINUX_WORKDIR_ENV) or os.environ.get(SHARED_WORKDIR_ENV, DEFAULT_SHARED_WORKDIR))
+
+
+DEFAULT_WORKDIR = default_workdir()
 DOCKERFILE = ROOT / "docker" / "chromium-build.Dockerfile"
 
 
