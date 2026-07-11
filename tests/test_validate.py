@@ -836,6 +836,27 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("linux_docker_chrome_exists", message)
 
 
+    def test_validate_rejects_source_acquisition_without_dependency_profile_contract(self) -> None:
+        """source-acquisition.json must document the active Chromium dependency profile and Darwin sync contract."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+            source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+            source_acquisition["chromium_base"]["dependency_profile_status"][
+                "source_sync_command_uses_host_deps"
+            ] = "gclient sync --with_branch_heads --with_tags"
+            self._write_json(source_acquisition_path, source_acquisition)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertRegex(message, r"source[- ]acquisition", message)
+        self.assertIn("dependency_profile_status", message)
+        self.assertIn("--deps=mac", message)
+
     def test_validate_rejects_graph_whose_only_runtime_artifact_is_missing(self) -> None:
         """scripts.validate.main must fail closed when no release-grade linux-x64 RuntimeArtifact exists."""
         module = self._load_validate_module()
@@ -1795,6 +1816,14 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "linux_docker_build_ninja_exists": True,
                         "linux_docker_chrome_exists": True,
                         "linux_docker_gn_args_exists": True,
+                    },
+                    "dependency_profile_status": {
+                        "current_checkout_profile": "linux_docker_deps",
+                        "linux_gn_exists": True,
+                        "mac_gn_exists": False,
+                        "windows_gn_exists": False,
+                        "source_sync_command_uses_host_deps": "python3 scripts/chromium_source.py acquire --execute --step sync-deps expands to gclient sync --with_branch_heads --with_tags --deps=mac on Darwin",
+                        "profile_switching_note": "The shared external checkout is dependency-profile specific; Docker linux sync and Darwin mac sync must not be treated as simultaneously ready.",
                     },
                     "native_build_automation": self._native_build_automation_fixture(),
                     "source_checkout_status": "checked_out_pinned_ref",

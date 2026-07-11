@@ -269,6 +269,28 @@ def validate_source_build_outputs(source_acquisition: dict, runtime_artifacts: d
                 raise SystemExit(f"source-acquisition build_output_status {key} must remain true while linux-x64 artifact is packaged")
 
 
+def validate_source_dependency_profile(source_acquisition: dict) -> None:
+    chromium_base = source_acquisition.get("chromium_base", {})
+    profile = chromium_base.get("dependency_profile_status")
+    if not isinstance(profile, dict):
+        raise SystemExit("source-acquisition must record dependency_profile_status")
+    required_bool_keys = {"linux_gn_exists", "mac_gn_exists", "windows_gn_exists"}
+    missing = sorted(required_bool_keys - set(profile))
+    if missing:
+        raise SystemExit(f"source-acquisition dependency_profile_status missing keys: {missing}")
+    for key in required_bool_keys:
+        if not isinstance(profile.get(key), bool):
+            raise SystemExit(f"source-acquisition dependency_profile_status {key} must be boolean")
+    if profile.get("current_checkout_profile") not in {"linux_docker_deps", "macos_deps", "windows_deps", "mixed", "unknown"}:
+        raise SystemExit("source-acquisition dependency_profile_status current_checkout_profile is invalid")
+    sync_contract = profile.get("source_sync_command_uses_host_deps")
+    if not isinstance(sync_contract, str) or "--deps=mac" not in sync_contract:
+        raise SystemExit("source-acquisition dependency_profile_status must record Darwin --deps=mac sync contract")
+    note = profile.get("profile_switching_note")
+    if not isinstance(note, str) or "shared external checkout" not in note:
+        raise SystemExit("source-acquisition dependency_profile_status must document shared checkout profile switching")
+
+
 def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict) -> None:
     automation = source_acquisition.get("chromium_base", {}).get("native_build_automation")
     if not isinstance(automation, dict):
@@ -980,6 +1002,7 @@ def main() -> None:
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     validate_native_build_automation(source_acquisition, runtime_artifacts)
     validate_source_build_outputs(source_acquisition, runtime_artifacts)
+    validate_source_dependency_profile(source_acquisition)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
