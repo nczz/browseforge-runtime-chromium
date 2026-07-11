@@ -123,8 +123,8 @@
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
-      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 host headed SannySoft plus BrowserLeaks Fonts, Audio, and WebGL direct evidence also exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
-      "result": "linux_headless_headed_xvfb_plus_macos_host_direct_audio_fonts_webgl_partial",
+      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS smokes now exist in both headless and headed/Xvfb display modes. macOS arm64 packaged headed SannySoft evidence exists for the built BrowseForge Chromium app, and host headed BrowserLeaks Fonts, Audio, and WebGL direct evidence exists through installed system Chrome. Windows, external proxy, and packaged native macOS/Windows detector matrix coverage remain absent.",
+      "result": "linux_headless_headed_xvfb_plus_macos_packaged_sannysoft_and_host_browserleaks_partial",
       "severity": "medium",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
       "status": "detector_tested",
@@ -285,12 +285,12 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T11:45:00Z",
+  "generated_at": "2026-07-11T12:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "1b7e25b458023f5a444e14ec0a5f2b4aa6ddbc21891147070f914da0d1719ed6",
     "detector-summary.json": "c442889d53bc1f909a0ca457543584702b7400e43cc570a95ba31609fb5e1e6c",
     "knowledge/manifests/detector-score-comparison.json": "6d3064f32594f12d419342470ae01899617cc50751e890470f46ba0b769a4cfe",
-    "knowledge/manifests/fingerprint-surface-status.json": "f2fa53d1446d3072831d6818945f54b7c6bef31c7a52d38ff753d15a42053ab5",
+    "knowledge/manifests/fingerprint-surface-status.json": "20523e710ec5e283212984cc17bc554c826832c787a102f269ee104cd1860bd6",
     "knowledge/manifests/native-artifact-preflight.json": "0624dd7628e6e069d6940d6ddafaf463c2d20228d4b920ec6a75aa0e9ba26277",
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
