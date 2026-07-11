@@ -1,5 +1,5 @@
 {
-  "blocker_count": 33,
+  "blocker_count": 34,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -343,8 +343,14 @@
       "status": "missing_native_release_artifact"
     },
     {
-      "blocker_id": "proxy-preflight:error:0",
-      "detail": "external proxy resource configured and redacted, but live detector proxy coverage remains blocked",
+      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
+      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_REGION is missing",
+      "severity": "critical",
+      "source": "knowledge/manifests/proxy-preflight.json"
+    },
+    {
+      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL",
+      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_URL is missing",
       "severity": "critical",
       "source": "knowledge/manifests/proxy-preflight.json"
     },
@@ -395,14 +401,14 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T00:45:00Z",
+  "generated_at": "2026-07-11T01:06:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
     "knowledge/manifests/detector-score-comparison.json": "e50bc9b0cd0cb98a3a523c4535d7a8d7df59f14821a4e2bc197e886c23201bbc",
     "knowledge/manifests/fingerprint-surface-status.json": "b98e6d98df4bed314dec2f8bfc1c2c31683e0b0b75c1d7f1972e51f6c089a5ff",
     "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
-    "knowledge/manifests/proxy-preflight.json": "a2e2c61a3a293c7ebc3ededb7b051a0543568655afef0602dfb5aad4488ec32b",
+    "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
     "knowledge/manifests/source-acquisition.json": "1a0ce1d3e23315f369e377f62d6cbb296887d2904b837da279907b6bac375000"
@@ -421,11 +427,10 @@
   "release_grade_ready": false,
   "resource_requirements": [
     {
-      "errors": [
-        "external proxy resource configured and redacted, but live detector proxy coverage remains blocked"
-      ],
+      "errors": [],
       "provide": [
-        "valid external proxy URL and redacted region label"
+        "BROWSEFORGE_DETECTOR_PROXY_URL",
+        "BROWSEFORGE_DETECTOR_PROXY_REGION"
       ],
       "requirements": [
         "external proxy URL with scheme, host, and port",
@@ -435,7 +440,7 @@
       ],
       "resource_id": "external-detector-proxy",
       "severity": "critical",
-      "status": "invalid",
+      "status": "missing",
       "unblocks": [
         "external proxy exit-IP/geolocation detector evidence",
         "proxy/IP coherence detector matrix",
