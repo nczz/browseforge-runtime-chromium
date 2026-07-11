@@ -2406,6 +2406,27 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         release_blocker: bool = False,
         updated_from: list[str] | None = None,
     ) -> None:
+        surface_names = [
+            "seed identity",
+            "UA",
+            "Client Hints",
+            "platform",
+            "timezone",
+            "locale",
+            "screen/window/DPR",
+            "hardwareConcurrency/deviceMemory",
+            "Canvas",
+            "WebGL vendor/renderer",
+            "AudioContext",
+            "fonts",
+            "WebRTC",
+            "permissions",
+            "storage quota",
+            "automation/headless/CDP",
+            "proxy/IP coherence",
+            "profile persistence",
+            "cross-platform drift",
+        ]
         self._write_json(
             root / "knowledge" / "manifests" / "fingerprint-surface-status.json",
             {
@@ -2415,12 +2436,13 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "surfaces": [
                     {
                         "evidence": "fixture",
-                        "release_blocker": release_blocker,
+                        "release_blocker": release_blocker and surface == "proxy/IP coherence",
                         "result": "fixture_surface_status",
-                        "severity": "medium" if release_blocker else "info",
+                        "severity": "medium" if release_blocker and surface == "proxy/IP coherence" else "info",
                         "status": "detector_tested",
-                        "surface": "automation/headless/CDP",
+                        "surface": surface,
                     }
+                    for surface in surface_names
                 ],
                 "updated_from": [] if updated_from is None else updated_from,
             },

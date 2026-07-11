@@ -144,6 +144,29 @@ REQUIRED_GRAPH_MANIFEST_SOURCES = [
     "knowledge/manifests/source-acquisition.json",
 ]
 
+REQUIRED_FINGERPRINT_SURFACES = {
+    "seed identity",
+    "UA",
+    "Client Hints",
+    "platform",
+    "timezone",
+    "locale",
+    "screen/window/DPR",
+    "hardwareConcurrency/deviceMemory",
+    "Canvas",
+    "WebGL vendor/renderer",
+    "AudioContext",
+    "fonts",
+    "WebRTC",
+    "permissions",
+    "storage quota",
+    "automation/headless/CDP",
+    "proxy/IP coherence",
+    "profile persistence",
+    "cross-platform drift",
+}
+
+
 
 def graph_manifest_node_id(path: str) -> str:
     return f"Manifest:{path.replace('/', '-')}"
@@ -416,6 +439,7 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
         raise SystemExit("fingerprint surface status must contain surfaces")
     required_fields = {"surface", "status", "release_blocker", "result", "evidence", "severity"}
     release_blockers = []
+    observed_surfaces = set()
     for surface in surfaces:
         missing_fields = sorted(required_fields - surface.keys())
         if missing_fields:
@@ -426,6 +450,10 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
             raise SystemExit(f"fingerprint surface {surface['surface']} release_blocker must be boolean")
         if surface["release_blocker"]:
             release_blockers.append(surface["surface"])
+        observed_surfaces.add(surface["surface"])
+    missing_required_surfaces = sorted(REQUIRED_FINGERPRINT_SURFACES - observed_surfaces)
+    if missing_required_surfaces:
+        raise SystemExit(f"fingerprint surface status missing required surfaces: {missing_required_surfaces}")
     if surface_status.get("release_grade") is True and release_blockers:
         raise SystemExit(f"fingerprint surface status cannot be release_grade with blockers: {sorted(release_blockers)}")
     if gate_status.get("live-detector-evidence") == "passed" and release_blockers:
