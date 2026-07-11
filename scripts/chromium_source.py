@@ -67,6 +67,11 @@ PATCH_CHECKS = [
         "script": "scripts/apply_locale_patch.py",
     },
     {
+        "patch_id": "surface-accept-language-header-native-override",
+        "surface": "locale_header",
+        "script": "scripts/apply_accept_language_header_patch.py",
+    },
+    {
         "patch_id": "surface-user-agent-native-overrides",
         "surface": "user_agent",
         "script": "scripts/apply_user_agent_patch.py",

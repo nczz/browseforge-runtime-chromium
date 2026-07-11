@@ -51,7 +51,8 @@
     "Packaged macOS Pixelscan headed direct WebGL evidence now records full sanitized vendor/renderer, extension, parameter, shader precision, and rendered-pixel metadata for the built BrowseForge Chromium app; proxy and Windows matrix coverage remain blockers.",
     "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers.",
     "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8.",
-    "BrowseForge runtime CLI now binds the remaining native fingerprint surface flags covered by launcher BuildPlan: Accept-Language, UA/UA-CH, screen available dimensions, plugins PDF policy, audio/canvas noise, WebGL vendor/renderer, and repeatable font families; go run dry-run emitted the corresponding native Chromium flags."
+    "BrowseForge runtime CLI now binds the remaining native fingerprint surface flags covered by launcher BuildPlan: Accept-Language, UA/UA-CH, screen available dimensions, plugins PDF policy, audio/canvas noise, WebGL vendor/renderer, and repeatable font families; go run dry-run emitted the corresponding native Chromium flags.",
+    "Source-level Accept-Language header patch scaffold now makes chrome/browser/net/profile_network_context_service.cc prefer --fingerprint-accept-language before the profile intl.accept_languages pref, aligning HTTP Accept-Language with DOM navigator.language/navigator.languages; live detector evidence still requires a rebuilt patched artifact."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -99,9 +100,9 @@
       "surface": "timezone"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list.",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list. Source-level HTTP Accept-Language header patch scaffold is recorded in patchset surface-accept-language-header-native-override; detector pass still comes from existing Linux/macOS locale evidence until rebuilt artifacts exercise the header path.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft",
+      "result": "pass_linux_sannysoft_plus_source_header_scaffold",
       "severity": "info",
       "status": "detector_tested",
       "surface": "locale"
