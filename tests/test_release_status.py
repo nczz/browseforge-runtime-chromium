@@ -69,6 +69,9 @@ class ReleaseStatusTests(unittest.TestCase):
                 "status": "failed",
                 "missing": ["BROWSEFORGE_DETECTOR_PROXY_URL"],
                 "errors": [],
+                "next_commands": [
+                    "python3 scripts/detector_harness.py run --detector sannysoft --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --display headed"
+                ],
             },
         )
         self.write_json(
@@ -186,6 +189,10 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(detector_blocker["display_mode"], "headed")
         self.assertEqual(detector_blocker["network_mode"], "proxy")
         self.assertEqual(detector_blocker["container"], False)
+        self.assertEqual(
+            detector_blocker["remediation_command"],
+            "python3 scripts/detector_harness.py run --detector sannysoft --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --display headed",
+        )
         native_blocker = next(
             blocker for blocker in payload["blockers"]
             if blocker["blocker_id"] == "native-artifact:macos-arm64:0"

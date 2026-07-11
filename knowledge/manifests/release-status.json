@@ -34,6 +34,7 @@
       "matrix_key": "macos-arm64:browserleaks:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector browserleaks --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -46,6 +47,7 @@
       "matrix_key": "macos-arm64:browserscan:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector browserscan --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -58,6 +60,7 @@
       "matrix_key": "macos-arm64:creepjs:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector creepjs --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -70,6 +73,7 @@
       "matrix_key": "macos-arm64:iphey:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector iphey --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -82,6 +86,7 @@
       "matrix_key": "macos-arm64:pixelscan:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector pixelscan --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -94,6 +99,7 @@
       "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
       "network_mode": "proxy",
       "platform": "macos-arm64",
+      "remediation_command": "python3 scripts/detector_harness.py run --detector sannysoft --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
       "severity": "high",
       "source": "detector-summary.json"
     },
@@ -252,7 +258,7 @@
       "status": "decision_recorded_artifact_missing"
     }
   ],
-  "generated_at": "2026-07-11T18:00:00Z",
+  "generated_at": "2026-07-11T18:30:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "210e23a4aff447aab1a52d70bee9cdab17a2eb2bb015e3aa3968d950c153e6c6",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",

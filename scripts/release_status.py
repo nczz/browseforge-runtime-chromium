@@ -61,6 +61,16 @@ def native_blocker_snapshot_fields(entry: dict[str, Any]) -> dict[str, Any]:
         "package_zip_exists": snapshot.get("package_zip_exists"),
     }
 
+def proxy_matrix_command_for_detector(proxy_preflight: dict[str, Any], detector_id: Any) -> str | None:
+    if not detector_id:
+        return None
+    needle = f"--detector {detector_id} "
+    for command in proxy_preflight.get("next_commands", []):
+        if isinstance(command, str) and needle in command:
+            return command
+    return None
+
+
 def source_rebuild_blockers(source_acquisition: dict[str, Any]) -> list[dict[str, Any]]:
     chromium = source_acquisition.get("chromium_base", {})
     if not isinstance(chromium, dict) or chromium.get("artifact_rebuild_required") is not True:
@@ -302,6 +312,9 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
             display_mode=gap.get("display_mode"),
             network_mode=gap.get("network_mode"),
             container=gap.get("container"),
+            remediation_command=proxy_matrix_command_for_detector(proxy_preflight, gap.get("detector_id"))
+            if gap.get("network_mode") == "proxy"
+            else None,
         )
 
     for gap_key in ("baseline_gaps", "gaps"):
