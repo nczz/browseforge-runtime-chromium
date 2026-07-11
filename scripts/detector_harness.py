@@ -461,6 +461,42 @@ def matrix_coverage_gaps(evidence_rows: list[dict], platform: str) -> list[dict]
 def _evidence_display(evidence: dict) -> str:
     return normalize_display_mode(str(evidence.get("matrix", {}).get("display_mode", "")))
 
+def _evidence_context(evidence: dict) -> dict:
+    matrix = evidence.get("matrix", {})
+    target = evidence.get("target", {})
+    return {
+        "platform": target.get("platform"),
+        "network_mode": matrix.get("network_mode"),
+        "container": bool(matrix.get("container")),
+    }
+
+def _record_context(record: dict) -> tuple[object, object, bool]:
+    return (record.get("platform"), record.get("network_mode"), bool(record.get("container")))
+
+def _display_pair_by_context(records: list[dict]) -> tuple[dict | None, dict | None, list[str]]:
+    by_context: dict[tuple[object, object, bool], dict[str, dict]] = {}
+    observed_displays = set()
+    for record in records:
+        display = record.get("display_mode")
+        observed_displays.add(display)
+        by_context.setdefault(_record_context(record), {})[display] = record
+    for context in sorted(by_context, key=lambda value: tuple(str(part) for part in value)):
+        displays = by_context[context]
+        if {"headless", "headed"} <= set(displays):
+            return displays["headless"], displays["headed"], []
+    missing = sorted({"headless", "headed"} - observed_displays)
+    return None, None, missing or ["shared headless/headed context"]
+
+def _shared_context_pair(left_records: list[dict], right_records: list[dict]) -> tuple[dict | None, dict | None]:
+    right_by_context: dict[tuple[object, object, bool], dict] = {}
+    for record in right_records:
+        right_by_context.setdefault(_record_context(record), record)
+    for left in sorted(left_records, key=lambda record: tuple(str(part) for part in _record_context(record))):
+        right = right_by_context.get(_record_context(left))
+        if right is not None:
+            return left, right
+    return None, None
+
 def _numeric_metric_deltas(left: dict, right: dict) -> dict:
     deltas = {}
     for key in sorted(set(left) & set(right)):
@@ -480,6 +516,7 @@ def _collect_audio_metric_records(evidence_rows: list[dict]) -> list[dict]:
             records.append({
                 "detector_id": evidence["detector"]["detector_id"],
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "metrics": {key: values[key] for key in ("freq", "gain", "sum", "time", "trap", "unique")},
             })
@@ -500,6 +537,7 @@ def _collect_detector_audio_probe_records(evidence_rows: list[dict], detector_id
             records.append({
                 "detector_id": detector_id,
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "metrics": {key: values[key] for key in ("sampleRate", "length", "sum", "sumAbs")},
             })
@@ -539,6 +577,7 @@ def _collect_browserleaks_audio_page_context_records(evidence_rows: list[dict]) 
                 continue
             records.append({
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "values": {key: context_values[key] for key in required},
             })
@@ -551,6 +590,7 @@ def _collect_font_metric_records(evidence_rows: list[dict]) -> list[dict]:
         merged = {
             "detector_id": evidence["detector"]["detector_id"],
             "display_mode": _evidence_display(evidence),
+            **_evidence_context(evidence),
             "run_id": evidence["run_id"],
             "candidate_count": None,
             "fonts": [],
@@ -589,6 +629,7 @@ def _collect_font_availability_records(evidence_rows: list[dict], detector_id: s
             records.append({
                 "detector_id": detector_id,
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "checks": {key: bool(value) for key, value in sorted(checks.items())},
                 "true_count": values.get("true_count"),
@@ -613,6 +654,7 @@ def _collect_webgl_records(evidence_rows: list[dict]) -> list[dict]:
             records.append({
                 "detector_id": detector.get("detector_id"),
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "status": evidence.get("status"),
                 "vendor": values.get("vendor"),
@@ -639,6 +681,7 @@ def _collect_webrtc_records(evidence_rows: list[dict], detector_id: str) -> list
             records.append({
                 "detector_id": detector_id,
                 "display_mode": _evidence_display(evidence),
+                **_evidence_context(evidence),
                 "run_id": evidence["run_id"],
                 "candidate_count": values["candidateCount"],
                 "types": sorted(values.get("types") or []),
@@ -972,14 +1015,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
     comparisons = []
     gaps = []
 
-    creepjs_audio = {
-        record["display_mode"]: record
+    creepjs_audio_records = [
+        record
         for record in _collect_audio_metric_records(evidence_rows)
         if record["detector_id"] == "creepjs"
-    }
-    if {"headless", "headed"} <= set(creepjs_audio):
-        headless = creepjs_audio["headless"]
-        headed = creepjs_audio["headed"]
+    ]
+    headless, headed, missing = _display_pair_by_context(creepjs_audio_records)
+    if headless and headed:
         deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
         identical = all(abs(value) <= 1e-9 for value in deltas.values())
         matching_metrics = sorted(metric for metric, delta in deltas.items() if abs(delta) <= 1e-9)
@@ -1002,17 +1044,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
         gaps.append({
             "gap_id": "creepjs_audio_headless_vs_headed",
             "surface": "audio",
-            "missing": sorted({"headless", "headed"} - set(creepjs_audio)),
+            "missing": missing,
             "finding": "CreepJS audio comparison requires both headless and headed sanitized evidence.",
         })
 
-    browserleaks_audio = {
-        record["display_mode"]: record
-        for record in _collect_browserleaks_audio_probe_records(evidence_rows)
-    }
-    if {"headless", "headed"} <= set(browserleaks_audio):
-        headless = browserleaks_audio["headless"]
-        headed = browserleaks_audio["headed"]
+    browserleaks_audio_records = _collect_browserleaks_audio_probe_records(evidence_rows)
+    headless, headed, missing = _display_pair_by_context(browserleaks_audio_records)
+    if headless and headed:
         deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
         identical = all(abs(value) <= 1e-9 for value in deltas.values())
         comparisons.append({
@@ -1030,17 +1068,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "browserleaks_audio_headless_vs_headed",
             "surface": "audio",
             "detector_id": "browserleaks",
-            "missing": sorted({"headless", "headed"} - set(browserleaks_audio)),
+            "missing": missing,
             "finding": "BrowserLeaks audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
         })
 
-    browserleaks_audio_page = {
-        record["display_mode"]: record
-        for record in _collect_browserleaks_audio_page_context_records(evidence_rows)
-    }
-    if {"headless", "headed"} <= set(browserleaks_audio_page):
-        headless = browserleaks_audio_page["headless"]
-        headed = browserleaks_audio_page["headed"]
+    browserleaks_audio_page_records = _collect_browserleaks_audio_page_context_records(evidence_rows)
+    headless, headed, missing = _display_pair_by_context(browserleaks_audio_page_records)
+    if headless and headed:
         value_matches = {
             key: headless["values"].get(key) == headed["values"].get(key)
             for key in sorted(set(headless["values"]) | set(headed["values"]))
@@ -1061,17 +1095,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "browserleaks_javascript_audio_page_context_headless_vs_headed",
             "surface": "audio",
             "detector_id": "browserleaks",
-            "missing": sorted({"headless", "headed"} - set(browserleaks_audio_page)),
+            "missing": missing,
             "finding": "BrowserLeaks JavaScript Web Audio page comparison requires both headless and headed sanitized AudioContext/AnalyserNode field evidence.",
         })
 
-    pixelscan_audio = {
-        record["display_mode"]: record
-        for record in _collect_detector_audio_probe_records(evidence_rows, "pixelscan")
-    }
-    if {"headless", "headed"} <= set(pixelscan_audio):
-        headless = pixelscan_audio["headless"]
-        headed = pixelscan_audio["headed"]
+    pixelscan_audio_records = _collect_detector_audio_probe_records(evidence_rows, "pixelscan")
+    headless, headed, missing = _display_pair_by_context(pixelscan_audio_records)
+    if headless and headed:
         deltas = _numeric_metric_deltas(headless["metrics"], headed["metrics"])
         identical = all(abs(value) <= 1e-9 for value in deltas.values())
         comparisons.append({
@@ -1089,13 +1119,14 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "pixelscan_audio_headless_vs_headed",
             "surface": "audio",
             "detector_id": "pixelscan",
-            "missing": sorted({"headless", "headed"} - set(pixelscan_audio)),
+            "missing": missing,
             "finding": "Pixelscan audio comparison requires both headless and headed sanitized AudioContext summary evidence.",
         })
 
     font_records = _collect_font_metric_records(evidence_rows)
-    browserleaks_fonts = next((record for record in font_records if record["detector_id"] == "browserleaks"), None)
-    creepjs_fonts = next((record for record in font_records if record["detector_id"] == "creepjs"), None)
+    browserleaks_font_candidates = [record for record in font_records if record["detector_id"] == "browserleaks"]
+    creepjs_font_candidates = [record for record in font_records if record["detector_id"] == "creepjs"]
+    browserleaks_fonts, creepjs_fonts = _shared_context_pair(browserleaks_font_candidates, creepjs_font_candidates)
     if browserleaks_fonts and creepjs_fonts:
         same_glyph = bool(browserleaks_fonts["glyph_sha256"] and browserleaks_fonts["glyph_sha256"] == creepjs_fonts["glyph_sha256"])
         same_metrics = bool(browserleaks_fonts["metrics_sha256"] and browserleaks_fonts["metrics_sha256"] == creepjs_fonts["metrics_sha256"])
@@ -1115,21 +1146,25 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "BrowserLeaks/CreepJS font metric evidence matches." if same_glyph and same_metrics and same_fonts else "BrowserLeaks/CreepJS font evidence is only partially comparable; release-grade font corpus parity remains required.",
         })
     else:
+        missing = (
+            ["shared browserleaks/creepjs context"]
+            if browserleaks_font_candidates and creepjs_font_candidates
+            else sorted(det for det, record in {"browserleaks": browserleaks_fonts, "creepjs": creepjs_fonts}.items() if record is None)
+        )
         gaps.append({
             "gap_id": "browserleaks_creepjs_font_metrics",
             "surface": "fonts",
-            "missing": sorted(det for det, record in {"browserleaks": browserleaks_fonts, "creepjs": creepjs_fonts}.items() if record is None),
-            "finding": "Font comparison requires sanitized BrowserLeaks and CreepJS font metric evidence.",
+            "missing": missing,
+            "finding": "Font comparison requires sanitized BrowserLeaks and CreepJS font metric evidence from the same platform/network/container context.",
         })
 
-    browserleaks_fonts_by_display = {
-        record["display_mode"]: record
+    browserleaks_font_records = [
+        record
         for record in font_records
         if record["detector_id"] == "browserleaks"
-    }
-    if {"headless", "headed"} <= set(browserleaks_fonts_by_display):
-        headless = browserleaks_fonts_by_display["headless"]
-        headed = browserleaks_fonts_by_display["headed"]
+    ]
+    headless, headed, missing = _display_pair_by_context(browserleaks_font_records)
+    if headless and headed:
         same_fonts = headless["fonts"] == headed["fonts"]
         same_glyph = bool(headless["glyph_sha256"] and headless["glyph_sha256"] == headed["glyph_sha256"])
         same_metrics = bool(headless["metrics_sha256"] and headless["metrics_sha256"] == headed["metrics_sha256"])
@@ -1152,17 +1187,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "browserleaks_fonts_headless_vs_headed",
             "surface": "fonts",
             "detector_id": "browserleaks",
-            "missing": sorted({"headless", "headed"} - set(browserleaks_fonts_by_display)),
+            "missing": missing,
             "finding": "BrowserLeaks font comparison requires both headless and headed sanitized font metric evidence.",
         })
 
-    pixelscan_fonts = {
-        record["display_mode"]: record
-        for record in _collect_font_availability_records(evidence_rows, "pixelscan")
-    }
-    if {"headless", "headed"} <= set(pixelscan_fonts):
-        headless = pixelscan_fonts["headless"]
-        headed = pixelscan_fonts["headed"]
+    pixelscan_font_records = _collect_font_availability_records(evidence_rows, "pixelscan")
+    headless, headed, missing = _display_pair_by_context(pixelscan_font_records)
+    if headless and headed:
         same_checks = headless["checks"] == headed["checks"]
         comparisons.append({
             "comparison_id": "pixelscan_fonts_headless_vs_headed",
@@ -1181,17 +1212,13 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "pixelscan_fonts_headless_vs_headed",
             "surface": "fonts",
             "detector_id": "pixelscan",
-            "missing": sorted({"headless", "headed"} - set(pixelscan_fonts)),
+            "missing": missing,
             "finding": "Pixelscan font comparison requires both headless and headed sanitized font availability evidence.",
         })
 
-    browserleaks_webrtc = {
-        record["display_mode"]: record
-        for record in _collect_webrtc_records(evidence_rows, "browserleaks")
-    }
-    if {"headless", "headed"} <= set(browserleaks_webrtc):
-        headless = browserleaks_webrtc["headless"]
-        headed = browserleaks_webrtc["headed"]
+    browserleaks_webrtc_records = _collect_webrtc_records(evidence_rows, "browserleaks")
+    headless, headed, missing = _display_pair_by_context(browserleaks_webrtc_records)
+    if headless and headed:
         value_matches = {
             "candidateCount": headless["candidate_count"] == headed["candidate_count"],
             "types": headless["types"] == headed["types"],
@@ -1217,7 +1244,7 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "gap_id": "browserleaks_webrtc_headless_vs_headed",
             "surface": "webrtc",
             "detector_id": "browserleaks",
-            "missing": sorted({"headless", "headed"} - set(browserleaks_webrtc)),
+            "missing": missing,
             "finding": "BrowserLeaks WebRTC comparison requires both headless and headed sanitized ICE candidate metadata evidence.",
         })
 
@@ -1240,8 +1267,9 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.",
         })
     complete_webgl = [record for record in webgl_records if not record["missing_metadata"]]
-    browserleaks_webgl = next((record for record in complete_webgl if record["detector_id"] == "browserleaks"), None)
-    comparison_peer = next((record for record in complete_webgl if record["detector_id"] != "browserleaks"), None)
+    browserleaks_webgl_candidates = [record for record in complete_webgl if record["detector_id"] == "browserleaks"]
+    webgl_peer_candidates = [record for record in complete_webgl if record["detector_id"] != "browserleaks"]
+    browserleaks_webgl, comparison_peer = _shared_context_pair(browserleaks_webgl_candidates, webgl_peer_candidates)
     if browserleaks_webgl and comparison_peer:
         hash_matches = {
             field: browserleaks_webgl["hashes"][field] == comparison_peer["hashes"][field]
@@ -1269,18 +1297,23 @@ def detector_score_comparisons(evidence_rows: list[dict]) -> tuple[list[dict], l
             "finding": "WebGL vendor/renderer, extension profile, parameter, shader precision, and rendered pixel metadata match across BrowserLeaks and peer detector evidence." if all_match else "WebGL metadata differs across BrowserLeaks and peer detector evidence; release-grade WebGL profile parity remains required.",
         })
     else:
-        gaps.append({
-            "gap_id": "webgl_cross_detector_metadata_comparison_missing",
-            "surface": "webgl",
-            "missing": sorted(
+        missing = (
+            ["shared browserleaks/peer context"]
+            if browserleaks_webgl_candidates and webgl_peer_candidates
+            else sorted(
                 label
                 for label, record in {
                     "browserleaks_complete_webgl_metadata": browserleaks_webgl,
                     "peer_complete_webgl_metadata": comparison_peer,
                 }.items()
                 if record is None
-            ),
-            "finding": "WebGL cross-detector comparison requires complete BrowserLeaks metadata and at least one complete peer detector metadata record.",
+            )
+        )
+        gaps.append({
+            "gap_id": "webgl_cross_detector_metadata_comparison_missing",
+            "surface": "webgl",
+            "missing": missing,
+            "finding": "WebGL cross-detector comparison requires complete BrowserLeaks metadata and peer detector metadata from the same platform/network/container context.",
         })
     return comparisons, gaps
 

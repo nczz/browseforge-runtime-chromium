@@ -94,14 +94,25 @@ class DetectorHarnessTests(unittest.TestCase):
         path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
 
-    def write_synthetic_score_evidence(self, evidence_root, *, detector_id, display_mode, results, label, status="passed"):
+    def write_synthetic_score_evidence(
+        self,
+        evidence_root,
+        *,
+        detector_id,
+        display_mode,
+        results,
+        label,
+        status="passed",
+        platform="linux-x64",
+        network_mode="direct",
+        container=True,
+    ):
         detector = self.harness_module.detector_by_id(detector_id)
         self.assertIsNotNone(detector)
-        platform = "linux-x64"
-        network_mode = "direct"
-        container = True
         display_key = "headed" if display_mode.startswith("headed") else display_mode
-        suffix = f"{detector_id}_{label}_{display_key}_{network_mode}_container"
+        network_key = network_mode.replace("_", "-")
+        container_label = "container" if container else "host"
+        suffix = f"{platform}_{detector_id}_{label}_{display_key}_{network_key}_{container_label}".replace("-", "_")
         evidence = json.loads(self.fixture_path("valid-evidence.json").read_text(encoding="utf-8"))
         evidence.update(
             {
@@ -121,14 +132,14 @@ class DetectorHarnessTests(unittest.TestCase):
                     **evidence["target"],
                     "platform": platform,
                     "container": container,
-                    "proxy_region_redacted": "none",
+                    "proxy_region_redacted": "none" if network_mode == "direct" else "redacted",
                 },
                 "matrix": {
-                    "matrix_key": f"{platform}:{detector_id}:{display_key}:{network_mode}:container",
+                    "matrix_key": f"{platform}:{detector_id}:{display_key}:{network_key}:{container_label}",
                     "display_mode": display_mode,
                     "network_mode": network_mode,
                     "container": container,
-                    "proxy": "none",
+                    "proxy": "none" if network_mode == "direct" else "redacted",
                     "required": False,
                 },
                 "status": status,
@@ -2412,6 +2423,65 @@ class DetectorHarnessTests(unittest.TestCase):
                 "browserleaks_fonts_headless_vs_headed",
                 {gap.get("gap_id") for gap in payload["gaps"]},
             )
+
+
+    def test_compare_scores_does_not_pair_browserleaks_fonts_across_target_contexts(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            evidence_root = root / "evidence"
+            output = root / "detector-score-comparison.json"
+            font_result = self.font_score_result(
+                detector_check="browserleaks_fonts_metrics",
+                metrics_sha256="a" * 64,
+                glyph_sha256="c" * 64,
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headless",
+                label="browserleaks_fonts_linux_docker_headless",
+                results=[font_result],
+            )
+            self.write_synthetic_score_evidence(
+                evidence_root,
+                detector_id="browserleaks",
+                display_mode="headed",
+                label="browserleaks_fonts_macos_host_headed",
+                platform="macos-arm64",
+                network_mode="proxy",
+                container=False,
+                results=[
+                    font_result,
+                    {
+                        "surface": "proxy_ip_coherence",
+                        "status": "pass",
+                        "severity": "info",
+                        "finding": "Detector geolocation matched the sanitized external proxy exit region.",
+                        "evidence_ref": "sanitized_score_comparison_fixture",
+                        "normalized_values": {
+                            "proxy_exit_region_redacted": "redacted-region",
+                            "detector_geolocation_region_redacted": "redacted-region",
+                        },
+                    },
+                ],
+            )
+
+            payload = self.run_compare_scores(evidence_root, output)
+
+            self.assertNotIn(
+                "browserleaks_fonts_headless_vs_headed",
+                {item.get("comparison_id") for item in payload["comparisons"]},
+            )
+            gap = next(
+                (
+                    item
+                    for item in payload["gaps"]
+                    if item.get("gap_id") == "browserleaks_fonts_headless_vs_headed"
+                    and item.get("detector_id") == "browserleaks"
+                ),
+                None,
+            )
+            self.assertIsNotNone(gap, payload["gaps"])
 
     def test_compare_scores_reports_gap_when_required_counterpart_evidence_is_missing(self):
         with tempfile.TemporaryDirectory() as td:
