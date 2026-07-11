@@ -1,0 +1,232 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "fingerprint_consistency",
+    "detector_id": "browserleaks",
+    "manifest_ref": "knowledge/manifests/detectors.json#browserleaks",
+    "name": "BrowserLeaks",
+    "url": "https://browserleaks.com/client-hints"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_browserleaks_client_hints_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:browserleaks:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "browserleaks_client_hints_packaged_macos_direct",
+      "evidence_ref": "packaged_collect_observed.uaData",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run loaded with configured macOS arm64 Chromium high-entropy client hints and a Chromium 150 fullVersionList entry.",
+      "normalized_values": {
+        "architecture": "arm",
+        "bitness": "64",
+        "fullVersionListBrands": [
+          "Not;A=Brand",
+          "Chromium"
+        ],
+        "chromiumFullVersionMajor": "150",
+        "hasChromiumFullVersion": true,
+        "mobile": false,
+        "platform": "macOS",
+        "platformVersion": "26.5.1",
+        "wow64": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_screen_profile",
+      "evidence_ref": "packaged_collect_observed.screen",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run reported configured screen dimensions and device pixel ratio from the packaged runtime profile.",
+      "normalized_values": {
+        "width": 1920,
+        "height": 1080,
+        "availWidth": 1920,
+        "availHeight": 1080,
+        "devicePixelRatio": 2
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "screen"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_locale_timezone",
+      "evidence_ref": "packaged_collect_observed.locale_timezone",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run reported the configured zh-TW locale and Asia/Taipei timezone profile.",
+      "normalized_values": {
+        "languages": [
+          "zh-TW"
+        ],
+        "timezone": "Asia/Taipei"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_hardware_profile",
+      "evidence_ref": "packaged_collect_observed.hardware",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run reported configured hardwareConcurrency and deviceMemory values.",
+      "normalized_values": {
+        "hardwareConcurrency": 8,
+        "deviceMemory": 32
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "hardware"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_storage_quota",
+      "evidence_ref": "packaged_collect_observed.storage",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run reported the configured storage quota through navigator.storage.estimate.",
+      "normalized_values": {
+        "quota": 8589934592
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "storage_quota"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_canvas_probe",
+      "evidence_ref": "packaged_collect_observed.canvas",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run produced bounded Canvas probe hashes without committing raw pixels or data URLs.",
+      "normalized_values": {
+        "available": true,
+        "width": 64,
+        "height": 32,
+        "sampleCount": 8192,
+        "dataUrlSha256": "71cf4062038917e0d78ecd3c478b5124efdcc1509aa022b6d06006d636dd3c80",
+        "imageDataSha256": "f8d7606fac2326d6ff99d2af69c7805d12df136550883ab1c65b55b11dc9bf15"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_audio_probe",
+      "evidence_ref": "packaged_collect_observed.audio",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run produced bounded OfflineAudioContext summary metrics without committing raw AudioBuffer payloads.",
+      "normalized_values": {
+        "available": true,
+        "length": 44100,
+        "sampleRate": 44100,
+        "sum": 0.77295988,
+        "sumAbs": 83.86503121
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "audio"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_permissions_features",
+      "evidence_ref": "packaged_collect_observed.features",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run recorded bounded Permissions API states and desktop feature availability without requesting device access.",
+      "normalized_values": {
+        "available": true,
+        "featureFlags": {
+          "contactsManager": true,
+          "contentIndex": true,
+          "idleDetector": true,
+          "keyboardLock": true,
+          "localFonts": true,
+          "networkInformation": true,
+          "presentation": true,
+          "storageBuckets": true,
+          "virtualKeyboard": true,
+          "webBluetooth": true,
+          "webHid": true,
+          "webNfc": false,
+          "webSerial": true,
+          "webShare": true,
+          "webShareData": true,
+          "webUsb": true,
+          "windowControlsOverlay": true
+        },
+        "notificationPermission": "default",
+        "permissionStates": {
+          "accelerometer": "granted",
+          "background-sync": "granted",
+          "camera": "prompt",
+          "clipboard-read": "prompt",
+          "clipboard-write": "granted",
+          "geolocation": "prompt",
+          "gyroscope": "granted",
+          "idle-detection": "prompt",
+          "local-fonts": "prompt",
+          "magnetometer": "granted",
+          "microphone": "prompt",
+          "midi": "prompt",
+          "notifications": "prompt",
+          "payment-handler": "granted",
+          "persistent-storage": "prompt",
+          "push": "error:NotSupportedError",
+          "window-management": "prompt"
+        },
+        "permissionsApi": true
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "permissions"
+    },
+    {
+      "detector_check": "browserleaks_packaged_macos_webdriver",
+      "evidence_ref": "packaged_collect_observed.webdriver",
+      "finding": "BrowserLeaks Client Hints packaged macOS headed direct run reported navigator.webdriver=false.",
+      "normalized_values": {
+        "webdriver": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_client_hints_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for BrowserLeaks Client Hints direct headed coverage; no raw page text, screenshots, storage details, IP literals, raw WebGL parameters/extensions/pixels, or raw AudioBuffer payloads are committed. Only text_sha256 and bounded normalized values are retained.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-browserleaks-client-hints-macos-packaged-headed-direct-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_client_hints_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "9a8136200a57882f11251c5929e93e6f3fbb24a27b85ceb1b4eb66fad417cc5b",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "f86df857286301abdfab25a1c5e621b1a33ed0c3314858518b407b5bf05bca27",
+    "sha256": "8423e95be7a743302a4b8bd785f19761f8d43a3eb922fce37d9245cfae4e2c07"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T14:15:00Z"
+}
