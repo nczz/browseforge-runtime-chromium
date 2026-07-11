@@ -1,7 +1,7 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-  "artifact_sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
-  "artifact_size_bytes": 403233897,
+  "artifact_sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
+  "artifact_size_bytes": 403236086,
   "checks": [
     {
       "check": "archive_integrity",

@@ -59,7 +59,7 @@
   ],
   "coverage_platform": "macos-arm64",
   "evidence_count": 62,
-  "generated_at": "2026-07-11T14:55:00Z",
+  "generated_at": "2026-07-11T16:05:00Z",
   "rows": [
     {
       "detector_id": "browserleaks",

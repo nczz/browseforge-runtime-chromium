@@ -37,7 +37,7 @@
       },
       "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-11T08:43:17.017577+00:00",
+      "created_at": "2026-07-11T14:13:59.156400+00:00",
       "download_url": "GitHub Release asset or GHCR artifact pending publication",
       "os": "macos",
       "patchset_id": "surface-switch-propagation-native-audit",
@@ -47,11 +47,11 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
-      "sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
+      "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 403233897,
+      "size_bytes": 403236086,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "96f5921334f282940cdb67199f517635423ca4d37fac99c4fdfc84f345de62c2",
+      "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b",
       "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
@@ -97,5 +97,16 @@
     "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence",
     "macos-x64": "blocked until a committed macOS x64 runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence"
   },
-  "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6"
+  "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6",
+  "macos_artifact_refresh": {
+    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+    "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
+    "size_bytes": 403236086,
+    "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b",
+    "refreshed_after_commits": [
+      "35f85be",
+      "6073ea0"
+    ],
+    "reason": "macOS alpha package refreshed after native fingerprint CLI surface expansion and BrowseForge integration contract evidence update."
+  }
 }
