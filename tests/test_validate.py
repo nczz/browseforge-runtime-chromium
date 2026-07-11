@@ -45,6 +45,24 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         "knowledge/manifests/objective-audit.json",
         "knowledge/manifests/source-acquisition.json",
     )
+    REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS = (
+        "audio",
+        "automation_signals",
+        "canvas",
+        "client_hints",
+        "fonts",
+        "hardware",
+        "locale",
+        "permissions",
+        "proxy_ip_coherence",
+        "screen",
+        "seed_identity",
+        "storage_quota",
+        "timezone",
+        "user_agent",
+        "webgl",
+        "webrtc",
+    )
 
     def _load_graph(self, path: Path = GRAPH_PATH) -> list[dict[str, Any]]:
         records: list[dict[str, Any]] = []
@@ -1676,7 +1694,15 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "properties": {"artifact_id": "missing-runtime-artifact", "runtime_id": "browseforge-chromium", "status": "missing", "release_grade": False},
             },
             {"record_type": "node", "label": "BrowseForgeConsumer", "id": "BrowseForgeConsumer:browseforge-main", "properties": {}},
-            {"record_type": "node", "label": "FingerprintSurface", "id": "FingerprintSurface:automation_signals", "properties": {}},
+            *[
+                {
+                    "record_type": "node",
+                    "label": "FingerprintSurface",
+                    "id": f"FingerprintSurface:{surface_id}",
+                    "properties": {"surface_id": surface_id},
+                }
+                for surface_id in self.REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS
+            ],
             {"record_type": "node", "label": "Patch", "id": "Patch:baseline", "properties": {}},
             {"record_type": "node", "label": "SourceFile", "id": "SourceFile:main", "properties": {}},
             {"record_type": "node", "label": "Symbol", "id": "Symbol:main", "properties": {}},
@@ -1978,7 +2004,15 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         records: list[dict[str, Any]] = [
             {"record_type": "node", "label": "RuntimeProvider", "id": "RuntimeProvider:browseforge-chromium", "properties": {}},
             {"record_type": "node", "label": "BrowseForgeConsumer", "id": "BrowseForgeConsumer:browseforge-main", "properties": {}},
-            {"record_type": "node", "label": "FingerprintSurface", "id": "FingerprintSurface:automation_signals", "properties": {}},
+            *[
+                {
+                    "record_type": "node",
+                    "label": "FingerprintSurface",
+                    "id": f"FingerprintSurface:{surface_id}",
+                    "properties": {"surface_id": surface_id},
+                }
+                for surface_id in self.REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS
+            ],
             {"record_type": "node", "label": "Patch", "id": "Patch:baseline", "properties": {}},
             {"record_type": "node", "label": "SourceFile", "id": "SourceFile:main", "properties": {}},
             {"record_type": "node", "label": "Symbol", "id": "Symbol:main", "properties": {}},

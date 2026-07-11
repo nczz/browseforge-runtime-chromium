@@ -105,6 +105,8 @@
 {"from": "Patch:unpatched-baseline-m150-150.0.7871.101", "label": "CONTROLS_SURFACE", "properties": {"status": "not_engine_patched"}, "record_type": "edge", "to": "FingerprintSurface:proxy_ip_coherence"}
 {"id": "FingerprintSurface:screen", "label": "FingerprintSurface", "properties": {"status": "designed", "surface_id": "screen"}, "record_type": "node"}
 {"from": "Patch:unpatched-baseline-m150-150.0.7871.101", "label": "CONTROLS_SURFACE", "properties": {"status": "not_engine_patched"}, "record_type": "edge", "to": "FingerprintSurface:screen"}
+{"id": "FingerprintSurface:seed_identity", "label": "FingerprintSurface", "properties": {"status": "designed", "surface_id": "seed_identity"}, "record_type": "node"}
+{"from": "Patch:unpatched-baseline-m150-150.0.7871.101", "label": "CONTROLS_SURFACE", "properties": {"status": "not_engine_patched"}, "record_type": "edge", "to": "FingerprintSurface:seed_identity"}
 {"id": "FingerprintSurface:storage_quota", "label": "FingerprintSurface", "properties": {"status": "designed", "surface_id": "storage_quota"}, "record_type": "node"}
 {"from": "Patch:unpatched-baseline-m150-150.0.7871.101", "label": "CONTROLS_SURFACE", "properties": {"status": "not_engine_patched"}, "record_type": "edge", "to": "FingerprintSurface:storage_quota"}
 {"id": "FingerprintSurface:timezone", "label": "FingerprintSurface", "properties": {"status": "designed", "surface_id": "timezone"}, "record_type": "node"}
@@ -118,6 +120,7 @@
 {"id": "RuntimeFlag:fingerprint-seed", "label": "RuntimeFlag", "properties": {"managed": true, "name": "--fingerprint-seed"}, "record_type": "node"}
 {"from": "RuntimeProvider:browseforge-chromium", "label": "MANAGES_FLAG", "properties": {}, "record_type": "edge", "to": "RuntimeFlag:fingerprint-seed"}
 {"from": "RuntimeFlag:fingerprint-seed", "label": "CONTROLS_SURFACE", "properties": {}, "record_type": "edge", "to": "FingerprintSurface:automation_signals"}
+{"from": "RuntimeFlag:fingerprint-seed", "label": "CONTROLS_SURFACE", "properties": {}, "record_type": "edge", "to": "FingerprintSurface:seed_identity"}
 {"id": "RuntimeFlag:fingerprint-timezone", "label": "RuntimeFlag", "properties": {"managed": true, "name": "--fingerprint-timezone"}, "record_type": "node"}
 {"from": "RuntimeProvider:browseforge-chromium", "label": "MANAGES_FLAG", "properties": {}, "record_type": "edge", "to": "RuntimeFlag:fingerprint-timezone"}
 {"from": "RuntimeFlag:fingerprint-timezone", "label": "CONTROLS_SURFACE", "properties": {}, "record_type": "edge", "to": "FingerprintSurface:timezone"}

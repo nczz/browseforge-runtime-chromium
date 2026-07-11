@@ -166,6 +166,25 @@ REQUIRED_FINGERPRINT_SURFACES = {
     "cross-platform drift",
 }
 
+REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS = {
+    "audio",
+    "automation_signals",
+    "canvas",
+    "client_hints",
+    "fonts",
+    "hardware",
+    "locale",
+    "permissions",
+    "proxy_ip_coherence",
+    "screen",
+    "seed_identity",
+    "storage_quota",
+    "timezone",
+    "user_agent",
+    "webgl",
+    "webrtc",
+}
+
 
 
 def graph_manifest_node_id(path: str) -> str:
@@ -1050,6 +1069,14 @@ def main() -> None:
         for record in graph_records
         if record.get("record_type") == "node" and "id" in record
     }
+    graph_surface_ids = {
+        record.get("properties", {}).get("surface_id")
+        for record in graph_records
+        if record.get("record_type") == "node" and record.get("label") == "FingerprintSurface"
+    }
+    missing_graph_surfaces = sorted(REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS - graph_surface_ids)
+    if missing_graph_surfaces:
+        raise SystemExit(f"generated KG missing FingerprintSurface ids: {missing_graph_surfaces}")
     for gate in release_gates["release_candidate_required_gates"]:
         gate_id = gate["gate_id"]
         node = graph_nodes.get(f"ReleaseGate:{gate_id}")
