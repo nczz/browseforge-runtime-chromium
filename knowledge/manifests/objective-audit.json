@@ -1,11 +1,9 @@
 {
-  "blocker_count": 49,
+  "blocker_count": 45,
   "deliverables": [
     {
       "blockers": [
-        "missing build output: dev_gn_args_exists",
         "missing build output: dev_build_ninja_exists",
-        "missing host dependency profile: mac_gn_exists",
         "blocked host toolchain: full Xcode required"
       ],
       "deliverable_id": "source_build_baseline",
@@ -162,9 +160,7 @@
         "signing-policy:macos-arm64",
         "signing-policy:windows-x64",
         "source-acquisition:dev-baseline:build-ninja",
-        "source-acquisition:dev-baseline:full-xcode",
-        "source-acquisition:dev-baseline:gn-args",
-        "source-acquisition:dev-baseline:platform-gn"
+        "source-acquisition:dev-baseline:full-xcode"
       ],
       "deliverable_id": "release_grade_cutover",
       "evidence": [
@@ -179,7 +175,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-11T04:35:00Z",
+  "generated_at": "2026-07-11T04:50:00Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,

@@ -1,5 +1,5 @@
 {
-  "blocker_count": 38,
+  "blocker_count": 36,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -402,7 +402,7 @@
     },
     {
       "blocker_id": "source-acquisition:dev-baseline:build-ninja",
-      "dependency_profile": "linux_docker_deps",
+      "dependency_profile": "macos_deps",
       "detail": "BrowseForgeDev build.ninja is missing, so the local development baseline cannot be built.",
       "severity": "medium",
       "source": "knowledge/manifests/source-acquisition.json"
@@ -410,40 +410,24 @@
     {
       "blocker_id": "source-acquisition:dev-baseline:full-xcode",
       "detail": "BrowseForgeDev generation reached platform GN but is blocked until xcode-select points at a full Xcode installation.",
-      "error_summary": "GN started after mac platform GN was installed, wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools. Subsequent Linux Docker deps sync returned the shared checkout to a linux dependency profile.",
-      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "error_summary": "GN started after mac platform GN was installed and wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools.",
+      "next_action": "Select full Xcode, then rerun python3 scripts/chromium_source.py acquire --execute --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
       "severity": "medium",
       "source": "knowledge/manifests/source-acquisition.json",
-      "status": "blocked_full_xcode_required_after_platform_gn_installed"
-    },
-    {
-      "blocker_id": "source-acquisition:dev-baseline:gn-args",
-      "dependency_profile": "linux_docker_deps",
-      "detail": "BrowseForgeDev GN args are missing, so the local development baseline has not been generated.",
-      "severity": "medium",
-      "source": "knowledge/manifests/source-acquisition.json"
-    },
-    {
-      "blocker_id": "source-acquisition:dev-baseline:platform-gn",
-      "dependency_profile": "linux_docker_deps",
-      "detail": "BrowseForgeDev generation is blocked because the active source dependency profile does not expose the macOS GN binary.",
-      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
-      "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn",
-      "severity": "medium",
-      "source": "knowledge/manifests/source-acquisition.json"
+      "status": "blocked_full_xcode_required_after_dev_args_written"
     }
   ],
-  "generated_at": "2026-07-11T04:35:00Z",
+  "generated_at": "2026-07-11T04:50:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
     "knowledge/manifests/detector-score-comparison.json": "e386a9934d36bf3e33349ab84d9c0ec7cfd465783cfb9c131e28e9603738159a",
     "knowledge/manifests/fingerprint-surface-status.json": "f2fa53d1446d3072831d6818945f54b7c6bef31c7a52d38ff753d15a42053ab5",
-    "knowledge/manifests/native-artifact-preflight.json": "3144ae450167a4b83a5e006433db4789e0faf30753fbb57ef146b34059a98beb",
+    "knowledge/manifests/native-artifact-preflight.json": "dbfe6bf0dd9a42a6467c735ed5ecf52c91dbd558935a6c59f5b019cc77b12c74",
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "e1eec6ea13d21bcbb4d328bbe7651994a63285f5c11f94c1638f2ef0599e583d"
+    "knowledge/manifests/source-acquisition.json": "d2ab7fa62485a54a27cd9b30283d3322ebf9911c0252d3bbeaee360823735095"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",

@@ -10,7 +10,7 @@
     "build_output_check_contract": "python3 scripts/chromium_source.py check reports build_outputs for BrowseForgeDev GN args/build.ninja, BrowseForgeLinuxDocker args.gn/build.ninja/chrome, and required Linux runtime sidecars/locales so missing baseline generation and incomplete packageable release outputs are machine-readable.",
     "build_output_status": {
       "dev_build_ninja_exists": false,
-      "dev_gn_args_exists": false,
+      "dev_gn_args_exists": true,
       "linux_docker_build_ninja_exists": true,
       "linux_docker_chrome_exists": true,
       "linux_docker_gn_args_exists": true,
@@ -18,9 +18,9 @@
     },
     "canvas_patch_status": "applied_to_external_checkout",
     "dependency_profile_status": {
-      "current_checkout_profile": "linux_docker_deps",
-      "linux_gn_exists": true,
-      "mac_gn_exists": false,
+      "current_checkout_profile": "macos_deps",
+      "linux_gn_exists": false,
+      "mac_gn_exists": true,
       "profile_isolated_workdir_contract": {
         "docker_helper_default": "scripts/chromium_docker.py uses BROWSEFORGE_CHROMIUM_LINUX_WORKDIR before the BROWSEFORGE_CHROMIUM_WORKDIR shared checkout fallback so Linux Docker deps no longer have to clobber a host-profile checkout.",
         "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
@@ -34,23 +34,22 @@
       "windows_gn_exists": false
     },
     "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
-    "deps_snapshot_status": "synced_selected_ref_with_linux_and_macos_host_deps",
+    "deps_snapshot_status": "synced_selected_ref_with_macos_host_deps",
     "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
     "feature_parity_patch_status": "applied_to_external_checkout_with_contacts_content_index_netinfo_serial_port_connected_webshare",
     "fonts_patch_status": "applied_to_external_checkout",
-    "gn_generation_status": "generated_linux_docker",
+    "gn_generation_status": "dev_args_written_blocked_full_xcode_before_build_ninja",
     "hardware_patch_status": "applied_to_external_checkout",
-    "hooks_status": "completed",
+    "hooks_status": "completed_after_macos_host_deps_sync",
     "last_dev_baseline_probe": {
-      "command": "python3 scripts/chromium_source.py acquire --execute --step generate-dev-build after mac deps sync",
+      "command": "python3 scripts/chromium_source.py acquire --execute --step sync-deps && python3 scripts/chromium_source.py acquire --execute --step run-hooks && python3 scripts/chromium_source.py acquire --execute --step generate-dev-build",
       "dev_build_ninja_exists_current": false,
-      "dev_gn_args_exists_current": false,
-      "error_summary": "GN started after mac platform GN was installed, wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools. Subsequent Linux Docker deps sync returned the shared checkout to a linux dependency profile.",
-      "next_action": "Select full Xcode, set BROWSEFORGE_CHROMIUM_HOST_WORKDIR to a dedicated macOS checkout, then rerun python3 scripts/chromium_source.py acquire --execute --step sync-deps --step run-hooks --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
+      "dev_gn_args_exists_current": true,
+      "error_summary": "GN started after mac platform GN was installed and wrote out/BrowseForgeDev/args.gn, then failed in build/config/apple/sdk_info.py because xcodebuild requires full Xcode while xcode-select points at CommandLineTools.",
+      "next_action": "Select full Xcode, then rerun python3 scripts/chromium_source.py acquire --execute --step generate-dev-build until out/BrowseForgeDev/build.ninja exists.",
       "platform_gn_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/buildtools/mac/gn",
-      "platform_gn_exists_current_after_linux_deps_sync": false,
-      "platform_gn_exists_during_probe": true,
-      "status": "blocked_full_xcode_required_after_platform_gn_installed"
+      "platform_gn_exists_current": true,
+      "status": "blocked_full_xcode_required_after_dev_args_written"
     },
     "linux_docker_missing_runtime_sidecars": [],
     "linux_docker_rebuild_resume": {
@@ -133,7 +132,7 @@
       }
     ],
     "locale_patch_status": "applied_to_external_checkout",
-    "macos_host_preflight_status": "blocked_full_xcode_required_for_gn_generation",
+    "macos_host_preflight_status": "blocked_full_xcode_required_after_dev_args_written",
     "native_build_automation": {
       "last_macos_preflight": {
         "blocking_error": "xcodebuild requires full Xcode; active developer directory is /Library/Developer/CommandLineTools",
@@ -192,7 +191,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout, and the linux-x64 artifact was rebuilt and repackaged after the WebShare feature parity patch. Source automation now pins Darwin dependency sync with --deps=mac, but the current shared checkout is in linux_docker_deps profile after Docker sync; BrowseForgeDev remains blocked by full Xcode, and the linux chrome output was restored from the packaged artifact after an Apple Silicon Docker/Rosetta rebuild resume failed.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present in the shared checkout, BrowseForgeDev args.gn now exists, and GN generation is blocked before build.ninja by full Xcode selection because xcode-select points at CommandLineTools. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact, but the shared checkout dependency profile should not be treated as simultaneously linux and mac ready; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "source_workdir_isolation_status": "helpers_support_profile_specific_workdirs_with_shared_fallback",
@@ -218,7 +217,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, Linux DEPS were synced in Docker with the external git cache mounted, GN generation succeeded for out/BrowseForgeLinuxDocker, webdriver/hardware/screen/platform/timezone/locale/user-agent/UA-CH/storage-quota/plugins/WebRTC/audio/canvas/WebGL/feature-parity(serial-port-connected,webshare)/fonts/process-priority/switch-propagation source-level patches are applied in the external checkout. The current dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip records a rebuilt patched Linux x64 runtime artifact after the WebShare feature parity patch, includes explicit artifact os=linux and arch=x64 metadata plus an alpha runtime manifest, and its live SannySoft smoke reports UA-CH fullVersionList. macOS host GN generation remains blocked because xcodebuild is backed by CommandLineTools instead of full Xcode; unpatched baseline Chromium build remains missing. scripts/chromium_source.py check now reports chromium_src_head, chromium_src_matches_manifest, and build_outputs so pinned checkout, missing dev-baseline GN generation, and Linux release build drift are visible before source patch/build work. A current BrowseForgeDev generation probe is blocked because buildtools/mac/gn/gn is absent; chromium_source.py check now exposes tools.platform_gn_binary and tools.platform_gn_exists for this prerequisite. A current BrowseForgeDev generation probe now passes platform GN discovery but is blocked by full Xcode selection: xcodebuild requires Xcode while xcode-select points at CommandLineTools.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present in the shared checkout, BrowseForgeDev args.gn now exists, and GN generation is blocked before build.ninja by full Xcode selection because xcode-select points at CommandLineTools. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact, but the shared checkout dependency profile should not be treated as simultaneously linux and mac ready; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {
