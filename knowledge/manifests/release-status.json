@@ -415,17 +415,17 @@
       "source": "knowledge/manifests/source-acquisition.json"
     }
   ],
-  "generated_at": "2026-07-11T01:48:00Z",
+  "generated_at": "2026-07-11T02:06:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "779a0549c057999276ce0b8366d2ed8984e84e2e402b8ab524f1b5d70d5953db",
     "detector-summary.json": "1a784b9a740d0b1d23e8fd65ddc9b96855ab42a58b56ecc0c8b43f8ecc32106a",
     "knowledge/manifests/detector-score-comparison.json": "e50bc9b0cd0cb98a3a523c4535d7a8d7df59f14821a4e2bc197e886c23201bbc",
     "knowledge/manifests/fingerprint-surface-status.json": "b98e6d98df4bed314dec2f8bfc1c2c31683e0b0b75c1d7f1972e51f6c089a5ff",
-    "knowledge/manifests/native-artifact-preflight.json": "865642e7ddd21630f622e50883ebe0b919f248283422457a1df2be070a76a89a",
+    "knowledge/manifests/native-artifact-preflight.json": "dfe861f426b1f5bbc360ce6e797141cb23d6a8030d1fb089a955a8f94e1f37d7",
     "knowledge/manifests/proxy-preflight.json": "7b7c06cb5b7ca63ef7a2bbc6a592ef952d871b194c2b0b3b0e39b602ddb5be47",
     "knowledge/manifests/release-gates.json": "371e40abd374187437a34ae363a6961cd2ac29d843db467888c21112f116dec3",
     "knowledge/manifests/signing-policy.json": "12276c500877c572a01dfbfc209a45fdb9931f91e36dbfdd5420d168c16a4851",
-    "knowledge/manifests/source-acquisition.json": "3aed6f66fafac67a8a63c9170d1b1878addda2962b00da7e93b31193facb8da0"
+    "knowledge/manifests/source-acquisition.json": "6120bb5e2b665ef484cb9f27ddd9e618c372c0c52d9f7296fd4d08f38238ca35"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",
@@ -481,16 +481,18 @@
         "app_bundle_exists": false,
         "build_ninja_exists": false,
         "chromium_deps_exists": true,
+        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
         "chromium_src_exists": true,
         "depot_tools_exists": true,
         "gn_binary_exists": true,
         "host_os": "darwin",
         "host_supported": true,
         "native_toolchain_ready": false,
-        "out_args_exists": true,
+        "out_args_exists": false,
         "output_binary_exists": false,
         "package_zip_exists": false,
         "required_host_os": "darwin",
+        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
         "xcodebuild_ok": false,
         "xcodebuild_status": "failed"
       },
@@ -518,6 +520,7 @@
       "status_snapshot": {
         "build_ninja_exists": false,
         "chromium_deps_exists": true,
+        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
         "chromium_src_exists": true,
         "depot_tools_exists": true,
         "gn_binary_exists": true,
@@ -528,7 +531,8 @@
         "output_binary_exists": false,
         "package_zip_exists": false,
         "portable_layout_exists": false,
-        "required_host_os": "windows"
+        "required_host_os": "windows",
+        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
       },
       "unblocks": [
         "windows-x64 packaged native BrowseForge Chromium artifact",

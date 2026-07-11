@@ -24,6 +24,7 @@
         "docker_helper_default": "scripts/chromium_docker.py uses BROWSEFORGE_CHROMIUM_LINUX_WORKDIR before the BROWSEFORGE_CHROMIUM_WORKDIR shared checkout fallback so Linux Docker deps no longer have to clobber a host-profile checkout.",
         "host_source_env": "BROWSEFORGE_CHROMIUM_HOST_WORKDIR",
         "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
+        "native_helper_default": "scripts/chromium_native.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before the BROWSEFORGE_CHROMIUM_WORKDIR shared checkout fallback so native artifact preflight/builds inspect the host-profile checkout.",
         "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
         "source_helper_default": "scripts/chromium_source.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before the BROWSEFORGE_CHROMIUM_WORKDIR shared checkout fallback so macOS/Windows host deps can keep a dedicated profile checkout."
       },
@@ -194,7 +195,8 @@
     "source_workdir_isolation_status": "helpers_support_profile_specific_workdirs_with_shared_fallback",
     "source_workdir_isolation_verification": [
       "python3 -m unittest tests.test_chromium_source",
-      "python3 -m unittest tests.test_chromium_docker"
+      "python3 -m unittest tests.test_chromium_docker",
+      "python3 -m unittest tests.test_chromium_native"
     ],
     "stealth_scaffold_status": "copied_and_linked_to_gn_all",
     "storage_quota_patch_status": "applied_to_external_checkout",

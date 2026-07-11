@@ -300,12 +300,16 @@ def validate_source_dependency_profile(source_acquisition: dict) -> None:
     for key, expected in required_workdir_envs.items():
         if workdir_contract.get(key) != expected:
             raise SystemExit(f"source-acquisition profile_isolated_workdir_contract {key} must be {expected}")
-    helper_notes = [
-        str(workdir_contract.get("source_helper_default", "")),
-        str(workdir_contract.get("docker_helper_default", "")),
-    ]
+    helper_notes = {
+        "source_helper_default": str(workdir_contract.get("source_helper_default", "")),
+        "native_helper_default": str(workdir_contract.get("native_helper_default", "")),
+        "docker_helper_default": str(workdir_contract.get("docker_helper_default", "")),
+    }
+    missing_helper_notes = [key for key, note in helper_notes.items() if not note]
+    if missing_helper_notes:
+        raise SystemExit(f"source-acquisition profile_isolated_workdir_contract missing helper notes: {missing_helper_notes}")
     for expected in required_workdir_envs.values():
-        if not any(expected in note for note in helper_notes):
+        if not any(expected in note for note in helper_notes.values()):
             raise SystemExit(f"source-acquisition profile_isolated_workdir_contract must document {expected}")
 
 

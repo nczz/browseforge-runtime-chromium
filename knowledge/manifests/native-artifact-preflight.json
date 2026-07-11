@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T02:07:27Z",
+  "generated_at": "2026-07-11T02:05:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -34,16 +34,18 @@
         "app_bundle_exists": false,
         "build_ninja_exists": false,
         "chromium_deps_exists": true,
+        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
         "chromium_src_exists": true,
         "depot_tools_exists": true,
         "gn_binary_exists": true,
         "host_os": "darwin",
         "host_supported": true,
         "native_toolchain_ready": false,
-        "out_args_exists": true,
+        "out_args_exists": false,
         "output_binary_exists": false,
         "package_zip_exists": false,
         "required_host_os": "darwin",
+        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
         "xcodebuild_ok": false,
         "xcodebuild_status": "failed"
       }
@@ -67,6 +69,7 @@
       "status_snapshot": {
         "build_ninja_exists": false,
         "chromium_deps_exists": true,
+        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
         "chromium_src_exists": true,
         "depot_tools_exists": true,
         "gn_binary_exists": true,
@@ -77,7 +80,8 @@
         "output_binary_exists": false,
         "package_zip_exists": false,
         "portable_layout_exists": false,
-        "required_host_os": "windows"
+        "required_host_os": "windows",
+        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
       }
     }
   ],

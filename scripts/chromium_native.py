@@ -13,8 +13,17 @@ from pathlib import Path
 from typing import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_WORKDIR = Path(os.environ.get("BROWSEFORGE_CHROMIUM_WORKDIR", "/Users/chun/Projects/browser-source/browseforge-chromium"))
+HOST_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_HOST_WORKDIR"
+SHARED_WORKDIR_ENV = "BROWSEFORGE_CHROMIUM_WORKDIR"
+DEFAULT_SHARED_WORKDIR = "/Users/chun/Projects/browser-source/browseforge-chromium"
 DEFAULT_JOBS = int(os.environ.get("BROWSEFORGE_CHROMIUM_NATIVE_JOBS", "4"))
+
+
+def default_workdir() -> Path:
+    return Path(os.environ.get(HOST_WORKDIR_ENV) or os.environ.get(SHARED_WORKDIR_ENV, DEFAULT_SHARED_WORKDIR))
+
+
+DEFAULT_WORKDIR = default_workdir()
 RUNTIME_VERSION = "v0.1.0-alpha.0"
 SUPPORTED_NATIVE_PLATFORMS = {"macos-arm64", "windows-x64"}
 
@@ -167,6 +176,8 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
     autoninja = str(Path(plan.depot_tools_dir) / "autoninja") if (Path(plan.depot_tools_dir) / "autoninja").is_file() else shutil.which("autoninja")
     gclient = str(Path(plan.depot_tools_dir) / "gclient") if (Path(plan.depot_tools_dir) / "gclient").is_file() else shutil.which("gclient")
     status = {
+        "workdir": plan.workdir,
+        "chromium_src_dir": plan.chromium_src_dir,
         "host_os": plan.host_os,
         "required_host_os": plan.required_host_os,
         "host_supported": plan.host_os == plan.required_host_os,
@@ -314,6 +325,8 @@ def native_status_evidence(platform_id: str, status: dict[str, object]) -> str:
 
 def native_status_snapshot(platform_id: str, status: dict[str, object]) -> dict[str, object]:
     keys = [
+        "workdir",
+        "chromium_src_dir",
         "host_os",
         "required_host_os",
         "host_supported",

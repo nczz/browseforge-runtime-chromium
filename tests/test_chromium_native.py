@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -21,18 +22,19 @@ spec.loader.exec_module(chromium_native)
 
 
 class ChromiumNativePlanTests(unittest.TestCase):
-    def _run_script(self, *args: str) -> subprocess.CompletedProcess[str]:
+    def _run_script(self, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             [sys.executable, str(SCRIPT), *args],
             cwd=ROOT,
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             check=False,
         )
 
-    def _json_from_script(self, *args: str) -> dict:
-        completed = self._run_script(*args)
+    def _json_from_script(self, *args: str, env: dict[str, str] | None = None) -> dict:
+        completed = self._run_script(*args, env=env)
         self.assertEqual(0, completed.returncode, completed.stderr + completed.stdout)
         try:
             payload = json.loads(completed.stdout)
@@ -99,6 +101,24 @@ class ChromiumNativePlanTests(unittest.TestCase):
         package_command = payload["package_command"]
         self.assertEqual("macos-arm64", package_command[package_command.index("--platform") + 1])
         self.assertEqual("macos-arm64", payload["commands"]["package"][package_command.index("--platform") + 1])
+
+    def test_cli_default_workdir_can_use_host_profile_env(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            host_workdir = Path(td) / "chromium-host"
+            env = os.environ.copy()
+            env["BROWSEFORGE_CHROMIUM_HOST_WORKDIR"] = str(host_workdir)
+            env["BROWSEFORGE_CHROMIUM_WORKDIR"] = str(Path(td) / "chromium-shared")
+            payload = self._json_from_script(
+                "plan",
+                "--platform",
+                "macos-arm64",
+                "--out-dir",
+                "out/TestMacArm64",
+                env=env,
+            )
+
+        self.assertEqual(str(host_workdir), payload["workdir"])
+        self.assertEqual(str(host_workdir / "src"), payload["chromium_src_dir"])
 
     def test_windows_plan_targets_x64_chrome_exe_and_windows_host(self) -> None:
         """The Windows native plan cross-targets win/x64 but declares that execution requires Windows."""

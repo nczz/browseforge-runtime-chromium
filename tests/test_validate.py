@@ -1848,6 +1848,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                             "linux_docker_source_env": "BROWSEFORGE_CHROMIUM_LINUX_WORKDIR",
                             "shared_fallback_env": "BROWSEFORGE_CHROMIUM_WORKDIR",
                             "source_helper_default": "scripts/chromium_source.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before BROWSEFORGE_CHROMIUM_WORKDIR.",
+                            "native_helper_default": "scripts/chromium_native.py uses BROWSEFORGE_CHROMIUM_HOST_WORKDIR before BROWSEFORGE_CHROMIUM_WORKDIR.",
                             "docker_helper_default": "scripts/chromium_docker.py uses BROWSEFORGE_CHROMIUM_LINUX_WORKDIR before BROWSEFORGE_CHROMIUM_WORKDIR.",
                         },
                     },
