@@ -740,6 +740,74 @@ def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts
     if release_ready and any(not entry.get("ready") for entry in entries.values()):
         raise SystemExit("native artifact preflight cannot be release_grade_ready while supported platforms remain blocked")
 
+def validate_package_smoke_manifest(platform: str, artifact: dict, smoke_path: str, *, required_checks: set[str]) -> None:
+    smoke = load_json(smoke_path)
+    if smoke.get("schema_version") != "1.0":
+        raise SystemExit(f"{smoke_path} schema_version must be 1.0")
+    if smoke.get("platform") != platform:
+        raise SystemExit(f"{smoke_path} platform drifted: {smoke.get('platform')!r} != {platform!r}")
+    if smoke.get("artifact_id") != artifact.get("artifact_id"):
+        raise SystemExit(f"{smoke_path} artifact_id drifted from runtime-artifacts")
+    archive = ROOT / "dist" / f"{artifact['artifact_id']}.zip"
+    if smoke.get("artifact_sha256") != artifact.get("sha256") or smoke.get("artifact_sha256") != file_sha256(archive):
+        raise SystemExit(f"{smoke_path} artifact_sha256 drifted from runtime artifact")
+    if smoke.get("artifact_size_bytes") != artifact.get("size_bytes") or smoke.get("artifact_size_bytes") != archive.stat().st_size:
+        raise SystemExit(f"{smoke_path} artifact_size_bytes drifted from runtime artifact")
+    checks = smoke.get("checks", [])
+    if not isinstance(checks, list) or not checks:
+        raise SystemExit(f"{smoke_path} checks must be a non-empty array")
+    by_check = {check.get("check"): check for check in checks if isinstance(check, dict)}
+    missing = sorted(required_checks - set(by_check))
+    if missing:
+        raise SystemExit(f"{smoke_path} missing package smoke checks: {missing}")
+    for check_name, check in sorted(by_check.items()):
+        status = check.get("status")
+        if status not in {"passed", "warning"}:
+            raise SystemExit(f"{smoke_path} {check_name} status must be passed or warning")
+        observed = check.get("observed")
+        if not isinstance(observed, dict):
+            raise SystemExit(f"{smoke_path} {check_name} observed must be an object")
+
+
+def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts: dict) -> None:
+    artifacts = {
+        artifact.get("platform"): artifact
+        for artifact in runtime_artifacts.get("artifacts", [])
+        if isinstance(artifact, dict)
+    }
+    base = source_acquisition.get("chromium_base", {})
+    smoke_contracts = {
+        "linux-x64": (
+            base.get("linux_x64_artifact", {}).get("smoke_evidence"),
+            {
+                "archive_integrity",
+                "wrapper_metadata_in_linux_amd64_container",
+                "packaged_chrome_devtools_launch_in_linux_amd64_container",
+            },
+        ),
+        "macos-arm64": (
+            base.get("macos_arm64_artifact", {}).get("smoke_evidence"),
+            {
+                "archive_integrity",
+                "extracted_executable_modes",
+                "wrapper_metadata_on_macos_host",
+                "wrapper_doctor_plan_on_macos_host",
+                "packaged_chromium_devtools_launch_on_macos_host",
+                "about_blank_browserleaks_collector_smoke",
+            },
+        ),
+    }
+    for platform, (smoke_path, required_checks) in smoke_contracts.items():
+        artifact = artifacts.get(platform)
+        if artifact is None:
+            continue
+        if not isinstance(smoke_path, str) or not smoke_path:
+            raise SystemExit(f"source-acquisition {platform} artifact must reference package smoke evidence")
+        if not (ROOT / smoke_path).is_file():
+            raise SystemExit(f"source-acquisition {platform} package smoke evidence is missing: {smoke_path}")
+        validate_package_smoke_manifest(platform, artifact, smoke_path, required_checks=required_checks)
+
+
 def validate_signing_policy(signing_policy: dict, runtime_artifacts: dict, platform_matrix: dict) -> None:
     if signing_policy.get("runtime_id") != "browseforge-chromium":
         raise SystemExit("signing policy runtime_id must be browseforge-chromium")
@@ -1183,6 +1251,7 @@ def main() -> None:
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
+    validate_package_smoke_manifests(source_acquisition, runtime_artifacts)
     signing_policy = load_json("knowledge/manifests/signing-policy.json")
     validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
     release_status = load_json("knowledge/manifests/release-status.json")

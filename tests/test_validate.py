@@ -887,6 +887,56 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             {"supported_package_platforms": ["macos-arm64"], "artifacts": [{"platform": "macos-arm64"}]},
         )
 
+    def test_validate_accepts_macos_package_smoke_manifest(self) -> None:
+        """macOS package smoke evidence is tied to the runtime artifact checksum and required launch checks."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            original_root = module.ROOT
+            module.ROOT = temp_root
+            try:
+                artifact_id = "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64"
+                archive = temp_root / "dist" / f"{artifact_id}.zip"
+                archive.parent.mkdir(parents=True)
+                archive.write_bytes(b"macos artifact fixture\n")
+                artifact = {
+                    "artifact_id": artifact_id,
+                    "platform": "macos-arm64",
+                    "sha256": self._sha256_file(archive),
+                    "size_bytes": archive.stat().st_size,
+                }
+                checks = [
+                    {"check": check, "status": "passed", "observed": {}}
+                    for check in {
+                        "archive_integrity",
+                        "extracted_executable_modes",
+                        "wrapper_metadata_on_macos_host",
+                        "wrapper_doctor_plan_on_macos_host",
+                        "packaged_chromium_devtools_launch_on_macos_host",
+                        "about_blank_browserleaks_collector_smoke",
+                    }
+                ]
+                self._write_json(
+                    temp_root / "knowledge" / "manifests" / "macos-package-smoke.json",
+                    {
+                        "artifact_id": artifact_id,
+                        "artifact_sha256": artifact["sha256"],
+                        "artifact_size_bytes": artifact["size_bytes"],
+                        "checks": checks,
+                        "platform": "macos-arm64",
+                        "schema_version": "1.0",
+                    },
+                )
+
+                module.validate_package_smoke_manifest(
+                    "macos-arm64",
+                    artifact,
+                    "knowledge/manifests/macos-package-smoke.json",
+                    required_checks={check["check"] for check in checks},
+                )
+            finally:
+                module.ROOT = original_root
+
     def test_validate_rejects_source_acquisition_with_linux_build_output_drift(self) -> None:
         """A packaged linux-x64 artifact requires source-acquisition build output gates to stay true."""
         module = self._load_validate_module()
@@ -2003,6 +2053,23 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             }
         )
         self._write_json(manifest_path, manifest)
+        smoke_rel = Path("knowledge") / "manifests" / "linux-package-smoke.json"
+        self._write_json(
+            root / smoke_rel,
+            {
+                "artifact_id": artifact_id,
+                "artifact_sha256": archive_sha256,
+                "artifact_size_bytes": archive_size_bytes,
+                "checks": [
+                    {"check": "archive_integrity", "status": "passed", "observed": {}},
+                    {"check": "wrapper_metadata_in_linux_amd64_container", "status": "passed", "observed": {}},
+                    {"check": "packaged_chrome_devtools_launch_in_linux_amd64_container", "status": "passed", "observed": {}},
+                ],
+                "platform": "linux-x64",
+                "schema_version": "1.0",
+            },
+        )
+
         self._write_json(
             root / "knowledge" / "manifests" / "source-acquisition.json",
             {
@@ -2027,6 +2094,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                         "stage_dir": stage_rel.as_posix(),
                         "status": "packaged",
                         "wrapper_binary_sha256": wrapper_sha256,
+                        "smoke_evidence": smoke_rel.as_posix(),
                     },
                     "build_output_status": {
                         "dev_build_ninja_exists": False,
