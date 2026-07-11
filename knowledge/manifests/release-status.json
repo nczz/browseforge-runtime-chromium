@@ -1,5 +1,5 @@
 {
-  "blocker_count": 20,
+  "blocker_count": 18,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -9,7 +9,7 @@
     },
     {
       "blocker_id": "browseforge-integration:1",
-      "detail": "Windows native BrowseForge Chromium release artifact is missing",
+      "detail": "Windows native detector evidence is missing",
       "severity": "high",
       "source": "contracts/browseforge-integration.contract.json"
     },
@@ -122,62 +122,6 @@
       "surface": "proxy/IP coherence"
     },
     {
-      "blocker_id": "native-artifact:windows-x64:0",
-      "build_ninja_exists": true,
-      "detail": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
-      "evidence": [
-        "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=False, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
-      ],
-      "host_supported": true,
-      "native_toolchain_ready": true,
-      "output_binary_exists": false,
-      "package_zip_exists": false,
-      "platform": "windows-x64",
-      "remediation_commands": [
-        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
-        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
-        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
-        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
-      ],
-      "severity": "critical",
-      "source": "knowledge/manifests/native-artifact-preflight.json",
-      "status": "missing_native_release_artifact"
-    },
-    {
-      "blocker_id": "native-artifact:windows-x64:1",
-      "build_ninja_exists": true,
-      "detail": "native Windows detector evidence for the packaged artifact",
-      "evidence": [
-        "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=False, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
-      ],
-      "host_supported": true,
-      "native_toolchain_ready": true,
-      "output_binary_exists": false,
-      "package_zip_exists": false,
-      "platform": "windows-x64",
-      "remediation_commands": [
-        "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
-        "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
-        "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
-        "GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium",
-        "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
-      ],
-      "severity": "critical",
-      "source": "knowledge/manifests/native-artifact-preflight.json",
-      "status": "missing_native_release_artifact"
-    },
-    {
       "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
       "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_REGION is missing",
       "severity": "critical",
@@ -227,27 +171,29 @@
     },
     {
       "blocker_id": "signing-policy:windows-x64",
-      "detail": "Windows x64 release-grade artifacts require a BrowseForge Chromium portable chrome.exe/DLL layout built from the selected source ref plus a committed code-signing decision before release_grade can pass.",
+      "detail": "Unsigned Windows x64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Authenticode/code-signing policy update.",
       "evidence": [
-        "knowledge/manifests/platform-matrix.json",
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
         "knowledge/manifests/native-artifact-preflight.json"
       ],
       "platform": "windows-x64",
       "severity": "high",
       "source": "knowledge/manifests/signing-policy.json",
-      "status": "decision_recorded_artifact_missing"
+      "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-11T19:30:00Z",
+  "generated_at": "2026-07-11T20:30:00Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "210e23a4aff447aab1a52d70bee9cdab17a2eb2bb015e3aa3968d950c153e6c6",
+    "contracts/browseforge-integration.contract.json": "db09083cc657c08ffb0b5ec29cf739e7750aed0c6e12bc419f96e15f1dcafd5c",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "bc3fbf1b2a506caa12c5e039881f8e8396f6013df6dead224d3faed37cf8f479",
-    "knowledge/manifests/native-artifact-preflight.json": "cfa4925e3f196036c5c6134caa1c9d83774ab81919cd9d232aea0e25f2d8c371",
+    "knowledge/manifests/native-artifact-preflight.json": "f070b961b62291cd392f6ba7cb5d814d2446cc3e80a021cd518e5c583e08f9f1",
     "knowledge/manifests/proxy-preflight.json": "dabb5e576a1a977f0372c14b846da3ee64f6ece5da046009a2a8f17dd3654a73",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
-    "knowledge/manifests/signing-policy.json": "521c2680e4130eedb9625d08c09cf37afd2f16849b0b8ddcf0e13b3f7efdba21",
+    "knowledge/manifests/signing-policy.json": "87248d5dfb5a932c4b46bc837513c8b35a0c2aadf5a548729a14c6eaff864c7b",
     "knowledge/manifests/source-acquisition.json": "68c9158724617ff140ab7721aaf6a55a7a5919aa59ae4dcfa76636745936feec"
   },
   "inputs": [
@@ -283,51 +229,6 @@
         "external proxy exit-IP/geolocation detector evidence",
         "proxy/IP coherence detector matrix",
         "WebRTC public/private IP coherence evidence"
-      ]
-    },
-    {
-      "evidence": [
-        "knowledge/manifests/platform-matrix.json",
-        "contracts/browseforge-integration.contract.json",
-        "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=False, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
-      ],
-      "provide": [
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
-        "native Windows detector evidence for the packaged artifact"
-      ],
-      "resource_id": "native-artifact-windows-x64",
-      "severity": "critical",
-      "status": "missing_native_release_artifact",
-      "status_snapshot": {
-        "build_ninja_exists": true,
-        "chromium_deps_exists": true,
-        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
-        "chromium_src_exists": true,
-        "depot_tools_exists": true,
-        "gclient_path": "/Users/chun/Projects/browser-source/browseforge-chromium/.gclient",
-        "gclient_target_os_win": true,
-        "gn_binary_exists": true,
-        "host_os": "darwin",
-        "host_support_mode": "darwin_windows_cross_compile",
-        "host_supported": true,
-        "native_toolchain_ready": true,
-        "out_args_exists": true,
-        "output_binary_exists": false,
-        "package_zip_exists": false,
-        "portable_layout_exists": true,
-        "required_host_os": "windows",
-        "windows_cross_compile_supported": true,
-        "windows_toolchain_base": "/Users/chun/Projects/chromium-win-sdk-prep/output",
-        "windows_toolchain_enabled": true,
-        "windows_toolchain_hash": "6eae1a9f3e",
-        "windows_toolchain_zip": "/Users/chun/Projects/chromium-win-sdk-prep/output/6eae1a9f3e.zip",
-        "windows_toolchain_zip_exists": true,
-        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
-      },
-      "unblocks": [
-        "windows-x64 packaged native BrowseForge Chromium artifact",
-        "windows-x64 native detector evidence"
       ]
     },
     {

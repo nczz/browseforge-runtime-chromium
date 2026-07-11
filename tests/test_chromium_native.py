@@ -172,6 +172,12 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual(str(depot_tools), payload["depot_tools_dir"])
         self.assertEqual(expected_path_prefix, payload["path_prefix"])
 
+        sync_deps = payload["commands"]["sync-deps"]
+        self.assertEqual(["bash", "-lc"], sync_deps[:2])
+        self.assertEqual(
+            f"PATH={expected_path_prefix} DEPOT_TOOLS_UPDATE=0 gclient sync --with_branch_heads --with_tags",
+            sync_deps[2],
+        )
         run_hooks = payload["commands"]["run-hooks"]
         self.assertEqual(["bash", "-lc"], run_hooks[:2])
         self.assertEqual(f"PATH={expected_path_prefix} DEPOT_TOOLS_UPDATE=0 gclient runhooks", run_hooks[2])
@@ -692,6 +698,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual("windows", windows_snapshot["required_host_os"])
         self.assertIs(windows_snapshot["portable_layout_exists"], False)
         windows_commands = entries["windows-x64"]["next_commands"]
+        self.assertTrue(any("sync-deps" in command and "--execute" in command for command in windows_commands))
         self.assertTrue(any("--platform windows-x64" in command for command in windows_commands))
         self.assertTrue(any("GOOS=windows GOARCH=amd64 go build" in command for command in windows_commands))
         self.assertTrue(any("build-chrome" in command and "--execute" in command for command in windows_commands))

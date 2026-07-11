@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T19:30:00Z",
+  "generated_at": "2026-07-11T20:30:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -26,6 +26,7 @@
       "next_commands": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
         "python3 scripts/chromium_native.py check --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py sync-deps --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py run-hooks --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py build-chrome --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
@@ -56,19 +57,18 @@
       }
     },
     {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=False, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
       ],
-      "missing_prerequisites": [
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip",
-        "native Windows detector evidence for the packaged artifact"
-      ],
+      "missing_prerequisites": [],
       "next_commands": [
         "python3 scripts/chromium_native.py plan --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
         "python3 scripts/chromium_native.py check --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py sync-deps --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py run-hooks --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py gn-gen --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
         "python3 scripts/chromium_native.py build-chrome --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
@@ -76,8 +76,8 @@
         "python3 scripts/chromium_native.py package --platform windows-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
       ],
       "platform": "windows-x64",
-      "ready": false,
-      "status": "missing_native_release_artifact",
+      "ready": true,
+      "status": "packaged_detector_tested",
       "status_snapshot": {
         "build_ninja_exists": true,
         "chromium_deps_exists": true,
@@ -92,8 +92,8 @@
         "host_supported": true,
         "native_toolchain_ready": true,
         "out_args_exists": true,
-        "output_binary_exists": false,
-        "package_zip_exists": false,
+        "output_binary_exists": true,
+        "package_zip_exists": true,
         "portable_layout_exists": true,
         "required_host_os": "windows",
         "windows_cross_compile_supported": true,
@@ -106,7 +106,7 @@
       }
     }
   ],
-  "release_grade_ready": false,
+  "release_grade_ready": true,
   "requirements": [
     "every supported package platform has a committed runtime artifact manifest entry",
     "every supported package platform artifact has sha256 and size metadata",

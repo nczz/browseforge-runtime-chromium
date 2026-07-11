@@ -43,7 +43,6 @@ WINDOWS_CHROMIUM_RUNTIME_FILES = (
     'resources.pak',
     'chrome_100_percent.pak',
     'chrome_200_percent.pak',
-    'chrome_crashpad_handler.exe',
     'd3dcompiler_47.dll',
     'dxcompiler.dll',
     'dxil.dll',
@@ -52,7 +51,6 @@ WINDOWS_CHROMIUM_RUNTIME_FILES = (
     'vk_swiftshader.dll',
     'vulkan-1.dll',
     'vk_swiftshader_icd.json',
-    'v8_context_snapshot.bin',
     'snapshot_blob.bin',
 )
 
@@ -261,8 +259,9 @@ def package(args):
     stage.mkdir(parents=True)
     browser = Path(args.browser_binary)
     wrapper = Path(args.wrapper_binary)
-    ensure_file(browser, executable=True)
-    ensure_file(wrapper, executable=True)
+    requires_posix_execute_bit = platform_id != 'windows-x64'
+    ensure_file(browser, executable=requires_posix_execute_bit)
+    ensure_file(wrapper, executable=requires_posix_execute_bit)
     staged_browser = stage_platform_browser(platform_id, browser, stage)
     staged_wrapper = stage / staged_wrapper_name(platform_id)
     staged_runtime_manifest = stage / 'runtime.manifest.json'

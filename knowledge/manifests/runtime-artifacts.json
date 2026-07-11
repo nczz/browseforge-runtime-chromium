@@ -53,10 +53,47 @@
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
       "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b",
       "wrapper_version": "v0.1.0-alpha.0"
+    },
+    {
+      "arch": "x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+      "browseforge_compatibility": {
+        "min_version": "v2.0.0",
+        "profile_field": "runtime_id"
+      },
+      "browser_binary_sha256": "393178534a837eaed482d486d967f8403addc24db819bd014743b6aa62bd4c4b",
+      "browser_version": "150.0.7871.101",
+      "created_at": "2026-07-11T19:36:35.867143+00:00",
+      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "os": "windows",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "platform": "windows-x64",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
+      "release_channel": "alpha",
+      "runtime_id": "browseforge-chromium",
+      "runtime_version": "v0.1.0-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
+      "sha256": "c0123b441c5c973cf468c2b9853a445a096fc28e8741d0a6bbc6de93f06ceee4",
+      "signature": "unsigned-dev-artifact",
+      "size_bytes": 235414095,
+      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "wrapper_binary_sha256": "ebcdd0e97c35d01ebf2663feaeadf135e6ab3429251207fa8e314845b1663122",
+      "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
   "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+  "macos_artifact_refresh": {
+    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+    "reason": "macOS alpha package refreshed after native fingerprint CLI surface expansion and BrowseForge integration contract evidence update.",
+    "refreshed_after_commits": [
+      "35f85be",
+      "6073ea0"
+    ],
+    "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
+    "size_bytes": 403236086,
+    "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b"
+  },
   "packager_contract": "build/package_runtime.py supports linux-x64 runtime dependency layout, macos-arm64 .app bundle layout, and windows-x64 portable Chromium directory layout; platforms not listed in supported_package_platforms cannot be generated without an explicit runtime asset contract.",
   "policy": {
     "publish_binaries_as_release_assets": true,
@@ -97,16 +134,12 @@
     "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence",
     "macos-x64": "blocked until a committed macOS x64 runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence"
   },
-  "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6",
-  "macos_artifact_refresh": {
-    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-    "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
-    "size_bytes": 403236086,
-    "wrapper_binary_sha256": "0f5358a823a98a3706b4b0aa3efc4dc53e4c5a766a8f1bd974dd11d0bb2d9a9b",
-    "refreshed_after_commits": [
-      "35f85be",
-      "6073ea0"
-    ],
-    "reason": "macOS alpha package refreshed after native fingerprint CLI surface expansion and BrowseForge integration contract evidence update."
-  }
+  "windows_artifact_refresh": {
+    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+    "reason": "Windows alpha package built from BrowseForge Chromium source after macOS cross-toolchain sync and GN build.",
+    "sha256": "c0123b441c5c973cf468c2b9853a445a096fc28e8741d0a6bbc6de93f06ceee4",
+    "size_bytes": 235414095,
+    "wrapper_binary_sha256": "ebcdd0e97c35d01ebf2663feaeadf135e6ab3429251207fa8e314845b1663122"
+  },
+  "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6"
 }

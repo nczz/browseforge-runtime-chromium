@@ -31,7 +31,7 @@
   ],
   "release_blockers": [
     "external proxy exit-IP/geolocation detector evidence is missing",
-    "Windows native BrowseForge Chromium release artifact is missing",
+    "Windows native detector evidence is missing",
     "native headed proxy and Windows detector matrix remains incomplete",
     "runtime release_grade must remain false until supported platform artifacts and live detector gates pass"
   ],

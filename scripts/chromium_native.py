@@ -200,6 +200,7 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         package_artifact_id=artifact_id,
         package_command=package_command,
         commands={
+            "sync-deps": ["bash", "-lc", f"{run_env} gclient sync --with_branch_heads --with_tags"],
             "run-hooks": ["bash", "-lc", f"{run_env} gclient runhooks"],
             "gn-gen": ["bash", "-lc", f"{run_env} gn gen {selected_out} --args='{gn_args}'"],
             "build-chrome": ["bash", "-lc", f"{run_env} autoninja -j{jobs} -C {selected_out} chrome"],
@@ -434,6 +435,7 @@ def native_preflight_next_commands(platform_id: str, status: dict[str, object]) 
     commands = [
         f"python3 scripts/chromium_native.py plan --platform {platform_id} --workdir {workdir}",
         f"python3 scripts/chromium_native.py check --platform {platform_id} --workdir {workdir}",
+        f"python3 scripts/chromium_native.py sync-deps --platform {platform_id} --workdir {workdir} --execute",
         f"python3 scripts/chromium_native.py run-hooks --platform {platform_id} --workdir {workdir} --execute",
         f"python3 scripts/chromium_native.py gn-gen --platform {platform_id} --workdir {workdir} --execute",
         f"python3 scripts/chromium_native.py build-chrome --platform {platform_id} --workdir {workdir} --execute",
@@ -511,7 +513,7 @@ def native_artifact_preflight_manifest(root: Path, workdir: Path, generated_at: 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="BrowseForge Chromium native build helper")
-    parser.add_argument("command", choices=["plan", "check", "preflight", "run-hooks", "gn-gen", "build-chrome", "package"])
+    parser.add_argument("command", choices=["plan", "check", "preflight", "sync-deps", "run-hooks", "gn-gen", "build-chrome", "package"])
     parser.add_argument("--platform", choices=sorted(SUPPORTED_NATIVE_PLATFORMS))
     parser.add_argument("--workdir", type=Path, default=DEFAULT_WORKDIR)
     parser.add_argument("--out-dir")

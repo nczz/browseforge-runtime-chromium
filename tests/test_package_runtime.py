@@ -36,7 +36,6 @@ REQUIRED_WINDOWS_RUNTIME_ASSETS = (
     "resources.pak",
     "chrome_100_percent.pak",
     "chrome_200_percent.pak",
-    "chrome_crashpad_handler.exe",
     "d3dcompiler_47.dll",
     "dxcompiler.dll",
     "dxil.dll",
@@ -45,7 +44,6 @@ REQUIRED_WINDOWS_RUNTIME_ASSETS = (
     "vk_swiftshader.dll",
     "vulkan-1.dll",
     "vk_swiftshader_icd.json",
-    "v8_context_snapshot.bin",
     "snapshot_blob.bin",
     "locales/en-US.pak",
 )
@@ -132,6 +130,7 @@ class PackageRuntimeTests(unittest.TestCase):
         platform_id: str = "linux-x64",
         browser: Path | None = None,
         browser_dir: Path | None = None,
+        wrapper: Path | None = None,
         omit_runtime_assets: set[str] | None = None,
         expect_success: bool = True,
     ):
@@ -142,7 +141,8 @@ class PackageRuntimeTests(unittest.TestCase):
             self._write_runtime_assets(browser_dir, omit=omit_runtime_assets)
         elif browser_dir is None:
             browser_dir = browser.parent
-        wrapper = self._write_executable(td / "wrapper", "#!/bin/sh\necho wrapper\n")
+        if wrapper is None:
+            wrapper = self._write_executable(td / "wrapper", "#!/bin/sh\necho wrapper\n")
         out = td / "dist"
         runtime_version = "v0.1.0-alpha.0"
         artifact_id = f"browseforge-runtime-chromium-{runtime_version}-{platform_id}"
@@ -379,6 +379,32 @@ class PackageRuntimeTests(unittest.TestCase):
             self.assertEqual(manifest["wrapper_binary_sha256"], self._sha256(package["wrapper"]))
             self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
             self.assertEqual(provenance["wrapper_binary_sha256"], self._sha256(package["wrapper"]))
+
+    def test_package_windows_x64_accepts_non_posix_executable_exe_inputs(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            browser_dir = tmp / "ChromiumPortable"
+            browser = self._write_windows_portable_runtime(browser_dir)
+            wrapper = tmp / "browseforge-runtime-chromium.exe"
+            wrapper.write_bytes(b"MZBrowseForge runtime wrapper\n")
+            browser.chmod(browser.stat().st_mode & ~0o111)
+            wrapper.chmod(wrapper.stat().st_mode & ~0o111)
+
+            self.assertEqual(0, browser.stat().st_mode & 0o111)
+            self.assertEqual(0, wrapper.stat().st_mode & 0o111)
+
+            package = self._run_package(
+                tmp,
+                platform_id="windows-x64",
+                browser=browser,
+                browser_dir=browser_dir,
+                wrapper=wrapper,
+            )
+
+            self.assertTrue((package["stage"] / "chrome.exe").is_file())
+            self.assertTrue((package["stage"] / "browseforge-runtime-chromium.exe").is_file())
+            self.assertEqual(self._sha256(browser), self._sha256(package["stage"] / "chrome.exe"))
+            self.assertEqual(self._sha256(wrapper), self._sha256(package["stage"] / "browseforge-runtime-chromium.exe"))
 
     def test_package_fails_clearly_when_windows_runtime_sidecar_is_missing(self):
         with tempfile.TemporaryDirectory() as td:

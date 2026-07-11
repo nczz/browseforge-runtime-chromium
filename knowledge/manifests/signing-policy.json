@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T22:26:00Z",
+  "generated_at": "2026-07-11T20:30:00Z",
   "policies": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -31,16 +31,19 @@
       "status": "unsigned_alpha_dev_artifact"
     },
     {
-      "decision": "Windows x64 release-grade artifacts require a BrowseForge Chromium portable chrome.exe/DLL layout built from the selected source ref plus a committed code-signing decision before release_grade can pass.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+      "decision": "Unsigned Windows x64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Authenticode/code-signing policy update.",
       "evidence": [
-        "knowledge/manifests/platform-matrix.json",
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
         "knowledge/manifests/native-artifact-preflight.json"
       ],
       "platform": "windows-x64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "missing-native-artifact",
-      "status": "decision_recorded_artifact_missing"
+      "signature": "unsigned-dev-artifact",
+      "status": "unsigned_alpha_dev_artifact"
     }
   ],
   "release_grade_ready": false,
