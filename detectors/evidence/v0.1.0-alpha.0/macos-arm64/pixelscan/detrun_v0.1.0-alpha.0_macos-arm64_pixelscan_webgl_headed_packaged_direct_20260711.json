@@ -1,0 +1,156 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "pixelscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#pixelscan",
+    "name": "Pixelscan",
+    "url": "https://pixelscan.net/fingerprint-check"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:pixelscan:headed:direct:host",
+    "network_mode": "direct",
+    "platform": "macos-arm64",
+    "proxy": "none",
+    "required": false
+  },
+  "results": [
+    {
+      "detector_check": "pixelscan_webgl_metadata_macos_packaged_direct",
+      "evidence_ref": "packaged_collect_observed.webgl",
+      "finding": "Pixelscan packaged macOS headed direct run recorded full sanitized WebGL vendor/renderer, extension, parameter, shader precision, and rendered pixel metadata from the page-context collector.",
+      "normalized_values": {
+        "available": true,
+        "vendor": "Google Inc. (Apple)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "extensionCount": 39,
+        "extensionSha256": "607b9f27fb876a17fac9bf146ca9b5cdb083fb5631930a88fe9f5436c33820c9",
+        "parameterSha256": "70312f56c46aed3e5318487bb6c73d257fa9f758faed0cad6581a5177fdb945b",
+        "precisionSha256": "ed6e07a200f3c248aca734ca2fd9a2c5707287e921f979d5e2a36e0437a51bb9",
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "pixelHeight": 16
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "pixelscan_webgl_parameters_macos_packaged_direct",
+      "evidence_ref": "packaged_collect_observed.webgl.parameters",
+      "finding": "Pixelscan packaged macOS headed direct run recorded a bounded WebGL parameter subset without committing raw extensions or pixels.",
+      "normalized_values": {
+        "aliasedLineWidthRange": [
+          1,
+          1
+        ],
+        "aliasedPointSizeRange": [
+          1,
+          511
+        ],
+        "maxCombinedTextureImageUnits": 32,
+        "maxCubeMapTextureSize": 16384,
+        "maxFragmentUniformVectors": 1024,
+        "maxRenderbufferSize": 16384,
+        "maxTextureImageUnits": 16,
+        "maxTextureSize": 16384,
+        "maxVaryingVectors": 30,
+        "maxVertexAttribs": 16,
+        "maxVertexTextureImageUnits": 16,
+        "maxVertexUniformVectors": 1024,
+        "maxViewportDims": [
+          16384,
+          16384
+        ],
+        "vendor": "Google Inc. (Apple)",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+        "extensionCount": 39,
+        "extensionSha256": "607b9f27fb876a17fac9bf146ca9b5cdb083fb5631930a88fe9f5436c33820c9",
+        "parameterSha256": "70312f56c46aed3e5318487bb6c73d257fa9f758faed0cad6581a5177fdb945b",
+        "precisionSha256": "ed6e07a200f3c248aca734ca2fd9a2c5707287e921f979d5e2a36e0437a51bb9",
+        "pixelSha256": "c7b8b8e0dcb78147f2dc0bac3c760235660711043cb49bb8f8537b419431a5c3",
+        "pixelWidth": 16,
+        "pixelHeight": 16
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "webgl"
+    },
+    {
+      "detector_check": "pixelscan_uach_macos_packaged_direct",
+      "evidence_ref": "packaged_collect_observed.uaData",
+      "finding": "Pixelscan packaged macOS headed direct run retained configured macOS arm64 UA-CH while collecting WebGL metadata.",
+      "normalized_values": {
+        "architecture": "arm",
+        "bitness": "64",
+        "platform": "macOS",
+        "platformVersion": "26.5.1",
+        "mobile": false,
+        "wow64": false
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "pixelscan_page_status_macos_packaged_direct",
+      "evidence_ref": "packaged_collect_observed.pixelscanPage",
+      "finding": "Pixelscan page score text may fluctuate; this artifact promotes bounded WebGL metadata and retains page status fields as context without treating them as WebGL parity metadata.",
+      "normalized_values": {
+        "verdict": "inconsistent",
+        "fingerprint": "Masking detected",
+        "botCheck": "No automated behavior detected",
+        "proxy": "No proxy detected"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "client_hints"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Generated from packaged macOS BrowseForge Chromium CDP collector for Pixelscan WebGL direct headed coverage; no raw page text, screenshots, storage details, IP literals, raw WebGL extensions/pixels, or raw AudioBuffer payloads are committed. Only text_sha256 and bounded normalized values are retained.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "source-detector-harness-pixelscan-webgl-macos-packaged-headed-direct-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
+    "raw_capture_sha256": "443813495cf35613ebb2361cac8815628bebd365e8aa4f8a685246520b9da799",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "9841608a398b24bc06b33f88bd893d91b1d305c5a5185bd96fc45b5d1853095e",
+    "sha256": "bf01d87972180f8ec9e96a1be02306d1a314f5a609f9e312238c0a4fa7cf82de"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150",
+    "browser_version_major": "150",
+    "container": false,
+    "gpu_mode": "headed packaged native",
+    "host_os": "macos",
+    "locale_profile": "zh-TW",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "none",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-11T14:45:00Z"
+}
