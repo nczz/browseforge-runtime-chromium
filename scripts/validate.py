@@ -364,7 +364,7 @@ def validate_source_dependency_profile(source_acquisition: dict) -> None:
             raise SystemExit(f"source-acquisition profile_isolated_workdir_contract must document {expected}")
 
 
-def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict) -> None:
+def validate_native_build_automation(source_acquisition: dict, runtime_artifacts: dict, native_preflight: dict | None = None) -> None:
     automation = source_acquisition.get("chromium_base", {}).get("native_build_automation")
     if not isinstance(automation, dict):
         raise SystemExit("source-acquisition must record native_build_automation")
@@ -411,6 +411,38 @@ def validate_native_build_automation(source_acquisition: dict, runtime_artifacts
             expected_statuses.add("packaged_launch_smoked")
         if platform.get("status") not in expected_statuses:
             raise SystemExit(f"source-acquisition native_build_automation {platform_id} status drifted: {platform.get('status')!r} not in {sorted(expected_statuses)!r}")
+    windows_preflight = automation.get("last_windows_preflight")
+    if "windows-x64" in expected_platforms:
+        if not isinstance(windows_preflight, dict):
+            raise SystemExit("source-acquisition native_build_automation must record last_windows_preflight")
+        if windows_preflight.get("verification_mode") != "manual_windows_os":
+            raise SystemExit("source-acquisition last_windows_preflight must record manual Windows OS validation mode")
+        if windows_preflight.get("manual_windows_os_validation_required") is not True:
+            raise SystemExit("source-acquisition last_windows_preflight must require manual Windows OS validation")
+    if native_preflight:
+        native_entries = {
+            entry.get("platform"): entry
+            for entry in native_preflight.get("platforms", [])
+            if isinstance(entry, dict)
+        }
+        windows_entry = native_entries.get("windows-x64")
+        if windows_entry is not None and isinstance(windows_preflight, dict):
+            snapshot = windows_entry.get("status_snapshot", {})
+            if not isinstance(snapshot, dict):
+                raise SystemExit("source-acquisition cannot align last_windows_preflight without native windows status_snapshot")
+            aligned_fields = {
+                "host_supported": snapshot.get("host_supported"),
+                "host_support_mode": snapshot.get("host_support_mode"),
+                "native_toolchain_ready": snapshot.get("native_toolchain_ready"),
+                "gclient_target_os_win": snapshot.get("gclient_target_os_win"),
+                "verification_mode": snapshot.get("verification_mode"),
+                "manual_windows_os_validation_required": snapshot.get("manual_windows_os_validation_required"),
+            }
+            for key, expected in aligned_fields.items():
+                if windows_preflight.get(key) != expected:
+                    raise SystemExit(f"source-acquisition last_windows_preflight {key} drifted from native-artifact-preflight: {windows_preflight.get(key)!r} != {expected!r}")
+            if windows_entry.get("ready") is True and windows_preflight.get("package_status") != windows_entry.get("status"):
+                raise SystemExit("source-acquisition last_windows_preflight package_status drifted from native-artifact-preflight")
 
 def validate_evidence_schema_contract(evidence_schema: dict) -> None:
     properties = evidence_schema.get("properties", {})
@@ -1336,12 +1368,12 @@ def main() -> None:
         if platform in unsupported_package_platforms:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
-    validate_native_build_automation(source_acquisition, runtime_artifacts)
+    native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
+    validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
+    validate_native_build_automation(source_acquisition, runtime_artifacts, native_artifact_preflight)
     validate_source_build_outputs(source_acquisition, runtime_artifacts)
     validate_source_dependency_profile(source_acquisition)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
-    native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
-    validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     validate_package_smoke_manifests(source_acquisition, runtime_artifacts)
     validate_accept_language_header_smoke(runtime_artifacts)
     validate_native_proxy_region_validation()

@@ -692,6 +692,10 @@ class ChromiumNativePlanTests(unittest.TestCase):
             chromium_native.WINDOWS_MANUAL_VALIDATION_NOTE,
             entries["windows-x64"]["evidence"],
         )
+        self.assertNotIn(
+            chromium_native.WINDOWS_MANUAL_VALIDATION_NOTE,
+            entries["macos-arm64"]["evidence"],
+        )
         macos_snapshot = entries["macos-arm64"]["status_snapshot"]
         self.assertIs(macos_snapshot["host_supported"], True)
         self.assertIs(macos_snapshot["native_toolchain_ready"], False)

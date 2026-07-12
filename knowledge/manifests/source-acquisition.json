@@ -173,16 +173,20 @@
         "xcodebuild_status": "ok"
       },
       "last_windows_preflight": {
-        "build_ninja_status": "missing_until_windows_gn_generation_runs_on_windows_host",
+        "build_ninja_status": "present_in_darwin_windows_cross_compile_checkout",
+        "gclient_target_os_win": true,
         "gn_binary_status": "checkout_depot_tools_gn_bat_present",
         "host_os": "darwin",
-        "host_supported": false,
-        "machine_readable_status": "python3 scripts/chromium_native.py check --platform windows-x64 reports host_supported=false, native_toolchain_ready=false, output_binary_exists=false, portable_layout_exists=false",
-        "native_toolchain_ready": false,
-        "next_action": "Run python3 scripts/chromium_native.py gn-gen --platform windows-x64 --execute on a Windows host with the pinned checkout and toolchain, then build-chrome and package after build_ninja/output exist",
-        "output_binary_status": "missing_windows_chrome_exe",
-        "package_status": "blocked_missing_windows_native_artifact",
-        "required_host_os": "windows"
+        "host_support_mode": "darwin_windows_cross_compile",
+        "host_supported": true,
+        "machine_readable_status": "python3 scripts/chromium_native.py check --platform windows-x64 reports host_supported=true, native_toolchain_ready=true, build_ninja_exists=true, output_binary_exists=true, package_zip_exists=true, portable_layout_exists=true, verification_mode=manual_windows_os",
+        "manual_windows_os_validation_required": true,
+        "native_toolchain_ready": true,
+        "next_action": "Run manual Windows OS compile/runtime validation and headed detector collection against the packaged portable chrome.exe/DLL layout; local wine/qemu execution is not required for this preflight.",
+        "output_binary_status": "portable_layout_present",
+        "package_status": "packaged_detector_tested",
+        "required_host_os": "windows",
+        "verification_mode": "manual_windows_os"
       },
       "platforms": {
         "macos-arm64": {
@@ -199,11 +203,11 @@
           "out_dir": "out/BrowseForgeWindowsX64",
           "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
           "required_host_os": "windows",
-          "status": "preflight_ready_artifact_missing"
+          "status": "packaged_launch_smoked"
         }
       },
       "script": "scripts/chromium_native.py",
-      "status": "macos_packaged_launch_smoked_windows_artifact_missing",
+      "status": "macos_and_windows_packaged_launch_smoked_manual_windows_validation_required",
       "verification": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64",
         "python3 scripts/chromium_native.py check --platform macos-arm64",

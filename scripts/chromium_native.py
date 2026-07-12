@@ -473,14 +473,16 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
     if platform_id == "windows-x64":
         status["verification_mode"] = "manual_windows_os"
         status["manual_windows_os_validation_required"] = True
+    evidence = [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        native_status_evidence(platform_id, status),
+    ]
+    if platform_id == "windows-x64":
+        evidence.append(WINDOWS_MANUAL_VALIDATION_NOTE)
     entry: dict[str, object] = {
-        "evidence": [
-            "knowledge/manifests/platform-matrix.json",
-            "contracts/browseforge-integration.contract.json",
-            "knowledge/manifests/signing-policy.json",
-            native_status_evidence(platform_id, status),
-            WINDOWS_MANUAL_VALIDATION_NOTE,
-        ],
+        "evidence": evidence,
         "platform": platform_id,
         "ready": not missing,
         "status": "packaged_detector_tested" if not missing else "missing_native_release_artifact",

@@ -951,6 +951,41 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("gn_args", message)
         self.assertIn("drifted", message)
 
+
+    def test_validate_rejects_source_acquisition_last_windows_preflight_drift_from_native_preflight(self) -> None:
+        """source-acquisition last_windows_preflight must mirror the native Windows preflight snapshot."""
+        module = self._load_validate_module()
+        cases = [
+            (
+                "verification_mode",
+                "local_host_toolchain",
+                ["source-acquisition", "last_windows_preflight", "manual windows os validation mode"],
+            ),
+            (
+                "host_supported",
+                True,
+                ["source-acquisition", "last_windows_preflight", "host_supported", "native-artifact-preflight"],
+            ),
+        ]
+        for field, stale_value, expected_tokens in cases:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    source_acquisition_path = temp_root / "knowledge" / "manifests" / "source-acquisition.json"
+                    source_acquisition = json.loads(source_acquisition_path.read_text(encoding="utf-8"))
+                    source_acquisition["chromium_base"]["native_build_automation"]["last_windows_preflight"][
+                        field
+                    ] = stale_value
+                    self._write_json(source_acquisition_path, source_acquisition)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                for expected_token in expected_tokens:
+                    self.assertIn(expected_token, message)
+
     def test_validate_accepts_packaged_native_status_when_artifact_exists(self) -> None:
         """A native platform may advance past preflight once runtime-artifacts lists its archive."""
         module = self._load_validate_module()
@@ -2446,6 +2481,15 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "status": "preflight_ready_artifact_missing",
                 },
             },
+            "last_windows_preflight": {
+                "gclient_target_os_win": False,
+                "host_support_mode": "unsupported_host",
+                "host_supported": False,
+                "manual_windows_os_validation_required": True,
+                "native_toolchain_ready": False,
+                "package_status": "blocked",
+                "verification_mode": "manual_windows_os",
+            },
         }
 
     def _sha256_file(self, path: Path) -> str:
@@ -2777,6 +2821,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         if platform == "windows-x64":
             snapshot.update(
                 {
+                    "gclient_target_os_win": False,
+                    "host_support_mode": "unsupported_host",
                     "manual_windows_os_validation_required": True,
                     "portable_layout_exists": False,
                     "verification_mode": "manual_windows_os",

@@ -20,8 +20,7 @@
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True",
-        "Windows compile/runtime verification is delegated to manual validation on a Windows OS host; local wine/qemu execution is not required for this preflight."
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True"
       ],
       "missing_prerequisites": [],
       "next_commands": [
