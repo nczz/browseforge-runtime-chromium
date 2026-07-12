@@ -89,7 +89,16 @@ class ReleaseStatusTests(unittest.TestCase):
                         "network_mode": "proxy",
                         "container": False,
                         "required_evidence": "external proxy exit-IP/geolocation evidence",
-                    }
+                    },
+                    {
+                        "matrix_key": "windows-x64:browserleaks:headed:direct:host",
+                        "platform": "windows-x64",
+                        "detector_id": "browserleaks",
+                        "display_mode": "headed",
+                        "network_mode": "direct",
+                        "container": False,
+                        "required_evidence": "Windows native detector evidence",
+                    },
                 ],
             },
         )
@@ -126,7 +135,13 @@ class ReleaseStatusTests(unittest.TestCase):
                         "release_grade_allowed": False,
                         "status": "unsigned_alpha_dev_artifact",
                         "decision": "Unsigned alpha artifact is not release-grade.",
-                    }
+                    },
+                    {
+                        "platform": "windows-x64",
+                        "release_grade_allowed": False,
+                        "status": "missing_authenticode_policy",
+                        "decision": "Windows artifacts need an Authenticode signing path before release.",
+                    },
                 ],
             },
         )
@@ -174,9 +189,11 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("native-artifact:macos-arm64:0", blocker_ids)
         self.assertIn("proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL", blocker_ids)
         self.assertIn("detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host", blocker_ids)
+        self.assertIn("detector:coverage-gap:windows-x64:browserleaks:headed:direct:host", blocker_ids)
         self.assertIn("score-comparison:baseline_gaps:native_headed_font_corpus_parity_missing", blocker_ids)
         self.assertIn("fingerprint-surface:proxy/IP coherence", blocker_ids)
         self.assertIn("signing-policy:linux-x64", blocker_ids)
+        self.assertIn("signing-policy:windows-x64", blocker_ids)
         self.assertIn("browseforge-integration:0", blocker_ids)
         self.assertIn("source-acquisition:artifact-rebuild:0", blocker_ids)
         self.assertIn("source-acquisition:dev-baseline:gn-args", blocker_ids)
@@ -210,11 +227,158 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("external-detector-proxy", resource_ids)
         self.assertIn("native-artifact-macos-arm64", resource_ids)
         self.assertIn("live-proxy-detector-matrix", resource_ids)
+        self.assertIn("windows-native-detector-host", resource_ids)
+        self.assertIn("release-grade-code-signing", resource_ids)
         proxy_requirement = next(
             requirement for requirement in payload["resource_requirements"]
             if requirement["resource_id"] == "external-detector-proxy"
         )
         self.assertEqual(proxy_requirement["provide"], ["BROWSEFORGE_DETECTOR_PROXY_URL"])
+        native_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "native-artifact-macos-arm64"
+        )
+        self.assertEqual(native_requirement["provide"], ["full Xcode selected via xcode-select"])
+        self.assertEqual(
+            native_requirement["unblocks"],
+            [
+                "macos-arm64 packaged native BrowseForge Chromium artifact",
+                "macos-arm64 native detector evidence",
+            ],
+        )
+        windows_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "windows-native-detector-host"
+        )
+        self.assertEqual(windows_requirement["status"], "missing_detector_evidence")
+        self.assertEqual(
+            windows_requirement["provide"],
+            ["windows-x64:browserleaks:headed:direct:host"],
+        )
+        self.assertEqual(
+            windows_requirement["requirements"],
+            [
+                "Windows x64 host or runner that can launch the packaged chrome.exe",
+                "sanitized headed detector evidence for each required Windows matrix row",
+            ],
+        )
+        self.assertEqual(
+            windows_requirement["unblocks"],
+            [
+                "Windows native detector evidence",
+                "cross-platform drift detector matrix",
+            ],
+        )
+        signing_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "release-grade-code-signing"
+        )
+        self.assertEqual(signing_requirement["status"], "missing_signing_policy")
+        self.assertEqual(signing_requirement["provide"], ["linux-x64", "windows-x64"])
+        self.assertIn(
+            "Authenticode/code-signing path for Windows artifacts",
+            signing_requirement["requirements"],
+        )
+        self.assertIn(
+            "release-grade signed artifact publication",
+            signing_requirement["unblocks"],
+        )
+
+    def test_windows_detector_summary_gap_requirement_provides_matrix_keys(self) -> None:
+        requirements = release_status.release_resource_requirements(
+            native_preflight={"release_grade_ready": True, "platforms": []},
+            proxy_preflight={"ready": True, "missing": [], "errors": []},
+            detector_summary={
+                "blocking_findings": [],
+                "coverage_gaps": [
+                    {
+                        "matrix_key": "windows-x64:browserleaks:headed:direct:host",
+                        "platform": "windows-x64",
+                        "detector_id": "browserleaks",
+                        "display_mode": "headed",
+                        "network_mode": "direct",
+                    },
+                    {
+                        "matrix_key": "windows-x64:sannysoft:headed:direct:host",
+                        "platform": "windows-x64",
+                        "detector_id": "sannysoft",
+                        "display_mode": "headed",
+                        "network_mode": "direct",
+                    },
+                ],
+            },
+            signing_policy={"release_grade_ready": True, "policies": []},
+            integration_contract={"release_blockers": []},
+        )
+
+        self.assertEqual(
+            [
+                {
+                    "resource_id": "windows-native-detector-host",
+                    "status": "missing_detector_evidence",
+                    "severity": "high",
+                    "provide": [
+                        "windows-x64:browserleaks:headed:direct:host",
+                        "windows-x64:sannysoft:headed:direct:host",
+                    ],
+                    "requirements": [
+                        "Windows x64 host or runner that can launch the packaged chrome.exe",
+                        "sanitized headed detector evidence for each required Windows matrix row",
+                    ],
+                    "unblocks": [
+                        "Windows native detector evidence",
+                        "cross-platform drift detector matrix",
+                    ],
+                }
+            ],
+            requirements,
+        )
+
+    def test_windows_integration_contract_blocker_uses_native_detector_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.write_base_inputs(root)
+            self.write_json(
+                root,
+                "detector-summary.json",
+                {
+                    "blocking_findings": [],
+                    "coverage_gaps": [
+                        {
+                            "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
+                            "platform": "macos-arm64",
+                            "detector_id": "sannysoft",
+                            "display_mode": "headed",
+                            "network_mode": "proxy",
+                            "container": False,
+                            "required_evidence": "external proxy exit-IP/geolocation evidence",
+                        }
+                    ],
+                },
+            )
+            self.write_json(
+                root,
+                "contracts/browseforge-integration.contract.json",
+                {
+                    "release_blockers": [
+                        "Windows native headed detector evidence is missing from the release contract"
+                    ]
+                },
+            )
+            payload = release_status.release_status(root, "2026-07-10T00:00:00Z")
+
+        blocker_ids = {blocker["blocker_id"] for blocker in payload["blockers"]}
+        self.assertNotIn("detector:coverage-gap:windows-x64:browserleaks:headed:direct:host", blocker_ids)
+        self.assertIn("browseforge-integration:0", blocker_ids)
+        windows_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "windows-native-detector-host"
+        )
+        self.assertEqual(windows_requirement["status"], "missing_detector_evidence")
+        self.assertEqual(
+            windows_requirement["provide"],
+            ["windows-x64 native headed detector evidence"],
+        )
 
     def test_release_status_passes_only_without_blockers(self) -> None:
         with tempfile.TemporaryDirectory() as td:

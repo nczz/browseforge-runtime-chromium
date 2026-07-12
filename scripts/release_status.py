@@ -157,6 +157,8 @@ def release_resource_requirements(
     native_preflight: dict[str, Any],
     proxy_preflight: dict[str, Any],
     detector_summary: dict[str, Any],
+    signing_policy: dict[str, Any],
+    integration_contract: dict[str, Any],
 ) -> list[dict[str, Any]]:
     requirements: list[dict[str, Any]] = []
     if proxy_preflight.get("ready") is not True:
@@ -212,6 +214,56 @@ def release_resource_requirements(
                 "provide": sorted({str(gap.get("matrix_key")) for gap in proxy_gaps}),
                 "requirements": ["headed detector runs through the configured external proxy"],
                 "unblocks": ["release-grade live detector evidence gate"],
+            }
+        )
+
+    windows_gaps = [
+        gap
+        for gap in detector_summary.get("coverage_gaps", [])
+        if str(gap.get("platform")) == "windows-x64"
+    ]
+    windows_native_blocked = any(
+        "windows" in str(detail).lower() and "detector evidence" in str(detail).lower()
+        for detail in integration_contract.get("release_blockers", [])
+    )
+    if windows_gaps or windows_native_blocked:
+        requirements.append(
+            {
+                "resource_id": "windows-native-detector-host",
+                "status": "missing_detector_evidence",
+                "severity": "high",
+                "provide": sorted({str(gap.get("matrix_key")) for gap in windows_gaps})
+                or ["windows-x64 native headed detector evidence"],
+                "requirements": [
+                    "Windows x64 host or runner that can launch the packaged chrome.exe",
+                    "sanitized headed detector evidence for each required Windows matrix row",
+                ],
+                "unblocks": [
+                    "Windows native detector evidence",
+                    "cross-platform drift detector matrix",
+                ],
+            }
+        )
+
+    signing_platforms = [
+        str(policy.get("platform"))
+        for policy in signing_policy.get("policies", [])
+        if policy.get("release_grade_allowed") is not True
+    ]
+    if signing_platforms:
+        requirements.append(
+            {
+                "resource_id": "release-grade-code-signing",
+                "status": "missing_signing_policy",
+                "severity": "high",
+                "provide": sorted(signing_platforms),
+                "requirements": [
+                    "release-grade signing policy for every packaged platform",
+                    "Developer ID/notarization path for macOS artifacts",
+                    "Authenticode/code-signing path for Windows artifacts",
+                    "Linux release asset signing or explicit unsigned release policy",
+                ],
+                "unblocks": ["release-grade signed artifact publication"],
             }
         )
     return requirements
@@ -377,7 +429,7 @@ def release_status(root: Path = ROOT, generated_at: str | None = None) -> dict[s
         "input_sha256": {path: sha256_file(root, path) for path in INPUT_PATHS},
         "inputs": INPUT_PATHS,
         "release_grade_ready": len(blockers) == 0,
-        "resource_requirements": release_resource_requirements(native_preflight, proxy_preflight, detector_summary),
+        "resource_requirements": release_resource_requirements(native_preflight, proxy_preflight, detector_summary, signing_policy, integration_contract),
         "runtime_id": RUNTIME_ID,
         "schema_version": SCHEMA_VERSION,
     }

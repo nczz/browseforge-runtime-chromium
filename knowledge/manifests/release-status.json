@@ -184,7 +184,7 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T07:50:00Z",
+  "generated_at": "2026-07-12T08:05:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "db09083cc657c08ffb0b5ec29cf739e7750aed0c6e12bc419f96e15f1dcafd5c",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
@@ -248,6 +248,41 @@
       "status": "missing_detector_evidence",
       "unblocks": [
         "release-grade live detector evidence gate"
+      ]
+    },
+    {
+      "provide": [
+        "windows-x64 native headed detector evidence"
+      ],
+      "requirements": [
+        "Windows x64 host or runner that can launch the packaged chrome.exe",
+        "sanitized headed detector evidence for each required Windows matrix row"
+      ],
+      "resource_id": "windows-native-detector-host",
+      "severity": "high",
+      "status": "missing_detector_evidence",
+      "unblocks": [
+        "Windows native detector evidence",
+        "cross-platform drift detector matrix"
+      ]
+    },
+    {
+      "provide": [
+        "linux-x64",
+        "macos-arm64",
+        "windows-x64"
+      ],
+      "requirements": [
+        "release-grade signing policy for every packaged platform",
+        "Developer ID/notarization path for macOS artifacts",
+        "Authenticode/code-signing path for Windows artifacts",
+        "Linux release asset signing or explicit unsigned release policy"
+      ],
+      "resource_id": "release-grade-code-signing",
+      "severity": "high",
+      "status": "missing_signing_policy",
+      "unblocks": [
+        "release-grade signed artifact publication"
       ]
     }
   ],
