@@ -195,6 +195,11 @@ def release_resource_requirements(
                 "status_snapshot": entry.get("status_snapshot", {}),
                 "unblocks": [
                     f"{platform} packaged native BrowseForge Chromium artifact",
+                    f"{platform} checksum/SBOM/provenance metadata",
+                ]
+                if platform == "macos-x64"
+                else [
+                    f"{platform} packaged native BrowseForge Chromium artifact",
                     f"{platform} native detector evidence",
                 ],
             }

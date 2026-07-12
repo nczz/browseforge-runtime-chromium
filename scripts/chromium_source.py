@@ -240,7 +240,7 @@ def build_plan(workdir: Path = DEFAULT_WORKDIR, git_cache: Path = DEFAULT_GIT_CA
                     "gn",
                     "gen",
                     "out/BrowseForgeDev",
-                    "--args=is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+                    '--args=is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
                 ],
                 creates=str(src / "out" / "BrowseForgeDev" / "build.ninja"),
             ),

@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Runtime version tag, for example v0.1.0-alpha.0'
+        required: true
+        default: 'v0.1.0-alpha.0'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      RUNTIME_VERSION: ${{ github.event.inputs.version || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Validate repository contracts
+        run: python3 scripts/validate.py
+
+      - name: Check release artifacts
+        run: |
+          set -euo pipefail
+          expected=(
+            "browseforge-runtime-chromium-${RUNTIME_VERSION}-linux-x64.zip"
+            "browseforge-runtime-chromium-${RUNTIME_VERSION}-macos-arm64.zip"
+            "browseforge-runtime-chromium-${RUNTIME_VERSION}-macos-x64.zip"
+            "browseforge-runtime-chromium-${RUNTIME_VERSION}-windows-x64.zip"
+            "checksums.txt"
+            "runtime.manifest.json"
+            "detector-summary.json"
+            "detector-score-comparison.json"
+            "knowledge-export.jsonl"
+            "graph.db.zst"
+          )
+          missing=0
+          for artifact in "${expected[@]}"; do
+            if [ ! -s "dist/${artifact}" ]; then
+              echo "missing release artifact: dist/${artifact}" >&2
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+          (cd dist && sha256sum -c checksums.txt)
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RUNTIME_VERSION }}
+          fail_on_unmatched_files: true
+          prerelease: ${{ contains(env.RUNTIME_VERSION, 'alpha') || contains(env.RUNTIME_VERSION, 'beta') || contains(env.RUNTIME_VERSION, 'rc') }}
+          files: |
+            dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-linux-x64.zip
+            dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-macos-arm64.zip
+            dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-macos-x64.zip
+            dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-windows-x64.zip
+            dist/checksums.txt
+            dist/runtime.manifest.json
+            dist/detector-summary.json
+            dist/detector-score-comparison.json
+            dist/knowledge-export.jsonl
+            dist/graph.db.zst

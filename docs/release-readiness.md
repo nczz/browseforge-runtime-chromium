@@ -13,7 +13,8 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 ## Artifact gates
 
 - Every platform artifact has download URL, SHA-256, size, source ref, patchset ID, wrapper version, SBOM path, and provenance path.
-- `build/package_runtime.py` must reject any platform not explicitly listed in `runtime-artifacts.json.supported_package_platforms`; add macOS/Windows only after committed runtime asset contracts cover bundle/layout, signing, SBOM/provenance, and detector evidence.
+- `build/package_runtime.py` must reject any platform not explicitly listed in `runtime-artifacts.json.supported_package_platforms`; linux-x64, macos-arm64, macos-x64, and windows-x64 are supported alpha package platforms by contract.
+- `linux-x64`, `macos-arm64`, and `windows-x64` currently have committed SBOM/provenance/checksum metadata. `macos-x64` must remain blocked until a real package, checksum, SBOM, and provenance exist; launch and detector evidence are explicitly not required for this packaged-only alpha release and must remain disclosed as absent.
 - Browser binary path matches `contracts/runtime.manifest.json`.
 - `.version` marker behavior is specified.
 - Docker install/seed path is tested.
@@ -38,6 +39,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - `scripts/validate.py` enforces that `detectors/evidence-schema.json` admits every committed sanitized evidence harness, matrix, and storage shape, including headed Xvfb and routing-only local proxy observations.
 - `scripts/validate.py` also rejects a release-grade fingerprint surface manifest while any `knowledge/manifests/fingerprint-surface-status.json` surface remains a release blocker, and it rejects a passed `live-detector-evidence` gate while those blockers remain.
 - Detector regressions block release unless explicitly accepted.
+- `docs/anti-detection-matrix.md` is the operator-facing matrix. Any `not_tested`, `blocked`, or `warn` release risk there must either be resolved or explicitly accepted before release-grade publication.
 
 ## Knowledge gates
 
@@ -51,7 +53,10 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 Each release should publish:
 
 ```text
-runtime artifact(s)
+browseforge-runtime-chromium-<version>-linux-x64.zip
+browseforge-runtime-chromium-<version>-macos-arm64.zip
+browseforge-runtime-chromium-<version>-macos-x64.zip
+browseforge-runtime-chromium-<version>-windows-x64.zip
 checksums.txt
 SBOM
 provenance attestation
@@ -62,3 +67,16 @@ detector-score-comparison.json
 knowledge-export.jsonl
 graph.db.zst or equivalent graph export
 ```
+
+The release workflow fails closed when any expected zip or metadata payload is missing, empty, or absent from `dist/checksums.txt`. Do not replace a missing package with a zero-byte file, placeholder zip, mock binary, or another platform's artifact.
+
+## Unsigned alpha release notes
+
+Release notes for `v0.1.0-alpha.0` must state:
+
+- All packages are unsigned alpha artifacts, not production-ready signed releases.
+- Users must verify SHA-256 checksums before running any package.
+- macOS users may need to allow the app manually or run `xattr -dr com.apple.quarantine /path/to/Chromium.app`.
+- Windows users may see SmartScreen/Defender warnings and must self-authorize until Authenticode signing is configured.
+- Linux users must verify the SHA-256 entry in `checksums.txt` before execution.
+- macOS x64 remains untested for launch/detectors; release notes may publish it only as packaged-only after a real package, checksum, SBOM, and provenance exist.

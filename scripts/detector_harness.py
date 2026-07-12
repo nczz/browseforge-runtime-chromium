@@ -1831,7 +1831,7 @@ def classify_creepjs_client_hints(value: dict) -> tuple[str, str, str]:
 
 
 
-def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int):
+def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_seconds: int, navigate_timeout: int = 30):
     target, _ = cdp.call("Target.createTarget", {"url": "about:blank"})
     target_id = target["targetId"]
     attached, _ = cdp.call("Target.attachToTarget", {"targetId": target_id, "flatten": True})
@@ -1839,7 +1839,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     cdp.call("Page.enable", session_id=session_id)
     cdp.call("Runtime.enable", session_id=session_id)
     started = time.time()
-    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=30)
+    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=navigate_timeout)
     cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
     time.sleep(wait_seconds)
     expr = """
@@ -2430,7 +2430,7 @@ def collect(args):
         cdp = CDPClient(version["webSocketDebuggerUrl"])
         payload = {
             "browser": version,
-            "records": [collect_page(cdp, args.detector, name, url, wait_seconds=args.wait_seconds)],
+            "records": [collect_page(cdp, args.detector, name, url, wait_seconds=args.wait_seconds, navigate_timeout=args.navigate_timeout)],
         }
     except Exception as err:
         print(f"collect failed: {err}", file=sys.stderr)
@@ -2456,7 +2456,7 @@ def main(argv=None):
     p = sub.add_parser("pixelscan-materialize-variants"); p.add_argument("--base-config", required=True); p.add_argument("--output-dir", required=True); p.add_argument("--manifest-output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_materialize_variants)
     p = sub.add_parser("pixelscan-variant-summary"); p.add_argument("--input-dir", required=True); p.add_argument("--headed-input-dir"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=pixelscan_variant_summary)
     p = sub.add_parser("proxy-preflight"); p.add_argument("--proxy-url"); p.add_argument("--proxy-region-redacted", dest="proxy_region"); p.add_argument("--proxy-region", dest="proxy_region"); p.add_argument("--output"); p.add_argument("--generated-at"); p.set_defaults(func=proxy_preflight)
-    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--output"); p.set_defaults(func=collect)
+    p = sub.add_parser("collect"); p.add_argument("--detector", default="sannysoft"); p.add_argument("--page"); p.add_argument("--url"); p.add_argument("--cdp-url", default="http://127.0.0.1:9222"); p.add_argument("--wait-seconds", type=int, default=15); p.add_argument("--navigate-timeout", type=int, default=30); p.add_argument("--output"); p.set_defaults(func=collect)
     args = parser.parse_args(argv)
     return args.func(args)
 

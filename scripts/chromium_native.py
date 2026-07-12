@@ -26,7 +26,7 @@ def default_workdir() -> Path:
 
 DEFAULT_WORKDIR = default_workdir()
 RUNTIME_VERSION = "v0.1.0-alpha.0"
-SUPPORTED_NATIVE_PLATFORMS = {"macos-arm64", "windows-x64"}
+SUPPORTED_NATIVE_PLATFORMS = {"macos-arm64", "macos-x64", "windows-x64"}
 WINDOWS_TOOLCHAIN_BASE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL"
 WINDOWS_TOOLCHAIN_ENABLE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN"
 WINDOWS_TOOLCHAIN_HASH_ENV = "GYP_MSVS_HASH_e66617bc68"
@@ -73,14 +73,21 @@ def platform_contract(platform_id: str) -> tuple[str, str, str, str]:
         return (
             "darwin",
             "out/BrowseForgeMacArm64",
-            'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+            'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
+            "Chromium.app/Contents/MacOS/Chromium",
+        )
+    if platform_id == "macos-x64":
+        return (
+            "darwin",
+            "out/BrowseForgeMacX64",
+            'target_os="mac" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
             "Chromium.app/Contents/MacOS/Chromium",
         )
     if platform_id == "windows-x64":
         return (
             "windows",
             "out/BrowseForgeWindowsX64",
-            'target_os="win" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
+            'target_os="win" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
             "chrome.exe",
         )
     supported = ", ".join(sorted(SUPPORTED_NATIVE_PLATFORMS))
@@ -153,7 +160,8 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
     selected_out = out_dir or default_out
     src = workdir / "src"
     output_binary = src / selected_out / output_rel
-    wrapper_binary = ROOT / "bin" / ("browseforge-runtime-chromium.exe" if platform_id == "windows-x64" else "browseforge-runtime-chromium")
+    wrapper_name = "browseforge-runtime-chromium.exe" if platform_id == "windows-x64" else "browseforge-runtime-chromium-darwin-amd64" if platform_id == "macos-x64" else "browseforge-runtime-chromium"
+    wrapper_binary = ROOT / "bin" / wrapper_name
     artifact_id = f"browseforge-runtime-chromium-{RUNTIME_VERSION}-{platform_id}"
     package_command = [
         sys.executable,
@@ -217,7 +225,7 @@ def check(plan: NativeBuildPlan) -> dict[str, object]:
     src = Path(plan.chromium_src_dir)
     output = Path(plan.output_binary)
     app_bundle = None
-    if plan.platform_id == "macos-arm64":
+    if plan.platform_id.startswith("macos-"):
         app_bundle = str(output.parents[2])
     gn_path = Path(plan.depot_tools_dir) / ("gn.bat" if plan.platform_id == "windows-x64" else "gn")
     depot_tools_exists = Path(plan.depot_tools_dir).is_dir()
@@ -449,6 +457,8 @@ def native_preflight_next_commands(platform_id: str, status: dict[str, object]) 
     ]
     if platform_id == "windows-x64":
         commands.append("GOOS=windows GOARCH=amd64 go build -o bin/browseforge-runtime-chromium.exe ./cmd/browseforge-runtime-chromium")
+    elif platform_id == "macos-x64":
+        commands.append("GOOS=darwin GOARCH=amd64 go build -o bin/browseforge-runtime-chromium-darwin-amd64 ./cmd/browseforge-runtime-chromium")
     else:
         commands.append("go build -o bin/browseforge-runtime-chromium ./cmd/browseforge-runtime-chromium")
     commands.append(f"python3 scripts/chromium_native.py package --platform {platform_id} --workdir {workdir} --execute")
@@ -468,7 +478,7 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
         missing.append("BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101")
     if platform_id == "windows-x64" and not status.get("portable_layout_exists"):
         missing.append("BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101")
-    if not status["package_zip_exists"]:
+    if not status["package_zip_exists"] and platform_id != "macos-x64":
         missing.append(f"native {platform_display_name(platform_id)} detector evidence for the packaged artifact")
     if platform_id == "windows-x64":
         status["verification_mode"] = "manual_windows_os"
@@ -485,7 +495,7 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
         "evidence": evidence,
         "platform": platform_id,
         "ready": not missing,
-        "status": "packaged_detector_tested" if not missing else "missing_native_release_artifact",
+        "status": "packaged_only_untested" if platform_id == "macos-x64" and not missing else "packaged_detector_tested" if not missing else "missing_native_release_artifact",
         "status_snapshot": native_status_snapshot(platform_id, status),
         "missing_prerequisites": missing,
         "next_commands": native_preflight_next_commands(platform_id, status),

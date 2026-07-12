@@ -12,6 +12,7 @@ import urllib.parse
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_FILES = [
+    ".github/workflows/release.yml",
     "README.md",
     "LICENSE",
     "SECURITY.md",
@@ -94,6 +95,7 @@ REQUIRED_FILES = [
     "docs/research-map.md",
     "docs/fingerprint-surfaces.md",
     "docs/release-readiness.md",
+    "docs/anti-detection-matrix.md",
     "docs/kb-kg-completeness-assessment.md",
     "tests/test_detector_harness.py",
     "tests/test_package_runtime.py",
@@ -385,6 +387,13 @@ def validate_native_build_automation(source_acquisition: dict, runtime_artifacts
             "gn_args": 'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
             "out_dir": "out/BrowseForgeMacArm64",
             "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+            "required_host_os": "darwin",
+        },
+        "macos-x64": {
+            "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+            "gn_args": 'target_os="mac" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
+            "out_dir": "out/BrowseForgeMacX64",
+            "output_binary": "out/BrowseForgeMacX64/Chromium.app/Contents/MacOS/Chromium",
             "required_host_os": "darwin",
         },
         "windows-x64": {
@@ -1075,6 +1084,16 @@ STALE_BROWSEFORGE_INTEGRATION_BLOCKERS = {
     "no detector baseline",
     "no docker smoke evidence",
     "no playwright bind evidence",
+    "external proxy exit-ip/geolocation detector evidence is missing",
+    "windows native detector evidence is missing",
+    "native headed proxy and windows detector matrix remains incomplete",
+    "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
+}
+
+BROWSEFORGE_INTEGRATION_READY_GATES = {
+    "browseforge-adapter-merged",
+    "runtime-artifact-produced",
+    "live-detector-evidence",
 }
 
 
@@ -1113,16 +1132,25 @@ def validate_browseforge_integration_contract(contract: dict, gate_status: dict[
     if "profile.proxy.region -> webrtc.proxy_region" not in native_proxy or "webrtc.proxy_region" not in native_webrtc:
         raise SystemExit("BrowseForge integration contract must map profile.proxy.region to native webrtc.proxy_region")
     blockers = contract.get("release_blockers", [])
-    if not blockers or not all(isinstance(blocker, str) and blocker for blocker in blockers):
-        raise SystemExit("BrowseForge integration contract release_blockers must be non-empty strings")
-    if gate_status.get("browseforge-adapter-merged") == "passed":
-        stale = sorted(
-            blocker
-            for blocker in blockers
-            if blocker.strip().lower() in STALE_BROWSEFORGE_INTEGRATION_BLOCKERS
+    ready_gates = {gate for gate in BROWSEFORGE_INTEGRATION_READY_GATES if gate_status.get(gate) == "passed"}
+    integration_ready = ready_gates == BROWSEFORGE_INTEGRATION_READY_GATES
+    if blockers:
+        if not all(isinstance(blocker, str) and blocker for blocker in blockers):
+            raise SystemExit("BrowseForge integration contract release_blockers must be non-empty strings")
+        if integration_ready:
+            stale = sorted(
+                blocker
+                for blocker in blockers
+                if blocker.strip().lower() in STALE_BROWSEFORGE_INTEGRATION_BLOCKERS
+            )
+            if stale:
+                raise SystemExit(f"stale BrowseForge integration release blockers: {stale}")
+    elif not integration_ready:
+        missing_ready_gates = sorted(BROWSEFORGE_INTEGRATION_READY_GATES - ready_gates)
+        raise SystemExit(
+            "BrowseForge integration contract release_blockers can be empty only after ready gates pass: "
+            f"{missing_ready_gates}"
         )
-        if stale:
-            raise SystemExit(f"stale BrowseForge integration release blockers: {stale}")
 
 
 
@@ -1367,6 +1395,13 @@ def main() -> None:
     for platform in artifact_platforms:
         if platform in unsupported_package_platforms:
             raise SystemExit(f"runtime-artifacts packages unsupported platform without runtime asset contract: {platform}")
+    runtime_manifest_binaries = manifest.get("binary", {})
+    for platform in sorted(artifact_platforms):
+        binary_contract = runtime_manifest_binaries.get(platform)
+        if not isinstance(binary_contract, dict):
+            raise SystemExit(f"runtime manifest missing binary contract for packaged platform: {platform}")
+        if binary_contract.get("packaged") is not True:
+            raise SystemExit(f"runtime manifest binary.{platform}.packaged must be true while runtime-artifacts lists a packaged artifact")
     validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)

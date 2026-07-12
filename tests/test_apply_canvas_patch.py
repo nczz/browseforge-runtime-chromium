@@ -111,12 +111,20 @@ class ImageDataBuffer {
 
 
 class ApplyCanvasPatchTests(unittest.TestCase):
+    def assert_alpha_zero_skip_before_noise_writes(self, patched: str) -> None:
+        alpha_skip = "if (UNSAFE_TODO(pixel[3]) == 0) {\n        continue;\n      }"
+        noise_write = "UNSAFE_TODO(pixel[channel]) ="
+        self.assertIn(alpha_skip, patched)
+        self.assertIn(noise_write, patched)
+        self.assertLess(patched.index(alpha_skip), patched.index(noise_write))
+
     def test_patches_get_image_data_readback(self) -> None:
         patched = apply_canvas_patch.patch_base_context(BASE_CONTEXT_FIXTURE)
         self.assertIn('#include "base/command_line.h"', patched)
         self.assertIn('"fingerprint-canvas-noise"', patched)
         self.assertIn('BrowseForgeApplyCanvasNoise(&image_data_pixmap)', patched)
         self.assertIn("UNSAFE_TODO(static_cast<uint8_t*>(pixmap->writable_addr())", patched)
+        self.assert_alpha_zero_skip_before_noise_writes(patched)
 
     def test_patches_canvas_encoding_readback(self) -> None:
         patched = apply_canvas_patch.patch_image_data_buffer_cc(IMAGE_DATA_BUFFER_FIXTURE)
@@ -126,6 +134,7 @@ class ApplyCanvasPatchTests(unittest.TestCase):
         self.assertIn('EncodeImage(mime_type, quality, &result)', patched)
         self.assertIn("UNSAFE_TODO(static_cast<uint8_t*>(pixmap->writable_addr())", patched)
         self.assertIn("UNSAFE_TODO(std::memcpy(dest_row, source_row,", patched)
+        self.assert_alpha_zero_skip_before_noise_writes(patched)
 
     def test_patch_is_idempotent(self) -> None:
         base_once = apply_canvas_patch.patch_base_context(BASE_CONTEXT_FIXTURE)

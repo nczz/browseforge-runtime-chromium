@@ -396,6 +396,62 @@ class DetectorHarnessTests(unittest.TestCase):
     def setUpClass(cls):
         cls.harness_module = load_harness_module()
 
+
+    def test_collect_forwards_navigate_timeout_to_collect_page(self):
+        module = self.harness_module
+        captured = {}
+        original_http_json = module.http_json
+        original_cdp_client = module.CDPClient
+        original_collect_page = module.collect_page
+        self.addCleanup(setattr, module, "http_json", original_http_json)
+        self.addCleanup(setattr, module, "CDPClient", original_cdp_client)
+        self.addCleanup(setattr, module, "collect_page", original_collect_page)
+
+        class FakeCDP:
+            def __init__(self, websocket_url):
+                self.websocket_url = websocket_url
+
+        def fake_http_json(url):
+            captured["version_url"] = url
+            return {"webSocketDebuggerUrl": "ws://unit-test"}
+
+        def fake_collect_page(cdp, detector_id, name, url, *, wait_seconds, navigate_timeout):
+            captured.update(
+                {
+                    "cdp_websocket_url": cdp.websocket_url,
+                    "detector_id": detector_id,
+                    "url": url,
+                    "wait_seconds": wait_seconds,
+                    "navigate_timeout": navigate_timeout,
+                }
+            )
+            return {"status": "passed", "failure_mode": "none"}
+
+        module.http_json = fake_http_json
+        module.CDPClient = FakeCDP
+        module.collect_page = fake_collect_page
+
+        with tempfile.TemporaryDirectory() as td:
+            class Args:
+                pass
+
+            args = Args()
+            args.detector = "pixelscan"
+            args.page = None
+            args.url = "https://example.test/fingerprint"
+            args.cdp_url = "http://cdp.example.test"
+            args.wait_seconds = 7
+            args.navigate_timeout = 123
+            args.output = str(Path(td) / "collect.json")
+            self.assertEqual(module.collect(args), 0)
+
+        self.assertEqual(captured["version_url"], "http://cdp.example.test/json/version")
+        self.assertEqual(captured["cdp_websocket_url"], "ws://unit-test")
+        self.assertEqual(captured["detector_id"], "pixelscan")
+        self.assertEqual(captured["url"], "https://example.test/fingerprint")
+        self.assertEqual(captured["wait_seconds"], 7)
+        self.assertEqual(captured["navigate_timeout"], 123)
+
     def test_cdp_events_until_tolerates_idle_socket_timeouts(self):
         class FakeSocket:
             def settimeout(self, timeout):
@@ -1646,7 +1702,7 @@ class DetectorHarnessTests(unittest.TestCase):
             self.assertEqual(url, "http://127.0.0.1:9222/json/version")
             return {"webSocketDebuggerUrl": "ws://127.0.0.1/devtools/browser/test"}
 
-        def fake_collect_page(cdp, detector_id, name, url, *, wait_seconds):
+        def fake_collect_page(cdp, detector_id, name, url, *, wait_seconds, navigate_timeout):
             calls.append(
                 {
                     "websocket_url": cdp.websocket_url,
@@ -1654,6 +1710,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     "name": name,
                     "url": url,
                     "wait_seconds": wait_seconds,
+                    "navigate_timeout": navigate_timeout,
                 }
             )
             return {
@@ -1681,6 +1738,8 @@ class DetectorHarnessTests(unittest.TestCase):
                         "browserleaks",
                         "--wait-seconds",
                         "0",
+                        "--navigate-timeout",
+                        "7",
                         "--output",
                         str(output),
                         *extra_args,
@@ -1702,6 +1761,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     "name": "BrowserLeaks",
                     "url": override_url,
                     "wait_seconds": 0,
+                    "navigate_timeout": 7,
                 },
                 {
                     "websocket_url": "ws://127.0.0.1/devtools/browser/test",
@@ -1709,6 +1769,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     "name": "BrowserLeaks",
                     "url": module.SUPPORTED_COLLECTORS["browserleaks"][1],
                     "wait_seconds": 0,
+                    "navigate_timeout": 7,
                 },
             ],
         )

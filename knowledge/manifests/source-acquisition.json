@@ -2,7 +2,7 @@
   "chromium_base": {
     "artifact_rebuild_reasons": [],
     "artifact_rebuild_required": false,
-    "artifact_rebuild_status": "repackaged_after_seed_identity_manifest_surface",
+    "artifact_rebuild_status": "repackaged_after_runtime_manifest_packaged_contract",
     "audio_patch_status": "applied_to_external_checkout",
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "base_ref": "refs/tags/150.0.7871.101",
@@ -72,16 +72,16 @@
     },
     "linux_x64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
-      "archive_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
-      "archive_size_bytes": 567877597,
+      "archive_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
+      "archive_size_bytes": 567880267,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
       "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/artifact-manifest.json",
-      "artifact_manifest_sha256": "e6dbf2acbc78145cb5acbb428991a6225c7d23c9b54193ada3f25df77e1128bf",
+      "artifact_manifest_sha256": "acc3dd335de1e8d893e6bbd35eebe541b9aa804e9ea30b6440103f97fae2ac1b",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxDocker/chrome",
       "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
       "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
       "provenance": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-      "provenance_sha256": "f959c341a4134e63c972357342afb6731f9afa561cbc9d06e81a2f1276929aa4",
+      "provenance_sha256": "302edda206069f31357a5fd522aef036b759e25dce9791f525e343f1ca75d8ef",
       "runtime_assets_included": [
         "icudtl.dat",
         "resources.pak",
@@ -98,19 +98,19 @@
         "headless_command_resources.pak",
         "locales/*.pak"
       ],
-      "runtime_manifest_sha256": "2e54d15736ab33972841dc283bcdf7428d2c2194070e147a4c9f264d5125d4c5",
+      "runtime_manifest_sha256": "530136de2cb1e1321962d07b100fa4172fd4a61e5cdcd6d6b1609b7892b8ecc7",
       "sbom": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "sbom_sha256": "fd8d2b2b18912dc628d35a55a537a4fe3fa00b9bfa8230d272fe935e8d0289b3",
+      "sbom_sha256": "8fc5c0e3321bd0f0ef768ca160db472cef51b3ed94655b4b97c4d9a997ee74c3",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "stage_dir": "dist/stage/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "status": "repackaged_after_seed_identity_manifest_surface",
+      "status": "repackaged_after_runtime_manifest_packaged_contract",
       "verification": [
         "python3 scripts/package_linux_runtime.py --execute --release-channel alpha",
         "python3 scripts/validate.py",
         "python3 -m unittest tests.test_validate",
         "python3 -m unittest discover -s tests"
       ],
-      "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6"
+      "wrapper_binary_sha256": "4311dc8bd80bdcb35d8d8df5083afc4b3ce1aa4e6cdff58ac8e1fbeb016a5b42"
     },
     "local_paths_checked": [
       {
@@ -138,22 +138,29 @@
     "locale_patch_status": "applied_to_external_checkout",
     "macos_arm64_artifact": {
       "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip",
-      "archive_sha256": "8fb5c595b7533b900d36832483ce58cdda6f9c3af378be0b5794a208b6028957",
-      "archive_size_bytes": 403233897,
+      "archive_sha256": "828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683",
+      "archive_size_bytes": 405358724,
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
       "browser_binary": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
       "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
       "smoke_evidence": "knowledge/manifests/macos-package-smoke.json",
-      "status": "packaged_launch_smoked",
+      "status": "repackaged_after_runtime_manifest_packaged_contract",
       "verification": [
-        "python3 scripts/chromium_native.py check --platform macos-arm64",
-        "/usr/bin/unzip -q dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip -d <tempdir>",
-        "./browseforge-runtime-chromium metadata",
         "./browseforge-runtime-chromium doctor --browser-binary Chromium.app/Contents/MacOS/Chromium ...",
         "./browseforge-runtime-chromium launch ...; GET /json/version",
-        "python3 scripts/detector_harness.py collect --detector browserleaks --page client-hints --url about:blank"
+        "./browseforge-runtime-chromium metadata",
+        "/usr/bin/unzip -q dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip -d <tempdir>",
+        "python3 scripts/chromium_native.py check --platform macos-arm64",
+        "python3 scripts/chromium_native.py package --platform macos-arm64 --execute",
+        "python3 scripts/detector_harness.py collect --detector browserleaks --page client-hints --network-mode proxy --proxy-region us-los-angeles",
+        "python3 scripts/detector_harness.py collect --detector browserleaks --page client-hints --url about:blank",
+        "python3 scripts/detector_harness.py collect --detector browserscan --network-mode proxy --proxy-region us-los-angeles",
+        "python3 scripts/detector_harness.py collect --detector creepjs --network-mode proxy --proxy-region us-los-angeles",
+        "python3 scripts/detector_harness.py collect --detector iphey --network-mode proxy --proxy-region us-los-angeles",
+        "python3 scripts/detector_harness.py collect --detector pixelscan --network-mode proxy --proxy-region us-los-angeles",
+        "python3 scripts/detector_harness.py collect --detector sannysoft --network-mode proxy --proxy-region us-los-angeles"
       ],
-      "wrapper_binary_sha256": "96f5921334f282940cdb67199f517635423ca4d37fac99c4fdfc84f345de62c2"
+      "wrapper_binary_sha256": "f1f6851461e5237cbca58202570243f33abe9b51fda5ef52b77ee4c94a735a98"
     },
     "macos_host_preflight_status": "native_toolchain_ready_build_output_and_package_present",
     "native_build_automation": {
@@ -204,13 +211,23 @@
           "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
           "required_host_os": "windows",
           "status": "packaged_launch_smoked"
+        },
+        "macos-x64": {
+          "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+          "gn_args": "target_os=\"mac\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding=\"Chrome\"",
+          "out_dir": "out/BrowseForgeMacX64",
+          "output_binary": "out/BrowseForgeMacX64/Chromium.app/Contents/MacOS/Chromium",
+          "required_host_os": "darwin",
+          "status": "preflight_ready_artifact_missing"
         }
       },
       "script": "scripts/chromium_native.py",
-      "status": "macos_and_windows_packaged_launch_smoked_manual_windows_validation_required",
+      "status": "macos_arm64_and_windows_packaged_macos_x64_contract_defined",
       "verification": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64",
         "python3 scripts/chromium_native.py check --platform macos-arm64",
+        "python3 scripts/chromium_native.py check --platform macos-x64",
+        "python3 scripts/chromium_native.py plan --platform macos-x64",
         "python3 scripts/chromium_native.py plan --platform windows-x64",
         "python3 scripts/chromium_native.py check --platform windows-x64",
         "python3 scripts/chromium_source.py acquire --execute --step sync-deps  # Darwin expands to --deps=mac",
@@ -223,7 +240,7 @@
     "platform_patch_status": "applied_to_external_checkout",
     "plugins_patch_status": "applied_to_external_checkout",
     "process_priority_patch_status": "applied_to_external_checkout",
-    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the packaged macOS arm64 archive launches on this host with CDP reachable. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
+    "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the refreshed packaged macOS arm64 archive launches on this host with headed external-proxy detector evidence for BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
     "screen_patch_status": "applied_to_external_checkout",
     "source_checkout_status": "checked_out_pinned_ref",
     "source_workdir_isolation_status": "helpers_support_profile_specific_workdirs_with_shared_fallback",
@@ -239,7 +256,10 @@
     "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
     "webdriver_patch_status": "applied_to_external_checkout",
     "webgl_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout"
+    "webrtc_patch_status": "applied_to_external_checkout",
+    "missing_prerequisites": [
+      "macOS x64 build/package artifact"
+    ]
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {
@@ -249,7 +269,7 @@
     "status": "usable_for_local_dogfood_only",
     "version_output": "Google Chrome 150.0.7871.49"
   },
-  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the packaged macOS arm64 archive launches on this host with CDP reachable. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
+  "reproducibility_note": "The selected ref and commit are recorded, checked out locally, gclient sync/hooks completed, macOS host DEPS are present, BrowseForgeDev args.gn/build.ninja exists, macOS arm64 GN/build output exists at out/BrowseForgeMacArm64, and the refreshed packaged macOS arm64 archive launches on this host with headed external-proxy detector evidence for BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft. Linux Docker args.gn/build.ninja/chrome and required runtime sidecars remain present from the packaged linux-x64 artifact; use BROWSEFORGE_CHROMIUM_HOST_WORKDIR and BROWSEFORGE_CHROMIUM_LINUX_WORKDIR for parallel baselines. Source-level patches remain applied in the external checkout.",
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "toolchain": {

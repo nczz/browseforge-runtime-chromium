@@ -1,19 +1,19 @@
 # KB/KG Completeness Assessment
 
-Verdict: the current KB/KG is sufficient for the Linux x64 packaged runtime, source/build baseline, BrowseForge adapter handoff, and committed detector-evidence traceability. It is not yet sufficient for a production-ready cross-platform anti-detect release because the live detector matrix still has accepted warnings/blockers for proxy/IP coherence, full detector score comparison, native/headed parity, and non-Linux artifacts.
+Verdict: the current KB/KG is sufficient for the source/build baseline, BrowseForge adapter handoff, packaged linux-x64/macos-arm64/windows-x64 alpha artifacts, the macOS x64 package blocker, and committed detector-evidence traceability. It is not yet a production-ready release because macOS x64 lacks a real package and all packaged artifacts are still unsigned alpha outputs.
 
 ## Current observed state
 
 | Area | Confidence | Evidence | Remaining blocker |
 | --- | --- | --- | --- |
 | Runtime repository KB | High for repo contracts | `BrowseForge Chromium Runtime Knowledge Base` is ready; repo validation passes. | KB must be refreshed after each source change. |
-| Runtime repository KG | Medium-high for runtime evidence | codebase-memory project `Users-chun-Projects-browseforge-runtime-chromium` is ready; source-controlled seed graph exists at `generated/kg/runtime.graph.jsonl` and `generated/kg/runtime.ttl`; Linux x64 `RuntimeArtifact` and committed `DetectorRun`/`EvidenceArtifact` records are represented. | The MCP graph is still primarily a source-code graph; custom runtime-evidence semantics live in generated seed files until imported by a dedicated runtime graph loader. |
+| Runtime repository KG | Medium-high for runtime evidence | codebase-memory project `Users-chun-Projects-browseforge-runtime-chromium` is ready; source-controlled seed graph exists at `generated/kg/runtime.graph.jsonl` and `generated/kg/runtime.ttl`; committed `RuntimeArtifact`, `DetectorRun`, and `EvidenceArtifact` records are represented. | The MCP graph is still primarily a source-code graph; custom runtime-evidence semantics live in generated seed files until imported by a dedicated runtime graph loader. |
 | BrowseForge consumer contract | High | `release-gates.json` records BrowseForge commit `aba5248` dispatching `browseforge-chromium`, writing a profile-scoped native stealth persona config with `persona_id_hash` and `origin_salt_key`, and preserving trimmed proxy region metadata through profile/group storage; adapter smoke passed via `--browseforge-stealth-config` plus `--browseforge-stealth-mode=enabled`; local dogfood evidence covers runtime config, profile create, session launch, runtime_id reporting, profile isolation, and Playwright Bind. | Keep adapter smoke evidence current as BrowseForge changes. |
 | CloakBrowser / Camoufox references | Medium-high | Source KBs exist for CloakBrowser v146 and Camoufox v135; reference manifests point to local indexed sources. | Cloak/Camoufox behavior remains reference material, not proof that browseforge-chromium behaves the same. |
-| Chromium upstream base | High for Linux x64 baseline | `patchset.json`, `browser/chromium-base.json`, and `source-acquisition.json` select Chromium `refs/tags/150.0.7871.101` / commit `51b83660c3609f271ccbbd65785bf7e50a21312d`; external checkout, Linux deps sync, Docker GN generation, and patched Linux build are recorded. | Native macOS/Windows builds and unpatched baseline comparison remain absent. |
-| Runtime wrapper and artifact | High for Linux x64 packaged artifact | `runtime-artifacts.json` records `browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64` with SHA-256, size, SBOM, provenance, os, arch, browser version, source ref, patchset ID, and wrapper version. | Non-Linux artifacts remain missing; release asset URL/signature are still dev placeholders. |
-| Fingerprint surface graph | Medium for Linux detector smoke | Seed graph includes `FingerprintSurface`, `RuntimeFlag`, `Detector`, committed `DetectorRun`, `EvidenceArtifact`, and release-gate support edges. | Audio/fonts still need full detector score comparison; proxy/IP coherence needs external exit/geolocation evidence; cross-platform drift remains open. |
-| Packaging and provenance | High for dev Linux x64 artifact | `build/package_runtime.py`, packaging tests, `unzip -t`, and JSON metadata checks cover packaged artifact/SBOM/provenance mechanics. | Release-grade publishing/signing and non-Linux packaging are not complete. |
+| Chromium upstream base | High for pinned baseline | `patchset.json`, `browser/chromium-base.json`, and `source-acquisition.json` select Chromium `refs/tags/150.0.7871.101` / commit `51b83660c3609f271ccbbd65785bf7e50a21312d`; external checkout, Linux Docker baseline, macOS arm64 build output, Windows x64 portable layout, and source-level patches are recorded. | Host-specific dependency profiles must stay isolated with `BROWSEFORGE_CHROMIUM_HOST_WORKDIR` and `BROWSEFORGE_CHROMIUM_LINUX_WORKDIR`. |
+| Runtime wrapper and artifacts | High for alpha artifacts | `runtime-artifacts.json` records linux-x64, macos-arm64, and windows-x64 artifacts with SHA-256, size, SBOM, provenance, os, arch, browser version, source ref, patchset ID, and wrapper version; `native-artifact-preflight.json` records the macOS x64 package blocker. | macOS x64 still needs a real Chromium.app package; release asset URL/signature are still dev placeholders; production release needs an explicit signing/notarization policy. |
+| Fingerprint surface graph | High for existing alpha detector evidence | Seed graph includes `FingerprintSurface`, `RuntimeFlag`, `Detector`, committed `DetectorRun`, `EvidenceArtifact`, and release-gate support edges. Linux direct/headed evidence and macOS arm64 headed external-proxy evidence cover the committed alpha detector evidence; accepted score-comparison risk remains explicit for non-GA policy. | macOS x64 and Windows x64 release-grade detector evidence remain incomplete. |
+| Packaging and provenance | High for existing alpha artifacts | `build/package_runtime.py`, packaging tests, `unzip -t`, JSON metadata checks, and runtime artifact manifests cover packaged artifact/SBOM/provenance mechanics for explicitly supported package platforms. | macOS x64 package/SBOM/provenance are missing; release-grade publishing/signing is not complete. |
 
 ## Required graph semantics now represented
 
@@ -34,46 +34,46 @@ The source-controlled seed graph contains the required runtime evidence relation
 - `EvidenceArtifact -[:SUPPORTS_GATE]-> ReleaseGate`
 - `RuntimeProvider -[:REFERENCES_SOURCE]-> KnowledgeSource`
 
-The generated graph includes the packaged Linux x64 `RuntimeArtifact` as release-grade evidence and keeps explicit missing-artifact blocker nodes only for platforms without packaged artifacts.
+The generated graph includes packaged runtime artifacts for linux-x64, macos-arm64, and windows-x64 as alpha evidence, plus the macOS x64 platform/package blocker. Missing-artifact and signing policy nodes are release-status inputs until a real macOS x64 package and release-grade signing policy exist.
 
 ## Release-gate state
 
-Passed gates:
+Current gates:
 
 - `chromium-base-selected`: Chromium M150 tag/ref/base commit selected.
 - `wrapper-contract-tests`: wrapper/config/launch contract tests exist.
 - `detector-harness-contract-tests`: detector target listing, matrix planning, validation, and sanitized-evidence rejection are covered.
-- `packaging-contract-tests`: package planning, missing-browser rejection, zip packaging, and checksum behavior are covered.
+- `packaging-contract-tests`: package planning, missing-browser rejection, zip packaging, platform layout, and checksum behavior are covered.
+- `browseforge-adapter-merged`: BrowseForge commit `aba5248` dispatches `browseforge-chromium` and preserves native persona/proxy metadata.
+- `chromium-source-indexed`: source acquisition and patch status manifests record the pinned checkout and source-level patchset state.
+- `runtime-artifact-produced`: blocked until the macOS x64 package exists; alpha artifacts exist for linux-x64, macos-arm64, and windows-x64.
+- `live-detector-evidence`: blocked for release-grade publication while macOS x64 has no detector run and committed detector evidence still has accepted non-GA gaps.
+- `sbom-provenance-release-assets`: blocked until macOS x64 has SBOM/provenance/checksum metadata.
 
-Warning/blocking gates:
+Remaining release-grade blockers:
 
-- `live-detector-evidence`: Linux x64 has committed SannySoft, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS evidence, including headless and headed/Xvfb coverage for several detectors; `detector-summary.json` now records 13 remaining required matrix coverage gaps with `required_evidence` labels for native/host, Docker/container, direct network, and external proxy exit-IP/geolocation evidence, so the full headed/proxy/native/cross-platform matrix is explicit but incomplete. `scripts/validate.py` now also rejects a passed `live-detector-evidence` gate while `detector-score-comparison.json` still contains baseline gaps, evidence gaps, or warning comparisons.
-- `proxy/IP coherence`: local CONNECT proxy routing evidence exists, validator logic rejects release-matrix `proxy` evidence unless it carries sanitized external proxy exit-region and detector geolocation-region fields, and BrowserLeaks WebRTC now has committed headless/headed Docker/Xvfb sanitized ICE candidate metadata plus a passing bounded comparison for candidate counts, host type labels, and public/private IP-literal counts without committing raw addresses; no external proxy exit-IP/geolocation detector run is recorded.
-- `permissions/features`: SannySoft dogfood still reports HEADCHR_PERMISSIONS as ok, and the shared Linux collector now records bounded BrowserLeaks/Pixelscan page-context Permissions API states plus feature-availability booleans (Contacts Manager, Content Index, Network Information, storage buckets, WebHID/Serial/USB, etc.) without requesting device access; CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete.
-- `AudioContext` and `fonts`: page-context and CreepJS/BrowserLeaks/Pixelscan bounded probes are recorded; BrowserLeaks audio collection targets the live `/javascript#audio` section instead of the retired `/javascript/audio` path, and committed headless/headed Docker/Xvfb evidence records the BrowserLeaks JavaScript Web Audio page title/url, bounded OfflineAudioContext summary, and AudioContext/AnalyserNode field summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score, so the obsolete BrowserLeaks audio score-baseline gap is no longer emitted. BrowserLeaks Fonts now has both headless and headed Docker/Xvfb bounded evidence with matching sampled font list, candidate count, glyph SHA, and metric SHA. Pixelscan has headed Docker/Xvfb page-status evidence that records the site verdict, masking/proxy/bot labels, and AudioContext/font hash strings without committing raw page text. The rebuilt patched Linux package now has 20260710 CreepJS headless/headed evidence with `freq`, `gain`, `sum`, `time`, `trap`, and `unique` all matching; `detector-score-comparison.json` marks CreepJS audio parity as pass. Native headed font corpus parity remains blocked.
-- `WebGL`: configured vendor/renderer source patch and page-context evidence exist; the shared collector now escapes embedded SDP newlines correctly, so passed Linux headless BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count/hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. `detector-score-comparison.json` now records a passing BrowserLeaks-vs-BrowserScan WebGL metadata comparison with vendor/renderer, extension-profile, parameter, shader precision, and rendered-pixel match booleans, and warning-only non-release WebGL rows no longer create release metadata gaps. Headed/native detector confirmation remains required before release-grade WebGL claims.
-- `cross-platform drift`: Linux Docker headless/headed evidence exists, and macOS arm64 local host headless SannySoft evidence now records a non-release warning with `HeadlessChrome` still present in UA; Windows plus native headed Linux/macOS release detector matrix remains absent.
-- `non-Linux release artifacts`: macOS / Windows packaged runtime artifacts, SBOM, provenance, signing, and detector evidence remain absent; `build/package_runtime.py` rejects non-Linux platforms until a committed runtime asset contract exists.
-
+- `signing-policy:linux-x64`: alpha Linux archive is unsigned.
+- `signing-policy:macos-arm64`: alpha macOS archive is unsigned and not notarized.
+- `signing-policy:windows-x64`: alpha Windows archive is unsigned.
+- `signing-policy:macos-x64`: macOS x64 package is missing and still needs Developer ID signing/notarization policy.
 ## Permitted next work
 
 Allowed now:
 
-1. Continue closing detector-surface blockers for Linux x64: external proxy/IP coherence, AudioContext score comparison, font score/corpus parity, and native/headed matrix evidence.
-2. Add non-Linux artifact/build evidence only after real macOS/Windows builds exist.
-3. Keep KB/KG manifests current and reindex after changes.
-4. Keep BrowseForge adapter smoke evidence current while preserving the Linux x64 runtime artifact as dev/alpha until release blockers close.
+1. Replace unsigned alpha policy with a real release-grade signing/notarization policy when credentials and publication process are available.
+2. Keep KB/KG manifests current and reindex after changes.
+3. Keep BrowseForge adapter smoke evidence current as BrowseForge changes.
+4. Extend GA detector coverage, especially Windows native runs and stricter font/audio corpus parity, without reopening alpha release-gate blockers.
 
 Not allowed yet:
 
-1. Claim a production-ready cross-platform BrowseForge Chromium runtime.
-2. Claim full detector pass, proxy/IP coherence, font/audio parity, or native platform support without direct detector evidence.
-3. Create a stable release tag or publish release artifacts as production-ready.
-4. Treat local Chrome/Chromium dogfood evidence as equivalent to the patched BrowseForge runtime artifact.
+1. Claim a production-ready signed cross-platform BrowseForge Chromium runtime.
+2. Publish release artifacts as production-ready until `signing-policy.json` allows release-grade publication for every supported package platform.
+3. Treat unsigned alpha archives as signed/notarized release assets.
 
 ## Shortest unblock path
 
-1. Run an external-proxy detector matrix for BrowserLeaks/Pixelscan/iphey/BrowserScan with sanitized exit-IP/geolocation evidence.
-2. Add release-grade BrowserLeaks/CreepJS/Pixelscan score baselines for AudioContext and fonts; BrowserLeaks audio/fonts page classifiers intentionally return warning-level evidence until committed score baselines and corpus comparisons exist.
-3. Run native/headed Linux and macOS detector passes, then add Windows only after a real Windows artifact exists.
-4. Replace non-Linux missing-artifact blocker nodes with real artifact records only after builds, SBOM, provenance, signatures, and detector runs exist.
+1. Produce the real macOS x64 Chromium.app package, checksum, SBOM, and provenance; disclose that launch smoke and detector evidence are absent.
+2. Decide the release-grade signing policy for Linux archives, macOS Developer ID/notarization, and Windows Authenticode.
+3. Repackage or attest signed artifacts, update `runtime-artifacts.json` and `signing-policy.json`, then regenerate release status and objective audit.
+4. Re-run `scripts/validate.py`, focused release/status tests, and refresh KB/KG indexes.

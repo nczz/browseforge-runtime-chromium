@@ -100,6 +100,8 @@ def build_plan(
             "symbol_level=1",
             "is_component_build=false",
             "use_remoteexec=false",
+            "proprietary_codecs=true",
+            'ffmpeg_branding="Chrome"',
         ]
     )
     base_run = docker_run_base(workdir, git_cache, image, platform)

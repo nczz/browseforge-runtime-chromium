@@ -58,7 +58,7 @@ WINDOWS_CHROMIUM_RUNTIME_DIRS = (
     'locales',
 )
 
-SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64', 'windows-x64'})
+SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64', 'macos-x64', 'windows-x64'})
 
 
 def sha256(path: Path) -> str:
@@ -67,6 +67,17 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: fh.read(1024 * 1024), b''):
             h.update(chunk)
     return h.hexdigest()
+
+def write_checksum_entry(checksums_path: Path, archive_name: str, checksum: str) -> None:
+    entries: dict[str, str] = {}
+    if checksums_path.is_file():
+        for line in checksums_path.read_text().splitlines():
+            parts = line.split()
+            if len(parts) >= 2:
+                entries[parts[-1]] = parts[0]
+    entries[archive_name] = checksum
+    checksums_path.write_text(''.join(f'{value}  {name}\n' for name, value in sorted(entries.items())))
+
 
 def file_record(path: Path, *, root: Path | None = None) -> dict[str, object]:
     return {
@@ -231,7 +242,7 @@ def stage_platform_browser(platform_id: str, browser: Path, stage: Path) -> Path
         shutil.copy2(browser, staged_browser)
         copy_required_linux_runtime_assets(browser, stage)
         return staged_browser
-    if platform_id == 'macos-arm64':
+    if platform_id in {'macos-arm64', 'macos-x64'}:
         return copy_required_macos_runtime_assets(browser, stage)
     if platform_id == 'windows-x64':
         staged_browser = stage / browser.name
@@ -325,7 +336,7 @@ def package(args):
             if file.is_file():
                 zf.write(file, arcname=f'{stage.name}/{file.relative_to(stage).as_posix()}')
     checksum = sha256(archive)
-    (out_dir / 'checksums.txt').write_text(f'{checksum}  {archive.name}\n')
+    write_checksum_entry(out_dir / 'checksums.txt', archive.name, checksum)
     print(json.dumps({'archive': str(archive), 'sha256': checksum}, indent=2))
     return 0
 

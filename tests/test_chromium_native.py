@@ -74,39 +74,63 @@ class ChromiumNativePlanTests(unittest.TestCase):
             chromium_native.main()
         return json.loads(stdout.getvalue())["status"]
 
-    def test_macos_plan_targets_arm64_app_bundle_and_package_platform(self) -> None:
-        """The macOS native plan targets arm64 Chromium.app and packages the macos-arm64 artifact."""
+    def test_macos_plan_targets_app_bundle_and_package_platform(self) -> None:
+        """The macOS native plan targets the requested CPU and packages the matching .app artifact."""
+        cases = (
+            ("macos-arm64", "arm64", "out/BrowseForgeMacArm64"),
+            ("macos-x64", "x64", "out/BrowseForgeMacX64"),
+        )
+
+        for platform_id, target_cpu, out_dir in cases:
+            with self.subTest(platform=platform_id), tempfile.TemporaryDirectory() as td:
+                workdir = Path(td) / "chromium"
+                payload = self._json_from_script(
+                    "plan",
+                    "--platform",
+                    platform_id,
+                    "--workdir",
+                    str(workdir),
+                )
+
+                self.assertIn('target_os="mac"', payload["gn_args"])
+                self.assertIn(f'target_cpu="{target_cpu}"', payload["gn_args"])
+                self.assertIn("proprietary_codecs=true", payload["gn_args"])
+                self.assertIn('ffmpeg_branding="Chrome"', payload["gn_args"])
+                self.assertEqual(
+                    str(workdir / "src" / out_dir / "Chromium.app" / "Contents" / "MacOS" / "Chromium"),
+                    payload["output_binary"],
+                )
+                self.assertEqual(
+                    f"browseforge-runtime-chromium-{chromium_native.RUNTIME_VERSION}-{platform_id}",
+                    payload["package_artifact_id"],
+                )
+                package_command = payload["package_command"]
+                self.assertEqual("package", package_command[2])
+                self.assertEqual("package", payload["commands"]["package"][2])
+                self.assertNotIn("--execute", payload["commands"]["package"])
+                self.assertEqual(platform_id, package_command[package_command.index("--platform") + 1])
+                self.assertEqual(platform_id, payload["commands"]["package"][package_command.index("--platform") + 1])
+                self.assertEqual(str(ROOT / "dist"), package_command[package_command.index("--output-dir") + 1])
+                self.assertEqual("surface-switch-propagation-native-audit", package_command[package_command.index("--patchset-id") + 1])
+                self.assertEqual("alpha", package_command[package_command.index("--release-channel") + 1])
+
+    def test_macos_x64_plan_uses_darwin_amd64_wrapper(self) -> None:
+        """macos-x64 packages with the darwin/amd64 wrapper binary, not the arm64 host wrapper."""
         with tempfile.TemporaryDirectory() as td:
             workdir = Path(td) / "chromium"
             payload = self._json_from_script(
                 "plan",
                 "--platform",
-                "macos-arm64",
+                "macos-x64",
                 "--workdir",
                 str(workdir),
-                "--out-dir",
-                "out/TestMacArm64",
             )
 
-        self.assertIn('target_os="mac"', payload["gn_args"])
-        self.assertIn('target_cpu="arm64"', payload["gn_args"])
-        self.assertEqual(
-            str(workdir / "src" / "out" / "TestMacArm64" / "Chromium.app" / "Contents" / "MacOS" / "Chromium"),
-            payload["output_binary"],
-        )
-        self.assertEqual(
-            f"browseforge-runtime-chromium-{chromium_native.RUNTIME_VERSION}-macos-arm64",
-            payload["package_artifact_id"],
-        )
         package_command = payload["package_command"]
-        self.assertEqual("package", package_command[2])
-        self.assertEqual("package", payload["commands"]["package"][2])
-        self.assertNotIn("--execute", payload["commands"]["package"])
-        self.assertEqual("macos-arm64", package_command[package_command.index("--platform") + 1])
-        self.assertEqual("macos-arm64", payload["commands"]["package"][package_command.index("--platform") + 1])
-        self.assertEqual(str(ROOT / "dist"), package_command[package_command.index("--output-dir") + 1])
-        self.assertEqual("surface-switch-propagation-native-audit", package_command[package_command.index("--patchset-id") + 1])
-        self.assertEqual("alpha", package_command[package_command.index("--release-channel") + 1])
+        self.assertEqual(
+            str(ROOT / "bin" / "browseforge-runtime-chromium-darwin-amd64"),
+            package_command[package_command.index("--wrapper-binary") + 1],
+        )
 
     def test_cli_default_workdir_can_use_host_profile_env(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -142,6 +166,8 @@ class ChromiumNativePlanTests(unittest.TestCase):
 
         self.assertIn('target_os="win"', payload["gn_args"])
         self.assertIn('target_cpu="x64"', payload["gn_args"])
+        self.assertIn("proprietary_codecs=true", payload["gn_args"])
+        self.assertIn('ffmpeg_branding="Chrome"', payload["gn_args"])
         self.assertEqual("windows", payload["required_host_os"])
         self.assertEqual(str(workdir / "src" / "out" / "TestWindowsX64" / "chrome.exe"), payload["output_binary"])
         package_command = payload["package_command"]
@@ -187,7 +213,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertEqual(["bash", "-lc"], gn_gen[:2])
         self.assertEqual(
             "PATH={path_prefix} DEPOT_TOOLS_UPDATE=0 gn gen out/TestMacArm64 --args='target_os=\"mac\" target_cpu=\"arm64\" "
-            "is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false'".format(
+            "is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding=\"Chrome\"'".format(
                 path_prefix=expected_path_prefix
             ),
             gn_gen[2],
@@ -638,7 +664,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 json.dumps(
                     {
                         "detector_smoke_evidence": "detectors/evidence/linux-smoke.json",
-                        "supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"],
+                        "supported_package_platforms": ["linux-x64", "macos-arm64", "macos-x64", "windows-x64"],
                         "artifacts": [
                             {
                                 "artifact_id": artifact_id,
@@ -673,7 +699,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
         payload = json.loads(stdout.getvalue())
         self.assertEqual("2026-07-10T00:00:00Z", payload["generated_at"])
         self.assertIs(payload["release_grade_ready"], False)
-        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], payload["supported_package_platforms"])
+        self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], payload["supported_package_platforms"])
         entries = {entry["platform"]: entry for entry in payload["platforms"]}
         self.assertIs(entries["linux-x64"]["ready"], True)
         self.assertEqual(artifact_id, entries["linux-x64"]["artifact_id"])
@@ -696,6 +722,21 @@ class ChromiumNativePlanTests(unittest.TestCase):
             chromium_native.WINDOWS_MANUAL_VALIDATION_NOTE,
             entries["macos-arm64"]["evidence"],
         )
+        self.assertIs(entries["macos-x64"]["ready"], False)
+        macos_x64_missing_prerequisites = entries["macos-x64"]["missing_prerequisites"]
+        self.assertFalse(
+            any("detector evidence" in item for item in macos_x64_missing_prerequisites),
+            macos_x64_missing_prerequisites,
+        )
+        macos_x64_commands = entries["macos-x64"]["next_commands"]
+        self.assertTrue(any("--platform macos-x64" in command for command in macos_x64_commands))
+        self.assertTrue(
+            any(
+                "GOOS=darwin GOARCH=amd64 go build -o bin/browseforge-runtime-chromium-darwin-amd64"
+                in command
+                for command in macos_x64_commands
+            )
+        )
         macos_snapshot = entries["macos-arm64"]["status_snapshot"]
         self.assertIs(macos_snapshot["host_supported"], True)
         self.assertIs(macos_snapshot["native_toolchain_ready"], False)
@@ -715,6 +756,58 @@ class ChromiumNativePlanTests(unittest.TestCase):
         self.assertTrue(any("build-chrome" in command and "--execute" in command for command in windows_commands))
         self.assertTrue(any("package" in command and "--execute" in command for command in windows_commands))
 
+    def test_macos_x64_preflight_marks_packaged_artifact_ready_without_detector_evidence(self) -> None:
+        """A completed macos-x64 package is alpha-ready as packaged-only, without native detector evidence."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            runtime_root = tmp_path / "runtime"
+            manifests = runtime_root / "knowledge" / "manifests"
+            manifests.mkdir(parents=True)
+            artifact_id = f"browseforge-runtime-chromium-{chromium_native.RUNTIME_VERSION}-macos-x64"
+            (runtime_root / "dist").mkdir()
+            (runtime_root / "dist" / f"{artifact_id}.zip").write_text("zip", encoding="utf-8")
+            (manifests / "runtime-artifacts.json").write_text(
+                json.dumps({"supported_package_platforms": ["macos-x64"], "artifacts": []}),
+                encoding="utf-8",
+            )
+            workdir = tmp_path / "chromium"
+            self._write_native_checkout_fixtures(workdir)
+            stdout = io.StringIO()
+            argv = [
+                "chromium_native.py",
+                "preflight",
+                "--workdir",
+                str(workdir),
+                "--generated-at",
+                "2026-07-10T00:00:00Z",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
+                mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
+                mock.patch("sys.stdout", stdout),
+            ):
+                chromium_native.main()
+
+        payload = json.loads(stdout.getvalue())
+        self.assertIs(payload["release_grade_ready"], True)
+        self.assertEqual(["macos-x64"], payload["supported_package_platforms"])
+        self.assertEqual(1, len(payload["platforms"]))
+        entry = payload["platforms"][0]
+        self.assertEqual("macos-x64", entry["platform"])
+        self.assertIs(entry["ready"], True)
+        self.assertEqual("packaged_only_untested", entry["status"])
+        self.assertEqual([], entry["missing_prerequisites"])
+        self.assertEqual(artifact_id, entry["artifact_id"])
+        self.assertFalse(any("detector evidence" in item for item in entry["evidence"]), entry["evidence"])
+        self.assertTrue(
+            any(
+                "GOOS=darwin GOARCH=amd64 go build -o bin/browseforge-runtime-chromium-darwin-amd64"
+                in command
+                for command in entry["next_commands"]
+            )
+        )
+
 
 
     def test_preflight_execute_writes_manifest(self) -> None:
@@ -725,7 +818,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
             manifests = runtime_root / "knowledge" / "manifests"
             manifests.mkdir(parents=True)
             (manifests / "runtime-artifacts.json").write_text(
-                json.dumps({"supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"], "artifacts": []}),
+                json.dumps({"supported_package_platforms": ["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], "artifacts": []}),
                 encoding="utf-8",
             )
             output = tmp_path / "native-artifact-preflight.json"

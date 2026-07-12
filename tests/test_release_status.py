@@ -59,6 +59,23 @@ class ReleaseStatusTests(unittest.TestCase):
                             "package_zip_exists": False,
                         },
                     },
+                    {
+                        "platform": "macos-x64",
+                        "ready": False,
+                        "status": "missing_native_release_artifact",
+                        "missing_prerequisites": [
+                            "macos-x64 packaged artifact with checksum/SBOM/provenance metadata"
+                        ],
+                        "evidence": ["python3 scripts/chromium_native.py check --platform macos-x64"],
+                        "next_commands": [
+                            "GOOS=darwin GOARCH=amd64 go build -o bin/browseforge-runtime-chromium-darwin-amd64 ./cmd/browseforge-runtime-chromium"
+                        ],
+                        "status_snapshot": {
+                            "host_supported": True,
+                            "native_toolchain_ready": True,
+                            "package_zip_exists": False,
+                        },
+                    },
                 ],
             },
         )
@@ -187,6 +204,7 @@ class ReleaseStatusTests(unittest.TestCase):
         blocker_ids = {blocker["blocker_id"] for blocker in payload["blockers"]}
         self.assertIn("release-gate:live-detector-evidence", blocker_ids)
         self.assertIn("native-artifact:macos-arm64:0", blocker_ids)
+        self.assertIn("native-artifact:macos-x64:0", blocker_ids)
         self.assertIn("proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL", blocker_ids)
         self.assertIn("detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host", blocker_ids)
         self.assertIn("detector:coverage-gap:windows-x64:browserleaks:headed:direct:host", blocker_ids)
@@ -222,10 +240,21 @@ class ReleaseStatusTests(unittest.TestCase):
             native_blocker["remediation_commands"],
             ["python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute"],
         )
+        macos_x64_blocker = next(
+            blocker for blocker in payload["blockers"]
+            if blocker["blocker_id"] == "native-artifact:macos-x64:0"
+        )
+        self.assertEqual(macos_x64_blocker["status"], "missing_native_release_artifact")
+        macos_x64_detail = macos_x64_blocker["detail"].lower()
+        for token in ["artifact", "checksum", "sbom", "provenance"]:
+            with self.subTest(token=token):
+                self.assertIn(token, macos_x64_detail)
+        self.assertNotIn("detector evidence", macos_x64_detail)
         self.assertEqual(set(release_status.INPUT_PATHS), set(payload["input_sha256"]))
         resource_ids = {requirement["resource_id"] for requirement in payload["resource_requirements"]}
         self.assertIn("external-detector-proxy", resource_ids)
         self.assertIn("native-artifact-macos-arm64", resource_ids)
+        self.assertIn("native-artifact-macos-x64", resource_ids)
         self.assertIn("live-proxy-detector-matrix", resource_ids)
         self.assertIn("windows-manual-detector-validation", resource_ids)
         self.assertIn("release-grade-code-signing", resource_ids)
@@ -245,6 +274,21 @@ class ReleaseStatusTests(unittest.TestCase):
                 "macos-arm64 packaged native BrowseForge Chromium artifact",
                 "macos-arm64 native detector evidence",
             ],
+        )
+        macos_x64_requirement = next(
+            requirement for requirement in payload["resource_requirements"]
+            if requirement["resource_id"] == "native-artifact-macos-x64"
+        )
+        self.assertEqual(
+            macos_x64_requirement["unblocks"],
+            [
+                "macos-x64 packaged native BrowseForge Chromium artifact",
+                "macos-x64 checksum/SBOM/provenance metadata",
+            ],
+        )
+        self.assertFalse(
+            any("detector evidence" in item for item in macos_x64_requirement["unblocks"]),
+            macos_x64_requirement["unblocks"],
         )
         windows_requirement = next(
             requirement for requirement in payload["resource_requirements"]
@@ -284,6 +328,23 @@ class ReleaseStatusTests(unittest.TestCase):
             "release-grade signed artifact publication",
             signing_requirement["unblocks"],
         )
+
+    def test_release_status_allows_empty_integration_blockers_while_signing_policy_blocks_release(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.write_base_inputs(root)
+            self.write_json(root, "contracts/browseforge-integration.contract.json", {"release_blockers": []})
+
+            payload = release_status.release_status(root, "2026-07-10T00:00:00Z")
+
+        blocker_ids = {blocker["blocker_id"] for blocker in payload["blockers"]}
+        self.assertFalse(
+            any(blocker_id.startswith("browseforge-integration:") for blocker_id in blocker_ids),
+            blocker_ids,
+        )
+        self.assertIn("signing-policy:linux-x64", blocker_ids)
+        self.assertIn("signing-policy:windows-x64", blocker_ids)
+        self.assertFalse(payload["release_grade_ready"])
 
     def test_windows_detector_summary_gap_requirement_provides_matrix_keys(self) -> None:
         requirements = release_status.release_resource_requirements(

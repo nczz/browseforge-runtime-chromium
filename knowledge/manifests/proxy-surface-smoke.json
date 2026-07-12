@@ -1,0 +1,47 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "checks": [
+    {
+      "check": "transparent_canvas_pixel_preserved",
+      "observed": {
+        "rgba": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "check": "proprietary_video_codecs_available",
+      "observed": {
+        "aac_mp4": "probably",
+        "h264_mp4": "probably",
+        "mp4_container": "maybe"
+      },
+      "status": "passed"
+    },
+    {
+      "check": "los_angeles_proxy_persona_timezone",
+      "observed": {
+        "proxy_region_redacted": "us-los-angeles",
+        "timezone": "America/Los_Angeles"
+      },
+      "status": "passed"
+    }
+  ],
+  "generated_at": "2026-07-12T12:00:00Z",
+  "network_mode": "proxy",
+  "platform": "macos-arm64",
+  "proxy": {
+    "has_credentials": false,
+    "host_redacted": "[REDACTED_PROXY_HOST]",
+    "port_redacted": "[REDACTED_PROXY_PORT]",
+    "scheme": "http"
+  },
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "schema_version": "1.0",
+  "status": "passed"
+}

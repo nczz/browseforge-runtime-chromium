@@ -13,15 +13,15 @@
       "relative_path": "chrome"
     },
     "macos-arm64": {
-      "packaged": false,
+      "packaged": true,
       "relative_path": "Chromium.app/Contents/MacOS/Chromium"
     },
     "macos-x64": {
-      "packaged": false,
+      "packaged": true,
       "relative_path": "Chromium.app/Contents/MacOS/Chromium"
     },
     "windows-x64": {
-      "packaged": false,
+      "packaged": true,
       "relative_path": "chrome.exe"
     }
   },

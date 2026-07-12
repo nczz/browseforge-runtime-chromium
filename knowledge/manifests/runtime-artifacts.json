@@ -1,6 +1,6 @@
 {
-  "artifact_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
-  "artifact_size_bytes": 567877597,
+  "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
+  "artifact_size_bytes": 567880267,
   "artifacts": [
     {
       "arch": "x64",
@@ -21,11 +21,11 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
+      "sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 567877597,
+      "size_bytes": 567880267,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6",
+      "wrapper_binary_sha256": "4311dc8bd80bdcb35d8d8df5083afc4b3ce1aa4e6cdff58ac8e1fbeb016a5b42",
       "wrapper_version": "v0.1.0-alpha.0"
     },
     {
@@ -37,7 +37,7 @@
       },
       "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-11T14:13:59.156400+00:00",
+      "created_at": "2026-07-12T12:00:00Z",
       "download_url": "GitHub Release asset or GHCR artifact pending publication",
       "os": "macos",
       "patchset_id": "surface-switch-propagation-native-audit",
@@ -47,11 +47,37 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
-      "sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
+      "sha256": "828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 403257580,
+      "size_bytes": 405358724,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "51bfcd1fe8c7455c46c6bb35cdf3fb7b764430220f7a4edfd221e57785c17dff",
+      "wrapper_binary_sha256": "f1f6851461e5237cbca58202570243f33abe9b51fda5ef52b77ee4c94a735a98",
+      "wrapper_version": "v0.1.0-alpha.0"
+    },
+    {
+      "arch": "x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+      "browseforge_compatibility": {
+        "min_version": "v2.0.0",
+        "profile_field": "runtime_id"
+      },
+      "browser_binary_sha256": "a4779c8a3d2d3d0eeadc2b77b7ee8dc04d35f5e415e67e0f2a8c83b49db228c2",
+      "browser_version": "150.0.7871.101",
+      "created_at": "2026-07-12T15:23:57.384237+00:00",
+      "download_url": "GitHub Release asset pending publication",
+      "os": "macos",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "platform": "macos-x64",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/provenance.json",
+      "release_channel": "alpha",
+      "runtime_id": "browseforge-chromium",
+      "runtime_version": "v0.1.0-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/SBOM.json",
+      "sha256": "960c2b7fbcaa86c34b5857361fbcf1ef9a2dcd001806117021fd51b99e71bb25",
+      "signature": "unsigned-dev-artifact",
+      "size_bytes": 472647619,
+      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "wrapper_binary_sha256": "19c36adb0820a0841d011349799c7bb73680c3989ae1bc35b5b87450632a687e",
       "wrapper_version": "v0.1.0-alpha.0"
     },
     {
@@ -73,11 +99,11 @@
       "runtime_id": "browseforge-chromium",
       "runtime_version": "v0.1.0-alpha.0",
       "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
-      "sha256": "c0123b441c5c973cf468c2b9853a445a096fc28e8741d0a6bbc6de93f06ceee4",
+      "sha256": "dae221b4e96166190287bc88c0671f4654f19e4e9e7b2c5fc3fb2aad4519218b",
       "signature": "unsigned-dev-artifact",
-      "size_bytes": 235414095,
+      "size_bytes": 235414104,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "ebcdd0e97c35d01ebf2663feaeadf135e6ab3429251207fa8e314845b1663122",
+      "wrapper_binary_sha256": "94953008abd1f831a122a0150a0fcc3e44ed2fe23a7bc923bebb9f21bc29cd1d",
       "wrapper_version": "v0.1.0-alpha.0"
     }
   ],
@@ -85,16 +111,24 @@
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
   "macos_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-    "reason": "macOS alpha package refreshed after native fingerprint CLI surface expansion and BrowseForge integration contract evidence update.",
+    "reason": "macOS alpha package refreshed after runtime manifest packaged-platform contract update.",
     "refreshed_after_commits": [
       "35f85be",
-      "6073ea0"
+      "6073ea0",
+      "transparent-pixel-codec-proxy-fix"
     ],
-    "sha256": "37452b9c20975acb71039e1fcadfc25f206366111f6a7c555dd3e00fa44d4e24",
-    "size_bytes": 403236086,
-    "wrapper_binary_sha256": "51bfcd1fe8c7455c46c6bb35cdf3fb7b764430220f7a4edfd221e57785c17dff"
+    "sha256": "828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683",
+    "size_bytes": 405358724,
+    "wrapper_binary_sha256": "f1f6851461e5237cbca58202570243f33abe9b51fda5ef52b77ee4c94a735a98"
   },
-  "packager_contract": "build/package_runtime.py supports linux-x64 runtime dependency layout, macos-arm64 .app bundle layout, and windows-x64 portable Chromium directory layout; platforms not listed in supported_package_platforms cannot be generated without an explicit runtime asset contract.",
+  "macos_x64_artifact_refresh": {
+    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+    "reason": "macOS x64 alpha package produced from native Chromium.app build for packaged-only release coverage.",
+    "sha256": "960c2b7fbcaa86c34b5857361fbcf1ef9a2dcd001806117021fd51b99e71bb25",
+    "size_bytes": 472647619,
+    "status": "packaged_only_untested"
+  },
+  "packager_contract": "build/package_runtime.py supports linux-x64 runtime dependency layout, macos-arm64/macos-x64 .app bundle layout, and windows-x64 portable Chromium directory layout; supported platforms without artifact entries remain blocked until real zip, checksum, SBOM, and provenance exist; macos-x64 launch/detector evidence may remain absent when disclosed as packaged-only alpha.",
   "policy": {
     "publish_binaries_as_release_assets": true,
     "require_provenance": true,
@@ -128,18 +162,18 @@
   "supported_package_platforms": [
     "linux-x64",
     "macos-arm64",
+    "macos-x64",
     "windows-x64"
   ],
   "unsupported_package_platforms": {
-    "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence",
-    "macos-x64": "blocked until a committed macOS x64 runtime asset contract covers app bundle layout, signing/notarization, SBOM/provenance, and detector evidence"
+    "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence"
   },
   "windows_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
-    "reason": "Windows alpha package built from BrowseForge Chromium source after macOS cross-toolchain sync and GN build.",
-    "sha256": "c0123b441c5c973cf468c2b9853a445a096fc28e8741d0a6bbc6de93f06ceee4",
-    "size_bytes": 235414095,
-    "wrapper_binary_sha256": "ebcdd0e97c35d01ebf2663feaeadf135e6ab3429251207fa8e314845b1663122"
+    "reason": "Windows alpha package refreshed after runtime manifest packaged-platform contract update.",
+    "sha256": "dae221b4e96166190287bc88c0671f4654f19e4e9e7b2c5fc3fb2aad4519218b",
+    "size_bytes": 235414104,
+    "wrapper_binary_sha256": "94953008abd1f831a122a0150a0fcc3e44ed2fe23a7bc923bebb9f21bc29cd1d"
   },
-  "wrapper_binary_sha256": "3d0fd7d36ff1e8e4c25ee74cd57849b533d01e19f60fee8b463130b5cd7813a6"
+  "wrapper_binary_sha256": "4311dc8bd80bdcb35d8d8df5083afc4b3ce1aa4e6cdff58ac8e1fbeb016a5b42"
 }

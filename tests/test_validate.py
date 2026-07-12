@@ -21,7 +21,9 @@ RUNTIME_ARTIFACTS_MANIFEST = ROOT / "knowledge" / "manifests" / "runtime-artifac
 LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64"
 LINUX_ARTIFACT_NODE_ID = f"RuntimeArtifact:{LINUX_ARTIFACT_ID}"
 LINUX_PLATFORM_NODE_ID = "Platform:linux-x64"
-
+MACOS_X64_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64"
+MACOS_X64_ARTIFACT_NODE_ID = f"RuntimeArtifact:{MACOS_X64_ARTIFACT_ID}"
+MACOS_X64_PLATFORM_NODE_ID = "Platform:macos-x64"
 def write_native_proxy_region_validation_sources(
     root: Path, *, omit_persona_snapshot_guard: bool = False
 ) -> None:
@@ -233,23 +235,85 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             "linux-x64 must not still TARGETS_PLATFORM from the missing-artifact blocker",
         )
 
-    def test_runtime_graph_release_gates_do_not_block_packaged_artifact_prerequisites(self) -> None:
-        """Release gates for indexed Chromium source and produced artifacts cannot remain blocked after packaging."""
+    def test_runtime_graph_release_gates_accept_real_macos_x64_artifact(self) -> None:
+        """Chromium source and runtime artifact gates pass once macos-x64 is packaged."""
         graph = self._load_graph()
+        with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        artifacts = manifest.get("artifacts")
+        self.assertIsInstance(artifacts, list)
+        assert isinstance(artifacts, list)
+        manifest_matches = [artifact for artifact in artifacts if artifact.get("artifact_id") == MACOS_X64_ARTIFACT_ID]
+        self.assertEqual(1, len(manifest_matches), f"expected exactly one manifest artifact {MACOS_X64_ARTIFACT_ID}")
+        manifest_artifact = manifest_matches[0]
 
-        for gate_id in ["chromium-source-indexed", "runtime-artifact-produced"]:
-            with self.subTest(gate_id=gate_id):
-                gate_node = self._node_by_id(graph, f"ReleaseGate:{gate_id}")
-                self.assertIsNotNone(gate_node, f"missing ReleaseGate:{gate_id}")
-                assert gate_node is not None
-                properties = gate_node.get("properties")
-                self.assertIsInstance(properties, dict)
-                assert isinstance(properties, dict)
-                self.assertNotEqual("blocked", properties.get("status"), f"ReleaseGate:{gate_id} must not remain blocked")
-                self.assertNotIn("blocker", properties, f"ReleaseGate:{gate_id} must not retain a blocker claim")
-                for edge in self._edges(graph, label="SUPPORTS_GATE", to_id=f"ReleaseGate:{gate_id}"):
-                    edge_properties = edge.get("properties") or {}
-                    self.assertNotEqual("blocked", edge_properties.get("status"), f"SUPPORTS_GATE edge to {gate_id} must not be blocked")
+        source_gate_node = self._node_by_id(graph, "ReleaseGate:chromium-source-indexed")
+        self.assertIsNotNone(source_gate_node, "missing ReleaseGate:chromium-source-indexed")
+        assert source_gate_node is not None
+        source_properties = source_gate_node.get("properties")
+        self.assertIsInstance(source_properties, dict)
+        assert isinstance(source_properties, dict)
+        self.assertEqual("passed", source_properties.get("status"))
+        self.assertNotIn("blocker", source_properties)
+        for edge in self._edges(graph, label="SUPPORTS_GATE", to_id="ReleaseGate:chromium-source-indexed"):
+            edge_properties = edge.get("properties") or {}
+            self.assertNotEqual("blocked", edge_properties.get("status"))
+
+        runtime_gate_node = self._node_by_id(graph, "ReleaseGate:runtime-artifact-produced")
+        self.assertIsNotNone(runtime_gate_node, "missing ReleaseGate:runtime-artifact-produced")
+        assert runtime_gate_node is not None
+        runtime_properties = runtime_gate_node.get("properties")
+        self.assertIsInstance(runtime_properties, dict)
+        assert isinstance(runtime_properties, dict)
+        self.assertEqual("passed", runtime_properties.get("status"))
+        self.assertNotIn("blocker", runtime_properties)
+
+        artifact_node = self._node_by_id(graph, MACOS_X64_ARTIFACT_NODE_ID)
+        self.assertIsNotNone(artifact_node, f"missing RuntimeArtifact node {MACOS_X64_ARTIFACT_NODE_ID}")
+        assert artifact_node is not None
+        self.assertEqual("RuntimeArtifact", artifact_node.get("label"))
+        artifact_properties = artifact_node.get("properties")
+        self.assertIsInstance(artifact_properties, dict)
+        assert isinstance(artifact_properties, dict)
+        for field in [
+            "artifact_id",
+            "platform",
+            "os",
+            "arch",
+            "sha256",
+            "size_bytes",
+            "sbom_path",
+            "provenance_path",
+            "browser_version",
+            "source_ref",
+            "patchset_id",
+            "wrapper_version",
+            "release_channel",
+        ]:
+            self.assertEqual(manifest_artifact[field], artifact_properties.get(field), f"RuntimeArtifact.{field}")
+        self.assertEqual("macos-x64", artifact_properties.get("platform"))
+        self.assertEqual("packaged", artifact_properties.get("status"))
+        self.assertTrue(artifact_properties.get("release_grade"), "macos-x64 artifact must be marked release-grade")
+
+        for label in ["BUILT_FOR", "TARGETS_PLATFORM"]:
+            with self.subTest(label=label):
+                self.assertTrue(
+                    self._edges(graph, label=label, from_id=MACOS_X64_ARTIFACT_NODE_ID, to_id=MACOS_X64_PLATFORM_NODE_ID),
+                    f"macos-x64 {label} edge must originate at the real packaged artifact",
+                )
+                self.assertFalse(
+                    self._edges(
+                        graph,
+                        label=label,
+                        from_id="RuntimeArtifact:missing-macos-x64-artifact",
+                        to_id=MACOS_X64_PLATFORM_NODE_ID,
+                    ),
+                    f"macos-x64 must not still {label} from the missing-artifact blocker",
+                )
+        self.assertIsNone(
+            self._node_by_id(graph, "RuntimeArtifact:missing-macos-x64-artifact"),
+            "macos-x64 must not keep the stale missing-artifact blocker node",
+        )
 
     def test_browseforge_adapter_gate_tracks_native_stealth_config_commit(self) -> None:
         with (ROOT / "knowledge" / "manifests" / "release-gates.json").open(encoding="utf-8") as fh:
@@ -316,25 +380,27 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
 
 
-    def test_runtime_artifact_manifest_distinguishes_supported_contracts_from_artifacts(self) -> None:
-        """Supported package contracts and committed artifacts both exclude unsupported platforms."""
+    def test_runtime_artifact_manifest_artifacts_match_supported_package_platforms(self) -> None:
+        """Every supported package platform must have a committed runtime artifact entry."""
         with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
             manifest = json.load(fh)
 
         supported_package_platforms = manifest.get("supported_package_platforms")
-        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], supported_package_platforms)
+        self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], supported_package_platforms)
         supported_platforms = set(supported_package_platforms)
 
         unsupported = manifest.get("unsupported_package_platforms")
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
         unsupported_platforms = set(unsupported)
-        self.assertEqual({"macos-x64", "linux-arm64"}, unsupported_platforms)
+        self.assertEqual({"linux-arm64"}, unsupported_platforms)
+        self.assertIn("macos-x64", supported_platforms)
+        self.assertNotIn("macos-x64", unsupported_platforms)
         self.assertTrue(supported_platforms.isdisjoint(unsupported_platforms))
 
         artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
-        self.assertEqual({"linux-x64", "macos-arm64", "windows-x64"}, artifact_platforms)
-        self.assertLessEqual(artifact_platforms, supported_platforms)
+        self.assertEqual(supported_platforms, artifact_platforms)
+        self.assertIn("macos-x64", artifact_platforms)
         self.assertTrue(artifact_platforms.isdisjoint(unsupported_platforms))
 
     def test_validate_allows_supported_package_contract_without_artifact(self) -> None:
@@ -344,13 +410,56 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             temp_root = Path(td)
             self._write_minimal_validate_tree(temp_root, module)
             manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
-            self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], manifest["supported_package_platforms"])
+            self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], manifest["supported_package_platforms"])
             self.assertEqual({"linux-x64"}, {artifact["platform"] for artifact in manifest["artifacts"]})
+            self.assertEqual({"macos-arm64", "macos-x64", "windows-x64"}, set(manifest["supported_package_platforms"]) - {artifact["platform"] for artifact in manifest["artifacts"]})
             self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
 
             output = self._run_validate_expect_success(module, temp_root)
 
         self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_runtime_artifact_missing_runtime_manifest_binary_entry(self) -> None:
+        """A packaged runtime-artifacts platform must have a runtime.manifest binary contract."""
+        platform = "linux-x64"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_artifacts = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_artifacts["artifacts"])
+            manifest_path = temp_root / "contracts" / "runtime.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            del manifest["binary"][platform]
+            self._write_json(manifest_path, manifest)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("runtime", message)
+        self.assertIn("manifest", message)
+        self.assertIn(platform, message)
+        self.assertIn("packaged", message)
+
+    def test_validate_rejects_runtime_artifact_with_unpacked_runtime_manifest_binary(self) -> None:
+        """A packaged runtime-artifacts platform cannot remain packaged=false in runtime.manifest."""
+        platform = "linux-x64"
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            runtime_artifacts = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, runtime_artifacts["artifacts"])
+            manifest_path = temp_root / "contracts" / "runtime.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["binary"][platform]["packaged"] = False
+            self._write_json(manifest_path, manifest)
+
+            message = self._run_validate_expect_exit(module, temp_root).lower()
+
+        self.assertIn("runtime", message)
+        self.assertIn("manifest", message)
+        self.assertIn(platform, message)
+        self.assertIn("packaged", message)
 
     def test_validate_accepts_native_artifact_preflight_for_linux_ready_and_native_blockers(self) -> None:
         """native-artifact-preflight records the Linux artifact as ready while native OS artifacts remain blockers."""
@@ -363,7 +472,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             preflight = self._write_native_artifact_preflight(temp_root, runtime_manifest=runtime_manifest)
 
             platforms = {entry["platform"]: entry for entry in preflight["platforms"]}
-            self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], preflight["supported_package_platforms"])
+            self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], preflight["supported_package_platforms"])
             self.assertTrue(platforms["linux-x64"]["ready"])
             self.assertEqual("ready", platforms["linux-x64"]["status"])
             self.assertEqual(LINUX_ARTIFACT_ID, platforms["linux-x64"]["artifact_id"])
@@ -372,7 +481,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 platforms["linux-x64"]["evidence"],
             )
             self.assertEqual([], platforms["linux-x64"]["missing_prerequisites"])
-            for platform in ["macos-arm64", "windows-x64"]:
+            for platform in ["macos-arm64", "macos-x64", "windows-x64"]:
                 with self.subTest(platform=platform):
                     self.assertFalse(platforms[platform]["ready"])
                     self.assertEqual("blocked", platforms[platform]["status"])
@@ -404,7 +513,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             policies = {entry["platform"]: entry for entry in signing_policy["policies"]}
             linux_artifact = runtime_manifest["artifacts"][0]
             self.assertEqual(linux_artifact["signature"], policies["linux-x64"]["signature"])
-            for platform in ["macos-arm64", "windows-x64"]:
+            for platform in ["macos-arm64", "macos-x64", "windows-x64"]:
                 with self.subTest(platform=platform):
                     self.assertIn("signing_requirement", policies[platform])
                     self.assertFalse(policies[platform]["release_grade_allowed"])
@@ -414,9 +523,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("runtime framework validation ok", output)
 
     def test_validate_rejects_signing_policy_missing_native_platform_decision(self) -> None:
-        """macOS and Windows platform-matrix signing requirements must each have a signing-policy row."""
+        """Native platform signing requirements must each have a signing-policy row."""
         module = self._load_validate_module()
-        for platform in ["macos-arm64", "windows-x64"]:
+        for platform in ["macos-arm64", "macos-x64", "windows-x64"]:
             with self.subTest(platform=platform):
                 with tempfile.TemporaryDirectory() as td:
                     temp_root = Path(td)
@@ -479,18 +588,18 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             self._write_native_artifact_preflight(
                 temp_root,
                 runtime_manifest=runtime_manifest,
-                omit_platforms={"windows-x64"},
+                omit_platforms={"macos-x64"},
             )
 
             message = self._run_validate_expect_exit(module, temp_root).lower()
 
         self.assertIn("native artifact preflight", message)
-        self.assertIn("windows-x64", message)
+        self.assertIn("macos-x64", message)
 
     def test_validate_rejects_native_artifact_preflight_native_ready_without_artifact(self) -> None:
-        """macOS and Windows cannot claim preflight readiness until their artifacts exist in runtime-artifacts."""
+        """Native platforms cannot claim preflight readiness until their artifacts exist in runtime-artifacts."""
         module = self._load_validate_module()
-        for platform in ["macos-arm64", "windows-x64"]:
+        for platform in ["macos-arm64", "macos-x64", "windows-x64"]:
             with self.subTest(platform=platform):
                 with tempfile.TemporaryDirectory() as td:
                     temp_root = Path(td)
@@ -1794,6 +1903,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             self._write_json(temp_root / "contracts" / "browseforge-integration.contract.json", committed_contract)
             manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
             self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_detector_summary(temp_root, coverage_gaps=[])
+            self._write_score_comparison(temp_root, baseline_gaps=[])
 
             output = self._run_validate_expect_success(module, temp_root)
 
@@ -1849,6 +1961,58 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
                 self.assertIn(expected_message, message)
 
+    def test_validate_accepts_empty_browseforge_integration_blockers_after_ready_gates_pass(self) -> None:
+        """Empty BrowseForge integration blockers mean the adapter, artifact, and live detector gates are all green."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_minimal_validate_tree(temp_root, module)
+            self._write_browseforge_integration_contract(temp_root, release_blockers=[])
+            manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+            self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+            self._write_release_gates(temp_root, live_detector_status="passed")
+            self._write_detector_summary(temp_root, coverage_gaps=[])
+            self._write_score_comparison(temp_root, baseline_gaps=[])
+
+            output = self._run_validate_expect_success(module, temp_root)
+
+        self.assertIn("runtime framework validation ok", output)
+
+    def test_validate_rejects_empty_browseforge_integration_blockers_before_ready_gates_pass(self) -> None:
+        """Empty BrowseForge integration blockers are only release-safe after all readiness gates pass."""
+        module = self._load_validate_module()
+        cases = [
+            ("browseforge adapter", "browseforge-adapter-merged"),
+            ("runtime artifact", "runtime-artifact-produced"),
+            ("live detector", "live-detector-evidence"),
+        ]
+        for case_name, blocked_gate in cases:
+            with self.subTest(blocked_gate=case_name):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    self._write_browseforge_integration_contract(temp_root, release_blockers=[])
+                    manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, manifest["artifacts"])
+                    self._write_release_gates(temp_root, live_detector_status="passed")
+                    self._write_detector_summary(temp_root, coverage_gaps=[])
+                    self._write_score_comparison(temp_root, baseline_gaps=[])
+                    release_gates_path = temp_root / "knowledge" / "manifests" / "release-gates.json"
+                    release_gates = json.loads(release_gates_path.read_text(encoding="utf-8"))
+                    for gate in release_gates["release_candidate_required_gates"]:
+                        if gate["gate_id"] == blocked_gate:
+                            gate["status"] = "warning"
+                            break
+                    else:  # pragma: no cover - keeps table edits honest.
+                        self.fail(f"missing release gate fixture: {blocked_gate}")
+                    self._write_json(release_gates_path, release_gates)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn("release_blockers can be empty only after ready gates pass", message)
+                self.assertIn(blocked_gate, message)
+
+
     def test_validate_rejects_stale_browseforge_integration_release_blockers_after_evidence_gates_pass(self) -> None:
         """Passed release evidence gates make old missing-evidence BrowseForge blockers invalid."""
         module = self._load_validate_module()
@@ -1857,6 +2021,10 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             "no detector baseline",
             "no Docker smoke evidence",
             "no Playwright bind evidence",
+            "external proxy exit-IP/geolocation detector evidence is missing",
+            "Windows native detector evidence is missing",
+            "native headed proxy and Windows detector matrix remains incomplete",
+            "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
         ]
         for stale_blocker in stale_blockers:
             with self.subTest(stale_blocker=stale_blocker):
@@ -1965,10 +2133,12 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "required_evidence": [
                     "build succeeds",
                     "artifact checksum exists",
+                    "app bundle layout packaged",
+                    "codesign/notarization decision exists",
                     "BrowseForge launches profile",
                     "detector run exists",
                 ],
-                "status": "planned",
+                "status": "packaging_contract_defined_artifact_missing",
             },
             {
                 "id": "windows-x64",
@@ -2023,17 +2193,16 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "id": "browseforge-chromium",
                 "family": "chromium",
                 "browseforge": {"profile_field": "runtime_id"},
+                "binary": {
+                    "linux-x64": {"relative_path": "chrome", "packaged": True},
+                },
                 "fingerprint": {"surfaces": list(self.REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS)},
             },
         )
         self._write_browseforge_integration_contract(
             root,
             release_blockers=[
-                "external proxy exit-IP/geolocation detector evidence is missing",
-                "macOS native BrowseForge Chromium release artifact is missing",
-                "Windows native BrowseForge Chromium release artifact is missing",
-                "native headed WebGL/audio/font/cross-platform detector matrix remains incomplete",
-                "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
+                "release-grade code-signing policy remains pending for packaged artifacts",
             ],
         )
 
@@ -2182,10 +2351,9 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 ],
                 "runtime_id": "browseforge-chromium",
                 "schema_version": "1.0",
-                "supported_package_platforms": ["linux-x64", "macos-arm64", "windows-x64"],
+                "supported_package_platforms": ["linux-x64", "macos-arm64", "macos-x64", "windows-x64"],
                 "unsupported_package_platforms": {
                     "linux-arm64": "missing Linux arm64 runtime asset contract",
-                    "macos-x64": "missing macOS x64 runtime asset contract",
                 },
                 "wrapper_binary_sha256": "",
             },
@@ -2487,6 +2655,14 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "gn_args": 'target_os="mac" target_cpu="arm64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false',
                     "out_dir": "out/BrowseForgeMacArm64",
                     "output_binary": "out/BrowseForgeMacArm64/Chromium.app/Contents/MacOS/Chromium",
+                    "required_host_os": "darwin",
+                    "status": "preflight_ready_artifact_missing",
+                },
+                "macos-x64": {
+                    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+                    "gn_args": 'target_os="mac" target_cpu="x64" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding="Chrome"',
+                    "out_dir": "out/BrowseForgeMacX64",
+                    "output_binary": "out/BrowseForgeMacX64/Chromium.app/Contents/MacOS/Chromium",
                     "required_host_os": "darwin",
                     "status": "preflight_ready_artifact_missing",
                 },
@@ -2816,8 +2992,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             return None
         snapshot: dict[str, Any] = {
             "host_os": "darwin",
-            "required_host_os": "darwin" if platform == "macos-arm64" else "windows",
-            "host_supported": platform == "macos-arm64",
+            "required_host_os": "darwin" if platform.startswith("macos-") else "windows",
+            "host_supported": platform.startswith("macos-"),
             "chromium_src_exists": False,
             "chromium_deps_exists": False,
             "depot_tools_exists": False,
@@ -2963,11 +3139,11 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "signing_requirement": "runtime-artifacts signature metadata matches artifact",
                     "status": "allowed",
                 }
-            elif platform == "macos-arm64":
+            elif platform.startswith("macos-"):
                 entry = {
-                    "decision": "codesign/notarization deferred until a native macOS artifact exists",
-                    "evidence": ["knowledge/manifests/platform-matrix.json:macos-arm64:codesign/notarization decision exists"],
-                    "missing_prerequisites": ["macOS native release artifact is missing"],
+                    "decision": f"codesign/notarization deferred until a native {platform} artifact exists",
+                    "evidence": [f"knowledge/manifests/platform-matrix.json:{platform}:codesign/notarization decision exists"],
+                    "missing_prerequisites": [f"{platform} native release artifact is missing"],
                     "platform": platform,
                     "release_grade_allowed": False,
                     "signing_requirement": signing_requirements[platform][0],

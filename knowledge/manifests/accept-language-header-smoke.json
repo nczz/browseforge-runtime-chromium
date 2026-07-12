@@ -1,8 +1,8 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-  "artifact_sha256": "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1",
+  "artifact_sha256": "828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683",
   "browser_version": "150.0.7871.101",
-  "generated_at": "2026-07-12T07:40:00Z",
+  "generated_at": "2026-07-12T12:00:00Z",
   "observed": {
     "accept_language": "en-US,en;q=0.9",
     "path": "/probe",

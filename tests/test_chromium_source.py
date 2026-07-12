@@ -117,6 +117,9 @@ class ChromiumSourcePlanTests(unittest.TestCase):
             self.assertIn(chromium_source.host_deps_argument(), sync.command)
         generate = next(step for step in plan.steps if step.id == "generate-dev-build")
         self.assertTrue(str(generate.creates).endswith("out/BrowseForgeDev/build.ninja"))
+        gn_args = next(arg for arg in generate.command if arg.startswith("--args="))
+        self.assertIn("proprietary_codecs=true", gn_args)
+        self.assertIn('ffmpeg_branding="Chrome"', gn_args)
 
     def test_check_tools_reports_checkout_presence(self) -> None:
         with tempfile.TemporaryDirectory() as td:

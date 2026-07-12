@@ -183,6 +183,8 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertEqual("bf-test:deps", plan.deps_image)
         self.assertIn('target_os="linux"', plan.gn_args)
         self.assertIn('target_cpu="x64"', plan.gn_args)
+        self.assertIn("proprietary_codecs=true", plan.gn_args)
+        self.assertIn('ffmpeg_branding="Chrome"', plan.gn_args)
 
     def test_check_reports_source_and_dockerfile_state(self) -> None:
         with tempfile.TemporaryDirectory() as td:

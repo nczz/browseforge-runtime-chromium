@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T10:00:00Z",
+  "generated_at": "2026-07-12T15:27:31Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -54,6 +54,45 @@
         "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
         "xcodebuild_ok": true,
         "xcodebuild_status": "ok"
+      }
+    },
+    {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+      "evidence": [
+        "knowledge/manifests/platform-matrix.json",
+        "contracts/browseforge-integration.contract.json",
+        "knowledge/manifests/signing-policy.json",
+        "python3 scripts/chromium_native.py check --platform macos-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True"
+      ],
+      "missing_prerequisites": [],
+      "next_commands": [
+        "python3 scripts/chromium_native.py plan --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py check --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
+        "python3 scripts/chromium_native.py sync-deps --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py run-hooks --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py gn-gen --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "python3 scripts/chromium_native.py build-chrome --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute",
+        "GOOS=darwin GOARCH=amd64 go build -o bin/browseforge-runtime-chromium-darwin-amd64 ./cmd/browseforge-runtime-chromium",
+        "python3 scripts/chromium_native.py package --platform macos-x64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
+      ],
+      "platform": "macos-x64",
+      "ready": true,
+      "status": "packaged_only_untested",
+      "status_snapshot": {
+        "build_ninja_exists": true,
+        "chromium_deps_exists": true,
+        "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
+        "chromium_src_exists": true,
+        "depot_tools_exists": true,
+        "gn_binary_exists": true,
+        "host_os": "darwin",
+        "host_supported": true,
+        "native_toolchain_ready": true,
+        "out_args_exists": true,
+        "output_binary_exists": true,
+        "package_zip_exists": true,
+        "required_host_os": "darwin",
+        "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
       }
     },
     {
@@ -122,6 +161,7 @@
   "supported_package_platforms": [
     "linux-x64",
     "macos-arm64",
+    "macos-x64",
     "windows-x64"
   ]
 }

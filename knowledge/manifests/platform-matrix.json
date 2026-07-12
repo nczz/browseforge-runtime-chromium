@@ -49,15 +49,23 @@
       "status": "packaged_launch_smoked"
     },
     {
+      "evidence": {
+        "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip",
+        "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/artifact-manifest.json",
+        "runtime_artifacts_manifest": "knowledge/manifests/runtime-artifacts.json",
+        "signing_policy": "knowledge/manifests/signing-policy.json"
+      },
       "id": "macos-x64",
       "priority": 3,
       "required_evidence": [
         "build succeeds",
         "artifact checksum exists",
-        "BrowseForge launches profile",
-        "detector run exists"
+        "app bundle layout packaged",
+        "SBOM/provenance generated",
+        "codesign/notarization decision exists",
+        "release notes disclose no launch smoke or detector evidence"
       ],
-      "status": "planned"
+      "status": "packaged_only_untested"
     },
     {
       "id": "windows-x64",

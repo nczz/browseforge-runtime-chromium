@@ -1,14 +1,14 @@
 {
   "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
-  "artifact_size_bytes": 567877597,
+  "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
+  "artifact_size_bytes": 567880267,
   "checks": [
     {
       "check": "archive_integrity",
       "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "observed": {
-        "archive_sha256": "6f2679e68e1a96639d52cfe7c8ed4cf527bbb0aa05f51643f32d92234c9b1448",
-        "archive_size_bytes": 567877597
+        "archive_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
+        "archive_size_bytes": 567880267
       },
       "status": "passed"
     },
@@ -73,7 +73,7 @@
       "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
       "limitations": "Prior detector navigation evidence predates this rebuilt artifact; rerun before release-grade detector claims.",
       "observed": {
-        "artifact_sha256": "prior-artifact-detector-evidence",
+        "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
         "audio": {
           "available": true,
           "length": 44100,

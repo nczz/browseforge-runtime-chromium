@@ -221,9 +221,10 @@ class PackageRuntimeTests(unittest.TestCase):
         platform_ids = {p["id"] for p in data["platforms"]}
         self.assertIn("linux-x64", platform_ids)
         self.assertIn("macos-arm64", platform_ids)
+        self.assertIn("macos-x64", platform_ids)
         self.assertIn("windows-x64", platform_ids)
-        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], data["supported_package_platforms"])
-        self.assertEqual({"macos-x64", "linux-arm64"}, set(data["unsupported_package_platforms"]))
+        self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], data["supported_package_platforms"])
+        self.assertEqual({"linux-arm64"}, set(data["unsupported_package_platforms"]))
         self.assertNotIn("windows-x64", data["unsupported_package_platforms"])
 
     def test_package_requires_browser_binary(self):
@@ -233,7 +234,7 @@ class PackageRuntimeTests(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("missing file", proc.stderr + proc.stdout)
 
-    def test_package_macos_arm64_requires_valid_app_bundle(self):
+    def test_package_macos_requires_valid_app_bundle_for_supported_arches(self):
         def outside_app(tmp: Path) -> Path:
             return self._write_executable(tmp / "Chromium")
 
@@ -251,68 +252,74 @@ class PackageRuntimeTests(unittest.TestCase):
             ("missing-info-plist", missing_info_plist, ("Info.plist",)),
         )
 
-        for name, setup, expected_messages in cases:
-            with self.subTest(name=name), tempfile.TemporaryDirectory() as td:
+        for platform_id in ("macos-arm64", "macos-x64"):
+            for name, setup, expected_messages in cases:
+                with self.subTest(platform=platform_id, case=name), tempfile.TemporaryDirectory() as td:
+                    tmp = Path(td)
+                    browser = setup(tmp)
+                    package = self._run_package(
+                        tmp,
+                        platform_id=platform_id,
+                        browser=browser,
+                        browser_dir=tmp,
+                        expect_success=False,
+                    )
+
+                    output = package["proc"].stderr + package["proc"].stdout
+                    for expected in expected_messages:
+                        self.assertIn(expected, output)
+
+    def test_package_macos_preserves_app_bundle_in_stage_manifest_sbom_and_zip_for_supported_arches(self):
+        cases = (
+            ("macos-arm64", "arm64"),
+            ("macos-x64", "x64"),
+        )
+
+        for platform_id, arch in cases:
+            with self.subTest(platform=platform_id), tempfile.TemporaryDirectory() as td:
                 tmp = Path(td)
-                browser = setup(tmp)
-                package = self._run_package(
-                    tmp,
-                    platform_id="macos-arm64",
-                    browser=browser,
-                    browser_dir=tmp,
-                    expect_success=False,
-                )
+                app, browser = self._write_macos_app_bundle(tmp)
+                package = self._run_package(tmp, platform_id=platform_id, browser=browser, browser_dir=app.parent)
+                stage = package["stage"]
+                manifest = json.loads((stage / "artifact-manifest.json").read_text())
+                provenance = json.loads((stage / "provenance.json").read_text())
+                sbom = json.loads((stage / "SBOM.json").read_text())
+                archive = Path(package["payload"]["archive"])
 
-                output = package["proc"].stderr + package["proc"].stdout
-                for expected in expected_messages:
-                    self.assertIn(expected, output)
+                for name, metadata in {
+                    "artifact-manifest.json": manifest,
+                    "provenance.json": provenance,
+                    "SBOM.json": sbom,
+                }.items():
+                    self.assertEqual(metadata["platform"], platform_id, name)
+                    self.assertEqual(metadata["os"], "macos", name)
+                    self.assertEqual(metadata["arch"], arch, name)
 
-    def test_package_macos_arm64_preserves_app_bundle_in_stage_manifest_sbom_and_zip(self):
-        with tempfile.TemporaryDirectory() as td:
-            tmp = Path(td)
-            app, browser = self._write_macos_app_bundle(tmp)
-            package = self._run_package(tmp, platform_id="macos-arm64", browser=browser, browser_dir=app.parent)
-            stage = package["stage"]
-            manifest = json.loads((stage / "artifact-manifest.json").read_text())
-            provenance = json.loads((stage / "provenance.json").read_text())
-            sbom = json.loads((stage / "SBOM.json").read_text())
-            archive = Path(package["payload"]["archive"])
+                expected_files = {
+                    f"{app.name}/{relative_path}": app / relative_path
+                    for relative_path in MACOS_APP_BUNDLE_FILES
+                }
+                expected_files["browseforge-runtime-chromium"] = package["wrapper"]
+                expected_files["runtime.manifest.json"] = ROOT / "contracts" / "runtime.manifest.json"
 
-            for name, metadata in {
-                "artifact-manifest.json": manifest,
-                "provenance.json": provenance,
-                "SBOM.json": sbom,
-            }.items():
-                self.assertEqual(metadata["platform"], "macos-arm64", name)
-                self.assertEqual(metadata["os"], "macos", name)
-                self.assertEqual(metadata["arch"], "arm64", name)
+                manifest_files = {entry["path"]: entry for entry in manifest["files"]}
+                sbom_files = {entry["path"]: entry for entry in sbom["files"]}
+                with zipfile.ZipFile(archive) as zf:
+                    archive_names = set(zf.namelist())
 
-            expected_files = {
-                f"{app.name}/{relative_path}": app / relative_path
-                for relative_path in MACOS_APP_BUNDLE_FILES
-            }
-            expected_files["browseforge-runtime-chromium"] = package["wrapper"]
-            expected_files["runtime.manifest.json"] = ROOT / "contracts" / "runtime.manifest.json"
+                for relative_path, source in expected_files.items():
+                    staged = stage / relative_path
+                    self.assertTrue(staged.is_file(), relative_path)
+                    self.assertIn(relative_path, manifest_files)
+                    self.assertIn(relative_path, sbom_files)
+                    self.assertIn(f"{package['artifact_id']}/{relative_path}", archive_names)
+                    self.assertEqual(manifest_files[relative_path]["sha256"], self._sha256(source))
+                    self.assertEqual(manifest_files[relative_path]["size_bytes"], source.stat().st_size)
+                    self.assertEqual(sbom_files[relative_path]["sha256"], self._sha256(source))
+                    self.assertEqual(sbom_files[relative_path]["size"], source.stat().st_size)
 
-            manifest_files = {entry["path"]: entry for entry in manifest["files"]}
-            sbom_files = {entry["path"]: entry for entry in sbom["files"]}
-            with zipfile.ZipFile(archive) as zf:
-                archive_names = set(zf.namelist())
-
-            for relative_path, source in expected_files.items():
-                staged = stage / relative_path
-                self.assertTrue(staged.is_file(), relative_path)
-                self.assertIn(relative_path, manifest_files)
-                self.assertIn(relative_path, sbom_files)
-                self.assertIn(f"{package['artifact_id']}/{relative_path}", archive_names)
-                self.assertEqual(manifest_files[relative_path]["sha256"], self._sha256(source))
-                self.assertEqual(manifest_files[relative_path]["size_bytes"], source.stat().st_size)
-                self.assertEqual(sbom_files[relative_path]["sha256"], self._sha256(source))
-                self.assertEqual(sbom_files[relative_path]["size"], source.stat().st_size)
-
-            self.assertEqual(manifest["browser_binary_sha256"], self._sha256(browser))
-            self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
-
+                self.assertEqual(manifest["browser_binary_sha256"], self._sha256(browser))
+                self.assertEqual(provenance["browser_binary_sha256"], self._sha256(browser))
 
     def test_package_windows_x64_requires_chrome_exe_browser_binary(self):
         with tempfile.TemporaryDirectory() as td:

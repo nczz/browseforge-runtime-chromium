@@ -1,0 +1,105 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+  "detector": {
+    "category": "cross_surface_consistency",
+    "detector_id": "creepjs",
+    "manifest_ref": "knowledge/manifests/detectors.json#creepjs",
+    "name": "CreepJS",
+    "url": "https://abrahamjuliot.github.io/creepjs/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_macos-arm64_creepjs_headed_proxy_host_20260712",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [
+      {
+        "from": "DetectorRun:detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_proxy_host_20260712",
+        "label": "VALIDATES_RUNTIME",
+        "properties": {},
+        "to": "RuntimeProvider:browseforge-chromium"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "DetectorRun:detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_proxy_host_20260712",
+        "label": "DetectorRun",
+        "properties": {
+          "artifact_sha256": "6adf38fd418bda08ef3499079f716891887259eae617c8e4f14fb259dab9704e"
+        }
+      }
+    ]
+  },
+  "matrix": {
+    "container": false,
+    "display_mode": "headed",
+    "matrix_key": "macos-arm64:creepjs:headed:proxy:host",
+    "network_mode": "proxy",
+    "platform": "macos-arm64",
+    "proxy": "redacted",
+    "required": true
+  },
+  "results": [
+    {
+      "evidence_ref": "sanitized_proxy_observation",
+      "finding": "CreepJS was collected through the configured external Los Angeles proxy without committing raw proxy host/IP values.",
+      "normalized_values": {
+        "detector_geolocation_region_redacted": "us-los-angeles",
+        "network_mode": "proxy",
+        "proxy_exit_region_redacted": "us-los-angeles"
+      },
+      "severity": "info",
+      "status": "pass",
+      "surface": "proxy_ip_coherence"
+    },
+    {
+      "evidence_ref": "sanitized_collect_record",
+      "finding": "CreepJS fingerprint check loaded, but navigator.userAgentData is unavailable.",
+      "normalized_values": {
+        "detector_status": "warning",
+        "timezone": "America/Los_Angeles",
+        "ua_architecture": null
+      },
+      "severity": "low",
+      "status": "warn",
+      "surface": "client_hints"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_proxy_host_20260712",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw CDP collect output stayed uncommitted; committed evidence uses only bounded sanitized observations and hashes.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "manual-redacted-20260712",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/macos-arm64/creepjs/detrun_v0.1.0-alpha.0_macos-arm64_creepjs_headed_proxy_host_20260712.json",
+    "sha256": "42ab572056479d98b8afe155bd76c6f3439e0374939c5ff5484bc0fde39052f6",
+    "summary_path": "knowledge/manifests/proxy-surface-smoke.json"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": false,
+    "gpu_mode": "headed_native",
+    "host_os": "darwin",
+    "locale_profile": "en-US",
+    "platform": "macos-arm64",
+    "proxy_region_redacted": "us-los-angeles",
+    "timezone_profile": "America/Los_Angeles"
+  },
+  "tested_at": "2026-07-12T12:00:00Z"
+}

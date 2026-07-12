@@ -1,146 +1,11 @@
 {
-  "blocker_count": 18,
+  "blocker_count": 5,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
-      "detail": "external proxy exit-IP/geolocation detector evidence is missing",
+      "detail": "macos-x64 release package is required by the runtime package contract but is missing; do not publish release assets until the real zip, checksum, SBOM, and provenance exist; launch smoke and detector evidence are intentionally absent and disclosed.",
       "severity": "high",
       "source": "contracts/browseforge-integration.contract.json"
-    },
-    {
-      "blocker_id": "browseforge-integration:1",
-      "detail": "Windows native detector evidence is missing",
-      "severity": "high",
-      "source": "contracts/browseforge-integration.contract.json"
-    },
-    {
-      "blocker_id": "browseforge-integration:2",
-      "detail": "native headed proxy and Windows detector matrix remains incomplete",
-      "severity": "high",
-      "source": "contracts/browseforge-integration.contract.json"
-    },
-    {
-      "blocker_id": "browseforge-integration:3",
-      "detail": "runtime release_grade must remain false until supported platform artifacts and live detector gates pass",
-      "severity": "high",
-      "source": "contracts/browseforge-integration.contract.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:browserleaks:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "browserleaks",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:browserleaks:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector browserleaks --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:browserscan:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "browserscan",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:browserscan:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector browserscan --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:creepjs:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "creepjs",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:creepjs:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector creepjs --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:iphey:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "iphey",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:iphey:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector iphey --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:pixelscan:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "pixelscan",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:pixelscan:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector pixelscan --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "detector:coverage-gap:macos-arm64:sannysoft:headed:proxy:host",
-      "container": false,
-      "detail": "headed / native/host / external proxy exit-IP/geolocation sanitized detector evidence",
-      "detector_id": "sannysoft",
-      "display_mode": "headed",
-      "matrix_key": "macos-arm64:sannysoft:headed:proxy:host",
-      "network_mode": "proxy",
-      "platform": "macos-arm64",
-      "remediation_command": "python3 scripts/detector_harness.py run --detector sannysoft --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <redacted-region> --display headed",
-      "severity": "high",
-      "source": "detector-summary.json"
-    },
-    {
-      "blocker_id": "fingerprint-surface:cross-platform drift",
-      "detail": "Linux x64 Docker SannySoft, BrowserLeaks, Pixelscan, BrowserScan, iphey, and CreepJS smokes now exist in both headless and headed/Xvfb display modes where supported. macOS arm64 packaged headed SannySoft full direct evidence plus packaged BrowserLeaks Client Hints/Screen/Canvas/WebGL/audio/fonts/WebRTC, BrowserScan client-hints/audio/fonts/canvas/storage/permissions/automation, BrowserScan WebGL, Pixelscan WebGL/audio/fonts/canvas, iphey client-hints/audio/fonts/canvas/locale/permissions/automation, and CreepJS WebGL/audio/fonts evidence exists for the built BrowseForge Chromium app; older host headed BrowserLeaks direct evidence exists through installed system Chrome. Windows and external proxy detector matrix coverage remain absent.",
-      "result": "linux_headless_headed_xvfb_plus_macos_packaged_sannysoft_browserleaks_browserscan_pixelscan_iphey_creepjs_direct_partial",
-      "severity": "medium",
-      "source": "knowledge/manifests/fingerprint-surface-status.json",
-      "status": "detector_tested",
-      "surface": "cross-platform drift"
-    },
-    {
-      "blocker_id": "fingerprint-surface:proxy/IP coherence",
-      "detail": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. Native persona validation now rejects raw IP, URL/credential-like, whitespace-padded, and overlong WebRTC proxy_region labels in Go and C++ coherence paths. No external proxy exit-IP/geolocation detector run has been executed.",
-      "result": "warn_linux_browserleaks_local_proxy_and_webrtc_metadata_only",
-      "severity": "high",
-      "source": "knowledge/manifests/fingerprint-surface-status.json",
-      "status": "detector_tested",
-      "surface": "proxy/IP coherence"
-    },
-    {
-      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_REGION",
-      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_REGION is missing",
-      "severity": "critical",
-      "source": "knowledge/manifests/proxy-preflight.json"
-    },
-    {
-      "blocker_id": "proxy-preflight:missing:BROWSEFORGE_DETECTOR_PROXY_URL",
-      "detail": "required proxy setting BROWSEFORGE_DETECTOR_PROXY_URL is missing",
-      "severity": "critical",
-      "source": "knowledge/manifests/proxy-preflight.json"
-    },
-    {
-      "blocker_id": "release-gate:live-detector-evidence",
-      "detail": "release gate live-detector-evidence status is 'warning', not 'passed'",
-      "evidence": "Live SannySoft headless/direct Docker evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json, BrowserLeaks Client Hints evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/browserleaks/detrun_linux_x64_browserleaks_client_hints_headless_docker_direct_20260709.json, Pixelscan UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/pixelscan/detrun_linux_x64_pixelscan_uach_headless_docker_direct_20260709.json, iphey UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/iphey/detrun_linux_x64_iphey_uach_headless_docker_direct_20260709.json, BrowserScan UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/browserscan/detrun_linux_x64_browserscan_uach_headless_docker_direct_20260709.json, and CreepJS UA-CH evidence is recorded at detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_uach_headless_docker_direct_20260709.json. The rebuilt Linux artifact verifies navigator.webdriver=false, configured Chromium UA without HeadlessChrome, UA-CH fullVersionList with Chromium 150.0.7871.101 on SannySoft/BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS, zh-TW languages, Asia/Taipei timezone, 1920x1080/1920x1040 screen, storage quota 8589934592 bytes, hardwareConcurrency/deviceMemory=8, Intel WebGL vendor/renderer, repeat-consistent sanitized Canvas 2D hashes, an unscored OfflineAudioContext probe, and an unscored FontFaceSet availability probe. Release-grade headed/proxy BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft matrix remains required; detector-score-comparison.json records CreepJS audio headless/headed deltas and BrowserLeaks/CreepJS font glyph/metric comparison while keeping release_grade=false and explicit baseline_gaps for missing BrowserLeaks audio, Pixelscan audio/fonts, and native headed font corpus evidence.",
-      "gate_id": "live-detector-evidence",
-      "severity": "high",
-      "source": "knowledge/manifests/release-gates.json",
-      "status": "warning"
     },
     {
       "blocker_id": "signing-policy:linux-x64",
@@ -170,6 +35,20 @@
       "status": "unsigned_alpha_dev_artifact"
     },
     {
+      "blocker_id": "signing-policy:macos-x64",
+      "detail": "Unsigned macOS x64 alpha artifact is acceptable only as a packaged-only release asset with committed SHA-256, SBOM, and provenance metadata; launch smoke and detector evidence are intentionally absent, and release-grade publishing still requires Developer ID signing and notarization policy update.",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/SBOM.json",
+        "knowledge/manifests/native-artifact-preflight.json"
+      ],
+      "platform": "macos-x64",
+      "severity": "high",
+      "source": "knowledge/manifests/signing-policy.json",
+      "status": "unsigned_packaged_only_alpha_dev_artifact"
+    },
+    {
       "blocker_id": "signing-policy:windows-x64",
       "detail": "Unsigned Windows x64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Authenticode/code-signing policy update.",
       "evidence": [
@@ -184,17 +63,17 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T10:00:00Z",
+  "generated_at": "2026-07-12T15:33:18Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "247ea4d98935e780b27b3b9dc0c64038b2a853f2277cd9d20144e6b406443912",
-    "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
-    "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
-    "knowledge/manifests/fingerprint-surface-status.json": "741483fc446e451cca6ad0c75a79bf653546eea706a2bb971a60da3eea03922f",
-    "knowledge/manifests/native-artifact-preflight.json": "207457d4faa81999a9104e47f3b5a570f113a2a392b053c9cb5c393a65374190",
-    "knowledge/manifests/proxy-preflight.json": "be03a0cc32fea994616393ac110135927398f75365577da34a3c7a136bef858a",
-    "knowledge/manifests/release-gates.json": "9e1994b2f6fa55032b51be5a1a61979ae87c302ac3d83b04d8d94d257926c5df",
-    "knowledge/manifests/signing-policy.json": "87248d5dfb5a932c4b46bc837513c8b35a0c2aadf5a548729a14c6eaff864c7b",
-    "knowledge/manifests/source-acquisition.json": "ee8af0e7ca75c4a0d6bbab8a3370dd3a3a60b1ab7c15387aaa79d258926c50f2"
+    "contracts/browseforge-integration.contract.json": "cfb92f6f571510230e1805b63117605d90e81dce8cc235dbc6603febca573c64",
+    "detector-summary.json": "fa71cfbee22b939a7cbe3c4a78fc4e695f1073551047559cde53dcb823e661ba",
+    "knowledge/manifests/detector-score-comparison.json": "28e96e92a6e31fe7ffdb9833b2821fc8593c59545fb0d1e8081919206a478629",
+    "knowledge/manifests/fingerprint-surface-status.json": "fa49885b6fe26ac066e9e68fb7d7f47333db6c3d922af922edd34d81159b2325",
+    "knowledge/manifests/native-artifact-preflight.json": "b745cdc50b74630cd4199f5a9549011b5f6ceffbb5edabf389096c728cb1ee64",
+    "knowledge/manifests/proxy-preflight.json": "94814a404fdc614852978d9ab4d8d9f1f62680289b4ddd44e28386780dc12f6c",
+    "knowledge/manifests/release-gates.json": "ef12b195e6d8c78fe2f1bf80c42c9a051a5150a53353453759004cc93e97c597",
+    "knowledge/manifests/signing-policy.json": "3a67b6c0bf5e57fa95f2472b02d2b9db0e4bd5c99d5949b08c5ec1cca2058149",
+    "knowledge/manifests/source-acquisition.json": "06156b3726e52d8c1bb750f94dee0634d71971893d2541f4e3dc307d5b5b13e0"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",
@@ -210,67 +89,10 @@
   "release_grade_ready": false,
   "resource_requirements": [
     {
-      "errors": [],
-      "provide": [
-        "BROWSEFORGE_DETECTOR_PROXY_URL",
-        "BROWSEFORGE_DETECTOR_PROXY_REGION"
-      ],
-      "requirements": [
-        "external proxy URL with scheme, host, and port",
-        "redacted external proxy region/geolocation metadata label",
-        "no loopback, private, link-local, or .local proxy authority",
-        "no raw credentials or IP literals in committed proxy URL or region evidence",
-        "run every detector in proxy network mode before clearing proxy release blockers"
-      ],
-      "resource_id": "external-detector-proxy",
-      "severity": "critical",
-      "status": "missing",
-      "unblocks": [
-        "external proxy exit-IP/geolocation detector evidence",
-        "proxy/IP coherence detector matrix",
-        "WebRTC public/private IP coherence evidence"
-      ]
-    },
-    {
-      "provide": [
-        "macos-arm64:browserleaks:headed:proxy:host",
-        "macos-arm64:browserscan:headed:proxy:host",
-        "macos-arm64:creepjs:headed:proxy:host",
-        "macos-arm64:iphey:headed:proxy:host",
-        "macos-arm64:pixelscan:headed:proxy:host",
-        "macos-arm64:sannysoft:headed:proxy:host"
-      ],
-      "requirements": [
-        "headed detector runs through the configured external proxy"
-      ],
-      "resource_id": "live-proxy-detector-matrix",
-      "severity": "high",
-      "status": "missing_detector_evidence",
-      "unblocks": [
-        "release-grade live detector evidence gate"
-      ]
-    },
-    {
-      "provide": [
-        "windows-x64 native headed detector evidence"
-      ],
-      "requirements": [
-        "manual Windows OS validation host that can launch the packaged chrome.exe",
-        "sanitized headed detector evidence for each required Windows matrix row",
-        "local wine/qemu execution is not required for the Windows compile/runtime verification step"
-      ],
-      "resource_id": "windows-manual-detector-validation",
-      "severity": "high",
-      "status": "missing_detector_evidence",
-      "unblocks": [
-        "Windows native detector evidence",
-        "cross-platform drift detector matrix"
-      ]
-    },
-    {
       "provide": [
         "linux-x64",
         "macos-arm64",
+        "macos-x64",
         "windows-x64"
       ],
       "requirements": [

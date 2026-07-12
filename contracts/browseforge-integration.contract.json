@@ -1,7 +1,61 @@
 {
-  "contract_version": "v0.1.0",
-  "runtime_id": "browseforge-chromium",
+  "adapter_requirements": [
+    "runtime descriptor registered with chromium family",
+    "binary path resolved from config.runtimes.<id>.binary_path",
+    "profile create/update/import/restore stores runtime_id, not engine",
+    "launch path assembles deterministic profile-specific args without mutating unrelated runtimes",
+    "Playwright bind endpoint is reachable for launched sessions",
+    "browser cache version marker prevents stale seeded runtime reuse",
+    "smoke rest and smoke mcp pass under Docker",
+    "launch path propagates profile fingerprint UA/UA-CH, locale, hardware, screen, plugins, canvas, audio, fonts, WebGL, WebRTC proxy region metadata, and native stealth config switches into BrowseForge Chromium"
+  ],
   "browseforge_min_version": "v2.0.0",
+  "browseforge_repository_evidence": {
+    "branch": "main",
+    "commit": "aba5248",
+    "files": [
+      "config.default.json",
+      "internal/browser/launch_chromium.go",
+      "internal/browser/manager_test.go",
+      "internal/config/config.go",
+      "internal/config/config_test.go",
+      "internal/profile/store.go",
+      "internal/groups/store.go",
+      "internal/groups/store_test.go",
+      "API.md",
+      "API.zh-TW.md",
+      "internal/browser/download.go",
+      "cmd/server/cli_runtime.go",
+      "docker/Dockerfile.run",
+      "docker/docker-compose.yml",
+      "README.md",
+      "docker/README.md",
+      "docs/cloud-deployment.md",
+      "docs/platform-support.md"
+    ],
+    "repository": "github.com:nczz/BrowseForge.git",
+    "summary": "BrowseForge registers Camoufox, CloakBrowser, and BrowseForge Chromium runtimes; Docker/GHCR defaults preinstall Camoufox plus BrowseForge Chromium; browser status/install can target selected runtimes; BrowseForge Chromium launch propagates fingerprint identity, proxy region metadata, and native stealth config switches.",
+    "verification": [
+      "go test ./internal/browser ./internal/groups",
+      "go test ./internal/config",
+      "npm run check-doc-language",
+      "go test -count=1 ./cmd/server ./internal/browser ./internal/config ./internal/runtime"
+    ]
+  },
+  "contract_version": "v0.1.0",
+  "native_persona_contract": {
+    "proxy": [
+      "profile.proxy.region -> webrtc.proxy_region"
+    ],
+    "webrtc": [
+      "webrtc.mode",
+      "webrtc.direct_ip_redaction",
+      "webrtc.proxy_region"
+    ]
+  },
+  "release_blockers": [
+    "macos-x64 release package is required by the runtime package contract but is missing; do not publish release assets until the real zip, checksum, SBOM, and provenance exist; launch smoke and detector evidence are intentionally absent and disclosed."
+  ],
   "required_browseforge_surfaces": [
     "config.runtimes.<id>",
     "GET /api/runtimes",
@@ -19,46 +73,12 @@
     "browsers install",
     "Docker seed /app/browsers/<runtime>"
   ],
-  "adapter_requirements": [
-    "runtime descriptor registered with chromium family",
-    "binary path resolved from config.runtimes.<id>.binary_path",
-    "profile create/update/import/restore stores runtime_id, not engine",
-    "launch path assembles deterministic profile-specific args without mutating unrelated runtimes",
-    "Playwright bind endpoint is reachable for launched sessions",
-    "browser cache version marker prevents stale seeded runtime reuse",
-    "smoke rest and smoke mcp pass under Docker",
-    "launch path propagates profile fingerprint UA/UA-CH, locale, hardware, screen, plugins, canvas, audio, fonts, WebGL, WebRTC proxy region metadata, and native stealth config switches into BrowseForge Chromium"
-  ],
-  "release_blockers": [
-    "external proxy exit-IP/geolocation detector evidence is missing",
-    "Windows native detector evidence is missing",
-    "native headed proxy and Windows detector matrix remains incomplete",
-    "runtime release_grade must remain false until supported platform artifacts and live detector gates pass"
-  ],
-  "browseforge_repository_evidence": {
-    "repository": "github.com:nczz/BrowseForge.git",
-    "branch": "main",
-    "commit": "aba5248",
-    "summary": "BrowseForge launch_chromium propagates profile fingerprint identity and trimmed proxy region metadata into BrowseForge Chromium native switches and persona config; group proxy storage normalizes proxy region metadata across effective proxy, reload, export, and import paths; config.default/API docs expose the optional proxy region metadata field for browseforge-chromium workflows.",
-    "files": [
-      "config.default.json",
-      "internal/browser/launch_chromium.go",
-      "internal/browser/manager_test.go",
-      "internal/config/config.go",
-      "internal/config/config_test.go",
-      "internal/profile/store.go",
-      "internal/groups/store.go",
-      "internal/groups/store_test.go",
-      "API.md",
-      "API.zh-TW.md"
-    ],
-    "verification": [
-      "go test ./internal/browser ./internal/groups",
-      "go test ./internal/config",
-      "npm run check-doc-language"
-    ]
-  },
+  "runtime_id": "browseforge-chromium",
   "runtime_switch_contract": {
+    "hardware": [
+      "--fingerprint-hardware-concurrency",
+      "--fingerprint-device-memory"
+    ],
     "identity": [
       "--user-agent",
       "--fingerprint-user-agent",
@@ -72,9 +92,9 @@
       "--fingerprint-locale",
       "--fingerprint-accept-language"
     ],
-    "hardware": [
-      "--fingerprint-hardware-concurrency",
-      "--fingerprint-device-memory"
+    "native_substrate": [
+      "--browseforge-stealth-config",
+      "--browseforge-stealth-mode"
     ],
     "screen": [
       "--fingerprint-screen-width",
@@ -89,20 +109,6 @@
       "--fingerprint-fonts-list",
       "--fingerprint-webgl-vendor",
       "--fingerprint-webgl-renderer"
-    ],
-    "native_substrate": [
-      "--browseforge-stealth-config",
-      "--browseforge-stealth-mode"
-    ]
-  },
-  "native_persona_contract": {
-    "proxy": [
-      "profile.proxy.region -> webrtc.proxy_region"
-    ],
-    "webrtc": [
-      "webrtc.mode",
-      "webrtc.direct_ip_redaction",
-      "webrtc.proxy_region"
     ]
   }
 }

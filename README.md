@@ -16,7 +16,7 @@ This repository is the source of truth for a BrowseForge-compatible Chromium run
 | Path | Purpose |
 | --- | --- |
 | `contracts/` | Stable runtime contracts consumed by BrowseForge and release tooling. |
-| `docs/` | Architecture, BrowseForge integration map, anti-detect research plan, and release gates. |
+| `docs/` | Architecture, BrowseForge integration map, anti-detect research plan, release gates, and release-facing anti-detection matrix. |
 | `wrapper/` | Cloak-like runtime launcher source and launch-policy implementation. |
 | `browser/` | Chromium fork notes, patch inventory, upstream tracking, and source import instructions. |
 | `build/` | Reproducible build and packaging scripts. |
@@ -39,6 +39,10 @@ primary goal: Chromium-family anti-detect runtime with Playwright bind support
 ```
 
 The runtime is expected to expose persistent browser sessions, deterministic fingerprint inputs, native proxy support, WebRTC masking controls, profile-isolated user data directories, and Docker-friendly launch behavior.
+
+Supported alpha package platforms are `linux-x64`, `macos-arm64`, `macos-x64`, and `windows-x64`. Existing local artifacts cover Linux x64, macOS arm64, and Windows x64. macOS x64 is contract-defined and must remain packaged-only, unsigned, not launch-tested, and not detector-tested until separate validation evidence exists.
+
+All current packages are unsigned alpha artifacts. Users must verify SHA-256 checksums before running. macOS users may need to manually allow the app or run `xattr -dr com.apple.quarantine /path/to/Chromium.app`; Windows users may see SmartScreen/Defender warnings until Authenticode signing is configured; Linux users must verify the SHA-256 entry in `checksums.txt`. Do not describe these artifacts as production-ready or signed/notarized releases.
 
 ## Development phases
 
