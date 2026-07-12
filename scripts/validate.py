@@ -1039,6 +1039,14 @@ def validate_browseforge_integration_contract(contract: dict, gate_status: dict[
     missing_surfaces = sorted(required_surfaces - surfaces)
     if missing_surfaces:
         raise SystemExit(f"BrowseForge integration contract missing surfaces: {missing_surfaces}")
+    adapter_requirements = " ".join(str(item) for item in contract.get("adapter_requirements", []))
+    if "WebRTC proxy region metadata" not in adapter_requirements:
+        raise SystemExit("BrowseForge integration contract must require WebRTC proxy region metadata propagation")
+    native_persona = contract.get("native_persona_contract", {})
+    native_proxy = native_persona.get("proxy", []) if isinstance(native_persona, dict) else []
+    native_webrtc = native_persona.get("webrtc", []) if isinstance(native_persona, dict) else []
+    if "profile.proxy.region -> webrtc.proxy_region" not in native_proxy or "webrtc.proxy_region" not in native_webrtc:
+        raise SystemExit("BrowseForge integration contract must map profile.proxy.region to native webrtc.proxy_region")
     blockers = contract.get("release_blockers", [])
     if not blockers or not all(isinstance(blocker, str) and blocker for blocker in blockers):
         raise SystemExit("BrowseForge integration contract release_blockers must be non-empty strings")

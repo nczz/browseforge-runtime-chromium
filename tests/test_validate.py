@@ -43,6 +43,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         "knowledge/manifests/signing-policy.json",
         "knowledge/manifests/release-status.json",
         "knowledge/manifests/objective-audit.json",
+        "knowledge/manifests/accept-language-header-smoke.json",
         "knowledge/manifests/source-acquisition.json",
     )
     REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS = (
@@ -259,20 +260,25 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
 
     def test_runtime_artifact_manifest_distinguishes_supported_contracts_from_artifacts(self) -> None:
-        """macos-arm64 is packaged while windows-x64 remains a supported contract without an artifact."""
+        """Supported package contracts and committed artifacts both exclude unsupported platforms."""
         with RUNTIME_ARTIFACTS_MANIFEST.open(encoding="utf-8") as fh:
             manifest = json.load(fh)
 
-        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], manifest.get("supported_package_platforms"))
+        supported_package_platforms = manifest.get("supported_package_platforms")
+        self.assertEqual(["linux-x64", "macos-arm64", "windows-x64"], supported_package_platforms)
+        supported_platforms = set(supported_package_platforms)
+
         unsupported = manifest.get("unsupported_package_platforms")
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
-        self.assertEqual({"macos-x64", "linux-arm64"}, set(unsupported))
-        self.assertNotIn("windows-x64", unsupported)
+        unsupported_platforms = set(unsupported)
+        self.assertEqual({"macos-x64", "linux-arm64"}, unsupported_platforms)
+        self.assertTrue(supported_platforms.isdisjoint(unsupported_platforms))
 
         artifact_platforms = {artifact.get("platform") for artifact in manifest.get("artifacts", [])}
-        self.assertEqual({"linux-x64", "macos-arm64"}, artifact_platforms)
-        self.assertGreater(set(manifest["supported_package_platforms"]), artifact_platforms)
+        self.assertEqual({"linux-x64", "macos-arm64", "windows-x64"}, artifact_platforms)
+        self.assertLessEqual(artifact_platforms, supported_platforms)
+        self.assertTrue(artifact_platforms.isdisjoint(unsupported_platforms))
 
     def test_validate_allows_supported_package_contract_without_artifact(self) -> None:
         """A supported packager contract must not require a RuntimeArtifact until an artifact is listed."""
@@ -1665,6 +1671,56 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
 
         self.assertIn("runtime framework validation ok", output)
 
+
+    def test_validate_rejects_browseforge_integration_contract_missing_proxy_region_contract(self) -> None:
+        """BrowseForge contracts must connect profile proxy region to native WebRTC metadata."""
+        module = self._load_validate_module()
+        cases = [
+            (
+                "adapter requirement",
+                "adapter_requirement",
+                "must require webrtc proxy region metadata propagation",
+            ),
+            (
+                "native proxy mapping",
+                "native_proxy_mapping",
+                "must map profile.proxy.region to native webrtc.proxy_region",
+            ),
+            (
+                "native webrtc field",
+                "native_webrtc_field",
+                "must map profile.proxy.region to native webrtc.proxy_region",
+            ),
+        ]
+        for case_name, missing_piece, expected_message in cases:
+            with self.subTest(missing_piece=case_name):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    contract_path = temp_root / "contracts" / "browseforge-integration.contract.json"
+                    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+                    if missing_piece == "adapter_requirement":
+                        contract["adapter_requirements"] = [
+                            requirement
+                            for requirement in contract["adapter_requirements"]
+                            if "WebRTC proxy region metadata" not in requirement
+                        ]
+                    elif missing_piece == "native_proxy_mapping":
+                        contract["native_persona_contract"]["proxy"] = []
+                    elif missing_piece == "native_webrtc_field":
+                        contract["native_persona_contract"]["webrtc"] = [
+                            field
+                            for field in contract["native_persona_contract"]["webrtc"]
+                            if field != "webrtc.proxy_region"
+                        ]
+                    else:  # pragma: no cover - keeps table edits honest.
+                        self.fail(f"unknown proxy-region contract case: {missing_piece}")
+                    self._write_json(contract_path, contract)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                self.assertIn(expected_message, message)
+
     def test_validate_rejects_stale_browseforge_integration_release_blockers_after_evidence_gates_pass(self) -> None:
         """Passed release evidence gates make old missing-evidence BrowseForge blockers invalid."""
         module = self._load_validate_module()
@@ -2005,6 +2061,24 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             },
         )
         self._write_current_runtime_artifact_fixture(root)
+        runtime_artifacts = self._load_temp_runtime_artifacts_manifest(root)
+        artifact = runtime_artifacts["artifacts"][0]
+        self._write_json(
+            root / "knowledge" / "manifests" / "accept-language-header-smoke.json",
+            {
+                "artifact_id": artifact["artifact_id"],
+                "artifact_sha256": artifact["sha256"],
+                "observed": {"accept_language": "en-US,en;q=0.9"},
+                "runtime_id": "browseforge-chromium",
+                "schema_version": "1.0",
+                "status": "passed",
+                "surfaces": ["locale"],
+                "switches": {
+                    "fingerprint_accept_language": "en-US",
+                    "fingerprint_locale": "zh-TW",
+                },
+            },
+        )
         self._write_signing_policy(root)
         self._write_native_artifact_preflight(root)
 
@@ -2905,10 +2979,21 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     "Playwright bind endpoint is reachable for launched sessions",
                     "browser cache version marker prevents stale seeded runtime reuse",
                     "smoke rest and smoke mcp pass under Docker",
+                    "launch path propagates WebRTC proxy region metadata into BrowseForge Chromium native persona config",
                 ],
                 "browseforge_min_version": "v2.0.0",
                 "contract_version": "v0.1.0",
                 "release_blockers": release_blockers,
+                "native_persona_contract": {
+                    "proxy": [
+                        "profile.proxy.region -> webrtc.proxy_region",
+                    ],
+                    "webrtc": [
+                        "webrtc.mode",
+                        "webrtc.direct_ip_redaction",
+                        "webrtc.proxy_region",
+                    ],
+                },
                 "required_browseforge_surfaces": [
                     "config.runtimes.<id>",
                     "GET /api/runtimes",
