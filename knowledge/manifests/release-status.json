@@ -184,9 +184,9 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T08:15:00Z",
+  "generated_at": "2026-07-12T08:25:00Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "26d958f22c50ea61cdc5775a05432becf862f99c1fca30bd49f0248db5d5d78d",
+    "contracts/browseforge-integration.contract.json": "6b8b5145dd8996ca4661e3ea057559c99cc01d75c06a7e385c4405c6f0840893",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "7bbeda495058b382c21ab5094891e5ecad476d50731f77a5c506b1b8aa671ed6",

@@ -38,18 +38,20 @@
   "browseforge_repository_evidence": {
     "repository": "github.com:nczz/BrowseForge.git",
     "branch": "main",
-    "commit": "85da7d5",
-    "summary": "BrowseForge launch_chromium propagates profile fingerprint identity and trimmed proxy region metadata into BrowseForge Chromium native switches and persona config; config.default.json enables plugins_pdf for browseforge-chromium.",
+    "commit": "4f72181",
+    "summary": "BrowseForge launch_chromium propagates profile fingerprint identity and trimmed proxy region metadata into BrowseForge Chromium native switches and persona config; group proxy storage normalizes proxy region metadata across effective proxy, reload, export, and import paths; config.default.json enables plugins_pdf for browseforge-chromium.",
     "files": [
       "config.default.json",
       "internal/browser/launch_chromium.go",
       "internal/browser/manager_test.go",
       "internal/config/config.go",
       "internal/config/config_test.go",
-      "internal/profile/store.go"
+      "internal/profile/store.go",
+      "internal/groups/store.go",
+      "internal/groups/store_test.go"
     ],
     "verification": [
-      "go test ./internal/browser",
+      "go test ./internal/browser ./internal/groups",
       "go test ./internal/config"
     ]
   },
