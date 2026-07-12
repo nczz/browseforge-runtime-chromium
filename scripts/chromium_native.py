@@ -32,6 +32,10 @@ WINDOWS_TOOLCHAIN_ENABLE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN"
 WINDOWS_TOOLCHAIN_HASH_ENV = "GYP_MSVS_HASH_e66617bc68"
 DEFAULT_WINDOWS_TOOLCHAIN_HASH = "6eae1a9f3e"
 DEFAULT_WINDOWS_TOOLCHAIN_BASE = Path.home() / "Projects" / "chromium-win-sdk-prep" / "output"
+WINDOWS_MANUAL_VALIDATION_NOTE = (
+    "Windows compile/runtime verification is delegated to manual validation on a Windows OS host; "
+    "local wine/qemu execution is not required for this preflight."
+)
 
 
 
@@ -383,6 +387,7 @@ def native_status_evidence(platform_id: str, status: dict[str, object]) -> str:
         parts.append(f"windows_toolchain_zip_exists={status.get('windows_toolchain_zip_exists')}")
         parts.append(f"gclient_target_os_win={status.get('gclient_target_os_win')}")
         parts.append(f"portable_layout_exists={status.get('portable_layout_exists')}")
+        parts.append("verification_mode=manual_windows_os")
     return f"python3 scripts/chromium_native.py check --platform {platform_id}: " + ", ".join(parts)
 
 def native_status_snapshot(platform_id: str, status: dict[str, object]) -> dict[str, object]:
@@ -416,6 +421,8 @@ def native_status_snapshot(platform_id: str, status: dict[str, object]) -> dict[
             "gclient_target_os_win",
             "gclient_path",
             "portable_layout_exists",
+            "verification_mode",
+            "manual_windows_os_validation_required",
         ])
     return {key: status[key] for key in keys if key in status}
 
@@ -451,15 +458,11 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
     missing: list[str] = []
     if not status["package_zip_exists"]:
         missing.append(f"dist/browseforge-runtime-chromium-{RUNTIME_VERSION}-{platform_id}.zip")
-    if not status["host_supported"]:
-        missing.append(
-            "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run"
-            if platform_id == "windows-x64"
-            else f"{platform_id} host/toolchain selected so native Chromium packaging can run"
-        )
+    if not status["host_supported"] and platform_id != "windows-x64":
+        missing.append(f"{platform_id} host/toolchain selected so native Chromium packaging can run")
     elif platform_id == "macos-arm64" and not status.get("xcodebuild_ok"):
         missing.append("full Xcode selected via xcode-select so Chromium macOS GN generation can read the macosx SDK")
-    elif not status["native_toolchain_ready"]:
+    elif platform_id != "windows-x64" and not status["native_toolchain_ready"]:
         missing.append(f"{platform_id} native Chromium toolchain ready")
     if platform_id == "macos-arm64" and not status.get("app_bundle_exists"):
         missing.append("BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101")
@@ -467,12 +470,16 @@ def native_preflight_entry(platform_id: str, status: dict[str, object]) -> dict[
         missing.append("BrowseForge Chromium portable chrome.exe/DLL runtime built from refs/tags/150.0.7871.101")
     if not status["package_zip_exists"]:
         missing.append(f"native {platform_display_name(platform_id)} detector evidence for the packaged artifact")
+    if platform_id == "windows-x64":
+        status["verification_mode"] = "manual_windows_os"
+        status["manual_windows_os_validation_required"] = True
     entry: dict[str, object] = {
         "evidence": [
             "knowledge/manifests/platform-matrix.json",
             "contracts/browseforge-integration.contract.json",
             "knowledge/manifests/signing-policy.json",
             native_status_evidence(platform_id, status),
+            WINDOWS_MANUAL_VALIDATION_NOTE,
         ],
         "platform": platform_id,
         "ready": not missing,
@@ -501,7 +508,7 @@ def native_artifact_preflight_manifest(root: Path, workdir: Path, generated_at: 
             "every supported package platform has a committed runtime artifact manifest entry",
             "every supported package platform artifact has sha256 and size metadata",
             "macOS artifacts are BrowseForge Chromium .app bundles built from the selected source ref, not host Chrome dogfood binaries",
-            "Windows artifacts are BrowseForge Chromium portable executable/DLL layouts built from the selected source ref",
+            "Windows artifacts are BrowseForge Chromium portable executable/DLL layouts built from the selected source ref; compile/runtime verification is manual on Windows OS, not local wine/qemu emulation",
             "native platform artifacts have detector evidence before release_grade can pass",
         ],
         "runtime_id": "browseforge-chromium",

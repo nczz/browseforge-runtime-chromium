@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T07:40:00Z",
+  "generated_at": "2026-07-12T10:00:00Z",
   "platforms": [
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
@@ -21,7 +21,7 @@
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
         "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True",
-        "knowledge/manifests/accept-language-header-smoke.json"
+        "Windows compile/runtime verification is delegated to manual validation on a Windows OS host; local wine/qemu execution is not required for this preflight."
       ],
       "missing_prerequisites": [],
       "next_commands": [
@@ -63,7 +63,8 @@
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True"
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True, verification_mode=manual_windows_os",
+        "Windows compile/runtime verification is delegated to manual validation on a Windows OS host; local wine/qemu execution is not required for this preflight."
       ],
       "missing_prerequisites": [],
       "next_commands": [
@@ -91,12 +92,14 @@
         "host_os": "darwin",
         "host_support_mode": "darwin_windows_cross_compile",
         "host_supported": true,
+        "manual_windows_os_validation_required": true,
         "native_toolchain_ready": true,
         "out_args_exists": true,
         "output_binary_exists": true,
         "package_zip_exists": true,
         "portable_layout_exists": true,
         "required_host_os": "windows",
+        "verification_mode": "manual_windows_os",
         "windows_cross_compile_supported": true,
         "windows_toolchain_base": "/Users/chun/Projects/chromium-win-sdk-prep/output",
         "windows_toolchain_enabled": true,
@@ -112,7 +115,7 @@
     "every supported package platform has a committed runtime artifact manifest entry",
     "every supported package platform artifact has sha256 and size metadata",
     "macOS artifacts are BrowseForge Chromium .app bundles built from the selected source ref, not host Chrome dogfood binaries",
-    "Windows artifacts are BrowseForge Chromium portable executable/DLL layouts built from the selected source ref",
+    "Windows artifacts are BrowseForge Chromium portable executable/DLL layouts built from the selected source ref; compile/runtime verification is manual on Windows OS, not local wine/qemu emulation",
     "native platform artifacts have detector evidence before release_grade can pass"
   ],
   "runtime_id": "browseforge-chromium",

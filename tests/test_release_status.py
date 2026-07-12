@@ -227,7 +227,7 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("external-detector-proxy", resource_ids)
         self.assertIn("native-artifact-macos-arm64", resource_ids)
         self.assertIn("live-proxy-detector-matrix", resource_ids)
-        self.assertIn("windows-native-detector-host", resource_ids)
+        self.assertIn("windows-manual-detector-validation", resource_ids)
         self.assertIn("release-grade-code-signing", resource_ids)
         proxy_requirement = next(
             requirement for requirement in payload["resource_requirements"]
@@ -248,7 +248,7 @@ class ReleaseStatusTests(unittest.TestCase):
         )
         windows_requirement = next(
             requirement for requirement in payload["resource_requirements"]
-            if requirement["resource_id"] == "windows-native-detector-host"
+            if requirement["resource_id"] == "windows-manual-detector-validation"
         )
         self.assertEqual(windows_requirement["status"], "missing_detector_evidence")
         self.assertEqual(
@@ -258,8 +258,9 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(
             windows_requirement["requirements"],
             [
-                "Windows x64 host or runner that can launch the packaged chrome.exe",
+                "manual Windows OS validation host that can launch the packaged chrome.exe",
                 "sanitized headed detector evidence for each required Windows matrix row",
+                "local wine/qemu execution is not required for the Windows compile/runtime verification step",
             ],
         )
         self.assertEqual(
@@ -314,7 +315,7 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertEqual(
             [
                 {
-                    "resource_id": "windows-native-detector-host",
+                    "resource_id": "windows-manual-detector-validation",
                     "status": "missing_detector_evidence",
                     "severity": "high",
                     "provide": [
@@ -322,8 +323,9 @@ class ReleaseStatusTests(unittest.TestCase):
                         "windows-x64:sannysoft:headed:direct:host",
                     ],
                     "requirements": [
-                        "Windows x64 host or runner that can launch the packaged chrome.exe",
+                        "manual Windows OS validation host that can launch the packaged chrome.exe",
                         "sanitized headed detector evidence for each required Windows matrix row",
+                        "local wine/qemu execution is not required for the Windows compile/runtime verification step",
                     ],
                     "unblocks": [
                         "Windows native detector evidence",
@@ -334,7 +336,7 @@ class ReleaseStatusTests(unittest.TestCase):
             requirements,
         )
 
-    def test_windows_integration_contract_blocker_uses_native_detector_fallback(self) -> None:
+    def test_windows_integration_contract_blocker_uses_manual_validation_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             self.write_base_inputs(root)
@@ -372,7 +374,7 @@ class ReleaseStatusTests(unittest.TestCase):
         self.assertIn("browseforge-integration:0", blocker_ids)
         windows_requirement = next(
             requirement for requirement in payload["resource_requirements"]
-            if requirement["resource_id"] == "windows-native-detector-host"
+            if requirement["resource_id"] == "windows-manual-detector-validation"
         )
         self.assertEqual(windows_requirement["status"], "missing_detector_evidence")
         self.assertEqual(

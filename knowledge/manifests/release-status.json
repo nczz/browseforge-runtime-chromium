@@ -184,14 +184,14 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T09:30:00Z",
+  "generated_at": "2026-07-12T10:00:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "247ea4d98935e780b27b3b9dc0c64038b2a853f2277cd9d20144e6b406443912",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
     "knowledge/manifests/fingerprint-surface-status.json": "741483fc446e451cca6ad0c75a79bf653546eea706a2bb971a60da3eea03922f",
-    "knowledge/manifests/native-artifact-preflight.json": "bb140cb2a088a77e2ce138f416666e3b244fe6b40e903e3c6df7cd4221aead7b",
-    "knowledge/manifests/proxy-preflight.json": "dabb5e576a1a977f0372c14b846da3ee64f6ece5da046009a2a8f17dd3654a73",
+    "knowledge/manifests/native-artifact-preflight.json": "ec13a3c4819f05184e9d8fe65d6d4c835482c60b0ee7ed8b199ac1968e95e606",
+    "knowledge/manifests/proxy-preflight.json": "be03a0cc32fea994616393ac110135927398f75365577da34a3c7a136bef858a",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
     "knowledge/manifests/signing-policy.json": "87248d5dfb5a932c4b46bc837513c8b35a0c2aadf5a548729a14c6eaff864c7b",
     "knowledge/manifests/source-acquisition.json": "68c9158724617ff140ab7721aaf6a55a7a5919aa59ae4dcfa76636745936feec"
@@ -217,9 +217,9 @@
       ],
       "requirements": [
         "external proxy URL with scheme, host, and port",
-        "redacted external proxy region/geolocation label",
+        "redacted external proxy region/geolocation metadata label",
         "no loopback, private, link-local, or .local proxy authority",
-        "no raw credentials or IP literals in committed evidence",
+        "no raw credentials or IP literals in committed proxy URL or region evidence",
         "run every detector in proxy network mode before clearing proxy release blockers"
       ],
       "resource_id": "external-detector-proxy",
@@ -255,10 +255,11 @@
         "windows-x64 native headed detector evidence"
       ],
       "requirements": [
-        "Windows x64 host or runner that can launch the packaged chrome.exe",
-        "sanitized headed detector evidence for each required Windows matrix row"
+        "manual Windows OS validation host that can launch the packaged chrome.exe",
+        "sanitized headed detector evidence for each required Windows matrix row",
+        "local wine/qemu execution is not required for the Windows compile/runtime verification step"
       ],
-      "resource_id": "windows-native-detector-host",
+      "resource_id": "windows-manual-detector-validation",
       "severity": "high",
       "status": "missing_detector_evidence",
       "unblocks": [

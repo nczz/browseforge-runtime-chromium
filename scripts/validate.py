@@ -711,11 +711,11 @@ def validate_native_status_snapshot(platform: str, entry: dict) -> None:
     if platform == "macos-arm64":
         required_keys.update({"xcodebuild_ok", "xcodebuild_status", "app_bundle_exists"})
     if platform == "windows-x64":
-        required_keys.add("portable_layout_exists")
+        required_keys.update({"portable_layout_exists", "verification_mode", "manual_windows_os_validation_required"})
     missing_keys = sorted(required_keys - set(snapshot))
     if missing_keys:
         raise SystemExit(f"native artifact preflight {platform} status_snapshot missing keys: {missing_keys}")
-    boolean_keys = required_keys - {"host_os", "required_host_os", "xcodebuild_status"}
+    boolean_keys = required_keys - {"host_os", "required_host_os", "xcodebuild_status", "verification_mode"}
     for key in sorted(boolean_keys):
         if not isinstance(snapshot.get(key), bool):
             raise SystemExit(f"native artifact preflight {platform} status_snapshot {key} must be boolean")
@@ -724,6 +724,11 @@ def validate_native_status_snapshot(platform: str, entry: dict) -> None:
             raise SystemExit(f"native artifact preflight {platform} status_snapshot {key} must be a non-empty string")
     if platform == "macos-arm64" and snapshot.get("xcodebuild_status") not in {"ok", "failed", "missing"}:
         raise SystemExit(f"native artifact preflight {platform} status_snapshot xcodebuild_status is invalid")
+    if platform == "windows-x64":
+        if snapshot.get("verification_mode") != "manual_windows_os":
+            raise SystemExit("native artifact preflight windows-x64 must delegate compile/runtime verification to manual Windows OS validation")
+        if snapshot.get("manual_windows_os_validation_required") is not True:
+            raise SystemExit("native artifact preflight windows-x64 must require manual Windows OS validation")
 
 
 def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts: dict) -> None:

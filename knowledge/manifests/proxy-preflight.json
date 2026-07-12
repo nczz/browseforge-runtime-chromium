@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2026-07-11T18:00:00Z",
+  "generated_at": "2026-07-12T10:00:00Z",
   "missing": [
     "BROWSEFORGE_DETECTOR_PROXY_URL",
     "BROWSEFORGE_DETECTOR_PROXY_REGION"
@@ -18,9 +18,9 @@
   "ready": false,
   "requirements": [
     "external proxy URL with scheme, host, and port",
-    "redacted external proxy region/geolocation label",
+    "redacted external proxy region/geolocation metadata label",
     "no loopback, private, link-local, or .local proxy authority",
-    "no raw credentials or IP literals in committed evidence",
+    "no raw credentials or IP literals in committed proxy URL or region evidence",
     "run every detector in proxy network mode before clearing proxy release blockers"
   ],
   "runtime_id": "browseforge-chromium",

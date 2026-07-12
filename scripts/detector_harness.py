@@ -158,6 +158,17 @@ def sanitized_proxy_descriptor(proxy_url: str) -> tuple[dict[str, object] | None
     }
     return descriptor, []
 
+
+def valid_proxy_region_label(proxy_region: str) -> bool:
+    if not proxy_region or proxy_region.strip() != proxy_region or len(proxy_region) > 64:
+        return False
+    try:
+        ipaddress.ip_address(proxy_region)
+        return False
+    except ValueError:
+        pass
+    return re.fullmatch(r"[A-Za-z0-9_.-]+", proxy_region) is not None
+
 def proxy_detector_matrix_commands(proxy_region: str) -> list[str]:
     region_arg = "<redacted-region>" if not proxy_region else "<configured-region>"
     commands = []
@@ -188,21 +199,28 @@ def proxy_preflight(args):
     proxy = None
     if proxy_url:
         proxy, errors = sanitized_proxy_descriptor(proxy_url)
+    proxy_region_valid = not proxy_region or valid_proxy_region_label(proxy_region)
+    proxy_region_for_commands = proxy_region if proxy_region_valid else ""
+    proxy_region_redacted = _bounded_redacted_value(proxy_region) if proxy_region else None
+    if proxy_region and not proxy_region_valid:
+        proxy_region_redacted = "[INVALID_PROXY_REGION_LABEL]"
+    if proxy_region and not proxy_region_valid:
+        errors.append("redacted external proxy region must be a normalized metadata label, not a raw IP, URL, credential, whitespace-padded, or overlong value")
     payload = {
         "errors": errors,
         "generated_at": args.generated_at or dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "missing": missing,
         "proxy": proxy,
-        "proxy_region_redacted": _bounded_redacted_value(proxy_region) if proxy_region else None,
+        "proxy_region_redacted": proxy_region_redacted,
         "ready": not missing and not errors,
         "requirements": [
             "external proxy URL with scheme, host, and port",
-            "redacted external proxy region/geolocation label",
+            "redacted external proxy region/geolocation metadata label",
             "no loopback, private, link-local, or .local proxy authority",
-            "no raw credentials or IP literals in committed evidence",
+            "no raw credentials or IP literals in committed proxy URL or region evidence",
             "run every detector in proxy network mode before clearing proxy release blockers",
         ],
-        "next_commands": proxy_detector_matrix_commands(proxy_region),
+        "next_commands": proxy_detector_matrix_commands(proxy_region_for_commands),
         "runtime_id": "browseforge-chromium",
         "schema_version": "1.0",
         "status": "passed" if not missing and not errors else "failed",

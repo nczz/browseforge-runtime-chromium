@@ -683,9 +683,14 @@ class ChromiumNativePlanTests(unittest.TestCase):
             entries["macos-arm64"]["missing_prerequisites"],
         )
         self.assertIs(entries["windows-x64"]["ready"], False)
-        self.assertIn(
+        windows_missing_prerequisites = entries["windows-x64"]["missing_prerequisites"]
+        self.assertNotIn(
             "Windows host/toolchain selected so Chromium Windows GN generation and native chrome.exe packaging can run",
-            entries["windows-x64"]["missing_prerequisites"],
+            windows_missing_prerequisites,
+        )
+        self.assertIn(
+            chromium_native.WINDOWS_MANUAL_VALIDATION_NOTE,
+            entries["windows-x64"]["evidence"],
         )
         macos_snapshot = entries["macos-arm64"]["status_snapshot"]
         self.assertIs(macos_snapshot["host_supported"], True)
@@ -696,6 +701,8 @@ class ChromiumNativePlanTests(unittest.TestCase):
         windows_snapshot = entries["windows-x64"]["status_snapshot"]
         self.assertIs(windows_snapshot["host_supported"], False)
         self.assertEqual("windows", windows_snapshot["required_host_os"])
+        self.assertEqual("manual_windows_os", windows_snapshot["verification_mode"])
+        self.assertIs(windows_snapshot["manual_windows_os_validation_required"], True)
         self.assertIs(windows_snapshot["portable_layout_exists"], False)
         windows_commands = entries["windows-x64"]["next_commands"]
         self.assertTrue(any("sync-deps" in command and "--execute" in command for command in windows_commands))

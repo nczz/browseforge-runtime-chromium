@@ -520,6 +520,42 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         self.assertIn("macos-arm64", message)
         self.assertIn("status_snapshot", message)
 
+    def test_validate_rejects_native_artifact_preflight_windows_verification_mode_drift(self) -> None:
+        """windows-x64 native preflight must delegate compile/runtime verification to manual Windows OS validation."""
+        module = self._load_validate_module()
+        cases = [
+            (
+                "missing verification_mode",
+                None,
+                ["native artifact preflight", "windows-x64", "status_snapshot missing keys", "verification_mode"],
+            ),
+            (
+                "altered verification_mode",
+                "local_host_toolchain",
+                ["native artifact preflight", "windows-x64", "manual windows os validation"],
+            ),
+        ]
+        for name, verification_mode, expected_tokens in cases:
+            with self.subTest(name=name):
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    self._write_minimal_validate_tree(temp_root, module)
+                    runtime_manifest = self._load_temp_runtime_artifacts_manifest(temp_root)
+                    self._write_runtime_graph_for_artifacts(temp_root, runtime_manifest["artifacts"])
+                    preflight = self._write_native_artifact_preflight(temp_root, runtime_manifest=runtime_manifest)
+                    windows_entry = next(entry for entry in preflight["platforms"] if entry["platform"] == "windows-x64")
+                    windows_snapshot = windows_entry["status_snapshot"]
+                    if verification_mode is None:
+                        del windows_snapshot["verification_mode"]
+                    else:
+                        windows_snapshot["verification_mode"] = verification_mode
+                    self._write_json(temp_root / "knowledge" / "manifests" / "native-artifact-preflight.json", preflight)
+
+                    message = self._run_validate_expect_exit(module, temp_root).lower()
+
+                for expected_token in expected_tokens:
+                    self.assertIn(expected_token, message)
+
     def test_validate_rejects_native_artifact_preflight_release_grade_ready_with_blocked_platform(self) -> None:
         """release_grade_ready cannot be true while any supported package platform remains not ready."""
         module = self._load_validate_module()
@@ -2739,7 +2775,13 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 }
             )
         if platform == "windows-x64":
-            snapshot["portable_layout_exists"] = False
+            snapshot.update(
+                {
+                    "manual_windows_os_validation_required": True,
+                    "portable_layout_exists": False,
+                    "verification_mode": "manual_windows_os",
+                }
+            )
         return snapshot
 
 

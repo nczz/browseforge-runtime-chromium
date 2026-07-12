@@ -229,14 +229,15 @@ def release_resource_requirements(
     if windows_gaps or windows_native_blocked:
         requirements.append(
             {
-                "resource_id": "windows-native-detector-host",
+                "resource_id": "windows-manual-detector-validation",
                 "status": "missing_detector_evidence",
                 "severity": "high",
                 "provide": sorted({str(gap.get("matrix_key")) for gap in windows_gaps})
                 or ["windows-x64 native headed detector evidence"],
                 "requirements": [
-                    "Windows x64 host or runner that can launch the packaged chrome.exe",
+                    "manual Windows OS validation host that can launch the packaged chrome.exe",
                     "sanitized headed detector evidence for each required Windows matrix row",
+                    "local wine/qemu execution is not required for the Windows compile/runtime verification step",
                 ],
                 "unblocks": [
                     "Windows native detector evidence",

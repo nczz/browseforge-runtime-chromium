@@ -1833,6 +1833,42 @@ class DetectorHarnessTests(unittest.TestCase):
             payload["requirements"],
         )
 
+    def test_proxy_preflight_rejects_unsanitized_proxy_region_labels(self):
+        cases = [
+            ("raw IPv4", "203.0.113.7", ("203.0.113.7",)),
+            (
+                "URL with credentials",
+                "https://user:pass@example.com",
+                ("https://user:pass@example.com", "user:pass", "pass@example.com"),
+            ),
+        ]
+        for name, proxy_region, forbidden_fragments in cases:
+            with self.subTest(name):
+                proc = self.run_harness(
+                    "proxy-preflight",
+                    "--proxy-url",
+                    "https://proxy.example.net:8443",
+                    "--proxy-region",
+                    proxy_region,
+                    env={
+                        "BROWSEFORGE_DETECTOR_PROXY_URL": None,
+                        "BROWSEFORGE_DETECTOR_PROXY_REGION": None,
+                    },
+                )
+
+                self.assertEqual(proc.returncode, self.harness_module.EXIT_PREFLIGHT)
+                self.assertEqual(proc.stderr, "")
+                payload = json.loads(proc.stdout)
+                self.assertEqual(payload["status"], "failed")
+                self.assertIs(payload["ready"], False)
+                self.assertEqual(payload["missing"], [])
+                self.assertTrue(
+                    any("normalized metadata label" in error for error in payload["errors"]),
+                    payload["errors"],
+                )
+                for fragment in forbidden_fragments:
+                    self.assertNotIn(fragment, proc.stdout)
+
     def test_proxy_preflight_rejects_loopback_and_localhost_proxy_authorities(self):
         cases = [
             ("loopback IPv4", "http://127.0.0.1:8080", "127.0.0.1"),
