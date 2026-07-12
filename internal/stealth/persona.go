@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
+	"net/netip"
 	"os"
 	"strings"
 )
@@ -159,10 +159,29 @@ func Validate(cfg PersonaConfig) error {
 	if cfg.Screen.AvailWidth > cfg.Screen.Width || cfg.Screen.AvailHeight > cfg.Screen.Height {
 		return errors.New("persona config incoherent; screen available size exceeds screen size")
 	}
-	if cfg.WebRTC.ProxyRegion != "" {
-		if _, err := url.Parse("bf-region://" + cfg.WebRTC.ProxyRegion); err != nil {
-			return fmt.Errorf("persona config incoherent; invalid WebRTC proxy region: %w", err)
-		}
+	if cfg.WebRTC.ProxyRegion != "" && !validProxyRegion(cfg.WebRTC.ProxyRegion) {
+		return fmt.Errorf("persona config incoherent; invalid WebRTC proxy region %q", cfg.WebRTC.ProxyRegion)
 	}
 	return nil
+}
+
+func validProxyRegion(region string) bool {
+	if region == "" || strings.TrimSpace(region) != region || len(region) > 64 {
+		return false
+	}
+	if _, err := netip.ParseAddr(region); err == nil {
+		return false
+	}
+	for i := range len(region) {
+		c := region[i]
+		switch {
+		case c >= 'a' && c <= 'z':
+		case c >= 'A' && c <= 'Z':
+		case c >= '0' && c <= '9':
+		case c == '-' || c == '_' || c == '.':
+		default:
+			return false
+		}
+	}
+	return true
 }

@@ -184,7 +184,7 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T08:35:00Z",
+  "generated_at": "2026-07-12T09:05:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "247ea4d98935e780b27b3b9dc0c64038b2a853f2277cd9d20144e6b406443912",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",

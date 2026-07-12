@@ -82,3 +82,36 @@ func TestValidateRejectsIncoherentScreen(t *testing.T) {
 		t.Fatalf("expected incoherent screen rejection, got %v", err)
 	}
 }
+
+func TestValidateProxyRegionLabels(t *testing.T) {
+	tests := []struct {
+		name        string
+		proxyRegion string
+		wantErr     bool
+	}{
+		{name: "accepts metadata label", proxyRegion: "tw-taipei-datacenter"},
+		{name: "accepts empty optional label", proxyRegion: ""},
+		{name: "rejects whitespace padded label", proxyRegion: " tw-taipei-datacenter ", wantErr: true},
+		{name: "rejects raw IPv4 address", proxyRegion: "203.0.113.7", wantErr: true},
+		{name: "rejects URL with credentials", proxyRegion: "https://user:pass@example.com", wantErr: true},
+		{name: "rejects label longer than 64 bytes", proxyRegion: strings.Repeat("a", 65), wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := completePersona()
+			cfg.WebRTC.ProxyRegion = tt.proxyRegion
+
+			err := Validate(cfg)
+			if tt.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "invalid WebRTC proxy region") {
+					t.Fatalf("expected proxy region rejection, got %v", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected proxy region %q to be accepted, got %v", tt.proxyRegion, err)
+			}
+		})
+	}
+}
