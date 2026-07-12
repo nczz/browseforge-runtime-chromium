@@ -35,7 +35,8 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_screen_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json",
+    "knowledge/manifests/accept-language-header-smoke.json"
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
@@ -52,7 +53,8 @@
     "Packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded Canvas 2D image and data URL hashes for the built BrowseForge Chromium app; raw pixels/data URLs are not committed, and proxy/Windows matrix coverage remain blockers.",
     "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8.",
     "BrowseForge runtime CLI now binds the remaining native fingerprint surface flags covered by launcher BuildPlan: Accept-Language, UA/UA-CH, screen available dimensions, plugins PDF policy, audio/canvas noise, WebGL vendor/renderer, and repeatable font families; go run dry-run emitted the corresponding native Chromium flags.",
-    "Source-level Accept-Language header patch scaffold now makes chrome/browser/net/profile_network_context_service.cc prefer --fingerprint-accept-language before the profile intl.accept_languages pref, aligning HTTP Accept-Language with DOM navigator.language/navigator.languages; live detector evidence still requires a rebuilt patched artifact."
+    "Source-level Accept-Language header patch scaffold now makes chrome/browser/net/profile_network_context_service.cc prefer --fingerprint-accept-language before the profile intl.accept_languages pref, aligning HTTP Accept-Language with DOM navigator.language/navigator.languages; live detector evidence still requires a rebuilt patched artifact.",
+    "Source-level Accept-Language header patch is now exercised by a rebuilt macOS arm64 BrowseForge Chromium artifact; knowledge/manifests/accept-language-header-smoke.json records --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing HTTP Accept-Language en-US,en;q=0.9."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -60,12 +62,12 @@
   "scope": "source_level_linux_headless_detector_smoke_plus_local_dogfood",
   "surfaces": [
     {
-      "surface": "seed identity",
-      "status": "detector_tested",
+      "evidence": "internal/stealth/persona_test.go proves stable persona_id_hash/origin_salt_key for an unchanged seed and hash drift when seed changes; knowledge/manifests/local-dogfood.json records distinct profile IDs and isolated same-origin profile state for browseforge-chromium dogfood sessions.",
       "release_blocker": false,
-      "severity": "info",
       "result": "pass_persona_seed_snapshot_and_profile_isolation_contract",
-      "evidence": "internal/stealth/persona_test.go proves stable persona_id_hash/origin_salt_key for an unchanged seed and hash drift when seed changes; knowledge/manifests/local-dogfood.json records distinct profile IDs and isolated same-origin profile state for browseforge-chromium dogfood sessions."
+      "severity": "info",
+      "status": "detector_tested",
+      "surface": "seed identity"
     },
     {
       "evidence": "Packaged Linux SannySoft/CDP smoke using fingerprint.user_agent config reported navigator.webdriver=false and configured Chromium UA without HeadlessChrome.",
@@ -100,9 +102,9 @@
       "surface": "timezone"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list. Source-level HTTP Accept-Language header patch scaffold is recorded in patchset surface-accept-language-header-native-override; detector pass still comes from existing Linux/macOS locale evidence until rebuilt artifacts exercise the header path.",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list. Rebuilt macOS arm64 BrowseForge Chromium source-level HTTP Accept-Language header smoke recorded --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing request header en-US,en;q=0.9, proving the native header path follows the Accept-Language switch rather than the locale/profile pref.",
       "release_blocker": false,
-      "result": "pass_linux_sannysoft_plus_source_header_scaffold",
+      "result": "pass_linux_sannysoft_plus_macos_source_header_smoke",
       "severity": "info",
       "status": "detector_tested",
       "surface": "locale"

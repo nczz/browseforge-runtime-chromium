@@ -43,6 +43,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/release-status.json",
     "knowledge/manifests/source-acquisition.json",
     "knowledge/manifests/objective-audit.json",
+    "knowledge/manifests/accept-language-header-smoke.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
     "browser/stealth/stealth_switches.h",
@@ -143,6 +144,7 @@ REQUIRED_GRAPH_MANIFEST_SOURCES = [
     "knowledge/manifests/signing-policy.json",
     "knowledge/manifests/release-status.json",
     "knowledge/manifests/objective-audit.json",
+    "knowledge/manifests/accept-language-header-smoke.json",
     "knowledge/manifests/source-acquisition.json",
 ]
 
@@ -776,6 +778,47 @@ def validate_package_smoke_manifest(platform: str, artifact: dict, smoke_path: s
             raise SystemExit(f"{smoke_path} {check_name} observed must be an object")
 
 
+def validate_accept_language_header_smoke(runtime_artifacts: dict) -> None:
+    smoke_path = "knowledge/manifests/accept-language-header-smoke.json"
+    smoke = load_json(smoke_path)
+    if smoke.get("schema_version") != "1.0":
+        raise SystemExit(f"{smoke_path} schema_version must be 1.0")
+    if smoke.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit(f"{smoke_path} runtime_id must be browseforge-chromium")
+    if smoke.get("status") != "passed":
+        raise SystemExit(f"{smoke_path} status must be passed")
+    surfaces = smoke.get("surfaces", [])
+    if "locale" not in surfaces:
+        raise SystemExit(f"{smoke_path} must cover locale surface")
+
+    artifacts = {
+        artifact.get("artifact_id"): artifact
+        for artifact in runtime_artifacts.get("artifacts", [])
+        if isinstance(artifact, dict)
+    }
+    artifact_id = smoke.get("artifact_id")
+    artifact = artifacts.get(artifact_id)
+    if artifact is None:
+        raise SystemExit(f"{smoke_path} artifact_id is not in runtime-artifacts")
+    if smoke.get("artifact_sha256") != artifact.get("sha256"):
+        raise SystemExit(f"{smoke_path} artifact_sha256 drifted from runtime-artifacts")
+
+    switches = smoke.get("switches", {})
+    expected_language = switches.get("fingerprint_accept_language")
+    if not isinstance(expected_language, str) or not expected_language:
+        raise SystemExit(f"{smoke_path} switches.fingerprint_accept_language must be non-empty")
+    observed = smoke.get("observed", {})
+    observed_header = observed.get("accept_language")
+    if not isinstance(observed_header, str) or not observed_header:
+        raise SystemExit(f"{smoke_path} observed.accept_language must be non-empty")
+    if observed_header.split(",", 1)[0] != expected_language:
+        raise SystemExit(f"{smoke_path} observed.accept_language does not start with fingerprint_accept_language")
+
+    expected_locale = switches.get("fingerprint_locale")
+    if expected_locale and observed_header.startswith(expected_locale):
+        raise SystemExit(f"{smoke_path} observed.accept_language is still using fingerprint_locale")
+
+
 def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts: dict) -> None:
     artifacts = {
         artifact.get("platform"): artifact
@@ -1259,6 +1302,7 @@ def main() -> None:
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     validate_package_smoke_manifests(source_acquisition, runtime_artifacts)
+    validate_accept_language_header_smoke(runtime_artifacts)
     signing_policy = load_json("knowledge/manifests/signing-policy.json")
     validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
     release_status = load_json("knowledge/manifests/release-status.json")

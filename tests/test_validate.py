@@ -2935,5 +2935,105 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
+
+class AcceptLanguageHeaderSmokeValidationTests(unittest.TestCase):
+    ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64"
+    ARTIFACT_SHA256 = "a69ba7c02152f336fc60ee4eaad12d15fc04b92dfcb30437be25c583ca7dacb1"
+    EXPECTED_ACCEPT_LANGUAGE = "en-US"
+
+    def _load_validate_module(self) -> Any:
+        spec = importlib.util.spec_from_file_location("validate_under_test", VALIDATE_SCRIPT)
+        self.assertIsNotNone(spec)
+        module = importlib.util.module_from_spec(spec)
+        assert spec is not None
+        assert spec.loader is not None
+        sys.modules["validate_under_test"] = module
+        spec.loader.exec_module(module)
+        return module
+
+    def _runtime_artifacts(self) -> dict[str, Any]:
+        return {
+            "artifacts": [
+                {
+                    "artifact_id": self.ARTIFACT_ID,
+                    "platform": "macos-arm64",
+                    "sha256": self.ARTIFACT_SHA256,
+                }
+            ]
+        }
+
+    def _accept_language_smoke_manifest(self) -> dict[str, Any]:
+        return {
+            "artifact_id": self.ARTIFACT_ID,
+            "artifact_sha256": self.ARTIFACT_SHA256,
+            "observed": {
+                "accept_language": f"{self.EXPECTED_ACCEPT_LANGUAGE},en;q=0.9",
+            },
+            "runtime_id": "browseforge-chromium",
+            "schema_version": "1.0",
+            "status": "passed",
+            "surfaces": ["locale"],
+            "switches": {
+                "fingerprint_accept_language": self.EXPECTED_ACCEPT_LANGUAGE,
+            },
+        }
+
+    def _write_accept_language_smoke_manifest(self, root: Path, manifest: dict[str, Any]) -> None:
+        path = root / "knowledge" / "manifests" / "accept-language-header-smoke.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    def _validate_with_temp_root(self, module: Any, root: Path, runtime_artifacts: dict[str, Any]) -> None:
+        original_root = module.ROOT
+        module.ROOT = root
+        try:
+            module.validate_accept_language_header_smoke(runtime_artifacts)
+        finally:
+            module.ROOT = original_root
+
+    def test_validate_accepts_accept_language_header_smoke_manifest(self) -> None:
+        """Accept-Language smoke evidence is tied to the macOS artifact and source fingerprint switch."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            self._write_accept_language_smoke_manifest(temp_root, self._accept_language_smoke_manifest())
+
+            self._validate_with_temp_root(module, temp_root, self._runtime_artifacts())
+
+    def test_validate_rejects_accept_language_header_smoke_manifest_drift(self) -> None:
+        """Accept-Language smoke evidence cannot drift from artifact identity or the observed header contract."""
+        cases: list[tuple[str, tuple[str, ...], Any]] = [
+            ("artifact_sha256", ("artifact_sha256",), lambda manifest: manifest.__setitem__("artifact_sha256", "0" * 64)),
+            ("status", ("status", "passed"), lambda manifest: manifest.__setitem__("status", "warning")),
+            ("locale_surface", ("locale",), lambda manifest: manifest.__setitem__("surfaces", [])),
+            ("missing_observed_accept_language", ("accept_language",), lambda manifest: manifest["observed"].pop("accept_language")),
+            (
+                "wrong_observed_accept_language",
+                ("observed.accept_language", "fingerprint_accept_language"),
+                lambda manifest: manifest["observed"].__setitem__("accept_language", "zh-TW,zh;q=0.9"),
+            ),
+            (
+                "wrong_switch_source",
+                ("observed.accept_language", "fingerprint_accept_language"),
+                lambda manifest: manifest["switches"].__setitem__("fingerprint_accept_language", "fr-FR"),
+            ),
+        ]
+
+        for case_name, expected_tokens, mutate in cases:
+            with self.subTest(case=case_name):
+                module = self._load_validate_module()
+                with tempfile.TemporaryDirectory() as td:
+                    temp_root = Path(td)
+                    manifest = self._accept_language_smoke_manifest()
+                    mutate(manifest)
+                    self._write_accept_language_smoke_manifest(temp_root, manifest)
+
+                    with self.assertRaises(SystemExit) as raised:
+                        self._validate_with_temp_root(module, temp_root, self._runtime_artifacts())
+
+                message = str(raised.exception).lower()
+                for expected_token in expected_tokens:
+                    self.assertIn(expected_token.lower(), message)
+
 if __name__ == "__main__":
     unittest.main()
