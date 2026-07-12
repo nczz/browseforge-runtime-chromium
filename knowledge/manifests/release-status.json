@@ -114,7 +114,7 @@
     },
     {
       "blocker_id": "fingerprint-surface:proxy/IP coherence",
-      "detail": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. No external proxy exit-IP/geolocation detector run has been executed.",
+      "detail": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. Native persona validation now rejects raw IP, URL/credential-like, whitespace-padded, and overlong WebRTC proxy_region labels in Go and C++ coherence paths. No external proxy exit-IP/geolocation detector run has been executed.",
       "result": "warn_linux_browserleaks_local_proxy_and_webrtc_metadata_only",
       "severity": "high",
       "source": "knowledge/manifests/fingerprint-surface-status.json",
@@ -184,12 +184,12 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T09:05:00Z",
+  "generated_at": "2026-07-12T09:30:00Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "247ea4d98935e780b27b3b9dc0c64038b2a853f2277cd9d20144e6b406443912",
     "detector-summary.json": "caa356879059fb43e575e2ca00cf5d32407886f4ce12da7934e4eef6fce0db7b",
     "knowledge/manifests/detector-score-comparison.json": "7a943dbfcc7a4b31b30283fdf9246b85efafe3e777a70488f492c5aa2a3d5f05",
-    "knowledge/manifests/fingerprint-surface-status.json": "7bbeda495058b382c21ab5094891e5ecad476d50731f77a5c506b1b8aa671ed6",
+    "knowledge/manifests/fingerprint-surface-status.json": "741483fc446e451cca6ad0c75a79bf653546eea706a2bb971a60da3eea03922f",
     "knowledge/manifests/native-artifact-preflight.json": "bb140cb2a088a77e2ce138f416666e3b244fe6b40e903e3c6df7cd4221aead7b",
     "knowledge/manifests/proxy-preflight.json": "dabb5e576a1a977f0372c14b846da3ee64f6ece5da046009a2a8f17dd3654a73",
     "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",

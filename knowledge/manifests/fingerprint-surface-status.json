@@ -54,7 +54,8 @@
     "BrowseForge runtime CLI now exposes -fingerprint-device-memory and merges config overrides so deviceMemory can be passed through the same native hardware surface path as hardwareConcurrency; go run dry-run emitted --fingerprint-device-memory=8.",
     "BrowseForge runtime CLI now binds the remaining native fingerprint surface flags covered by launcher BuildPlan: Accept-Language, UA/UA-CH, screen available dimensions, plugins PDF policy, audio/canvas noise, WebGL vendor/renderer, and repeatable font families; go run dry-run emitted the corresponding native Chromium flags.",
     "Source-level Accept-Language header patch scaffold now makes chrome/browser/net/profile_network_context_service.cc prefer --fingerprint-accept-language before the profile intl.accept_languages pref, aligning HTTP Accept-Language with DOM navigator.language/navigator.languages; live detector evidence still requires a rebuilt patched artifact.",
-    "Source-level Accept-Language header patch is now exercised by a rebuilt macOS arm64 BrowseForge Chromium artifact; knowledge/manifests/accept-language-header-smoke.json records --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing HTTP Accept-Language en-US,en;q=0.9."
+    "Source-level Accept-Language header patch is now exercised by a rebuilt macOS arm64 BrowseForge Chromium artifact; knowledge/manifests/accept-language-header-smoke.json records --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing HTTP Accept-Language en-US,en;q=0.9.",
+    "Native persona validation now treats WebRTC proxy_region as sanitized metadata only: internal/stealth/persona.go and browser/stealth/persona_snapshot.cc reject whitespace-padded labels, raw IP literals, URL/credential-like values, and labels longer than 64 bytes while preserving empty optional labels; internal/stealth/persona_test.go covers the Go validator path."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -190,7 +191,7 @@
       "surface": "automation/headless/CDP"
     },
     {
-      "evidence": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. No external proxy exit-IP/geolocation detector run has been executed.",
+      "evidence": "Packaged Linux BrowserLeaks Client Hints smoke executed with Chromium configured for --proxy-server=<loopback-http-proxy>; the committed local CONNECT proxy observer summary recorded BrowserLeaks HTTPS tunnel traffic through the proxy. BrowserLeaks WebRTC collection now flags sanitized candidate IP literal counts. scripts/detector_harness.py proxy-preflight now fails closed unless an external proxy URL and redacted region label are present and rejects loopback/private/local proxy authorities without emitting credentials or raw IP literals. Native persona validation now rejects raw IP, URL/credential-like, whitespace-padded, and overlong WebRTC proxy_region labels in Go and C++ coherence paths. No external proxy exit-IP/geolocation detector run has been executed.",
       "release_blocker": true,
       "result": "warn_linux_browserleaks_local_proxy_and_webrtc_metadata_only",
       "severity": "high",
