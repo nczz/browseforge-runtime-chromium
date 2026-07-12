@@ -774,7 +774,7 @@ def validate_native_status_snapshot(platform: str, entry: dict) -> None:
             raise SystemExit("native artifact preflight windows-x64 must require manual Windows OS validation")
 
 
-def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts: dict) -> None:
+def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts: dict, *, require_archives: bool = True) -> None:
     if native_preflight.get("runtime_id") != "browseforge-chromium":
         raise SystemExit("native artifact preflight runtime_id must be browseforge-chromium")
     if native_preflight.get("schema_version") != "1.0":
@@ -817,15 +817,16 @@ def validate_native_artifact_preflight(native_preflight: dict, runtime_artifacts
                 raise SystemExit(f"native artifact preflight {platform} cannot be ready without runtime-artifacts entry")
             if entry.get("artifact_id") != artifact.get("artifact_id"):
                 raise SystemExit(f"native artifact preflight {platform} artifact_id drifted from runtime-artifacts")
-            archive = ROOT / "dist" / f"{artifact['artifact_id']}.zip"
-            if not archive.is_file():
-                raise SystemExit(f"native artifact preflight {platform} missing archive: {archive.relative_to(ROOT)}")
+            if require_archives:
+                archive = ROOT / "dist" / f"{artifact['artifact_id']}.zip"
+                if not archive.is_file():
+                    raise SystemExit(f"native artifact preflight {platform} missing archive: {archive.relative_to(ROOT)}")
         elif not missing:
             raise SystemExit(f"native artifact preflight {platform} must record missing prerequisites when not ready")
     if release_ready and any(not entry.get("ready") for entry in entries.values()):
         raise SystemExit("native artifact preflight cannot be release_grade_ready while supported platforms remain blocked")
 
-def validate_package_smoke_manifest(platform: str, artifact: dict, smoke_path: str, *, required_checks: set[str]) -> None:
+def validate_package_smoke_manifest(platform: str, artifact: dict, smoke_path: str, *, required_checks: set[str], require_archive: bool = True) -> None:
     smoke = load_json(smoke_path)
     if smoke.get("schema_version") != "1.0":
         raise SystemExit(f"{smoke_path} schema_version must be 1.0")
@@ -834,10 +835,15 @@ def validate_package_smoke_manifest(platform: str, artifact: dict, smoke_path: s
     if smoke.get("artifact_id") != artifact.get("artifact_id"):
         raise SystemExit(f"{smoke_path} artifact_id drifted from runtime-artifacts")
     archive = ROOT / "dist" / f"{artifact['artifact_id']}.zip"
-    if smoke.get("artifact_sha256") != artifact.get("sha256") or smoke.get("artifact_sha256") != file_sha256(archive):
+    if smoke.get("artifact_sha256") != artifact.get("sha256"):
         raise SystemExit(f"{smoke_path} artifact_sha256 drifted from runtime artifact")
-    if smoke.get("artifact_size_bytes") != artifact.get("size_bytes") or smoke.get("artifact_size_bytes") != archive.stat().st_size:
+    if smoke.get("artifact_size_bytes") != artifact.get("size_bytes"):
         raise SystemExit(f"{smoke_path} artifact_size_bytes drifted from runtime artifact")
+    if require_archive:
+        if smoke.get("artifact_sha256") != file_sha256(archive):
+            raise SystemExit(f"{smoke_path} artifact_sha256 drifted from runtime artifact")
+        if smoke.get("artifact_size_bytes") != archive.stat().st_size:
+            raise SystemExit(f"{smoke_path} artifact_size_bytes drifted from runtime artifact")
     checks = smoke.get("checks", [])
     if not isinstance(checks, list) or not checks:
         raise SystemExit(f"{smoke_path} checks must be a non-empty array")
@@ -895,7 +901,7 @@ def validate_accept_language_header_smoke(runtime_artifacts: dict) -> None:
         raise SystemExit(f"{smoke_path} observed.accept_language is still using fingerprint_locale")
 
 
-def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts: dict) -> None:
+def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts: dict, *, require_archives: bool = True) -> None:
     artifacts = {
         artifact.get("platform"): artifact
         for artifact in runtime_artifacts.get("artifacts", [])
@@ -931,7 +937,7 @@ def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts
             raise SystemExit(f"source-acquisition {platform} artifact must reference package smoke evidence")
         if not (ROOT / smoke_path).is_file():
             raise SystemExit(f"source-acquisition {platform} package smoke evidence is missing: {smoke_path}")
-        validate_package_smoke_manifest(platform, artifact, smoke_path, required_checks=required_checks)
+        validate_package_smoke_manifest(platform, artifact, smoke_path, required_checks=required_checks, require_archive=require_archives)
 
 
 def validate_signing_policy(signing_policy: dict, runtime_artifacts: dict, platform_matrix: dict) -> None:
@@ -1421,12 +1427,12 @@ def main(argv: list[str] | None = None) -> None:
     if not args.skip_artifact_archives:
         validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
-    validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
+    validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts, require_archives=not args.skip_artifact_archives)
     validate_native_build_automation(source_acquisition, runtime_artifacts, native_artifact_preflight)
     validate_source_build_outputs(source_acquisition, runtime_artifacts)
     validate_source_dependency_profile(source_acquisition)
     validate_release_gate_artifact_evidence(release_gates, runtime_artifacts)
-    validate_package_smoke_manifests(source_acquisition, runtime_artifacts)
+    validate_package_smoke_manifests(source_acquisition, runtime_artifacts, require_archives=not args.skip_artifact_archives)
     validate_accept_language_header_smoke(runtime_artifacts)
     validate_native_proxy_region_validation()
     signing_policy = load_json("knowledge/manifests/signing-policy.json")
