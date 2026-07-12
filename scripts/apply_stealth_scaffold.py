@@ -33,6 +33,23 @@ def patch_root_build(src: Path) -> Path:
     return root_build
 
 
+def scaffold_file_paths() -> list[Path]:
+    return sorted(path.relative_to(SCAFFOLD) for path in SCAFFOLD.rglob("*") if path.is_file())
+
+
+def verify_scaffold_applied(src: Path) -> None:
+    validate_chromium_src(src)
+    dest = src / "browseforge" / "stealth"
+    missing = [path.as_posix() for path in scaffold_file_paths() if not (dest / path).is_file()]
+    if missing:
+        raise SystemExit(f"BrowseForge stealth scaffold is not fully applied; missing files: {missing}")
+    root_build = src / "BUILD.gn"
+    if not root_build.is_file():
+        raise SystemExit(f"Chromium root BUILD.gn is missing: {root_build}")
+    if GN_ALL_DEP not in root_build.read_text(encoding="utf-8"):
+        raise SystemExit("Chromium root BUILD.gn does not include //browseforge/stealth in gn_all deps")
+
+
 def apply_scaffold(src: Path) -> list[Path]:
     validate_chromium_src(src)
     dest = src / "browseforge" / "stealth"
@@ -55,6 +72,7 @@ def main() -> None:
     src = args.chromium_src.resolve()
     validate_chromium_src(src)
     if args.check:
+        verify_scaffold_applied(src)
         print(f"ready: {src}")
         return
     for path in apply_scaffold(src):

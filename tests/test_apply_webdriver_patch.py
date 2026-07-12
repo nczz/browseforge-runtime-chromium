@@ -55,6 +55,22 @@ class ApplyWebdriverPatchTests(unittest.TestCase):
         self.assertEqual(patched_once, patched_twice)
         self.assertEqual(2, patched_twice.count("BrowseForgeShouldHideWebDriver"))
 
+    def test_patch_normalizes_existing_legacy_helper(self) -> None:
+        legacy = apply_webdriver_patch.patch_navigator(NAVIGATOR_FIXTURE).replace(
+            'return mode == "enabled" || mode == "strict" || mode == "true" ||\n'
+            '         mode == "1";',
+            'return mode != "off";',
+        )
+
+        patched = apply_webdriver_patch.patch_navigator(legacy)
+
+        self.assertEqual(2, patched.count("BrowseForgeShouldHideWebDriver"))
+        self.assertIn('mode == "enabled"', patched)
+        self.assertIn('mode == "strict"', patched)
+        self.assertIn('mode == "true"', patched)
+        self.assertIn('mode == "1"', patched)
+        self.assertNotIn('mode != "off"', patched)
+
     def test_apply_patch_updates_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "src"

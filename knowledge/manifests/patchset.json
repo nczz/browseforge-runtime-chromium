@@ -310,23 +310,29 @@
         "scripts/apply_accept_language_header_patch.py",
         "tests/test_apply_accept_language_header_patch.py",
         "scripts/validate.py",
-        "chromium/src/chrome/browser/net/profile_network_context_service.cc"
+        "chromium/src/chrome/browser/net/profile_network_context_service.cc",
+        "chromium/src/chrome/browser/chrome_content_browser_client.cc",
+        "chromium/src/components/reduce_accept_language/browser/reduce_accept_language_service.cc"
       ],
-      "notes": "When --fingerprint-accept-language contains a bounded Accept-Language list, Chrome network context generation uses it before the profile intl.accept_languages pref so HTTP Accept-Language aligns with navigator.language/navigator.languages. Invalid, empty, oversized, or absent values preserve upstream pref behavior. This closes the locale patch gap where DOM language APIs were overridden but request headers could still leak profile defaults; detector pass still requires a patched Chromium artifact and live detector run.",
+      "notes": "When --fingerprint-accept-language contains a bounded Accept-Language list, Chrome network context generation uses it before the profile intl.accept_languages pref so HTTP Accept-Language aligns with navigator.language/navigator.languages. Invalid, empty, oversized, or absent values preserve upstream pref behavior. This closes the locale patch gap where DOM language APIs were overridden but request headers could still leak profile defaults; detector pass still requires a patched Chromium artifact and live detector run. The patch method also updates ChromeContentBrowserClient::GetAcceptLangs and ReduceAcceptLanguageService::UpdateAcceptLanguage so reduced Accept-Language and browser client dispatch remain coherent with the profile/network-context header path.",
       "patchset_id": "surface-accept-language-header-native-override",
       "risk_level": "high",
       "surface": "locale_header",
       "symbols_touched": [
         "ComputeAcceptLanguageFromPref",
         "BrowseForgeAcceptLanguagesHeaderOverride",
-        "fingerprint-accept-language"
+        "fingerprint-accept-language",
+        "ChromeContentBrowserClient::GetAcceptLangs",
+        "ReduceAcceptLanguageService::UpdateAcceptLanguage"
       ],
       "tests": [
         "python3 -m unittest tests.test_apply_accept_language_header_patch",
         "python3 scripts/apply_accept_language_header_patch.py --check",
         "python3 scripts/chromium_docker.py gn-gen --execute",
         "gn check out/BrowseForgeLinuxDocker //chrome/browser/net:net",
-        "python3 scripts/validate.py"
+        "python3 scripts/validate.py",
+        "gn check out/BrowseForgeLinuxDocker //chrome/browser:browser",
+        "gn check out/BrowseForgeLinuxDocker //components/reduce_accept_language/browser:browser"
       ],
       "title": "BrowseForge HTTP Accept-Language header native override for Chromium M150",
       "upstream_status": "applied_to_external_checkout_not_release_built"
@@ -559,7 +565,7 @@
         "chromium/src/third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.cc",
         "chromium/src/third_party/blink/renderer/platform/graphics/image_data_buffer.cc"
       ],
-      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic \u00b11 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper. Strict native mode suppresses --fingerprint-canvas-noise emission, because strict mode must prefer native Canvas output over deterministic pixel perturbation until the active detector matrix proves canvas coherence.",
+      "notes": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic ±1 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper. Strict native mode suppresses --fingerprint-canvas-noise emission, because strict mode must prefer native Canvas output over deterministic pixel perturbation until the active detector matrix proves canvas coherence.",
       "patchset_id": "surface-canvas-native-noise-override",
       "risk_level": "high",
       "surface": "canvas",

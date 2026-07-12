@@ -121,6 +121,58 @@ class ChromiumSourcePlanTests(unittest.TestCase):
         self.assertIn("proprietary_codecs=true", gn_args)
         self.assertIn('ffmpeg_branding="Chrome"', gn_args)
 
+    def test_verify_pinned_commit_rejects_manifest_mismatch_before_step_subprocess(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+
+            with (
+                mock.patch.object(chromium_source, "git_head", return_value="b" * 40),
+                mock.patch.object(
+                    chromium_source.subprocess,
+                    "run",
+                    side_effect=AssertionError("verify-pinned-commit must fail before subprocess.run"),
+                ) as run_spy,
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    chromium_source.execute(plan, ["verify-pinned-commit"])
+
+            self.assertFalse(run_spy.called)
+            self.assertIn("HEAD drifted from manifest base_commit", str(raised.exception))
+
+    def test_generate_dev_build_regenerates_existing_build_ninja(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp_path = Path(td)
+            workdir = tmp_path / "chromium"
+            src = workdir / "src"
+            src.mkdir(parents=True)
+            platform_gn = src / "buildtools" / "mac" / "gn"
+            platform_gn.parent.mkdir(parents=True)
+            platform_gn.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            existing = src / "out" / "BrowseForgeDev" / "build.ninja"
+            existing.parent.mkdir(parents=True)
+            existing.write_text("stale\n", encoding="utf-8")
+            plan = chromium_source.build_plan(workdir, tmp_path / "git-cache")
+            generate_step = next(step for step in plan.steps if step.id == "generate-dev-build")
+
+            def run_side_effect(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+                if command == ["xcodebuild", "-version"]:
+                    return subprocess.CompletedProcess(command, 0, stdout="Xcode 16.4\nBuild version 16F6", stderr="")
+                return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+            with (
+                mock.patch.object(chromium_source.sys, "platform", "darwin"),
+                mock.patch.object(chromium_source.shutil, "which", return_value="/usr/bin/xcodebuild"),
+                mock.patch.object(chromium_source.subprocess, "run", side_effect=run_side_effect) as run_spy,
+            ):
+                chromium_source.execute(plan, ["generate-dev-build"])
+
+            self.assertEqual(["xcodebuild", "-version"], run_spy.call_args_list[0].args[0])
+            self.assertEqual(generate_step.command, run_spy.call_args_list[1].args[0])
+
     def test_check_tools_reports_checkout_presence(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp_path = Path(td)

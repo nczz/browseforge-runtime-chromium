@@ -1,0 +1,251 @@
+{
+  "claim_levels": [
+    "source-compatible",
+    "build-compatible",
+    "packaged",
+    "launch-smoked",
+    "detector-tested-direct",
+    "detector-tested-proxy",
+    "cross-platform-matrix-tested",
+    "signed-production-ready"
+  ],
+  "core_policy": [
+    "Treat every Chromium version change as a controlled rebase with a new candidate runtime version; never silently roll the base under an existing release claim.",
+    "Build an unpatched baseline first, then apply BrowseForge patches, so upstream detector drift is separable from BrowseForge regressions.",
+    "A source patch that still applies proves only source compatibility; anti-detection compatibility requires a rebuilt artifact and live detector evidence.",
+    "Package/SBOM/provenance success is not launch success; launch success is not detector success; single-platform detector success is not cross-platform success.",
+    "Keep high-risk spoof surfaces switch-gated, bounded, fail-closed, and suppress partial spoofing in strict native mode where native coherence is safer.",
+    "Record every accepted caveat explicitly in manifests and release notes; do not promote alpha caveats to production claims."
+  ],
+  "created_at": "2026-07-12",
+  "current_base": {
+    "base_branch_position": 1639810,
+    "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+    "base_ref": "refs/tags/150.0.7871.101",
+    "base_version": "150.0.7871.101"
+  },
+  "detector_surfaces_required": [
+    "seed identity",
+    "UA",
+    "Client Hints",
+    "platform",
+    "timezone",
+    "locale",
+    "Accept-Language header",
+    "screen/window/DPR",
+    "hardwareConcurrency/deviceMemory",
+    "Canvas",
+    "WebGL vendor/renderer and rendered/parameter metadata",
+    "AudioContext",
+    "fonts availability and metrics",
+    "WebRTC",
+    "permissions/features",
+    "storage quota",
+    "automation/headless/CDP",
+    "proxy/IP coherence",
+    "profile persistence",
+    "cross-platform drift"
+  ],
+  "framework_findings": [
+    {
+      "evidence": "scripts/apply_stealth_scaffold.py --check now verifies copied scaffold files and root BUILD.gn //browseforge/stealth dependency.",
+      "finding": "Patch/scaffold check mode must distinguish applicability from applied state.",
+      "status": "partially_mitigated"
+    },
+    {
+      "evidence": "scripts/chromium_source.py preflight_step now compares git_head(step.cwd) to plan.base_commit before verify-pinned-commit subprocess execution.",
+      "finding": "Pinned commit verification must fail when HEAD differs from manifest base_commit.",
+      "status": "mitigated"
+    },
+    {
+      "evidence": "scripts/chromium_source.py run_step no longer skips generate-dev-build when build.ninja already exists.",
+      "finding": "GN output must not be trusted solely because build.ninja exists.",
+      "status": "mitigated_for_dev_generation"
+    },
+    {
+      "evidence": "patch-best-practice-audit records per-patch watch files/symbols and requires semantic review on anchor drift.",
+      "finding": "Text anchors remain noisy across Chromium upgrades.",
+      "status": "accepted_with_guardrails"
+    }
+  ],
+  "hard_blockers": [
+    "patch anchor repaired without reviewing the new upstream symbol semantics",
+    "high-risk surface changed without rebuilt artifact detector evidence",
+    "UA/UA-CH/header/platform/timezone/proxy values contradict each other",
+    "WebRTC DOM candidate masking claimed as network leak prevention without network/proxy evidence",
+    "feature inventory enabled without API/permission/service coherence evidence",
+    "fonts or WebGL string spoofing claimed as complete surface coverage without metric/parameter/render evidence",
+    "release-grade claim while any supported production platform lacks launch/detector/signing evidence",
+    "audio noise active mode changes WebAudio getChannelData backing-array mutation semantics until redesigned or proven safe",
+    "browser-side UA-CH request metadata is not yet proven coherent with Blink DOM uaData overrides",
+    "WebRTC candidate SDP related-address rewriting is not yet coherent enough for standalone leak-prevention claims",
+    "feature parity flags are alpha DOM-inventory only until service/permission behavior is validated"
+  ],
+  "phase_order": [
+    {
+      "checks": [
+        "resolve target ref to commit",
+        "record branch position when available",
+        "inspect src/build/vs_toolchain.py TOOLCHAIN_HASH and SDK_VERSION for Windows SDK changes"
+      ],
+      "objective": "Choose a Chromium target tag and record immutable base metadata before mutating source.",
+      "phase": "select-base",
+      "required_outputs": [
+        "browser/chromium-base.json",
+        "knowledge/manifests/patchset.json base fields",
+        "knowledge/manifests/source-acquisition.json chromium_base fields"
+      ]
+    },
+    {
+      "checks": [
+        "gclient sync/runhooks",
+        "GN generation",
+        "unpatched build",
+        "detector baseline comparison"
+      ],
+      "objective": "Build and test the new upstream Chromium without BrowseForge patches.",
+      "phase": "unpatched-baseline",
+      "required_outputs": [
+        "unpatched baseline patchset entry",
+        "source-acquisition baseline build output status",
+        "sanitized baseline detector evidence when detector drift analysis is in scope"
+      ]
+    },
+    {
+      "checks": [
+        "apply_*_patch.py --check for every patch",
+        "unit tests for changed patch scripts",
+        "launcher validation tests for every emitted switch",
+        "switch propagation allowlist completeness"
+      ],
+      "objective": "Reapply BrowseForge patch scripts against the new upstream and repair only with source-aware semantic review.",
+      "phase": "patch-rebase",
+      "required_outputs": [
+        "updated patch scripts/tests if anchors move",
+        "patchset entries with new upstream_status",
+        "GN check evidence for touched targets"
+      ]
+    },
+    {
+      "checks": [
+        "Linux Docker build first",
+        "macOS arm64 native build",
+        "macOS x64 package or explicit caveat",
+        "Windows x64 cross-compile via windows-toolchain-sop and manual OS validation"
+      ],
+      "objective": "Produce platform artifacts from the rebased source and package with provenance.",
+      "phase": "artifact-build",
+      "required_outputs": [
+        "dist/<artifact>.zip",
+        "runtime-artifacts.json",
+        "artifact-manifest.json",
+        "SBOM.json",
+        "provenance.json",
+        "checksums.txt"
+      ]
+    },
+    {
+      "checks": [
+        "BrowserLeaks",
+        "BrowserScan",
+        "CreepJS",
+        "iphey",
+        "Pixelscan",
+        "SannySoft",
+        "direct/proxy modes where required",
+        "headed/headless where relevant",
+        "raw IP/URL/token sanitization"
+      ],
+      "objective": "Prove anti-detection surfaces with live detector evidence on rebuilt artifacts.",
+      "phase": "detector-matrix",
+      "required_outputs": [
+        "detectors/evidence/<version>/...",
+        "detector-summary.json",
+        "detector-score-comparison.json",
+        "fingerprint-surface-status.json",
+        "docs/anti-detection-matrix.md"
+      ]
+    },
+    {
+      "checks": [
+        "python3 scripts/validate.py",
+        "go test targeted runtime packages",
+        "python3 -m unittest targeted changed tests",
+        "SBOM/provenance/checksum consistency",
+        "KB/KG refresh"
+      ],
+      "objective": "Promote only evidence-backed claims.",
+      "phase": "release-gates",
+      "required_outputs": [
+        "release-gates.json",
+        "release-status.json",
+        "objective-audit.json",
+        "release notes"
+      ]
+    }
+  ],
+  "platform_order": [
+    "source dev baseline",
+    "linux-x64 Docker",
+    "macos-arm64 headed native",
+    "macos-x64 package/launch if available",
+    "windows-x64 cross-compile plus manual Windows OS validation"
+  ],
+  "purpose": "Durable strategy for upgrading the pinned Chromium base while preserving BrowseForge anti-detection claims through evidence, not assumptions.",
+  "related_manifests": [
+    "knowledge/manifests/patchset.json",
+    "knowledge/manifests/patch-best-practice-audit.json",
+    "knowledge/manifests/source-acquisition.json",
+    "knowledge/manifests/windows-toolchain-sop.json",
+    "knowledge/manifests/fingerprint-surface-status.json",
+    "knowledge/manifests/release-gates.json",
+    "knowledge/manifests/release-status.json"
+  ],
+  "repo_update_contract": [
+    "Update knowledge/manifests/patchset.json for every source patch status change.",
+    "Update knowledge/manifests/source-acquisition.json for source checkout/build/toolchain status.",
+    "Update knowledge/manifests/patch-best-practice-audit.json when adding/changing patch methods.",
+    "Regenerate release-status/objective-audit after manifest input changes.",
+    "Refresh BrowseForge Chromium Runtime Knowledge Base and codebase-memory KG, then commit .codebase-memory artifacts."
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "upgrade_record_required_fields": [
+    "upgrade_id",
+    "previous_base_version",
+    "previous_base_ref",
+    "previous_base_commit",
+    "previous_branch_position",
+    "target_base_version",
+    "target_base_ref",
+    "target_base_commit",
+    "target_branch_position",
+    "deps_sha256",
+    "selected_ref_rationale",
+    "linux_published_stable",
+    "depot_tools_ref",
+    "gclient_sync_args_by_host_profile",
+    "external_workdirs",
+    "source_checkout_head",
+    "checkout_matches_manifest",
+    "dirty_status",
+    "patch_rebase_order",
+    "patch_dependency_graph",
+    "platform_gn_args",
+    "args_gn_sha256",
+    "build_ninja_sha256",
+    "build_output_source_head",
+    "artifact_rebuild_required",
+    "artifact_rebuild_reasons",
+    "package_artifact_ids",
+    "checksums",
+    "sbom_refs",
+    "provenance_refs",
+    "live_detector_matrix_requirements",
+    "live_detector_matrix_results",
+    "stale_after_base_commit",
+    "rollback_base_ref",
+    "rollback_artifact_refs",
+    "kb_kg_refresh_status"
+  ]
+}

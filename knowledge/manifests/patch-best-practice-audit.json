@@ -1,0 +1,723 @@
+{
+  "assessment_scale": {
+    "acceptable": "Method is sound when coupled with existing validation and detector evidence.",
+    "acceptable_with_high_risk": "Correct layer and guardrails exist, but the surface is inherently high-signal and needs full detector recertification every upgrade.",
+    "risky_as_standalone": "Method is useful only as one layer; claiming it alone as anti-detection best practice would be wrong.",
+    "strong": "Method is appropriate and should be preserved, with normal upgrade revalidation.",
+    "strong_non_fingerprint": "Method is appropriate for launch/build stability but must not be marketed as a fingerprint spoof."
+  },
+  "base_reviewed": {
+    "base_branch_position": 1639810,
+    "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+    "base_ref": "refs/tags/150.0.7871.101",
+    "base_version": "150.0.7871.101"
+  },
+  "created_at": "2026-07-12",
+  "global_findings": [
+    "The strongest current practices are native source-level changes, explicit command-line switches, launcher-side validation, upstream fallback when disabled, and detector evidence gates.",
+    "The weakest practices are inherently partial spoof surfaces: WebRTC DOM candidate rewriting, WebGL string-only masking, FontFaceSet.check allowlists, and runtime-enabled feature flips without full backend behavior evidence.",
+    "Strict native mode suppression for canvas/audio/WebGL/fonts is a good guardrail because coherent native behavior is often safer than partial synthetic spoofing.",
+    "Exact text-anchor patch scripts are acceptable for a pinned Chromium ref because they fail closed and have tests; for repeated Chromium upgrades they must be paired with semantic upstream symbol review and detector recertification.",
+    "No high-risk patch should be promoted from source-compatible to release-grade without a rebuilt artifact, live detector evidence, and cross-surface coherence checks.",
+    "Browser-side UA-CH request metadata remains the highest identity-surface gap; DOM uaData evidence cannot stand in for Sec-CH-UA-* header evidence.",
+    "WebAudio active noise currently risks detectable getChannelData mutation/object semantics; strict mode must remain the release default for audio until fixed or disproven.",
+    "WebRTC candidate masking is a DOM mitigation only until address and related-address SDP fields are rewritten coherently and backed by proxy/STUN detector evidence.",
+    "Feature parity and font allowlists are alpha inventory mitigations, not production-grade evidence of real API/font corpus behavior.",
+    "Framework mitigations added in this update: scaffold --check verifies applied state, pinned commit preflight compares HEAD to base_commit, and dev GN generation no longer skips solely on existing build.ninja."
+  ],
+  "must_do_before_next_chromium_upgrade": [
+    "Create an unpatched baseline build and detector evidence for the new Chromium tag.",
+    "Run every apply_*_patch.py --check against the new checkout and treat missing anchors as rebase work, not optional drift.",
+    "Review every upgrade_watch_file and upgrade_watch_symbol touched by high-risk surfaces before repairing anchors.",
+    "Regenerate UA/UA-CH version and GREASE expectations for the new Chromium major/minor version.",
+    "Prove WebRTC with network/proxy evidence, not DOM candidate rewriting alone.",
+    "Prove WebGL with parameters/extensions/shader precision/rendered pixels, not vendor/renderer strings alone.",
+    "Prove fonts with real font availability and metrics/glyph evidence, not FontFaceSet.check alone.",
+    "Prove feature parity with API behavior and permission/service coherence, not runtime_enabled_features flips alone.",
+    "Update this audit manifest whenever patch methods or claim policies change."
+  ],
+  "parallel_review_sources": [
+    {
+      "agent": "NavigatorPatchReview",
+      "key_findings": [
+        "browser-side UA-CH metadata path remains a P1 gap",
+        "webdriver helper needed legacy normalization",
+        "Accept-Language header manifest under-declared fan-out"
+      ],
+      "status": "completed"
+    },
+    {
+      "agent": "GraphicsPatchReview",
+      "key_findings": [
+        "strict native mode is the safest release path for graphics/media/fonts",
+        "audio getChannelData mutation semantics are a concrete active-spoof risk",
+        "fonts allowlist and WebGL string overrides are risky standalone methods"
+      ],
+      "status": "completed"
+    },
+    {
+      "agent": "NetworkPatchReview",
+      "key_findings": [
+        "WebRTC related-address SDP rewriting is a P1 gap",
+        "feature parity is risky unless platform/service/permission behavior is proven",
+        "process priority patch is stability only"
+      ],
+      "status": "completed"
+    },
+    {
+      "agent": "FrameworkPatchReview",
+      "key_findings": [
+        "check mode must verify applied state",
+        "pinned commit verification must compare HEAD",
+        "GN output must be invalidated/regenerated across upgrades"
+      ],
+      "status": "completed"
+    }
+  ],
+  "patch_reviews": [
+    {
+      "best_practice_verdict": "strong",
+      "claim_policy": "baseline_control",
+      "method_summary": "No anti-detect browser engine patches are claimed. This patchset exists to bind wrapper/build/detector evidence to a concrete Chromium source ref before patch work begins.",
+      "patchset_id": "unpatched-baseline-m150-150.0.7871.101",
+      "rationale": "Baseline binding is the correct control for separating upstream detector drift from BrowseForge patch regressions.",
+      "recommendation": "Create a fresh unpatched baseline entry and detector baseline for every Chromium base upgrade.",
+      "required_evidence": [
+        "wrapper argument tests",
+        "detector harness schema tests",
+        "package script smoke"
+      ],
+      "review_group": "framework_upgrade",
+      "risk_level": "low",
+      "surface": "none",
+      "upgrade_watch_files": [],
+      "upgrade_watch_symbols": [],
+      "upstream_status": "unmodified_baseline"
+    },
+    {
+      "best_practice_verdict": "strong",
+      "claim_policy": "evidence_required",
+      "method_summary": "Defines the fail-closed persona snapshot contract, native switch names, and internal Mojo projection interface. The scaffold is copied into the pinned Chromium checkout as //browseforge/stealth and linked from Chromium root gn_all so GN generates and checks the target. It does not claim detector pass until browser/renderer/network subsystems consume the native service.",
+      "patchset_id": "scaffold-browseforge-stealth-substrate",
+      "rationale": "Dedicated native substrate, switch names, persona snapshot, and Mojo boundary are better than ad-hoc renderer globals when kept fail-closed.",
+      "recommendation": "Keep persona schema versioned and reject missing/invalid native config before launch.",
+      "required_evidence": [
+        "go test ./...",
+        "python3 -m unittest discover -s tests",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py sync-linux-deps --execute",
+        "python3 scripts/chromium_docker.py install-linux-deps --execute",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //browseforge/stealth:stealth"
+      ],
+      "review_group": "framework_upgrade",
+      "risk_level": "medium",
+      "surface": "stealth_substrate",
+      "upgrade_watch_files": [
+        "chromium/src/BUILD.gn"
+      ],
+      "upgrade_watch_symbols": [
+        "browseforge::stealth::PersonaSnapshot",
+        "browseforge::stealth::PersonaResolver",
+        "browseforge.stealth.mojom.BrowseForgeStealthHost",
+        "launcher.FingerprintConfig.NativeConfigPath",
+        "launcher.FingerprintConfig.NativeMode",
+        "launcher.validateNativeMode"
+      ],
+      "upstream_status": "copied_to_external_checkout_and_linked_to_gn_all"
+    },
+    {
+      "best_practice_verdict": "acceptable_after_legacy_helper_normalization",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --browseforge-stealth-mode is explicitly enabled/strict/true/1, blink::Navigator::webdriver returns false before Chromium's AutomationControlled/probe override path. Empty, absent, off, disabled, false, or 0 preserve upstream behavior; the launcher rejects unknown mode strings before command-plan emission. This is source-level patch evidence only; release detector pass still requires a patched Chromium artifact and live detector run.",
+      "must_fix_before_upgrade": false,
+      "patchset_id": "surface-webdriver-native-gate",
+      "rationale": "Native gated webdriver override is standard for automation-marker control and preserves upstream behavior when disabled.",
+      "recommendation": "Reapply the updated script to normalize legacy helpers; keep disabled/false/0/off preserving upstream behavior and test against real external checkout shapes.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_webdriver_patch",
+        "python3 scripts/apply_webdriver_patch.py --check",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core",
+        "go test ./...",
+        "python3 -m unittest discover -s tests",
+        "python3 scripts/validate.py"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "automation_webdriver",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/frame/navigator.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::Navigator::webdriver",
+        "BrowseForgeShouldHideWebDriver",
+        "launcher.FingerprintConfig.NativeMode",
+        "launcher.validateNativeMode"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-hardware-concurrency or --fingerprint-device-memory contains a bounded positive integer, Blink returns that value for navigator.hardwareConcurrency or navigator.deviceMemory. Zero or absent values preserve upstream Chromium behavior; explicit negative values, hardware concurrency above 128, or device memory above 64 GB are rejected by the launcher before command-plan emission, matching the Blink helper bounds. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-hardware-native-overrides",
+      "rationale": "Bounded native overrides with launcher validation and upstream fallback are appropriate for hardwareConcurrency/deviceMemory.",
+      "recommendation": "Keep values coherent with UA platform, container CPU limits, and detector matrix; retest after NavigatorBase/NavigatorDeviceMemory changes.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_hardware_patch",
+        "python3 scripts/apply_hardware_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "hardware",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
+        "chromium/src/third_party/blink/renderer/core/frame/navigator_device_memory.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::NavigatorBase::hardwareConcurrency",
+        "blink::NavigatorDeviceMemory::deviceMemory",
+        "BrowseForgeHardwareConcurrencyOverrideOrDefault",
+        "BrowseForgeDeviceMemoryOverrideOrDefault",
+        "launcher.FingerprintConfig.HardwareConcurrency",
+        "launcher.FingerprintConfig.DeviceMemoryGB",
+        "launcher.maxHardwareConcurrency",
+        "launcher.maxDeviceMemoryGB",
+        "launcher.validateHardwareValue"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-screen-width, --fingerprint-screen-height, --fingerprint-screen-avail-width, or --fingerprint-screen-avail-height contains a bounded positive integer, Blink returns that value through the matching Screen API. If an available dimension is not set but the full screen dimension is set, the available dimension falls back to the full-screen override to avoid leaking the host display. Zero or absent values preserve upstream Chromium behavior; explicit negative values or values above 32768 are rejected by the launcher before command-plan emission, matching the Blink helper bounds. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact a",
+      "patchset_id": "surface-screen-native-overrides",
+      "rationale": "Native Screen API overrides with bounded dimensions and avail fallback are appropriate.",
+      "recommendation": "Validate DPR/window metrics together; prevent impossible screen/viewport combinations across headed/headless and OS personas.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_screen_patch",
+        "python3 scripts/apply_screen_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "screen",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/frame/screen.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::Screen::width",
+        "blink::Screen::height",
+        "blink::Screen::availWidth",
+        "blink::Screen::availHeight",
+        "BrowseForgeReadPositiveIntSwitch",
+        "BrowseForgeScreenSwitchOrDefault",
+        "BrowseForgeScreenAvailSwitchOrDefault",
+        "launcher.FingerprintConfig.ScreenWidth",
+        "launcher.FingerprintConfig.ScreenHeight",
+        "launcher.FingerprintConfig.ScreenAvailWidth",
+        "launcher.FingerprintConfig.ScreenAvailHeight",
+        "launcher.maxScreenDimension",
+        "launcher.validateScreenDimension"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-platform contains a bounded ASCII platform token, blink::NavigatorBase::platform returns that value before Chromium's reduced platform fallback. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This covers navigator.platform in the common window/worker path; higher-entropy UA-CH platform fields remain a separate surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-platform-native-override",
+      "rationale": "Switch-gated navigator.platform override is useful but partial if UA-CH platform and OS-specific surfaces disagree.",
+      "recommendation": "Treat as coupled with UA-CH, userAgent, WebGL/Font OS persona, and profile platform selection.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_platform_patch",
+        "python3 scripts/apply_platform_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "platform",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::NavigatorBase::platform",
+        "BrowseForgeNavigatorPlatformOverride",
+        "launcher.FingerprintConfig.Platform",
+        "launcher.validatePlatform"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-timezone contains a bounded ASCII IANA timezone id, blink::TimeZoneController applies it through Chromium's existing ICU/V8 timezone path during controller initialization. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-timezone-native-override",
+      "rationale": "Using Chromium ICU/V8 timezone path is preferable to JS injection and aligns Intl behavior.",
+      "recommendation": "Keep TZ env/profile/proxy geolocation coherent; rerun BrowserLeaks/iphey/Pixelscan after ICU/timezone upstream changes.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_timezone_patch",
+        "python3 scripts/apply_timezone_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "timezone",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/timezone/timezone_controller.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::TimeZoneController::TimeZoneController",
+        "blink::TimeZoneController::SetIcuTimeZoneAndNotifyV8",
+        "BrowseForgeTimezoneOverride",
+        "launcher.FingerprintConfig.Timezone",
+        "launcher.validateTimezone"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-accept-language contains a bounded Accept-Language list, Blink uses it for navigator.language and navigator.languages; --fingerprint-locale is used as a fallback single-language value. Empty or absent values preserve upstream Chromium behavior; explicit values with characters or lengths rejected by the Blink helper are rejected by the launcher before command-plan emission. This covers DOM language APIs; HTTP Accept-Language header coherence remains a separate network/browser preference surface. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-locale-native-override",
+      "rationale": "DOM navigator language override with bounded Accept-Language fallback is appropriate.",
+      "recommendation": "Always pair with locale_header patch and HTTP evidence; DOM-only locale spoof is insufficient.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_locale_patch",
+        "python3 scripts/apply_locale_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "medium",
+      "surface": "locale",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/frame/navigator_language.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::NavigatorLanguage::IsLanguagesDirty",
+        "blink::NavigatorLanguage::EnsureUpdatedLanguage",
+        "BrowseForgeAcceptLanguagesOverride",
+        "launcher.FingerprintConfig.Locale",
+        "launcher.FingerprintConfig.AcceptLanguage",
+        "launcher.validateAcceptLanguages"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "strong_after_manifest_fanout_update",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-accept-language contains a bounded Accept-Language list, Chrome network context generation uses it before the profile intl.accept_languages pref so HTTP Accept-Language aligns with navigator.language/navigator.languages. Invalid, empty, oversized, or absent values preserve upstream pref behavior. This closes the locale patch gap where DOM language APIs were overridden but request headers could still leak profile defaults; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-accept-language-header-native-override",
+      "rationale": "Browser network-context Accept-Language override closes DOM/header coherence better than page injection or profile-only prefs.",
+      "recommendation": "Keep profile_network_context_service, ChromeContentBrowserClient, and ReduceAcceptLanguageService in the manifest/tests and rerun header observer evidence after upgrades.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_accept_language_header_patch",
+        "python3 scripts/apply_accept_language_header_patch.py --check",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //chrome/browser/net:net",
+        "python3 scripts/validate.py"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "high",
+      "surface": "locale_header",
+      "upgrade_watch_files": [
+        "chromium/src/chrome/browser/chrome_content_browser_client.cc",
+        "chromium/src/chrome/browser/net/profile_network_context_service.cc",
+        "chromium/src/components/reduce_accept_language/browser/reduce_accept_language_service.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "BrowseForgeAcceptLanguagesHeaderOverride",
+        "ChromeContentBrowserClient::GetAcceptLangs",
+        "ComputeAcceptLanguageFromPref",
+        "ReduceAcceptLanguageService::UpdateAcceptLanguage",
+        "fingerprint-accept-language"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "risky_until_browser_uach_header_coherence",
+      "claim_policy": "do_not_claim_release_grade_until_browser_header_evidence",
+      "method_summary": "When --fingerprint-user-agent contains a bounded printable ASCII UA string, Blink returns it from navigator.userAgent, and the launcher also passes Chromium's standard --user-agent flag to align network User-Agent behavior. UA-CH metadata can be overridden through bounded --fingerprint-ua-* switches for full version, platform, platform version, architecture, bitness, model, mobile, and wow64; non-grease brand versions are rewritten from the full version, and an empty upstream brand_full_version_list is seeded from brand_version_list so navigator.userAgentData.getHighEntropyValues([\"fullVersionList\"]) can return full-version entries after rebuild. Grease brand entries are now expanded from ma",
+      "must_fix_before_upgrade": true,
+      "patchset_id": "surface-user-agent-native-overrides",
+      "rationale": "Native UA plus UA-CH override is the right layer, but UA-CH GREASE/fullVersionList behavior is Chromium-version-sensitive.",
+      "recommendation": "Implement browser-side UA-CH metadata overrides in the request client-hint path and add local HTTP header/Accept-CH evidence before release-grade UA-CH claims.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_user_agent_patch",
+        "python3 scripts/apply_user_agent_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core",
+        "python3 scripts/chromium_docker.py build-chrome --jobs 4 --execute",
+        "python3 scripts/package_linux_runtime.py --execute --output-dir /tmp/bf-patched-dist",
+        "docker exec bf-pixelscan-patched python3 /work/scripts/detector_harness.py collect --detector pixelscan --cdp-url http://127.0.0.1:9222 --wait-seconds 30"
+      ],
+      "review_group": "identity_dom",
+      "risk_level": "high",
+      "surface": "user_agent",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/execution_context/navigator_base.cc",
+        "chromium/src/third_party/blink/renderer/core/frame/navigator_ua.cc",
+        "chromium/src/components/embedder_support/user_agent_utils.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::NavigatorBase::userAgent",
+        "blink::NavigatorUA::userAgentData",
+        "BrowseForgeNavigatorUserAgentOverride",
+        "BrowseForgeApplyUserAgentMetadataOverrides",
+        "launcher.FingerprintConfig.UserAgent",
+        "launcher.FingerprintConfig.UAFullVersion",
+        "BrowseForgeFullVersionForBrandVersion",
+        "launcher.FingerprintConfig.UAPlatform",
+        "launcher.FingerprintConfig.UAPlatformVersion",
+        "launcher.FingerprintConfig.UAArchitecture",
+        "launcher.FingerprintConfig.UABitness",
+        "launcher.FingerprintConfig.UAMobile",
+        "launcher.FingerprintConfig.UAWoW64",
+        "launcher.validatePrintableASCII",
+        "embedder_support::GetUserAgentInternal"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-storage-quota contains a bounded positive megabyte value, navigator.storage.estimate() and StorageBucket.estimate() report that quota in bytes while preserving the real usage value and clamping quota to at least usage. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects storage_quota_mb values above 1073741824 MB, matching the Blink helper bound before converting to bytes.",
+      "patchset_id": "surface-storage-quota-native-override",
+      "rationale": "Bounded quota override preserving usage and clamping quota above usage is safer than fixed fake estimates.",
+      "recommendation": "Validate across StorageManager and StorageBucket, storage pressure modes, incognito, and per-profile data dir behavior.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_storage_quota_patch",
+        "python3 scripts/apply_storage_quota_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/quota:quota",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/buckets:buckets"
+      ],
+      "review_group": "network_privacy_features",
+      "risk_level": "medium",
+      "surface": "storage_quota",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/buckets/storage_bucket.cc",
+        "chromium/src/third_party/blink/renderer/modules/quota/storage_manager.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::StorageManager::estimate",
+        "blink::StorageBucket::DidGetEstimate",
+        "BrowseForgeStorageQuotaOverrideOrDefault",
+        "launcher.FingerprintConfig.StorageQuotaMB",
+        "launcher.maxStorageQuotaMB"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "acceptable",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-plugins-pdf is enabled/true/1, Blink exposes Chromium's fixed five-entry PDF plugin list, the matching application/pdf and text/pdf mimeTypes, and navigator.pdfViewerEnabled even when PDF plugin data is unavailable in the embedded build. When disabled/false/0, those APIs report no PDF plugin. Empty or absent values preserve upstream Chromium behavior; explicit invalid values are rejected by the launcher before command-plan emission. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run.",
+      "patchset_id": "surface-plugins-pdf-native-override",
+      "rationale": "Explicit PDF plugin inventory control avoids missing plugin leaks in embedded packages.",
+      "recommendation": "Keep plugin/mimeType/pdfViewerEnabled counts aligned with current desktop Chrome detector expectations.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_plugins_patch",
+        "python3 scripts/apply_plugins_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/plugins:plugins"
+      ],
+      "review_group": "network_privacy_features",
+      "risk_level": "medium",
+      "surface": "plugins_pdf",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/plugins/dom_plugin_array.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::DOMPluginArray::DOMPluginArray",
+        "blink::DOMPluginArray::IsPdfViewerAvailable",
+        "blink::NavigatorPlugins::pdfViewerEnabled",
+        "BrowseForgePluginsPDFOverrideOrDefault",
+        "launcher.FingerprintConfig.PluginsPDF",
+        "launcher.validatePluginsPDF"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "risky_until_related_address_sdp_rewrite",
+      "claim_policy": "do_not_claim_standalone",
+      "method_summary": "When --fingerprint-webrtc-ip contains a bounded IPv4/IPv6 literal, Blink rewrites surfaced RTCIceCandidate candidate strings, address, relatedAddress, and toJSON().candidate to that value. Empty, auto, invalid, or absent values preserve upstream Chromium behavior; the launcher still applies Chromium disable_non_proxied_udp policy by default and maps proxy exit_ip to --fingerprint-webrtc-ip. This is a DOM-surfacing mitigation, not a complete network-stack relay guarantee; release detector pass still requires a patched Chromium artifact and live WebRTC detector evidence. The launcher now validates explicit fingerprint.webrtc_ip and proxy.exit_ip values as IP literals before emitting --fingerpr",
+      "must_fix_before_upgrade": true,
+      "patchset_id": "surface-webrtc-ice-candidate-native-override",
+      "rationale": "DOM ICE candidate rewriting can hide surfaced candidates but is not a complete network-stack relay/leak-prevention strategy.",
+      "recommendation": "Rewrite candidate SDP address/relatedAddress/raddr/rport coherently and rerun live WebRTC proxy detector evidence before release-grade WebRTC claims.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_webrtc_patch",
+        "python3 scripts/apply_webrtc_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/peerconnection:peerconnection"
+      ],
+      "review_group": "network_privacy_features",
+      "risk_level": "high",
+      "surface": "webrtc",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/peerconnection/rtc_ice_candidate.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::RTCIceCandidate::candidate",
+        "blink::RTCIceCandidate::address",
+        "blink::RTCIceCandidate::relatedAddress",
+        "blink::RTCIceCandidate::toJSONForBinding",
+        "BrowseForgeWebRTCIPOverride",
+        "BrowseForgeWebRTCCandidateOverride",
+        "launcher.FingerprintConfig.WebRTCIP"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "risky_as_active_spoof",
+      "claim_policy": "strict_suppressed_until_semantics_fixed_or_proven",
+      "method_summary": "When --fingerprint-audio-noise contains a positive integer seed, Blink adds tiny deterministic per-index perturbations to dense AudioBuffer and AnalyserNode readback APIs commonly sampled by audio fingerprint tests. AudioBuffer::getChannelData and copyFromChannel now gate perturbations on dense, non-uniform sample data so CreepJS-style sparse/uniform AudioBuffer trap probes retain native mutation semantics while rendered audio remains seed-adjusted. AudioBuffer::copyFromChannel seeds perturbations from buffer_offset so offset copies remain consistent with whole-buffer per-index readback. Invalid, zero, sparse/uniform, or absent values preserve upstream Chromium behavior. The patched Linux x6",
+      "must_fix_before_upgrade": true,
+      "patchset_id": "surface-audio-native-noise-override",
+      "rationale": "Deterministic seed noise at native WebAudio readback points is stronger than JS injection; dense/sparse gating reduces trap risk.",
+      "recommendation": "Fix or prove getChannelData backing-array mutation semantics before enabling audio noise outside experiments; keep strict native mode suppressing managed audio noise.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_audio_patch",
+        "python3 scripts/apply_audio_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/webaudio:webaudio"
+      ],
+      "review_group": "graphics_media_fonts",
+      "risk_level": "high",
+      "surface": "audio",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/webaudio/audio_buffer.cc",
+        "chromium/src/third_party/blink/renderer/modules/webaudio/analyser_node.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::AudioBuffer::getChannelData",
+        "blink::AudioBuffer::copyFromChannel",
+        "blink::AnalyserNode::getFloatFrequencyData",
+        "blink::AnalyserNode::getByteFrequencyData",
+        "blink::AnalyserNode::getFloatTimeDomainData",
+        "blink::AnalyserNode::getByteTimeDomainData",
+        "BrowseForgeAudioNoiseSeed",
+        "BrowseForgeShouldApplyAudioNoise",
+        "BrowseForgeApplyAudioNoise",
+        "BrowseForgeApplyAudioByteNoise",
+        "launcher.FingerprintConfig.AudioNoise",
+        "launcher.validateUint32",
+        "launcher.strictNativeMode"
+      ],
+      "upstream_status": "release_built_linux_x64_detector_tested_native_matrix_required"
+    },
+    {
+      "best_practice_verdict": "acceptable_with_high_risk",
+      "claim_policy": "evidence_required",
+      "method_summary": "When --fingerprint-canvas-noise contains a positive integer seed, Blink applies deterministic ±1 RGB byte perturbations to Canvas 2D getImageData readbacks and ImageDataBuffer encoding used by canvas data URL/blob serialization. Invalid, zero, or absent values preserve upstream Chromium behavior. This is source-level patch evidence only; detector pass still requires a patched Chromium artifact and live detector run. The launcher rejects canvas_noise values above uint32 range so command-line seeds do not wrap inside the native Blink helper. Strict native mode suppresses --fingerprint-canvas-noise emission, because strict mode must prefer native Canvas output over deterministic pixel perturbat",
+      "patchset_id": "surface-canvas-native-noise-override",
+      "rationale": "Native getImageData plus serialization coverage is better than canvas monkeypatching; transparent-pixel guard and strict-mode suppression reduce false positives.",
+      "recommendation": "Maintain rendered/encoded/readback parity evidence and avoid claiming canvas pass from hash drift alone.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_canvas_patch",
+        "python3 scripts/apply_canvas_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/canvas:canvas",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
+      ],
+      "review_group": "graphics_media_fonts",
+      "risk_level": "high",
+      "surface": "canvas",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.cc",
+        "chromium/src/third_party/blink/renderer/platform/graphics/image_data_buffer.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::BaseRenderingContext2D::getImageDataInternal",
+        "blink::ImageDataBuffer::EncodeImage",
+        "blink::ImageDataBuffer::ToDataURL",
+        "BrowseForgeCanvasNoiseSeed",
+        "BrowseForgeApplyCanvasNoise",
+        "BrowseForgeMakeNoisyCanvasPixmap",
+        "launcher.FingerprintConfig.CanvasNoise",
+        "launcher.validateUint32",
+        "launcher.strictNativeMode"
+      ],
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
+    },
+    {
+      "best_practice_verdict": "risky_as_active_spoof",
+      "claim_policy": "strict_suppressed_unless_native_gpu_profile_coherent",
+      "method_summary": "When --fingerprint-webgl-vendor or --fingerprint-webgl-renderer contains a bounded printable ASCII value, Blink returns that value for WEBGL_debug_renderer_info unmasked vendor/renderer parameters. Invalid, empty, or absent values preserve upstream Chromium behavior. The launcher validates webgl_vendor/webgl_renderer strings and now suppresses these string-spoofing switches when fingerprint.native_mode is strict, because strict mode must prefer native WebGL coherence over partial string-only masking. This only covers the high-signal WebGL string surface; WebGL params, extensions, shader precision, and rendered pixel output still require separate evidence before release-grade WebGL claims. St",
+      "patchset_id": "surface-webgl-vendor-renderer-native-override",
+      "rationale": "String-only WebGL vendor/renderer masking is incomplete because parameters, extensions, shader precision, and rendered pixels remain high-signal.",
+      "recommendation": "Use string overrides only when generated from actual GPU/ANGLE profile and validated against extensions, params, shader precision, and rendered pixels.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_webgl_patch",
+        "python3 scripts/apply_webgl_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules/webgl:webgl"
+      ],
+      "review_group": "graphics_media_fonts",
+      "risk_level": "high",
+      "surface": "webgl",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::WebGLRenderingContextBase::getParameter",
+        "blink::WebGLDebugRendererInfo::kUnmaskedRendererWebgl",
+        "blink::WebGLDebugRendererInfo::kUnmaskedVendorWebgl",
+        "BrowseForgeWebGLStringOverride",
+        "launcher.FingerprintConfig.WebGLVendor",
+        "launcher.FingerprintConfig.WebGLRenderer",
+        "launcher.strictNativeMode"
+      ],
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
+    },
+    {
+      "best_practice_verdict": "risky_alpha_dom_inventory_only",
+      "claim_policy": "alpha_inventory_only_until_service_permission_coherence",
+      "method_summary": "Promotes ContentIndex, ContactsManager, ContactsManagerExtraProperties, NetInfoDownlinkMax, SerialPortConnected, and WebShare to stable desktop runtime-enabled features so a modern desktop Chrome persona does not expose known feature inventory gaps such as noContentIndex, noContactsManager, noDownlinkMax, missing Web Share API, and serial connected-state inventory drift. This only changes Blink feature availability; API behavior, permission prompts, browser-side service availability, share UI invocation, and detector pass still require a patched Chromium artifact and live detector evidence. The rebuilt Linux x64 artifact includes this patch in the current packaged runtime; broader CreepJS/ip",
+      "patchset_id": "surface-feature-parity-native-defaults",
+      "rationale": "Feature inventory parity can reduce missing-feature leaks, but enabling features without backend/service/permission coherence can create new contradictions.",
+      "recommendation": "Platform-gate or prove API behavior, permission prompts, and browser-side service availability for each promoted feature before release-grade feature parity claims.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_feature_parity_patch",
+        "python3 scripts/apply_feature_parity_patch.py --check",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/modules:modules",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/platform:platform"
+      ],
+      "review_group": "network_privacy_features",
+      "risk_level": "high",
+      "surface": "permissions_features",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5"
+      ],
+      "upgrade_watch_symbols": [
+        "RuntimeEnabledFeatures::ContentIndexEnabled",
+        "RuntimeEnabledFeatures::ContactsManagerEnabled",
+        "RuntimeEnabledFeatures::ContactsManagerExtraPropertiesEnabled",
+        "RuntimeEnabledFeatures::NetInfoDownlinkMaxEnabled",
+        "RuntimeEnabledFeatures::SerialPortConnectedEnabled",
+        "RuntimeEnabledFeatures::WebShareEnabled"
+      ],
+      "upstream_status": "applied_to_external_checkout_release_built_linux_x64_detector_tested_native_matrix_required"
+    },
+    {
+      "best_practice_verdict": "risky_as_active_spoof",
+      "claim_policy": "strict_suppressed_until_real_font_corpus_and_metrics",
+      "method_summary": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence. Strict native mode suppresses --fingerprint-fonts-dir and --fingerprint-fonts-list emission, because strict mode ",
+      "patchset_id": "surface-font-face-set-native-list-override",
+      "rationale": "FontFaceSet.check allowlist covers availability probes but not glyph rasterization, metrics, fallback, or actual installed font files.",
+      "recommendation": "Prefer installed per-OS font corpus plus glyph/metrics validation; keep allowlist-only FontFaceSet.check spoofing strict-suppressed.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_fonts_patch",
+        "python3 scripts/apply_fonts_patch.py --check",
+        "go test ./internal/launcher",
+        "python3 scripts/validate.py",
+        "python3 scripts/chromium_docker.py gn-gen --execute",
+        "gn check out/BrowseForgeLinuxDocker //third_party/blink/renderer/core:core"
+      ],
+      "review_group": "graphics_media_fonts",
+      "risk_level": "high",
+      "surface": "fonts",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/css/font_face_set.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::FontFaceSet::check",
+        "BrowseForgeFontFamilyAllowed",
+        "launcher.FingerprintConfig.Fonts",
+        "launcher.validateFonts",
+        "launcher.strictNativeMode"
+      ],
+      "upstream_status": "applied_to_external_checkout_release_built_with_strict_native_guard"
+    },
+    {
+      "best_practice_verdict": "strong_non_fingerprint",
+      "claim_policy": "stability_only",
+      "method_summary": "Replaces Linux setpriority DPCHECK hard-fail behavior with a warning so containerized/headless BrowseForge Chromium runs do not crash when the host disallows priority changes. This is a launch stability mitigation for detector collection and does not claim a fingerprint surface pass.",
+      "patchset_id": "surface-process-priority-native-adjustment",
+      "rationale": "Changing container priority DPCHECK hard-fail to warning is a pragmatic launch-stability patch, not a fingerprint spoof.",
+      "recommendation": "Keep it scoped to stability and do not list it as anti-detection evidence except as detector-run enablement.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_process_priority_patch",
+        "python3 scripts/apply_process_priority_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "review_group": "network_privacy_features",
+      "risk_level": "medium",
+      "surface": "process_priority",
+      "upgrade_watch_files": [
+        "chromium/src/base/process/process_linux.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "base::Process::SetPriority",
+        "PLOG(WARNING)"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "strong_critical",
+      "claim_policy": "evidence_required",
+      "method_summary": "Adds the complete BrowseForge fingerprint and stealth command-line switch set to Chromium's browser-to-renderer switch allowlist so Blink-side native patches can observe browser-owned persona values in renderer processes. The patch script now audits every declared switch and repairs partial older allowlists, including fingerprint-fonts-list. Without this patch, source-level surface overrides may compile but never receive profile-specific inputs.",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "rationale": "Auditing renderer switch propagation is essential; without it Blink patches compile but do not receive profile persona inputs.",
+      "recommendation": "Validate every declared fingerprint switch is propagated after each Chromium upgrade and whenever new switches are added.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_switch_propagation_patch",
+        "python3 scripts/apply_switch_propagation_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "review_group": "framework_upgrade",
+      "risk_level": "high",
+      "surface": "switch_propagation",
+      "upgrade_watch_files": [
+        "chromium/src/content/browser/renderer_host/render_process_host_impl.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "content::RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer",
+        "kSwitchNames",
+        "browseforge-stealth-mode",
+        "fingerprint-*",
+        "BROWSEFORGE_SWITCHES",
+        "missing_browseforge_switches",
+        "fingerprint-fonts-list"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    }
+  ],
+  "purpose": "Durable review of each BrowseForge Chromium patch method against upgrade-readiness and anti-detection best-practice criteria.",
+  "related_strategy": "knowledge/manifests/chromium-upgrade-strategy.json",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
+}

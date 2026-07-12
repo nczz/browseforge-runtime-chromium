@@ -35,6 +35,20 @@ class ApplyStealthScaffoldTests(unittest.TestCase):
             self.assertIn('"//browseforge/stealth"', (src / "BUILD.gn").read_text(encoding="utf-8"))
             self.assertTrue((src / "browseforge" / "stealth" / "persona_resolver.cc").is_file())
 
+    def test_check_requires_scaffold_files_and_build_dep(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "src"
+            (src / ".git").mkdir(parents=True)
+            (src / "BUILD.gn").write_text('group("gn_all") {\n  deps = [\n      "//url:url_unittests",\n  ]\n}\n', encoding="utf-8")
+
+            with self.assertRaises(SystemExit) as raised:
+                apply_stealth_scaffold.verify_scaffold_applied(src)
+
+            self.assertIn("stealth scaffold is not fully applied", str(raised.exception))
+
+            apply_stealth_scaffold.apply_scaffold(src)
+            apply_stealth_scaffold.verify_scaffold_applied(src)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -435,6 +435,11 @@ def emit_json(payload: object) -> None:
 
 
 def preflight_step(plan: SourcePlan, step: Step) -> None:
+    if step.id == "verify-pinned-commit":
+        head = git_head(Path(step.cwd))
+        if head != plan.base_commit:
+            raise SystemExit(f"Chromium checkout HEAD drifted from manifest base_commit: {head!r} != {plan.base_commit!r}")
+        return
     if step.id != "generate-dev-build":
         return
     platform_gn = platform_gn_binary(Path(plan.chromium_src_dir))
@@ -449,7 +454,7 @@ def preflight_step(plan: SourcePlan, step: Step) -> None:
 
 def run_step(step: Step, env: dict[str, str]) -> None:
     Path(step.cwd).mkdir(parents=True, exist_ok=True)
-    if step.creates and Path(step.creates).exists():
+    if step.creates and Path(step.creates).exists() and step.id != "generate-dev-build":
         return
     subprocess.run(step.command, cwd=step.cwd, env=env, check=True)
 

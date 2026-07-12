@@ -48,6 +48,20 @@ def validate_chromium_src(src: Path) -> None:
         raise SystemExit(f"navigator.cc is missing: {src / NAVIGATOR_CC}")
 
 
+def normalize_webdriver_helper(text: str) -> str:
+    helper_name = "BrowseForgeShouldHideWebDriver"
+    helper_index = text.find(helper_name)
+    if helper_index == -1:
+        return text
+    start = text.rfind("namespace {", 0, helper_index)
+    end_marker = "}  // namespace"
+    end = text.find(end_marker, helper_index)
+    if start == -1 or end == -1:
+        raise SystemExit("navigator.cc existing BrowseForge webdriver helper block not found")
+    end += len(end_marker)
+    return text[:start] + HELPER.strip("\n") + text[end:]
+
+
 def patch_navigator(text: str) -> str:
     patched = ensure_text_after(
         text,
@@ -55,12 +69,14 @@ def patch_navigator(text: str) -> str:
         "\n" + COMMAND_LINE_INCLUDE,
         "navigator.cc include",
     )
-    patched = ensure_text_before(
-        patched,
-        NAMESPACE_ANCHOR,
-        HELPER + "\n",
-        "navigator.cc namespace",
-    )
+    patched = normalize_webdriver_helper(patched)
+    if "BrowseForgeShouldHideWebDriver" not in patched:
+        patched = ensure_text_before(
+            patched,
+            NAMESPACE_ANCHOR,
+            HELPER + "\n",
+            "navigator.cc namespace",
+        )
     return replace_once(
         patched,
         ORIGINAL_WEBDRIVER,
