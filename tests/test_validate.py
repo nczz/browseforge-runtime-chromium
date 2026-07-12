@@ -22,6 +22,45 @@ LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64"
 LINUX_ARTIFACT_NODE_ID = f"RuntimeArtifact:{LINUX_ARTIFACT_ID}"
 LINUX_PLATFORM_NODE_ID = "Platform:linux-x64"
 
+def write_native_proxy_region_validation_sources(
+    root: Path, *, omit_persona_snapshot_guard: bool = False
+) -> None:
+    persona_snapshot_tokens = [
+        "IsRawIPv4Address",
+        "webrtc.proxy_region",
+        "region.size() > 64",
+    ]
+    if not omit_persona_snapshot_guard:
+        persona_snapshot_tokens.insert(0, "IsValidProxyRegion")
+
+    sources = {
+        "internal/stealth/persona.go": "\n".join(
+            [
+                "validProxyRegion",
+                "strings.TrimSpace(region) != region",
+                "netip.ParseAddr(region)",
+                "len(region) > 64",
+            ]
+        )
+        + "\n",
+        "browser/stealth/persona_snapshot.cc": "\n".join(persona_snapshot_tokens) + "\n",
+        "internal/stealth/persona_test.go": "\n".join(
+            [
+                "TestValidateProxyRegionLabels",
+                "rejects raw IPv4 address",
+                "rejects URL with credentials",
+                "rejects label longer than 64 bytes",
+            ]
+        )
+        + "\n",
+    }
+    for relative_path, text in sources.items():
+        path = root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+
+
 
 class ValidateRuntimeGraphTests(unittest.TestCase):
     REQUIRED_RUNTIME_GRAPH_MANIFEST_SOURCES = (
@@ -1886,6 +1925,8 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             path = root / required_file
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("placeholder\n", encoding="utf-8")
+        write_native_proxy_region_validation_sources(root)
+
 
         self._write_json(
             root / "contracts" / "runtime.manifest.json",
@@ -3018,6 +3059,42 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
     def _write_json(self, path: Path, payload: object) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+
+
+
+class NativeProxyRegionValidationTests(unittest.TestCase):
+    def _load_validate_module(self) -> Any:
+        spec = importlib.util.spec_from_file_location("validate_under_test", VALIDATE_SCRIPT)
+        self.assertIsNotNone(spec)
+        module = importlib.util.module_from_spec(spec)
+        assert spec is not None
+        assert spec.loader is not None
+        sys.modules["validate_under_test"] = module
+        spec.loader.exec_module(module)
+        return module
+
+    def _validate_with_temp_root(self, module: Any, root: Path) -> None:
+        original_root = module.ROOT
+        module.ROOT = root
+        try:
+            module.validate_native_proxy_region_validation()
+        finally:
+            module.ROOT = original_root
+
+    def test_validate_rejects_native_proxy_region_validation_drift_in_cpp_snapshot(self) -> None:
+        """The native gate fails closed when C++ proxy-region guard evidence drifts."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            write_native_proxy_region_validation_sources(temp_root, omit_persona_snapshot_guard=True)
+
+            with self.assertRaises(SystemExit) as raised:
+                self._validate_with_temp_root(module, temp_root)
+
+        message = str(raised.exception)
+        self.assertIn("native proxy-region validation drift", message)
+        self.assertIn("browser/stealth/persona_snapshot.cc", message)
+        self.assertIn("IsValidProxyRegion", message)
 
 
 

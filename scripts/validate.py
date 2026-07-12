@@ -501,6 +501,34 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
         if not (ROOT / source_path).is_file():
             raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")
 
+
+def validate_native_proxy_region_validation() -> None:
+    required_tokens = {
+        "internal/stealth/persona.go": [
+            "validProxyRegion",
+            "strings.TrimSpace(region) != region",
+            "netip.ParseAddr(region)",
+            "len(region) > 64",
+        ],
+        "browser/stealth/persona_snapshot.cc": [
+            "IsValidProxyRegion",
+            "IsRawIPv4Address",
+            "webrtc.proxy_region",
+            "region.size() > 64",
+        ],
+        "internal/stealth/persona_test.go": [
+            "TestValidateProxyRegionLabels",
+            "rejects raw IPv4 address",
+            "rejects URL with credentials",
+            "rejects label longer than 64 bytes",
+        ],
+    }
+    for path, tokens in required_tokens.items():
+        text = (ROOT / path).read_text(encoding="utf-8")
+        missing = [token for token in tokens if token not in text]
+        if missing:
+            raise SystemExit(f"native proxy-region validation drift in {path}: missing {missing}")
+
 CONTEXT_SENSITIVE_SCORE_COMPARISONS = {
     "creepjs_audio_headless_vs_headed",
     "browserleaks_audio_headless_vs_headed",
@@ -1311,6 +1339,7 @@ def main() -> None:
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     validate_package_smoke_manifests(source_acquisition, runtime_artifacts)
     validate_accept_language_header_smoke(runtime_artifacts)
+    validate_native_proxy_region_validation()
     signing_policy = load_json("knowledge/manifests/signing-policy.json")
     validate_signing_policy(signing_policy, runtime_artifacts, platform_matrix)
     release_status = load_json("knowledge/manifests/release-status.json")
