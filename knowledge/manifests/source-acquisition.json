@@ -163,6 +163,9 @@
       "wrapper_binary_sha256": "f1f6851461e5237cbca58202570243f33abe9b51fda5ef52b77ee4c94a735a98"
     },
     "macos_host_preflight_status": "native_toolchain_ready_build_output_and_package_present",
+    "missing_prerequisites": [
+      "macOS x64 build/package artifact"
+    ],
     "native_build_automation": {
       "last_macos_preflight": {
         "app_bundle_exists": true,
@@ -193,6 +196,8 @@
         "output_binary_status": "portable_layout_present",
         "package_status": "packaged_detector_tested",
         "required_host_os": "windows",
+        "toolchain_sop_evidence": "knowledge/manifests/windows-toolchain-sop.json",
+        "toolchain_sop_source_url": "https://gist.github.com/nczz/64883b0992d93e939f5ac2432a5ddf4f",
         "verification_mode": "manual_windows_os"
       },
       "platforms": {
@@ -204,14 +209,6 @@
           "required_host_os": "darwin",
           "status": "packaged_launch_smoked"
         },
-        "windows-x64": {
-          "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
-          "gn_args": "target_os=\"win\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
-          "out_dir": "out/BrowseForgeWindowsX64",
-          "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
-          "required_host_os": "windows",
-          "status": "packaged_launch_smoked"
-        },
         "macos-x64": {
           "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
           "gn_args": "target_os=\"mac\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false proprietary_codecs=true ffmpeg_branding=\"Chrome\"",
@@ -219,6 +216,14 @@
           "output_binary": "out/BrowseForgeMacX64/Chromium.app/Contents/MacOS/Chromium",
           "required_host_os": "darwin",
           "status": "preflight_ready_artifact_missing"
+        },
+        "windows-x64": {
+          "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
+          "gn_args": "target_os=\"win\" target_cpu=\"x64\" is_debug=false symbol_level=1 is_component_build=false use_remoteexec=false",
+          "out_dir": "out/BrowseForgeWindowsX64",
+          "output_binary": "out/BrowseForgeWindowsX64/chrome.exe",
+          "required_host_os": "windows",
+          "status": "packaged_launch_smoked"
         }
       },
       "script": "scripts/chromium_native.py",
@@ -233,8 +238,11 @@
         "python3 scripts/chromium_source.py acquire --execute --step sync-deps  # Darwin expands to --deps=mac",
         "python3 scripts/chromium_native.py run-hooks --platform macos-arm64 --execute",
         "python3 scripts/chromium_native.py gn-gen --platform macos-arm64 --execute",
-        "python3 scripts/chromium_native.py package --platform macos-arm64 --execute"
-      ]
+        "python3 scripts/chromium_native.py package --platform macos-arm64 --execute",
+        "knowledge/manifests/windows-toolchain-sop.json"
+      ],
+      "windows_toolchain_sop": "knowledge/manifests/windows-toolchain-sop.json",
+      "windows_toolchain_source_url": "https://gist.github.com/nczz/64883b0992d93e939f5ac2432a5ddf4f"
     },
     "platform_gn_check_contract": "python3 scripts/chromium_source.py check reports tools.platform_gn_binary and tools.platform_gn_exists so host GN wrapper failures are machine-readable before BrowseForgeDev generation.",
     "platform_patch_status": "applied_to_external_checkout",
@@ -256,10 +264,7 @@
     "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
     "webdriver_patch_status": "applied_to_external_checkout",
     "webgl_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout",
-    "missing_prerequisites": [
-      "macOS x64 build/package artifact"
-    ]
+    "webrtc_patch_status": "applied_to_external_checkout"
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {

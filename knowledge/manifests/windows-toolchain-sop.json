@@ -1,0 +1,159 @@
+{
+  "integration_points": {
+    "browseforge_windows_platform": "windows-x64",
+    "default_macos_toolchain_cache": "~/Projects/chromium-win-sdk-prep/output",
+    "hash_mapping_env": "GYP_MSVS_HASH_e66617bc68",
+    "script": "scripts/chromium_native.py",
+    "toolchain_base_env": "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL",
+    "toolchain_enable_env": "DEPOT_TOOLS_WIN_TOOLCHAIN"
+  },
+  "macos_usage_steps": [
+    {
+      "commands": [
+        "mkdir -p ~/Projects/chromium-win-sdk-prep/output",
+        "mv <hash>.zip ~/Projects/chromium-win-sdk-prep/output/"
+      ],
+      "id": "place-zip"
+    },
+    {
+      "commands": [
+        "export DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=\"$HOME/Projects/chromium-win-sdk-prep/output\"",
+        "export GYP_MSVS_HASH_e66617bc68=\"<actualhash>\""
+      ],
+      "id": "set-env",
+      "note": "Set GYP_MSVS_HASH_e66617bc68 when the generated zip hash differs from Chromium expected hash e66617bc68."
+    },
+    {
+      "commands": [
+        "cd ~/Projects/browser-source/browseforge-chromium",
+        "echo \"target_os = ['win']\" >> .gclient"
+      ],
+      "id": "enable-win-target-os",
+      "note": "Only append if target_os is not already present."
+    },
+    {
+      "commands": [
+        "cd ~/Projects/browser-source/browseforge-chromium/src",
+        "python3 build/vs_toolchain.py update --force",
+        "python3 build/vs_toolchain.py get_toolchain_dir"
+      ],
+      "expected_output": "vs_path, sdk_version = \"10.0.26100.0\", vs_version = \"2026\"",
+      "id": "verify-toolchain"
+    },
+    {
+      "commands": [
+        "gn gen out/win --args='target_os=\"win\" target_cpu=\"x64\" is_official_build=true is_debug=false symbol_level=0 enable_nacl=false'",
+        "autoninja -C out/win chrome"
+      ],
+      "id": "compile-windows-chrome"
+    }
+  ],
+  "maintenance_notes": [
+    "The Windows packaging operation is one-time per Chromium/toolchain version; the generated zip can be reused on macOS builds.",
+    "When upgrading Chromium, inspect src/build/vs_toolchain.py for TOOLCHAIN_HASH and SDK_VERSION changes before reusing this SOP output.",
+    "Use rsync --progress or scp -C when transferring the 1-3 GB zip."
+  ],
+  "pitfalls": [
+    {
+      "cause": "vswhere default search excludes Build Tools products",
+      "fix": "Patch package_from_installed.py to add -products *.",
+      "problem": "vswhere cannot find Build Tools"
+    },
+    {
+      "cause": "VC.Tools.x86.x64 component not installed",
+      "fix": "Install Microsoft.VisualStudio.Component.VC.Tools.x86.x64.",
+      "problem": "x64/x86 CRT Redist DLLs missing"
+    },
+    {
+      "cause": "--wait is unsupported for this installer",
+      "fix": "Use --passive and wait for installer UI completion.",
+      "problem": "VS 2026 installer rejects --wait"
+    },
+    {
+      "cause": "Windows host has no Python by default",
+      "fix": "Install Python.Python.3.12 via winget.",
+      "problem": "Python unavailable on Windows"
+    },
+    {
+      "cause": "Debugging Tools is not inside VS Build Tools package",
+      "fix": "Run Windows SDK installer on Windows with OptionId.WindowsDesktopDebuggers.",
+      "problem": "macOS-only SDK download lacks Debugging Tools"
+    },
+    {
+      "cause": "Self-packaged content differs from Google official archive",
+      "fix": "Set GYP_MSVS_HASH_e66617bc68 to the generated hash.",
+      "problem": "Generated hash does not match Chromium expected hash"
+    }
+  ],
+  "purpose": "Preserve the maintainer-provided SOP for packaging the Chromium 150 Windows SDK/toolchain on Windows 11 so macOS hosts can cross-compile the BrowseForge Chromium windows-x64 runtime.",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "source": {
+    "author": "nczz",
+    "captured_at": "2026-07-12",
+    "created_at": "2026-07-11T13:57:10Z",
+    "file": "chromium-win-toolchain-sop.md",
+    "type": "gist",
+    "updated_at": "2026-07-11T13:57:10Z",
+    "url": "https://gist.github.com/nczz/64883b0992d93e939f5ac2432a5ddf4f"
+  },
+  "target_versions": {
+    "chromium": "150.0.7871.101",
+    "msvc_toolset": "VC145",
+    "toolchain_hash_expected_by_chromium": "e66617bc68",
+    "visual_studio": "2026 (18.0)",
+    "windows_sdk": "10.0.26100.0"
+  },
+  "windows_packaging_steps": [
+    {
+      "commands": [
+        "winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements",
+        "winget install --id Python.Python.3.12 -e --source winget --accept-package-agreements --accept-source-agreements"
+      ],
+      "id": "install-git-python",
+      "note": "Restart administrator PowerShell after install so PATH is refreshed."
+    },
+    {
+      "commands": [
+        "Invoke-WebRequest -Uri \"https://aka.ms/vs/18/stable/vs_buildtools.exe\" -OutFile \"C:\\vs_buildtools.exe\"",
+        "& \"C:\\vs_buildtools.exe\" install --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --add Microsoft.VisualStudio.Component.VC.MFC.ARM64 --includeRecommended --passive"
+      ],
+      "critical_components": [
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "Microsoft.VisualStudio.Component.VC.Tools.ARM64",
+        "Microsoft.VisualStudio.Component.VC.MFC.ARM64"
+      ],
+      "id": "install-vs-build-tools"
+    },
+    {
+      "commands": [
+        "Invoke-WebRequest -Uri \"https://go.microsoft.com/fwlink/?linkid=2272610\" -OutFile \"C:\\winsdksetup.exe\"",
+        "& \"C:\\winsdksetup.exe\" /features OptionId.WindowsDesktopDebuggers OptionId.DesktopCPPx86 OptionId.DesktopCPPx64 OptionId.DesktopCPParm64 /quiet"
+      ],
+      "id": "install-windows-sdk-debuggers"
+    },
+    {
+      "commands": [
+        "cd C:\\",
+        "git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+      ],
+      "id": "clone-depot-tools"
+    },
+    {
+      "commands": [
+        "(Get-Content \"C:\\depot_tools\\win_toolchain\\package_from_installed.py\") -replace \"vswhere.exe -prerelease\", \"vswhere.exe -prerelease -products *\" | Set-Content \"C:\\depot_tools\\win_toolchain\\package_from_installed.py\""
+      ],
+      "id": "patch-vswhere-products",
+      "reason": "VS Build Tools is not discovered by vswhere unless -products * is used."
+    },
+    {
+      "commands": [
+        "cd C:\\depot_tools\\win_toolchain",
+        "python package_from_installed.py 2026 -w 10.0.26100.0",
+        "Get-ChildItem \"C:\\depot_tools\\win_toolchain\\*.zip\""
+      ],
+      "id": "package-toolchain",
+      "output": "<hash>.zip, approximately 1-3 GB"
+    }
+  ]
+}

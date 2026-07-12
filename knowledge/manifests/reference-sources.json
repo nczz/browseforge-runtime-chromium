@@ -1,74 +1,84 @@
 {
-  "schema_version": "1.0",
-  "runtime_id": "browseforge-chromium",
-  "purpose": "Authoritative and comparative sources required before implementing a cross-platform Chromium-family anti-detect runtime.",
-  "source_classes": [
-    {
-      "id": "browseforge-consumer",
-      "name": "BrowseForge main project",
-      "local_path": "/Users/chun/Projects/BrowseForge",
-      "knowledge_base": "BrowseForge Project Knowledge Base",
-      "knowledge_graph_project": "Users-chun-Projects-BrowseForge",
-      "role": "Consumer contract, runtime registry, profile/session storage, REST/MCP/workflow/dashboard/Docker integration.",
-      "required_before_implementation": true
-    },
-    {
-      "id": "cloakbrowser-reference",
-      "name": "CloakBrowser v146 source reference",
-      "local_path": "/Users/chun/Projects/browser-source-intel/CloakBrowser-v146.0.7680.177.4",
-      "knowledge_base": "CloakBrowser v146 Source Knowledge Base",
-      "knowledge_graph_project": "Users-chun-Projects-browser-source-intel-CloakBrowser-v146.0.7680.177.4",
-      "role": "Chromium-family wrapper, launch flags, proxy/WebRTC policy, Playwright bind, Docker/browser packaging reference.",
-      "required_before_implementation": true
-    },
-    {
-      "id": "camoufox-reference",
-      "name": "Camoufox v135 source reference",
-      "local_path": "/Users/chun/Projects/browser-source-intel/Camoufox-v135.0.1-beta.24",
-      "knowledge_base": "Camoufox v135 Source Knowledge Base",
-      "knowledge_graph_project": "Users-chun-Projects-browser-source-intel-Camoufox-v135.0.1-beta.24",
-      "role": "Firefox-family profile/fingerprint configuration reference and contrast model for deterministic persona generation.",
-      "required_before_implementation": true
-    },
-    {
-      "id": "chromium-upstream",
-      "name": "Chromium upstream source",
-      "local_path": null,
-      "knowledge_base": null,
-      "knowledge_graph_project": null,
-      "role": "Final source of truth for Blink, GPU, WebRTC, network, storage, permissions, headless, and platform build behavior.",
-      "required_before_implementation": true,
-      "status": "selected_not_indexed",
-      "blocking_reason": "Exact Chromium base is selected, but Chromium source has not been downloaded or indexed because it is a large external checkout.",
-      "base_version": "150.0.7871.101",
-      "base_ref": "refs/tags/150.0.7871.101",
-      "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d"
-    },
-    {
-      "id": "detector-evidence",
-      "name": "Detector reports and sanitized runtime traces",
-      "local_path": "detectors/",
-      "knowledge_base": "BrowseForge Chromium Runtime Knowledge Base",
-      "knowledge_graph_project": "Users-chun-Projects-browseforge-runtime-chromium",
-      "role": "Runtime-specific proof that surfaces match intended fingerprints under real detector pages.",
-      "required_before_release": true,
-      "status": "schema_only",
-      "blocking_reason": "No runtime-specific detector runs exist yet."
-    }
-  ],
   "minimum_development_inputs": [
     "BrowseForge consumer contract",
     "CloakBrowser wrapper behavior reference",
     "Camoufox deterministic fingerprint contrast reference",
     "Chromium upstream base decision",
     "Detector surface/evidence model",
-    "Cross-platform build dependency matrix"
+    "Cross-platform build dependency matrix",
+    "Windows toolchain packaging SOP for macOS cross-compile"
   ],
+  "purpose": "Authoritative and comparative sources required before implementing a cross-platform Chromium-family anti-detect runtime.",
   "release_blockers": [
     "missing runtime artifact checksums",
     "missing detector evidence",
     "missing SBOM/provenance",
     "missing BrowseForge integration test evidence",
     "missing indexed Chromium source checkout"
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0",
+  "source_classes": [
+    {
+      "id": "browseforge-consumer",
+      "knowledge_base": "BrowseForge Project Knowledge Base",
+      "knowledge_graph_project": "Users-chun-Projects-BrowseForge",
+      "local_path": "/Users/chun/Projects/BrowseForge",
+      "name": "BrowseForge main project",
+      "required_before_implementation": true,
+      "role": "Consumer contract, runtime registry, profile/session storage, REST/MCP/workflow/dashboard/Docker integration."
+    },
+    {
+      "id": "cloakbrowser-reference",
+      "knowledge_base": "CloakBrowser v146 Source Knowledge Base",
+      "knowledge_graph_project": "Users-chun-Projects-browser-source-intel-CloakBrowser-v146.0.7680.177.4",
+      "local_path": "/Users/chun/Projects/browser-source-intel/CloakBrowser-v146.0.7680.177.4",
+      "name": "CloakBrowser v146 source reference",
+      "required_before_implementation": true,
+      "role": "Chromium-family wrapper, launch flags, proxy/WebRTC policy, Playwright bind, Docker/browser packaging reference."
+    },
+    {
+      "id": "camoufox-reference",
+      "knowledge_base": "Camoufox v135 Source Knowledge Base",
+      "knowledge_graph_project": "Users-chun-Projects-browser-source-intel-Camoufox-v135.0.1-beta.24",
+      "local_path": "/Users/chun/Projects/browser-source-intel/Camoufox-v135.0.1-beta.24",
+      "name": "Camoufox v135 source reference",
+      "required_before_implementation": true,
+      "role": "Firefox-family profile/fingerprint configuration reference and contrast model for deterministic persona generation."
+    },
+    {
+      "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "base_ref": "refs/tags/150.0.7871.101",
+      "base_version": "150.0.7871.101",
+      "blocking_reason": "Exact Chromium base is selected, but Chromium source has not been downloaded or indexed because it is a large external checkout.",
+      "id": "chromium-upstream",
+      "knowledge_base": null,
+      "knowledge_graph_project": null,
+      "local_path": null,
+      "name": "Chromium upstream source",
+      "required_before_implementation": true,
+      "role": "Final source of truth for Blink, GPU, WebRTC, network, storage, permissions, headless, and platform build behavior.",
+      "status": "selected_not_indexed"
+    },
+    {
+      "blocking_reason": "No runtime-specific detector runs exist yet.",
+      "id": "detector-evidence",
+      "knowledge_base": "BrowseForge Chromium Runtime Knowledge Base",
+      "knowledge_graph_project": "Users-chun-Projects-browseforge-runtime-chromium",
+      "local_path": "detectors/",
+      "name": "Detector reports and sanitized runtime traces",
+      "required_before_release": true,
+      "role": "Runtime-specific proof that surfaces match intended fingerprints under real detector pages.",
+      "status": "schema_only"
+    },
+    {
+      "external_url": "https://gist.github.com/nczz/64883b0992d93e939f5ac2432a5ddf4f",
+      "id": "windows-toolchain-sop",
+      "local_path": "knowledge/manifests/windows-toolchain-sop.json",
+      "name": "Chromium 150 Windows toolchain packaging SOP",
+      "required_before_windows_cross_compile": true,
+      "role": "Maintainer-provided Windows 11 procedure for packaging VS 2026/MSVC VC145/Windows SDK 10.0.26100.0 into the toolchain zip consumed by macOS windows-x64 cross-compile.",
+      "status": "captured"
+    }
   ]
 }
