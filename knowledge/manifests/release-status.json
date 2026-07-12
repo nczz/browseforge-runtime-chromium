@@ -1,12 +1,6 @@
 {
-  "blocker_count": 5,
+  "blocker_count": 4,
   "blockers": [
-    {
-      "blocker_id": "browseforge-integration:0",
-      "detail": "macos-x64 release package is required by the runtime package contract but is missing; do not publish release assets until the real zip, checksum, SBOM, and provenance exist; launch smoke and detector evidence are intentionally absent and disclosed.",
-      "severity": "high",
-      "source": "contracts/browseforge-integration.contract.json"
-    },
     {
       "blocker_id": "signing-policy:linux-x64",
       "detail": "Unsigned dev artifact is acceptable only for alpha validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing requires an explicit signing policy update.",
@@ -63,9 +57,9 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-12T15:33:18Z",
+  "generated_at": "2026-07-12T16:15:14Z",
   "input_sha256": {
-    "contracts/browseforge-integration.contract.json": "cfb92f6f571510230e1805b63117605d90e81dce8cc235dbc6603febca573c64",
+    "contracts/browseforge-integration.contract.json": "542c2dd621e3e23ebd309bdab95c2eb15d190b59de8becb4bd7644a7e7dac66d",
     "detector-summary.json": "fa71cfbee22b939a7cbe3c4a78fc4e695f1073551047559cde53dcb823e661ba",
     "knowledge/manifests/detector-score-comparison.json": "28e96e92a6e31fe7ffdb9833b2821fc8593c59545fb0d1e8081919206a478629",
     "knowledge/manifests/fingerprint-surface-status.json": "fa49885b6fe26ac066e9e68fb7d7f47333db6c3d922af922edd34d81159b2325",

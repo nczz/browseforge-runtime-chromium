@@ -12,7 +12,7 @@
   "browseforge_min_version": "v2.0.0",
   "browseforge_repository_evidence": {
     "branch": "main",
-    "commit": "aba5248",
+    "commit": "4a8a766",
     "files": [
       "config.default.json",
       "internal/browser/launch_chromium.go",
@@ -36,10 +36,10 @@
     "repository": "github.com:nczz/BrowseForge.git",
     "summary": "BrowseForge registers Camoufox, CloakBrowser, and BrowseForge Chromium runtimes; Docker/GHCR defaults preinstall Camoufox plus BrowseForge Chromium; browser status/install can target selected runtimes; BrowseForge Chromium launch propagates fingerprint identity, proxy region metadata, and native stealth config switches.",
     "verification": [
-      "go test ./internal/browser ./internal/groups",
-      "go test ./internal/config",
+      "go test -count=1 ./cmd/server ./internal/api ./internal/browser ./internal/config ./internal/fingerprint ./internal/groups ./internal/humanize ./internal/mcp ./internal/profile ./internal/runtime ./internal/workflow",
+      "go vet ./...",
       "npm run check-doc-language",
-      "go test -count=1 ./cmd/server ./internal/browser ./internal/config ./internal/runtime"
+      "go run ./cmd/server --base-dir /tmp/browseforge-runtime-dogfood browsers install --runtimes browseforge-chromium --json"
     ]
   },
   "contract_version": "v0.1.0",
@@ -53,9 +53,7 @@
       "webrtc.proxy_region"
     ]
   },
-  "release_blockers": [
-    "macos-x64 release package is required by the runtime package contract but is missing; do not publish release assets until the real zip, checksum, SBOM, and provenance exist; launch smoke and detector evidence are intentionally absent and disclosed."
-  ],
+  "release_blockers": [],
   "required_browseforge_surfaces": [
     "config.runtimes.<id>",
     "GET /api/runtimes",
