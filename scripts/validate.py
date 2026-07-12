@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import hashlib
 import ipaddress
 import json
+import sys
 from pathlib import Path
 import zipfile
 import urllib.parse
@@ -1155,7 +1157,21 @@ def validate_browseforge_integration_contract(contract: dict, gate_status: dict[
 
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Validate BrowseForge Chromium runtime contracts.")
+    parser.add_argument(
+        "--skip-artifact-archives",
+        action="store_true",
+        help=(
+            "Skip checks that require local dist/*.zip archives. Use this only for normal "
+            "repository CI checkouts; release/preflight validation must keep archive checks enabled."
+        ),
+    )
+    return parser.parse_args([] if argv is None else argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
     missing = [path for path in REQUIRED_FILES if not (ROOT / path).is_file()]
     if missing:
         raise SystemExit(f"missing required files: {missing}")
@@ -1402,7 +1418,8 @@ def main() -> None:
             raise SystemExit(f"runtime manifest missing binary contract for packaged platform: {platform}")
         if binary_contract.get("packaged") is not True:
             raise SystemExit(f"runtime manifest binary.{platform}.packaged must be true while runtime-artifacts lists a packaged artifact")
-    validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
+    if not args.skip_artifact_archives:
+        validate_runtime_artifact_consistency(runtime_artifacts, source_acquisition)
     native_artifact_preflight = load_json("knowledge/manifests/native-artifact-preflight.json")
     validate_native_artifact_preflight(native_artifact_preflight, runtime_artifacts)
     validate_native_build_automation(source_acquisition, runtime_artifacts, native_artifact_preflight)
@@ -1475,4 +1492,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
