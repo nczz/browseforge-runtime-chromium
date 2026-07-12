@@ -192,7 +192,7 @@
     "knowledge/manifests/fingerprint-surface-status.json": "741483fc446e451cca6ad0c75a79bf653546eea706a2bb971a60da3eea03922f",
     "knowledge/manifests/native-artifact-preflight.json": "207457d4faa81999a9104e47f3b5a570f113a2a392b053c9cb5c393a65374190",
     "knowledge/manifests/proxy-preflight.json": "be03a0cc32fea994616393ac110135927398f75365577da34a3c7a136bef858a",
-    "knowledge/manifests/release-gates.json": "a94d74fe2d2c6baa358021b5bda4ab041e07c427c85cef1c33914536d34d1838",
+    "knowledge/manifests/release-gates.json": "9e1994b2f6fa55032b51be5a1a61979ae87c302ac3d83b04d8d94d257926c5df",
     "knowledge/manifests/signing-policy.json": "87248d5dfb5a932c4b46bc837513c8b35a0c2aadf5a548729a14c6eaff864c7b",
     "knowledge/manifests/source-acquisition.json": "ee8af0e7ca75c4a0d6bbab8a3370dd3a3a60b1ab7c15387aaa79d258926c50f2"
   },

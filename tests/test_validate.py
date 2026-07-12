@@ -252,6 +252,15 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     self.assertNotEqual("blocked", edge_properties.get("status"), f"SUPPORTS_GATE edge to {gate_id} must not be blocked")
 
     def test_browseforge_adapter_gate_tracks_native_stealth_config_commit(self) -> None:
+        with (ROOT / "knowledge" / "manifests" / "release-gates.json").open(encoding="utf-8") as fh:
+            release_gates = json.load(fh)
+        manifest_matches = [
+            gate
+            for gate in release_gates["release_candidate_required_gates"]
+            if gate.get("gate_id") == "browseforge-adapter-merged"
+        ]
+        self.assertEqual(1, len(manifest_matches), "expected exactly one browseforge-adapter-merged gate")
+
         graph = self._load_graph()
         gate_node = self._node_by_id(graph, "ReleaseGate:browseforge-adapter-merged")
         self.assertIsNotNone(gate_node)
@@ -259,18 +268,27 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         properties = gate_node.get("properties")
         self.assertIsInstance(properties, dict)
         assert isinstance(properties, dict)
-        evidence = properties.get("evidence")
-        self.assertIsInstance(evidence, str)
-        assert isinstance(evidence, str)
-        for token in [
-            "5dc2749",
-            "--browseforge-stealth-config",
-            "--browseforge-stealth-mode=enabled",
-            "profile-scoped native stealth persona config",
-            "persona_id_hash",
-            "origin_salt_key",
+        self.assertEqual(manifest_matches[0].get("evidence"), properties.get("evidence"))
+
+        for source, evidence in [
+            ("release-gates.json", manifest_matches[0].get("evidence")),
+            ("runtime.graph.jsonl", properties.get("evidence")),
         ]:
-            self.assertIn(token, evidence)
+            with self.subTest(source=source):
+                self.assertIsInstance(evidence, str)
+                assert isinstance(evidence, str)
+                self.assertNotIn("5dc2749", evidence)
+                for token in [
+                    "aba5248",
+                    "--browseforge-stealth-config",
+                    "--browseforge-stealth-mode=enabled",
+                    "profile-scoped native stealth persona config",
+                    "persona_id_hash",
+                    "origin_salt_key",
+                    "trimmed proxy region metadata",
+                    "profile/group storage",
+                ]:
+                    self.assertIn(token, evidence)
 
     def test_committed_detector_runs_do_not_keep_missing_artifact_placeholders(self) -> None:
         """Detectors with committed linux-x64 evidence must not keep no-artifact placeholders as evidence."""
