@@ -1,6 +1,6 @@
 # KB/KG Completeness Assessment
 
-Verdict: the current KB/KG is sufficient for the source/build baseline, BrowseForge adapter handoff, packaged linux-x64/macos-arm64/windows-x64 alpha artifacts, the macOS x64 package blocker, and committed detector-evidence traceability. It is not yet a production-ready release because macOS x64 lacks a real package and all packaged artifacts are still unsigned alpha outputs.
+Verdict: the current KB/KG is sufficient for the source/build baseline, BrowseForge adapter handoff, packaged linux-x64/linux-arm64/macos-arm64/macos-x64/windows-x64 alpha artifacts, and committed detector-evidence traceability. It is not yet a production-ready release because the artifacts are unsigned alpha outputs, linux-arm64 still has iphey/proxy/native-host/Playwright Bind blockers, macOS x64 is packaged-only without launch/detector evidence, and release-grade signing policy is absent.
 
 ## Current observed state
 
@@ -11,9 +11,9 @@ Verdict: the current KB/KG is sufficient for the source/build baseline, BrowseFo
 | BrowseForge consumer contract | High | `release-gates.json` records BrowseForge commit `aba5248` dispatching `browseforge-chromium`, writing a profile-scoped native stealth persona config with `persona_id_hash` and `origin_salt_key`, and preserving trimmed proxy region metadata through profile/group storage; adapter smoke passed via `--browseforge-stealth-config` plus `--browseforge-stealth-mode=enabled`; local dogfood evidence covers runtime config, profile create, session launch, runtime_id reporting, profile isolation, and Playwright Bind. | Keep adapter smoke evidence current as BrowseForge changes. |
 | CloakBrowser / Camoufox references | Medium-high | Source KBs exist for CloakBrowser v146 and Camoufox v135; reference manifests point to local indexed sources. | Cloak/Camoufox behavior remains reference material, not proof that browseforge-chromium behaves the same. |
 | Chromium upstream base | High for pinned baseline | `patchset.json`, `browser/chromium-base.json`, and `source-acquisition.json` select Chromium `refs/tags/150.0.7871.101` / commit `51b83660c3609f271ccbbd65785bf7e50a21312d`; external checkout, Linux Docker baseline, macOS arm64 build output, Windows x64 portable layout, and source-level patches are recorded. | Host-specific dependency profiles must stay isolated with `BROWSEFORGE_CHROMIUM_HOST_WORKDIR` and `BROWSEFORGE_CHROMIUM_LINUX_WORKDIR`. |
-| Runtime wrapper and artifacts | High for alpha artifacts | `runtime-artifacts.json` records linux-x64, macos-arm64, and windows-x64 artifacts with SHA-256, size, SBOM, provenance, os, arch, browser version, source ref, patchset ID, and wrapper version; `native-artifact-preflight.json` records the macOS x64 package blocker. | macOS x64 still needs a real Chromium.app package; release asset URL/signature are still dev placeholders; production release needs an explicit signing/notarization policy. |
-| Fingerprint surface graph | High for existing alpha detector evidence | Seed graph includes `FingerprintSurface`, `RuntimeFlag`, `Detector`, committed `DetectorRun`, `EvidenceArtifact`, and release-gate support edges. Linux direct/headed evidence and macOS arm64 headed external-proxy evidence cover the committed alpha detector evidence; accepted score-comparison risk remains explicit for non-GA policy. | macOS x64 and Windows x64 release-grade detector evidence remain incomplete. |
-| Packaging and provenance | High for existing alpha artifacts | `build/package_runtime.py`, packaging tests, `unzip -t`, JSON metadata checks, and runtime artifact manifests cover packaged artifact/SBOM/provenance mechanics for explicitly supported package platforms. | macOS x64 package/SBOM/provenance are missing; release-grade publishing/signing is not complete. |
+| Runtime wrapper and artifacts | High for alpha artifacts | `runtime-artifacts.json` records linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64 artifacts with SHA-256, size, SBOM, provenance, os, arch, browser version, source ref, patchset ID, and wrapper version; linux-arm64 also records `linux/arm64` container build and BrowseForge smoke evidence. | linux-arm64 remains non-production until iphey/proxy/native-host/Playwright Bind blockers clear; macOS x64 remains packaged-only without launch/detector evidence; production release needs an explicit signing/notarization policy. |
+| Fingerprint surface graph | High for existing alpha detector evidence | Seed graph includes `FingerprintSurface`, `RuntimeFlag`, `Detector`, committed `DetectorRun`, `EvidenceArtifact`, and release-gate support edges. Linux x64 direct/headed evidence, Linux arm64 headed Docker direct evidence, and macOS arm64 headed external-proxy evidence cover the committed alpha detector evidence; accepted score-comparison risk remains explicit for non-GA policy. | Linux arm64 proxy/native-host detector coverage, iphey, and independent Playwright Bind remain incomplete; macOS x64 and Windows x64 release-grade detector evidence remain incomplete. |
+| Packaging and provenance | High for existing alpha artifacts | `build/package_runtime.py`, packaging tests, `unzip -t`, JSON metadata checks, and runtime artifact manifests cover packaged artifact/SBOM/provenance mechanics for explicitly supported package platforms. | Release-grade publishing/signing is not complete. |
 
 ## Required graph semantics now represented
 
@@ -34,7 +34,7 @@ The source-controlled seed graph contains the required runtime evidence relation
 - `EvidenceArtifact -[:SUPPORTS_GATE]-> ReleaseGate`
 - `RuntimeProvider -[:REFERENCES_SOURCE]-> KnowledgeSource`
 
-The generated graph includes packaged runtime artifacts for linux-x64, macos-arm64, and windows-x64 as alpha evidence, plus the macOS x64 platform/package blocker. Missing-artifact and signing policy nodes are release-status inputs until a real macOS x64 package and release-grade signing policy exist.
+The generated graph includes packaged runtime artifacts for linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64 as alpha evidence. Release-status input nodes keep linux-arm64 detector/proxy/Bind blockers, macOS x64 packaged-only caveats, and signing policy blockers explicit until promotion evidence exists.
 
 ## Release-gate state
 
@@ -46,16 +46,19 @@ Current gates:
 - `packaging-contract-tests`: package planning, missing-browser rejection, zip packaging, platform layout, and checksum behavior are covered.
 - `browseforge-adapter-merged`: BrowseForge commit `aba5248` dispatches `browseforge-chromium` and preserves native persona/proxy metadata.
 - `chromium-source-indexed`: source acquisition and patch status manifests record the pinned checkout and source-level patchset state.
-- `runtime-artifact-produced`: blocked until the macOS x64 package exists; alpha artifacts exist for linux-x64, macos-arm64, and windows-x64.
-- `live-detector-evidence`: blocked for release-grade publication while macOS x64 has no detector run and committed detector evidence still has accepted non-GA gaps.
-- `sbom-provenance-release-assets`: blocked until macOS x64 has SBOM/provenance/checksum metadata.
+- `runtime-artifact-produced`: passed for all five alpha package artifacts: linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64.
+- `live-detector-evidence`: blocked for release-grade publication while linux-arm64 iphey/proxy/native-host/Bind evidence remains incomplete and committed detector evidence still has accepted non-GA gaps.
+- `sbom-provenance-release-assets`: passed for all five alpha package artifacts; release-grade signing remains blocked separately.
 
 Remaining release-grade blockers:
 
 - `signing-policy:linux-x64`: alpha Linux archive is unsigned.
+- `signing-policy:linux-arm64`: alpha Linux arm64 archive is unsigned and not production-ready.
 - `signing-policy:macos-arm64`: alpha macOS archive is unsigned and not notarized.
+- `signing-policy:macos-x64`: alpha macOS x64 archive is unsigned, not notarized, packaged-only, and not launch/detector tested.
 - `signing-policy:windows-x64`: alpha Windows archive is unsigned.
-- `signing-policy:macos-x64`: macOS x64 package is missing and still needs Developer ID signing/notarization policy.
+- `linux-arm64 detector/proxy/Bind blockers`: iphey collector failure, proxy/native-host coverage gaps, and independent Playwright Bind evidence still prevent promotion beyond unsigned alpha.
+
 ## Permitted next work
 
 Allowed now:

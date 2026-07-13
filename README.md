@@ -40,7 +40,7 @@ primary goal: Chromium-family anti-detect runtime with Playwright bind support
 
 The runtime is expected to expose persistent browser sessions, deterministic fingerprint inputs, native proxy support, WebRTC masking controls, profile-isolated user data directories, and Docker-friendly launch behavior.
 
-Supported alpha package platforms are `linux-x64`, `macos-arm64`, `macos-x64`, and `windows-x64`. Existing local artifacts cover Linux x64, macOS arm64, and Windows x64. macOS x64 is contract-defined and must remain packaged-only, unsigned, not launch-tested, and not detector-tested until separate validation evidence exists.
+Supported alpha package platforms are `linux-x64`, `linux-arm64`, `macos-arm64`, `macos-x64`, and `windows-x64`. Existing local artifacts cover all five platforms. `linux-arm64` is built from a real `linux/arm64` container Chromium output and has BrowseForge status/profile launch, REST, MCP, and headed Docker detector evidence, but remains non-production until iphey, proxy/native-host detector coverage, and independent Playwright Bind evidence pass. macOS x64 remains packaged-only, unsigned, not launch-tested, and not detector-tested until separate validation evidence exists.
 
 All current packages are unsigned alpha artifacts. Users must verify SHA-256 checksums before running. macOS users may need to manually allow the app or run `xattr -dr com.apple.quarantine /path/to/Chromium.app`; Windows users may see SmartScreen/Defender warnings until Authenticode signing is configured; Linux users must verify the SHA-256 entry in `checksums.txt`. Do not describe these artifacts as production-ready or signed/notarized releases.
 
