@@ -30,6 +30,45 @@
     },
     {
       "arch": "arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+      "browseforge_compatibility": {
+        "min_version": "v2.0.0",
+        "profile_field": "runtime_id"
+      },
+      "browser_binary_sha256": "3dea60505e7bac078ddaace923032328bd695ed3fb440e5e7c7a0f843ab60171",
+      "browser_version": "150.0.7871.101",
+      "created_at": "2026-07-13T08:49:26.194157+00:00",
+      "detector_evidence": [
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks-webrtc_headed_docker_webrtc_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserscan/detrun_v0.1.0-alpha.0_linux-arm64_browserscan_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/creepjs/detrun_v0.1.0-alpha.0_linux-arm64_creepjs_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/pixelscan/detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json"
+      ],
+      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "os": "linux",
+      "patchset_id": "surface-switch-propagation-native-audit",
+      "platform": "linux-arm64",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/provenance.json",
+      "release_channel": "alpha",
+      "runtime_id": "browseforge-chromium",
+      "runtime_version": "v0.1.0-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/SBOM.json",
+      "sha256": "953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b",
+      "signature": "unsigned-dev-artifact",
+      "size_bytes": 584002023,
+      "smoke_evidence": [
+        "knowledge/manifests/linux-arm64-package-smoke.json"
+      ],
+      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "status": "packaged_pending_smoke_detector",
+      "wrapper_binary_sha256": "e80c90a807e6cabba0a858f6551ebb86fe87095b08c47babdb16f4d689b431a5",
+      "wrapper_version": "v0.1.0-alpha.0"
+    },
+    {
+      "arch": "arm64",
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
       "browseforge_compatibility": {
         "min_version": "v2.0.0",
@@ -109,6 +148,15 @@
   ],
   "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
   "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+  "linux_arm64_artifact_refresh": {
+    "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+    "browser_binary_sha256": "3dea60505e7bac078ddaace923032328bd695ed3fb440e5e7c7a0f843ab60171",
+    "reason": "Linux arm64 alpha package produced from real linux/arm64 container Chromium build; smoke and detector promotion still pending.",
+    "sha256": "953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b",
+    "size_bytes": 584002023,
+    "status": "packaged_pending_smoke_detector",
+    "wrapper_binary_sha256": "e80c90a807e6cabba0a858f6551ebb86fe87095b08c47babdb16f4d689b431a5"
+  },
   "macos_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
     "reason": "macOS alpha package refreshed after runtime manifest packaged-platform contract update.",
@@ -161,13 +209,11 @@
   "schema_version": "1.0",
   "supported_package_platforms": [
     "linux-x64",
+    "linux-arm64",
     "macos-arm64",
     "macos-x64",
     "windows-x64"
   ],
-  "unsupported_package_platforms": {
-    "linux-arm64": "blocked until a committed Linux arm64 runtime asset contract covers browser engine support, Docker/KasmVNC validation, SBOM/provenance, and detector evidence"
-  },
   "windows_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
     "reason": "Windows alpha package refreshed after runtime manifest packaged-platform contract update.",

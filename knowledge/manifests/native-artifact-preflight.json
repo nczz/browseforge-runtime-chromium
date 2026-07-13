@@ -15,6 +15,23 @@
       "status": "packaged_detector_tested"
     },
     {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip",
+        "knowledge/manifests/linux-arm64-package-smoke.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json",
+        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json"
+      ],
+      "missing_prerequisites": [
+        "linux-arm64 native-host/proxy detector coverage",
+        "linux-arm64 iphey successful sanitized page observation"
+      ],
+      "platform": "linux-arm64",
+      "ready": false,
+      "status": "packaged_pending_smoke_detector"
+    },
+    {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
@@ -148,7 +165,7 @@
       }
     }
   ],
-  "release_grade_ready": true,
+  "release_grade_ready": false,
   "requirements": [
     "every supported package platform has a committed runtime artifact manifest entry",
     "every supported package platform artifact has sha256 and size metadata",
@@ -160,6 +177,7 @@
   "schema_version": "1.0",
   "supported_package_platforms": [
     "linux-x64",
+    "linux-arm64",
     "macos-arm64",
     "macos-x64",
     "windows-x64"

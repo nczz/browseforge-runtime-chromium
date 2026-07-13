@@ -58,7 +58,7 @@ WINDOWS_CHROMIUM_RUNTIME_DIRS = (
     'locales',
 )
 
-SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'macos-arm64', 'macos-x64', 'windows-x64'})
+SUPPORTED_PACKAGE_PLATFORMS = frozenset({'linux-x64', 'linux-arm64', 'macos-arm64', 'macos-x64', 'windows-x64'})
 
 
 def sha256(path: Path) -> str:
@@ -237,7 +237,7 @@ def copy_required_macos_runtime_assets(browser: Path, stage: Path) -> Path:
     return staged_browser
 
 def stage_platform_browser(platform_id: str, browser: Path, stage: Path) -> Path:
-    if platform_id == 'linux-x64':
+    if platform_id in {'linux-x64', 'linux-arm64'}:
         staged_browser = stage / browser.name
         shutil.copy2(browser, staged_browser)
         copy_required_linux_runtime_assets(browser, stage)

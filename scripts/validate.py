@@ -382,7 +382,7 @@ def validate_native_build_automation(source_acquisition: dict, runtime_artifacts
     platforms = automation.get("platforms", {})
     if not isinstance(platforms, dict):
         raise SystemExit("source-acquisition native_build_automation platforms must be an object")
-    expected_platforms = sorted(set(runtime_artifacts.get("supported_package_platforms", [])) - {"linux-x64"})
+    expected_platforms = sorted(set(runtime_artifacts.get("supported_package_platforms", [])) - {"linux-x64", "linux-arm64"})
     missing_platforms = sorted(set(expected_platforms) - set(platforms))
     if missing_platforms:
         raise SystemExit(f"source-acquisition native_build_automation missing platforms: {missing_platforms}")
@@ -735,7 +735,7 @@ def validate_release_gate_artifact_evidence(release_gates: dict, runtime_artifac
             raise SystemExit(f"release gate {gate_id} evidence has stale runtime artifact metadata: {missing}")
 
 def validate_native_status_snapshot(platform: str, entry: dict) -> None:
-    if platform == "linux-x64":
+    if platform.startswith("linux-"):
         return
     snapshot = entry.get("status_snapshot")
     if not isinstance(snapshot, dict):
@@ -918,6 +918,14 @@ def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts
                 "archive_integrity",
                 "wrapper_metadata_in_linux_amd64_container",
                 "packaged_chrome_devtools_launch_in_linux_amd64_container",
+            },
+        ),
+        "linux-arm64": (
+            base.get("linux_arm64_artifact", {}).get("smoke_evidence"),
+            {
+                "archive_integrity",
+                "wrapper_metadata_in_linux_arm64_container",
+                "packaged_chrome_devtools_launch_in_linux_arm64_container",
             },
         ),
         "macos-arm64": (

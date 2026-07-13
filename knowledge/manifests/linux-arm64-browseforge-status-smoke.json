@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "browseforge_binary": "ELF 64-bit LSB executable, ARM aarch64",
+    "path": "/bf-base/browsers/browseforge-chromium/chrome",
+    "ready": true,
+    "uname_m": "aarch64"
+  },
+  "payload": {
+    "browsers": [
+      {
+        "expected": "v0.1.0-alpha.0",
+        "installed": "v0.1.0-alpha.0",
+        "name": "browseforge-chromium",
+        "path": "/bf-base/browsers/browseforge-chromium/chrome",
+        "ready": true
+      }
+    ],
+    "ok": true
+  },
+  "stderr": "",
+  "stdout": "aarch64\n/usr/local/bin/BrowseForge: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, Go BuildID=c0k-04Np9neAnh4xFupB/y3PAS2D1H08J5C_L3lSb/2mfelpR9RDNPUziPZ-TX/NcAJxW_W3wuq9X4FvbAD, BuildID[sha1]=5c0d96538c380a70f2d627400baa07cd5904fcab, with debug_info, not stripped\n{\n  \"browsers\": [\n    {\n      \"name\": \"browseforge-chromium\",\n      \"expected\": \"v0.1.0-alpha.0\",\n      \"installed\": \"v0.1.0-alpha.0\",\n      \"path\": \"/bf-base/browsers/browseforge-chromium/chrome\",\n      \"ready\": true\n    }\n  ],\n  \"ok\": true\n}\n"
+}

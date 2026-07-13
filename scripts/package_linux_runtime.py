@@ -12,7 +12,10 @@ from typing import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CHROMIUM_SRC = Path(os.environ.get("BROWSEFORGE_CHROMIUM_SRC", "/Users/chun/Projects/browser-source/browseforge-chromium/src"))
-DEFAULT_OUT_DIR = "out/BrowseForgeLinuxDocker"
+DEFAULT_OUT_DIR_BY_PLATFORM = {
+    "linux-x64": "out/BrowseForgeLinuxDocker",
+    "linux-arm64": "out/BrowseForgeLinuxArm64Docker",
+}
 
 
 @dataclass(frozen=True)
@@ -28,6 +31,19 @@ class LinuxPackagePlan:
     wrapper_version: str
     release_channel: str
     commands: dict[str, list[str]]
+    goarch: str
+
+
+def default_out_dir(platform: str) -> str:
+    return DEFAULT_OUT_DIR_BY_PLATFORM[platform]
+
+
+def goarch_for_platform(platform: str) -> str:
+    if platform == "linux-x64":
+        return "amd64"
+    if platform == "linux-arm64":
+        return "arm64"
+    raise SystemExit(f"unsupported Linux package platform: {platform}")
 
 
 def load_json(path: Path) -> object:
@@ -55,27 +71,30 @@ def latest_patchset_id() -> str:
 
 def build_plan(
     chromium_src: Path = DEFAULT_CHROMIUM_SRC,
-    chromium_out_dir: str = DEFAULT_OUT_DIR,
+    chromium_out_dir: str | None = None,
     output_dir: Path = ROOT / "dist",
     runtime_version_value: str | None = None,
     browser_version_value: str | None = None,
     source_ref_value: str | None = None,
     patchset_id_value: str | None = None,
     release_channel: str = "dev",
+    platform: str = "linux-x64",
 ) -> LinuxPackagePlan:
+    goarch = goarch_for_platform(platform)
+    chromium_out_dir = chromium_out_dir or default_out_dir(platform)
     browser_version_default, source_ref_default = source_base()
     runtime_version_final = runtime_version_value or runtime_version()
     browser_version_final = browser_version_value or browser_version_default
     source_ref_final = source_ref_value or source_ref_default
     patchset_id_final = patchset_id_value or latest_patchset_id()
-    wrapper_binary = output_dir / "build" / "browseforge-runtime-chromium-linux-x64"
+    wrapper_binary = output_dir / "build" / f"browseforge-runtime-chromium-{platform}"
     browser_binary = chromium_src / chromium_out_dir / "chrome"
     package_command = [
         sys.executable,
         str(ROOT / "build" / "package_runtime.py"),
         "package",
         "--platform",
-        "linux-x64",
+        platform,
         "--browser-binary",
         str(browser_binary),
         "--wrapper-binary",
@@ -96,7 +115,7 @@ def build_plan(
         release_channel,
     ]
     return LinuxPackagePlan(
-        platform="linux-x64",
+        platform=platform,
         browser_binary=str(browser_binary),
         wrapper_binary=str(wrapper_binary),
         output_dir=str(output_dir),
@@ -116,6 +135,7 @@ def build_plan(
             ],
             "package": package_command,
         },
+        goarch=goarch,
     )
 
 
@@ -133,16 +153,17 @@ def run_command(command: Sequence[str], *, env: dict[str, str] | None = None) ->
 
 def package(plan: LinuxPackagePlan) -> None:
     Path(plan.wrapper_binary).parent.mkdir(parents=True, exist_ok=True)
-    run_command(plan.commands["build-wrapper"], env={"GOOS": "linux", "GOARCH": "amd64", "CGO_ENABLED": "0"})
+    run_command(plan.commands["build-wrapper"], env={"GOOS": "linux", "GOARCH": plan.goarch, "CGO_ENABLED": "0"})
     run_command(plan.commands["package"])
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Package BrowseForge Chromium linux-x64 runtime artifacts")
+    parser = argparse.ArgumentParser(description="Package BrowseForge Chromium Linux runtime artifacts")
     parser.add_argument("--plan", action="store_true", help="print package plan JSON")
     parser.add_argument("--execute", action="store_true", help="build wrapper and package artifact")
+    parser.add_argument("--platform", choices=sorted(DEFAULT_OUT_DIR_BY_PLATFORM), default="linux-x64")
     parser.add_argument("--chromium-src", type=Path, default=DEFAULT_CHROMIUM_SRC)
-    parser.add_argument("--chromium-out-dir", default=DEFAULT_OUT_DIR)
+    parser.add_argument("--chromium-out-dir")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
     parser.add_argument("--runtime-version")
     parser.add_argument("--browser-version")
@@ -159,6 +180,7 @@ def main() -> None:
         source_ref_value=args.source_ref,
         patchset_id_value=args.patchset_id,
         release_channel=args.release_channel,
+        platform=args.platform,
     )
     if args.plan:
         emit_json(asdict(plan))

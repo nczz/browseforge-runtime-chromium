@@ -1,5 +1,5 @@
 {
-  "blocker_count": 4,
+  "blocker_count": 21,
   "deliverables": [
     {
       "blockers": [],
@@ -97,7 +97,9 @@
       "title": "Fingerprint surface implementation and detector evidence"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "native platform not ready: linux-arm64"
+      ],
       "deliverable_id": "native_release_artifacts",
       "evidence": [
         "knowledge/manifests/native-artifact-preflight.json",
@@ -108,11 +110,27 @@
         "Windows artifact is a portable chrome.exe/DLL layout built from the selected source ref",
         "Native artifacts have detector evidence before release_grade passes"
       ],
-      "satisfied": true,
+      "satisfied": false,
       "title": "Native macOS and Windows BrowseForge Chromium release artifacts"
     },
     {
       "blockers": [
+        "browseforge-integration:0",
+        "detector:coverage-gap:linux-arm64:browserleaks:headed:direct:host",
+        "detector:coverage-gap:linux-arm64:browserleaks:headed:proxy:host",
+        "detector:coverage-gap:linux-arm64:browserscan:headed:proxy:host",
+        "detector:coverage-gap:linux-arm64:creepjs:headed:proxy:host",
+        "detector:coverage-gap:linux-arm64:iphey:headed:proxy:host",
+        "detector:coverage-gap:linux-arm64:pixelscan:headed:proxy:host",
+        "detector:coverage-gap:linux-arm64:sannysoft:headed:direct:host",
+        "detector:coverage-gap:linux-arm64:sannysoft:headed:proxy:host",
+        "score-comparison:gaps:webgl_metadata_hashes_missing",
+        "native-artifact:linux-arm64:0",
+        "native-artifact:linux-arm64:1",
+        "proxy-preflight:error:0",
+        "proxy-preflight:missing:linux-arm64 proxy/native-host detector coverage",
+        "release-gate:live-detector-evidence",
+        "signing-policy:linux-arm64",
         "signing-policy:linux-x64",
         "signing-policy:macos-arm64",
         "signing-policy:macos-x64",
@@ -131,7 +149,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-12T17:13:41Z",
+  "generated_at": "2026-07-13T09:49:24Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,

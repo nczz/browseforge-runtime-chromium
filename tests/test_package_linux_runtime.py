@@ -97,6 +97,20 @@ class PackageLinuxRuntimeScriptTests(unittest.TestCase):
         self.assertEqual(ROOT / "dist" / "build" / "browseforge-runtime-chromium-linux-x64", wrapper_binary)
         self.assertEqual(ROOT / "dist", Path(plan["output_dir"]))
 
+    def test_plan_can_target_linux_arm64_runtime(self) -> None:
+        completed = self._run_script("--plan", "--platform", "linux-arm64")
+        self.assertEqual(0, completed.returncode, completed.stderr + completed.stdout)
+        plan = json.loads(completed.stdout)
+
+        self.assertEqual("linux-arm64", plan["platform"])
+        self.assertEqual("arm64", plan["goarch"])
+        self.assertEqual(
+            Path("/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxArm64Docker/chrome"),
+            Path(plan["browser_binary"]),
+        )
+        self.assertEqual(ROOT / "dist" / "build" / "browseforge-runtime-chromium-linux-arm64", Path(plan["wrapper_binary"]))
+        self.assertEqual("linux-arm64", plan["commands"]["package"][plan["commands"]["package"].index("--platform") + 1])
+
     def test_package_requires_execute_before_touching_build_or_package_steps(self) -> None:
         """The package action is fail-closed unless the caller explicitly passes --execute."""
         completed = self._run_script()
@@ -105,7 +119,7 @@ class PackageLinuxRuntimeScriptTests(unittest.TestCase):
         self.assertIn("requires --execute", completed.stderr + completed.stdout)
 
     def test_plan_build_commands_and_package_cross_compile_env(self) -> None:
-        """The exposed plan and package action build the linux-amd64 wrapper before packaging."""
+        """The exposed plan and package action build the matching Linux wrapper before packaging."""
         plan_payload = self._plan()
         command_root = plan_payload.get("commands") or plan_payload.get("build_commands") or plan_payload.get("command_list")
         if command_root is None:
@@ -148,6 +162,24 @@ class PackageLinuxRuntimeScriptTests(unittest.TestCase):
         self.assertEqual("linux", wrapper_env["GOOS"])
         self.assertEqual("amd64", wrapper_env["GOARCH"])
         self.assertEqual("0", wrapper_env["CGO_ENABLED"])
+
+        arm_plan = module.build_plan(
+            chromium_src=Path("/tmp/chromium/src"),
+            output_dir=Path("/tmp/dist"),
+            runtime_version_value="v-test",
+            browser_version_value="150.0.7871.101",
+            source_ref_value="51b83660c3609f271ccbbd65785bf7e50a21312d",
+            patchset_id_value="surface-font-face-set-native-list-override",
+            platform="linux-arm64",
+        )
+        recorded_commands.clear()
+        try:
+            module.run_command = record_command
+            module.package(arm_plan)
+        finally:
+            module.run_command = original_run_command
+        self.assertEqual("arm64", recorded_commands[0][1]["GOARCH"])
+        self.assertIn("linux-arm64", recorded_commands[1][0])
         self.assertEqual(plan.commands["package"], package_command)
         self.assertIsNone(package_env)
 

@@ -16,6 +16,20 @@
       "status": "unsigned_alpha_dev_artifact"
     },
     {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+      "decision": "Unsigned Linux arm64 alpha artifact is acceptable only for alpha validation with committed SHA-256, SBOM, and provenance metadata; it remains non-production until BrowseForge smoke and detector evidence pass, and release-grade publishing requires an explicit signing policy update.",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/SBOM.json"
+      ],
+      "platform": "linux-arm64",
+      "release_channel": "alpha",
+      "release_grade_allowed": false,
+      "signature": "unsigned-dev-artifact",
+      "status": "unsigned_alpha_dev_artifact_pending_smoke_detector"
+    },
+    {
       "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
       "decision": "Unsigned macOS arm64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Developer ID signing and notarization policy update.",
       "evidence": [

@@ -33,6 +33,7 @@ jobs:
           set -euo pipefail
           expected=(
             "browseforge-runtime-chromium-${RUNTIME_VERSION}-linux-x64.zip"
+            "browseforge-runtime-chromium-${RUNTIME_VERSION}-linux-arm64.zip"
             "browseforge-runtime-chromium-${RUNTIME_VERSION}-macos-arm64.zip"
             "browseforge-runtime-chromium-${RUNTIME_VERSION}-macos-x64.zip"
             "browseforge-runtime-chromium-${RUNTIME_VERSION}-windows-x64.zip"
@@ -63,6 +64,7 @@ jobs:
           prerelease: ${{ contains(env.RUNTIME_VERSION, 'alpha') || contains(env.RUNTIME_VERSION, 'beta') || contains(env.RUNTIME_VERSION, 'rc') }}
           files: |
             dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-linux-x64.zip
+            dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-linux-arm64.zip
             dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-macos-arm64.zip
             dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-macos-x64.zip
             dist/browseforge-runtime-chromium-${{ env.RUNTIME_VERSION }}-windows-x64.zip

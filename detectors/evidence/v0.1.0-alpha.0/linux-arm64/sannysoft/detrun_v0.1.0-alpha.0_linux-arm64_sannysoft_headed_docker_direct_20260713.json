@@ -1,0 +1,650 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+  "detector": {
+    "category": "automation",
+    "detector_id": "sannysoft",
+    "manifest_ref": "knowledge/manifests/detectors.json#sannysoft",
+    "name": "SannySoft",
+    "url": "https://bot.sannysoft.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-arm64:sannysoft:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": true
+  },
+  "results": [
+    {
+      "detector_check": "sannysoft_headed_linux_arm64_automation_signals",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "SannySoft loaded; webdriver is false and configured UA does not expose HeadlessChrome.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": null,
+        "deviceMemory": 8,
+        "elapsed_seconds": 14.92,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Intoli.com tests + additions Test Name Result User Agent (Old) Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36 WebDriver (New) missing (passed) WebDriver Advanced passed Chrome (New) present (passed) Permissions (New) prompt Plugins Length (Old) 5 Plugins is of type PluginArray passed Languages (Old) zh-TW,zh,en WebGL Vendor Canvas has no webgl context WebGL Renderer Canvas has no webgl context Broken Image Dimensions 16x16 Fingerprint ",
+        "text_sha256": "d7eda704cc8e1f3cab84af3ae3d93b1c41b044a01d7bcab65cbf2ec429d2e3b6",
+        "timezone": "Asia/Taipei",
+        "title": "Antibot",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://bot.sannysoft.com/",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "59c9662dd8fd8ad6e6a224c5dc1fcd9505287cf111223b75647f0a73fda24c2d",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "automation_signals"
+    },
+    {
+      "detector_check": "sannysoft_headed_linux_arm64_locale",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "SannySoft loaded; webdriver is false and configured UA does not expose HeadlessChrome.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": null,
+        "deviceMemory": 8,
+        "elapsed_seconds": 14.92,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Intoli.com tests + additions Test Name Result User Agent (Old) Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36 WebDriver (New) missing (passed) WebDriver Advanced passed Chrome (New) present (passed) Permissions (New) prompt Plugins Length (Old) 5 Plugins is of type PluginArray passed Languages (Old) zh-TW,zh,en WebGL Vendor Canvas has no webgl context WebGL Renderer Canvas has no webgl context Broken Image Dimensions 16x16 Fingerprint ",
+        "text_sha256": "d7eda704cc8e1f3cab84af3ae3d93b1c41b044a01d7bcab65cbf2ec429d2e3b6",
+        "timezone": "Asia/Taipei",
+        "title": "Antibot",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://bot.sannysoft.com/",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "59c9662dd8fd8ad6e6a224c5dc1fcd9505287cf111223b75647f0a73fda24c2d",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "locale"
+    },
+    {
+      "detector_check": "sannysoft_headed_linux_arm64_canvas",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "SannySoft loaded; webdriver is false and configured UA does not expose HeadlessChrome.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": null,
+        "deviceMemory": 8,
+        "elapsed_seconds": 14.92,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Intoli.com tests + additions Test Name Result User Agent (Old) Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36 WebDriver (New) missing (passed) WebDriver Advanced passed Chrome (New) present (passed) Permissions (New) prompt Plugins Length (Old) 5 Plugins is of type PluginArray passed Languages (Old) zh-TW,zh,en WebGL Vendor Canvas has no webgl context WebGL Renderer Canvas has no webgl context Broken Image Dimensions 16x16 Fingerprint ",
+        "text_sha256": "d7eda704cc8e1f3cab84af3ae3d93b1c41b044a01d7bcab65cbf2ec429d2e3b6",
+        "timezone": "Asia/Taipei",
+        "title": "Antibot",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://bot.sannysoft.com/",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "59c9662dd8fd8ad6e6a224c5dc1fcd9505287cf111223b75647f0a73fda24c2d",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "canvas"
+    },
+    {
+      "detector_check": "sannysoft_headed_linux_arm64_webgl",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "SannySoft loaded; webdriver is false and configured UA does not expose HeadlessChrome.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": null,
+        "deviceMemory": 8,
+        "elapsed_seconds": 14.92,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9919f29f3ba6aac608676987bfe16917d0a790f110cdc8332dfa67e8175943cb"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Intoli.com tests + additions Test Name Result User Agent (Old) Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36 WebDriver (New) missing (passed) WebDriver Advanced passed Chrome (New) present (passed) Permissions (New) prompt Plugins Length (Old) 5 Plugins is of type PluginArray passed Languages (Old) zh-TW,zh,en WebGL Vendor Canvas has no webgl context WebGL Renderer Canvas has no webgl context Broken Image Dimensions 16x16 Fingerprint ",
+        "text_sha256": "d7eda704cc8e1f3cab84af3ae3d93b1c41b044a01d7bcab65cbf2ec429d2e3b6",
+        "timezone": "Asia/Taipei",
+        "title": "Antibot",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://bot.sannysoft.com/",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "59c9662dd8fd8ad6e6a224c5dc1fcd9505287cf111223b75647f0a73fda24c2d",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "low",
+      "status": "pass",
+      "surface": "webgl"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw page text, CDP endpoint, profile paths, screenshots, cookies, storage, and canvas payloads are not committed; evidence stores bounded values and hashes only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "detector-harness-linux-arm64-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "passed",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json",
+    "raw_capture_sha256": "7ec63c386f94f23df588068eaa05806c1c3d128db15191cc48e049e62b94a9b7",
+    "sha256": "6931c887172818bc2ec63e361e8baa44dbb19198b183151f099ef43b2c71ba05",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "d7eda704cc8e1f3cab84af3ae3d93b1c41b044a01d7bcab65cbf2ec429d2e3b6"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "xvfb",
+    "host_os": "linux",
+    "locale_profile": "zh-TW",
+    "platform": "linux-arm64",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-13T09:30:14Z"
+}

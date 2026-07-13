@@ -36,9 +36,9 @@
       "status": "passed"
     },
     {
-      "evidence": "macOS arm64 headed external-proxy detector coverage is committed for BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft under detectors/evidence/v0.1.0-alpha.0/macos-arm64/*/*_headed_proxy_host_20260712.json; knowledge/manifests/proxy-surface-smoke.json records transparent canvas pixel RGBA [0,0,0,0], H.264/AAC MP4 codec availability, and America/Los_Angeles proxy persona timezone. Linux direct/headless Docker detector evidence remains recorded in the existing v0.1.0-alpha.0 evidence tree.",
+      "evidence": "macOS arm64 headed external-proxy detector coverage is committed for BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft under detectors/evidence/v0.1.0-alpha.0/macos-arm64/*/*_headed_proxy_host_20260712.json; Linux x64 direct/headless Docker detector evidence remains recorded in the existing v0.1.0-alpha.0 evidence tree. Linux arm64 headed Docker detector evidence is committed for BrowserLeaks, BrowserLeaks WebRTC, BrowserScan, CreepJS, Pixelscan, and SannySoft under detectors/evidence/v0.1.0-alpha.0/linux-arm64, while iphey is blocked by a detector collector Runtime.evaluate failure and native-host/proxy matrix rows remain coverage gaps.",
       "gate_id": "live-detector-evidence",
-      "status": "passed"
+      "status": "blocked"
     },
     {
       "evidence": "Primary artifact browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 sha256 386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf size 567880267; each linux-x64, macos-arm64, macos-x64, and windows-x64 release zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, and platform browser payload; dist/checksums.txt includes all four zip SHA-256 entries. macos-x64 metadata is packaged-only alpha and does not claim launch/detector evidence.",

@@ -1,0 +1,76 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+  "detector": {
+    "category": "trustworthiness",
+    "detector_id": "iphey",
+    "manifest_ref": "knowledge/manifests/detectors.json#iphey",
+    "name": "iphey",
+    "url": "https://iphey.com/"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713",
+  "failure_mode": "detector_unreachable",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-arm64:iphey:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": true
+  },
+  "results": [
+    {
+      "detector_check": "iphey_headed_linux_arm64_collect",
+      "evidence_ref": "collector_error_summary",
+      "finding": "iphey collection reached the detector target but Runtime.evaluate failed before a sanitized page observation could be produced in the arm64 container run.",
+      "normalized_values": {
+        "collector_error": "collect failed: Runtime.evaluate",
+        "collector_returncode": 2
+      },
+      "severity": "medium",
+      "status": "not_tested",
+      "surface": "automation_signals"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Operational failure evidence contains only bounded collector status and no raw page data.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "detector-harness-linux-arm64-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "blocked",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json",
+    "sha256": "b5e2f7adb5e1a55f40df908b750184937c9fb4abe2431f2720ed850ec3519e7f",
+    "summary_path": "detector-summary.json"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "xvfb",
+    "host_os": "linux",
+    "locale_profile": "zh-TW",
+    "platform": "linux-arm64",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-13T09:30:14Z"
+}

@@ -83,12 +83,20 @@
     {
       "id": "linux-arm64",
       "priority": 5,
+      "evidence": {
+        "artifact": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip",
+        "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/artifact-manifest.json",
+        "build_container_architecture": "aarch64",
+        "build_output": "/Users/chun/Projects/browser-source/browseforge-chromium/src/out/BrowseForgeLinuxArm64Docker/chrome",
+        "checksums": "dist/checksums.txt",
+        "source_acquisition": "knowledge/manifests/source-acquisition.json"
+      },
       "required_evidence": [
         "Docker/KasmVNC runtime validation",
         "browser engine support confirmed",
         "detector run exists"
       ],
-      "status": "deferred"
+      "status": "packaged_pending_smoke_detector"
     }
   ],
   "purpose": "Cross-platform implementation and evidence matrix for BrowseForge Chromium runtime development.",

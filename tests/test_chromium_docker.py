@@ -68,6 +68,33 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
         self.assertEqual(4, payload["jobs"])
 
+    def test_plan_supports_linux_arm64_runtime_platform(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workdir = Path(td) / "chromium"
+            git_cache = Path(td) / "git-cache"
+            completed = self._run_script(
+                "plan",
+                "--workdir",
+                str(workdir),
+                "--image",
+                "bf-test",
+                "--git-cache",
+                str(git_cache),
+                "--runtime-platform",
+                "linux-arm64",
+            )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual("linux-arm64", payload["runtime_platform"])
+        self.assertEqual("linux/arm64", payload["platform"])
+        self.assertEqual("out/BrowseForgeLinuxArm64Docker", payload["out_dir"])
+        self.assertEqual(str(workdir / "src" / "out" / "BrowseForgeLinuxArm64Docker" / "chrome"), payload["output_binary"])
+        self.assertIn('target_cpu="arm64"', payload["gn_args"])
+        self.assertIn("linux/arm64", payload["commands"]["build-image"])
+        self.assertIn("linux/arm64", payload["commands"]["gn-gen"])
+        self.assertIn("libglib2.0-0:amd64", payload["commands"]["install-linux-deps"][-1])
+
 
     def test_cli_default_workdir_can_use_linux_profile_env(self) -> None:
         with tempfile.TemporaryDirectory() as td:

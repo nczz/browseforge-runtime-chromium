@@ -1,7 +1,11 @@
 {
-  "errors": [],
+  "errors": [
+    "live-detector-evidence gate is blocked by linux-arm64 iphey collector failure and remaining native-host/proxy coverage gaps"
+  ],
   "generated_at": "2026-07-12T12:00:00Z",
-  "missing": [],
+  "missing": [
+    "linux-arm64 proxy/native-host detector coverage"
+  ],
   "next_commands": [
     "python3 scripts/detector_harness.py run --detector browserleaks --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <configured-region> --display headed",
     "python3 scripts/detector_harness.py run --detector browserscan --artifact-id browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64 --platform macos-arm64 --browser-binary dist/stage_restore/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/Chromium.app/Contents/MacOS/Chromium --proxy-url \"$BROWSEFORGE_DETECTOR_PROXY_URL\" --network-mode proxy --proxy-region <configured-region> --display headed",
@@ -17,7 +21,7 @@
     "scheme": "http"
   },
   "proxy_region_redacted": "us-los-angeles",
-  "ready": true,
+  "ready": false,
   "requirements": [
     "external proxy URL with scheme, host, and port",
     "redacted external proxy region/geolocation metadata label",
@@ -27,5 +31,5 @@
   ],
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
-  "status": "passed"
+  "status": "failed"
 }

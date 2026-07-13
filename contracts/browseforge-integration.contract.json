@@ -53,7 +53,9 @@
       "webrtc.proxy_region"
     ]
   },
-  "release_blockers": [],
+  "release_blockers": [
+    "live-detector-evidence"
+  ],
   "required_browseforge_surfaces": [
     "config.runtimes.<id>",
     "GET /api/runtimes",

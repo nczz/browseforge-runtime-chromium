@@ -1,0 +1,94 @@
+{
+  "container": "6f58934021835a48ce2b14819e2a545614e258b3d59fa9a1683f33f80971d869",
+  "docker_logs_tail": "{\"time\":\"2026-07-13T09:16:36.728832144Z\",\"level\":\"INFO\",\"msg\":\"session recovery: starting clean\"}\n{\"time\":\"2026-07-13T09:16:36.731464744Z\",\"level\":\"INFO\",\"msg\":\"generated API token\",\"path\":\"data/.api-token\"}\n{\"time\":\"2026-07-13T09:16:36.731544136Z\",\"level\":\"INFO\",\"msg\":\"server starting\",\"host\":\"0.0.0.0\",\"port\":\"19280\"}\n2026/07/13 09:16:37 \"GET http://127.0.0.1:19380/api/status HTTP/1.1\" from 192.168.215.1:37472 - 200 32B in 70.39\u00b5s\n2026/07/13 09:16:37 \"POST http://127.0.0.1:19380/api/profiles HTTP/1.1\" from 192.168.215.1:37486 - 201 300B in 790.251\u00b5s\n2026/07/13 09:16:37 \"GET http://127.0.0.1:19280/api/status HTTP/1.1\" from 127.0.0.1:53966 - 200 32B in 18.296\u00b5s\n\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n\u2551        \ud83e\udd8a BrowseForge vdev             \u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n\u2551  Dashboard: http://0.0.0.0:19280       \u2551\n\u2551  MCP:       http://0.0.0.0:19280/mcp   \u2551\n\u2551  Token:     c371d4f7259ad19f...  \u2551\n\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\n{\"time\":\"2026-07-13T09:16:37.49974563Z\",\"level\":\"WARN\",\"msg\":\"Windows CloakBrowser fingerprint on non-Windows host should configure runtimes.cloakbrowser.settings.fonts_dir with a Windows-compatible font pack\",\"goos\":\"linux\",\"platform\":\"Win32\"}\n{\"time\":\"2026-07-13T09:16:38.363556436Z\",\"level\":\"INFO\",\"msg\":\"session launched\",\"session\":\"sess_prof_27a9ae5cc8cf\",\"profile\":\"prof_27a9ae5cc8cf\",\"runtime_id\":\"browseforge-chromium\",\"connectURL\":\"ws://0.0.0.0:38051/a832f2bd503364d1aeb19e4204e3c665\"}\n2026/07/13 09:16:38 \"POST http://127.0.0.1:19380/api/sessions HTTP/1.1\" from 192.168.215.1:37494 - 201 118B in 1.192862111s\n2026/07/13 09:16:38 \"POST http://127.0.0.1:19380/api/sessions/sess_prof_27a9ae5cc8cf/eval HTTP/1.1\" from 192.168.215.1:37506 - 200 184B in 8.950731ms\n2026/07/13 09:16:38 \"GET http://127.0.0.1:19380/api/sessions HTTP/1.1\" from 192.168.215.1:37514 - 200 130B in 25.339\u00b5s\n2026/07/13 09:16:38 \"POST http://127.0.0.1:19380/mcp HTTP/1.1\" from 192.168.215.1:37526 - 200 147B in 77.642\u00b5s\n{\"time\":\"2026-07-13T09:16:38.445074386Z\",\"level\":\"INFO\",\"msg\":\"session closed\",\"session\":\"sess_prof_27a9ae5cc8cf\"}\n2026/07/13 09:16:38 \"DELETE http://127.0.0.1:19380/api/sessions/sess_prof_27a9ae5cc8cf HTTP/1.1\" from 192.168.215.1:37538 - 200 18B in 68.430966ms\n",
+  "eval": {
+    "body": {
+      "data": "{\"title\":\"\",\"ua\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36\",\"platform\":\"Win32\",\"webdriver\":false}"
+    },
+    "status": 200,
+    "text": "{\"data\":\"{\\\"title\\\":\\\"\\\",\\\"ua\\\":\\\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36\\\",\\\"platform\\\":\\\"Win32\\\",\\\"webdriver\\\":false}\"}\n"
+  },
+  "mcp_smoke": {
+    "body": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "capabilities": {
+          "tools": {}
+        },
+        "protocolVersion": "2025-11-25",
+        "serverInfo": {
+          "name": "BrowseForge",
+          "version": "dev"
+        }
+      }
+    },
+    "status": 200,
+    "text": "{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":{\"capabilities\":{\"tools\":{}},\"protocolVersion\":\"2025-11-25\",\"serverInfo\":{\"name\":\"BrowseForge\",\"version\":\"dev\"}}}\n"
+  },
+  "profile_create": {
+    "body": {
+      "data": {
+        "created_at": "2026-07-13T09:16:37.169298529Z",
+        "fingerprint_seed": 2316880392,
+        "group": "smoke",
+        "id": "prof_27a9ae5cc8cf",
+        "last_used": "2026-07-13T09:16:37.169298529Z",
+        "name": "arm64 smoke",
+        "profile_dir": "profiles/prof_27a9ae5cc8cf",
+        "runtime_id": "browseforge-chromium",
+        "tags": [
+          "arm64",
+          "runtime"
+        ]
+      }
+    },
+    "status": 201,
+    "text": "{\"data\":{\"id\":\"prof_27a9ae5cc8cf\",\"name\":\"arm64 smoke\",\"runtime_id\":\"browseforge-chromium\",\"group\":\"smoke\",\"tags\":[\"arm64\",\"runtime\"],\"created_at\":\"2026-07-13T09:16:37.169298529Z\",\"last_used\":\"2026-07-13T09:16:37.169298529Z\",\"fingerprint_seed\":2316880392,\"profile_dir\":\"profiles/prof_27a9ae5cc8cf\"}}\n"
+  },
+  "rest_smoke": {
+    "base_url": "http://127.0.0.1:19380",
+    "ok": true,
+    "response": {
+      "status": "ok",
+      "version": "dev"
+    },
+    "target": "rest"
+  },
+  "server_status": {
+    "status": "ok",
+    "version": "dev"
+  },
+  "session_close": {
+    "body": {
+      "data": "closed"
+    },
+    "status": 200,
+    "text": "{\"data\":\"closed\"}\n"
+  },
+  "session_create": {
+    "body": {
+      "data": {
+        "profile_id": "prof_27a9ae5cc8cf",
+        "runtime_id": "browseforge-chromium",
+        "session_id": "sess_prof_27a9ae5cc8cf"
+      }
+    },
+    "status": 201,
+    "text": "{\"data\":{\"profile_id\":\"prof_27a9ae5cc8cf\",\"runtime_id\":\"browseforge-chromium\",\"session_id\":\"sess_prof_27a9ae5cc8cf\"}}\n"
+  },
+  "sessions_list": {
+    "body": {
+      "data": [
+        {
+          "profile_id": "prof_27a9ae5cc8cf",
+          "runtime_id": "browseforge-chromium",
+          "session_id": "sess_prof_27a9ae5cc8cf"
+        }
+      ],
+      "total": 1
+    },
+    "status": 200,
+    "text": "{\"data\":[{\"profile_id\":\"prof_27a9ae5cc8cf\",\"runtime_id\":\"browseforge-chromium\",\"session_id\":\"sess_prof_27a9ae5cc8cf\"}],\"total\":1}\n"
+  }
+}

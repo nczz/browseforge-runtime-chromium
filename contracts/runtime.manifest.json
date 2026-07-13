@@ -12,6 +12,10 @@
       "packaged": true,
       "relative_path": "chrome"
     },
+    "linux-arm64": {
+      "packaged": true,
+      "relative_path": "chrome"
+    },
     "macos-arm64": {
       "packaged": true,
       "relative_path": "Chromium.app/Contents/MacOS/Chromium"

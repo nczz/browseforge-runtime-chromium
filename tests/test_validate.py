@@ -386,14 +386,14 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             manifest = json.load(fh)
 
         supported_package_platforms = manifest.get("supported_package_platforms")
-        self.assertEqual(["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], supported_package_platforms)
+        self.assertEqual(["linux-x64", "linux-arm64", "macos-arm64", "macos-x64", "windows-x64"], supported_package_platforms)
         supported_platforms = set(supported_package_platforms)
 
-        unsupported = manifest.get("unsupported_package_platforms")
+        unsupported = manifest.get("unsupported_package_platforms", {})
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
         unsupported_platforms = set(unsupported)
-        self.assertEqual({"linux-arm64"}, unsupported_platforms)
+        self.assertEqual(set(), unsupported_platforms)
         self.assertIn("macos-x64", supported_platforms)
         self.assertNotIn("macos-x64", unsupported_platforms)
         self.assertTrue(supported_platforms.isdisjoint(unsupported_platforms))
@@ -1176,6 +1176,53 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                     artifact,
                     "knowledge/manifests/macos-package-smoke.json",
                     required_checks={check["check"] for check in checks},
+                )
+            finally:
+                module.ROOT = original_root
+
+    def test_validate_accepts_linux_arm64_package_smoke_manifest(self) -> None:
+        """Linux arm64 package smoke evidence is tied to required container launch checks."""
+        module = self._load_validate_module()
+        with tempfile.TemporaryDirectory() as td:
+            temp_root = Path(td)
+            original_root = module.ROOT
+            module.ROOT = temp_root
+            try:
+                artifact_id = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64"
+                archive = temp_root / "dist" / f"{artifact_id}.zip"
+                archive.parent.mkdir(parents=True)
+                archive.write_bytes(b"linux arm64 artifact fixture\n")
+                artifact = {
+                    "artifact_id": artifact_id,
+                    "platform": "linux-arm64",
+                    "sha256": self._sha256_file(archive),
+                    "size_bytes": archive.stat().st_size,
+                }
+                required_checks = {
+                    "archive_integrity",
+                    "wrapper_metadata_in_linux_arm64_container",
+                    "packaged_chrome_devtools_launch_in_linux_arm64_container",
+                }
+                self._write_json(
+                    temp_root / "knowledge" / "manifests" / "linux-arm64-package-smoke.json",
+                    {
+                        "artifact_id": artifact_id,
+                        "artifact_sha256": artifact["sha256"],
+                        "artifact_size_bytes": artifact["size_bytes"],
+                        "checks": [
+                            {"check": check, "status": "passed", "observed": {}}
+                            for check in sorted(required_checks)
+                        ],
+                        "platform": "linux-arm64",
+                        "schema_version": "1.0",
+                    },
+                )
+
+                module.validate_package_smoke_manifest(
+                    "linux-arm64",
+                    artifact,
+                    "knowledge/manifests/linux-arm64-package-smoke.json",
+                    required_checks=required_checks,
                 )
             finally:
                 module.ROOT = original_root

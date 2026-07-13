@@ -1,0 +1,91 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+  "artifact_sha256": "953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b",
+  "artifact_size_bytes": 584002023,
+  "checks": [
+    {
+      "check": "archive_integrity",
+      "observed": {
+        "archive": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip",
+        "sha256": "953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b",
+        "size_bytes": 584002023
+      },
+      "status": "passed"
+    },
+    {
+      "check": "wrapper_metadata_in_linux_arm64_container",
+      "observed": {
+        "uname_m": "aarch64",
+        "wrapper_file": "ELF 64-bit LSB executable, ARM aarch64, statically linked"
+      },
+      "status": "passed"
+    },
+    {
+      "check": "packaged_chrome_devtools_launch_in_linux_arm64_container",
+      "observed": {
+        "chrome_file": "ELF 64-bit LSB pie executable, ARM aarch64",
+        "devtools_version_endpoint": "http://127.0.0.1:9222/json/version",
+        "forbidden_rosetta_crashpad_patterns_found": false,
+        "uname_m": "aarch64"
+      },
+      "status": "passed"
+    },
+    {
+      "check": "browseforge_browsers_status_ready_in_linux_arm64_container",
+      "observed": {
+        "evidence": "knowledge/manifests/linux-arm64-browseforge-status-smoke.json",
+        "path": "/bf-base/browsers/browseforge-chromium/chrome",
+        "ready": true,
+        "uname_m": "aarch64"
+      },
+      "status": "passed"
+    },
+    {
+      "check": "browseforge_profile_launch_linux_arm64_container",
+      "observed": {
+        "eval_status": 200,
+        "evidence": "knowledge/manifests/linux-arm64-runtime-profile-smoke.json",
+        "session_status": 201
+      },
+      "status": "passed"
+    },
+    {
+      "check": "browseforge_rest_smoke",
+      "observed": {
+        "evidence": "knowledge/manifests/linux-arm64-runtime-profile-smoke.json",
+        "status": "ok"
+      },
+      "status": "passed"
+    },
+    {
+      "check": "browseforge_mcp_initialize_smoke",
+      "observed": {
+        "evidence": "knowledge/manifests/linux-arm64-runtime-profile-smoke.json",
+        "http_status": 200
+      },
+      "status": "passed"
+    },
+    {
+      "check": "no_rosetta_linux_arm64_runtime_smoke",
+      "observed": {
+        "browseforge_file": "ELF 64-bit LSB executable, ARM aarch64",
+        "chrome_file": "ELF 64-bit LSB executable, ARM aarch64",
+        "container_uname": "aarch64",
+        "evidence": [
+          "knowledge/manifests/linux-arm64-browseforge-status-smoke.json",
+          "knowledge/manifests/linux-arm64-runtime-profile-smoke.json"
+        ]
+      },
+      "status": "passed"
+    }
+  ],
+  "container": {
+    "image": "browseforge/chromium-build:ubuntu22-arm64-deps",
+    "platform": "linux/arm64",
+    "uname_m": "aarch64"
+  },
+  "generated_at": "2026-07-13T08:57:58.145411+00:00",
+  "platform": "linux-arm64",
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
+}

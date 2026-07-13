@@ -1,0 +1,856 @@
+{
+  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+  "detector": {
+    "category": "consistency",
+    "detector_id": "pixelscan",
+    "manifest_ref": "knowledge/manifests/detectors.json#pixelscan",
+    "name": "Pixelscan",
+    "url": "https://pixelscan.net/fingerprint-check"
+  },
+  "evidence_id": "evidence_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713",
+  "failure_mode": "none",
+  "harness": {
+    "mode": "live_collect",
+    "name": "browseforge-detector-harness",
+    "version": "0.1.0"
+  },
+  "kg": {
+    "edges": [],
+    "nodes": []
+  },
+  "matrix": {
+    "container": true,
+    "display_mode": "headed_xvfb",
+    "matrix_key": "linux-arm64:pixelscan:headed:direct:container",
+    "network_mode": "direct",
+    "proxy": "none",
+    "required": true
+  },
+  "results": [
+    {
+      "detector_check": "pixelscan_headed_linux_arm64_client_hints",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": {
+          "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+          "available": true,
+          "botCheck": "No automated behavior detected",
+          "browser": "Chrome 150.0.7871.101 on Linux",
+          "canvasHash": "3429499a73dfe796c2901ec3d3a78e23",
+          "fingerprint": "Masking detected",
+          "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+          "location": "Taiwan / Taipei",
+          "proxy": "No proxy detected",
+          "verdict": "inconsistent",
+          "webglHash": "-"
+        },
+        "deviceMemory": 8,
+        "elapsed_seconds": 15.59,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9dfd7904079653ee0f16a6d650dd98cc17f2e0a1c9e9c6b92f10e23ea28f31bf"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Products Resources Special Offers Company Join Pixelscan Community Back Fingerprint Check Verify your browser fingerprint CHECKERS IP Address Check See your IP details IP Blacklist Check Reviewing blacklist agent Proxy Checker Verify proxy quality Bot Verification Verify that a user is a human VPN Check Test and see the expected security TOOLS DNS Leak Test Securing your DNS tunnel WebRTC Leak Test Securing your WebRTC tunnel Location Info Provide accurate location Cookie Converter Convert Cooki",
+        "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749",
+        "timezone": "Asia/Taipei",
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://pixelscan.net/fingerprint-check",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "3137a4c5a0783ae471b6ffb03f451a7a6bec98e9ea537409029ba88fa615598b",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "client_hints"
+    },
+    {
+      "detector_check": "pixelscan_headed_linux_arm64_fonts",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": {
+          "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+          "available": true,
+          "botCheck": "No automated behavior detected",
+          "browser": "Chrome 150.0.7871.101 on Linux",
+          "canvasHash": "3429499a73dfe796c2901ec3d3a78e23",
+          "fingerprint": "Masking detected",
+          "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+          "location": "Taiwan / Taipei",
+          "proxy": "No proxy detected",
+          "verdict": "inconsistent",
+          "webglHash": "-"
+        },
+        "deviceMemory": 8,
+        "elapsed_seconds": 15.59,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9dfd7904079653ee0f16a6d650dd98cc17f2e0a1c9e9c6b92f10e23ea28f31bf"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Products Resources Special Offers Company Join Pixelscan Community Back Fingerprint Check Verify your browser fingerprint CHECKERS IP Address Check See your IP details IP Blacklist Check Reviewing blacklist agent Proxy Checker Verify proxy quality Bot Verification Verify that a user is a human VPN Check Test and see the expected security TOOLS DNS Leak Test Securing your DNS tunnel WebRTC Leak Test Securing your WebRTC tunnel Location Info Provide accurate location Cookie Converter Convert Cooki",
+        "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749",
+        "timezone": "Asia/Taipei",
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://pixelscan.net/fingerprint-check",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "3137a4c5a0783ae471b6ffb03f451a7a6bec98e9ea537409029ba88fa615598b",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "fonts"
+    },
+    {
+      "detector_check": "pixelscan_headed_linux_arm64_proxy_ip_coherence",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": {
+          "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+          "available": true,
+          "botCheck": "No automated behavior detected",
+          "browser": "Chrome 150.0.7871.101 on Linux",
+          "canvasHash": "3429499a73dfe796c2901ec3d3a78e23",
+          "fingerprint": "Masking detected",
+          "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+          "location": "Taiwan / Taipei",
+          "proxy": "No proxy detected",
+          "verdict": "inconsistent",
+          "webglHash": "-"
+        },
+        "deviceMemory": 8,
+        "elapsed_seconds": 15.59,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9dfd7904079653ee0f16a6d650dd98cc17f2e0a1c9e9c6b92f10e23ea28f31bf"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Products Resources Special Offers Company Join Pixelscan Community Back Fingerprint Check Verify your browser fingerprint CHECKERS IP Address Check See your IP details IP Blacklist Check Reviewing blacklist agent Proxy Checker Verify proxy quality Bot Verification Verify that a user is a human VPN Check Test and see the expected security TOOLS DNS Leak Test Securing your DNS tunnel WebRTC Leak Test Securing your WebRTC tunnel Location Info Provide accurate location Cookie Converter Convert Cooki",
+        "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749",
+        "timezone": "Asia/Taipei",
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://pixelscan.net/fingerprint-check",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "3137a4c5a0783ae471b6ffb03f451a7a6bec98e9ea537409029ba88fa615598b",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "proxy_ip_coherence"
+    },
+    {
+      "detector_check": "pixelscan_headed_linux_arm64_timezone",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": {
+          "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+          "available": true,
+          "botCheck": "No automated behavior detected",
+          "browser": "Chrome 150.0.7871.101 on Linux",
+          "canvasHash": "3429499a73dfe796c2901ec3d3a78e23",
+          "fingerprint": "Masking detected",
+          "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+          "location": "Taiwan / Taipei",
+          "proxy": "No proxy detected",
+          "verdict": "inconsistent",
+          "webglHash": "-"
+        },
+        "deviceMemory": 8,
+        "elapsed_seconds": 15.59,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9dfd7904079653ee0f16a6d650dd98cc17f2e0a1c9e9c6b92f10e23ea28f31bf"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Products Resources Special Offers Company Join Pixelscan Community Back Fingerprint Check Verify your browser fingerprint CHECKERS IP Address Check See your IP details IP Blacklist Check Reviewing blacklist agent Proxy Checker Verify proxy quality Bot Verification Verify that a user is a human VPN Check Test and see the expected security TOOLS DNS Leak Test Securing your DNS tunnel WebRTC Leak Test Securing your WebRTC tunnel Location Info Provide accurate location Cookie Converter Convert Cooki",
+        "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749",
+        "timezone": "Asia/Taipei",
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://pixelscan.net/fingerprint-check",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "3137a4c5a0783ae471b6ffb03f451a7a6bec98e9ea537409029ba88fa615598b",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "timezone"
+    },
+    {
+      "detector_check": "pixelscan_headed_linux_arm64_webgl",
+      "evidence_ref": "sanitized_runtime_observation",
+      "finding": "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.",
+      "normalized_values": {
+        "audio": {
+          "available": true,
+          "length": 44100,
+          "reason": null,
+          "sampleRate": 44100,
+          "sum": 0.77295997,
+          "sumAbs": 83.86503192
+        },
+        "canvas": {
+          "available": true,
+          "dataUrlSha256": "b93e9f39dcd838812ca3b8000fab81a64b1651cfe8d3de42b809b028131f1339",
+          "height": 32,
+          "imageDataSha256": "b3051ccd8c1d42e8633b41ff49e66a67d632611c7fbdefefee829aeee625dd37",
+          "reason": null,
+          "sampleCount": 8192,
+          "width": 64
+        },
+        "detector_page": {
+          "audioContextHash": "ba6689f9a1550fb5eef25d1fc682c8c1",
+          "available": true,
+          "botCheck": "No automated behavior detected",
+          "browser": "Chrome 150.0.7871.101 on Linux",
+          "canvasHash": "3429499a73dfe796c2901ec3d3a78e23",
+          "fingerprint": "Masking detected",
+          "fontHash": "aecd897e2e539610bfba63cb202d6bd4",
+          "location": "Taiwan / Taipei",
+          "proxy": "No proxy detected",
+          "verdict": "inconsistent",
+          "webglHash": "-"
+        },
+        "deviceMemory": 8,
+        "elapsed_seconds": 15.59,
+        "features": {
+          "available": true,
+          "featureFlags": {
+            "contactsManager": true,
+            "contentIndex": true,
+            "idleDetector": true,
+            "keyboardLock": true,
+            "localFonts": true,
+            "networkInformation": true,
+            "presentation": true,
+            "storageBuckets": true,
+            "virtualKeyboard": true,
+            "webBluetooth": false,
+            "webHid": true,
+            "webNfc": false,
+            "webSerial": true,
+            "webShare": true,
+            "webShareData": true,
+            "webUsb": true,
+            "windowControlsOverlay": true
+          },
+          "notificationPermission": "default",
+          "permissionsApi": true
+        },
+        "fonts": {
+          "available": true,
+          "candidateCount": 8,
+          "checks": {
+            "Arial": true,
+            "Calibri": true,
+            "Consolas": true,
+            "Courier New": true,
+            "DejaVu Sans": true,
+            "Noto Sans CJK TC": true,
+            "Segoe UI": true,
+            "Times New Roman": true
+          },
+          "glyphSha256": "d3468b6f05356d4dd39afe381b67abb9a5c748d9c9e45f17d6852cff05173e7e",
+          "metricsSha256": "9dfd7904079653ee0f16a6d650dd98cc17f2e0a1c9e9c6b92f10e23ea28f31bf"
+        },
+        "hardwareConcurrency": 8,
+        "headless_user_agent_exposed": false,
+        "languages": [
+          "zh-TW",
+          "zh",
+          "en"
+        ],
+        "platform": "Linux aarch64",
+        "screen": {
+          "availHeight": 1040,
+          "availWidth": 1920,
+          "devicePixelRatio": 1,
+          "height": 1080,
+          "width": 1920
+        },
+        "storage": {
+          "quota": 8589934592,
+          "usage": 0
+        },
+        "text_excerpt": "Products Resources Special Offers Company Join Pixelscan Community Back Fingerprint Check Verify your browser fingerprint CHECKERS IP Address Check See your IP details IP Blacklist Check Reviewing blacklist agent Proxy Checker Verify proxy quality Bot Verification Verify that a user is a human VPN Check Test and see the expected security TOOLS DNS Leak Test Securing your DNS tunnel WebRTC Leak Test Securing your WebRTC tunnel Location Info Provide accurate location Cookie Converter Convert Cooki",
+        "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749",
+        "timezone": "Asia/Taipei",
+        "title": "Check browser fingerprinting with Pixelscan \ud83d\udd0eAnalyze your digital trail",
+        "uaData": {
+          "available": true,
+          "highEntropy": {
+            "architecture": "arm",
+            "bitness": "64",
+            "mobile": false,
+            "platform": "Linux",
+            "platformVersion": "",
+            "wow64": false
+          },
+          "lowEntropy": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "150"
+              }
+            ],
+            "mobile": false,
+            "platform": "Linux"
+          }
+        },
+        "ua_family": "Chrome/150",
+        "url": "https://pixelscan.net/fingerprint-check",
+        "webdriver": false,
+        "webgl": {
+          "available": false,
+          "extensionCount": null,
+          "extensionSha256": null,
+          "parameterSha256": null,
+          "pixelHeight": null,
+          "pixelSha256": null,
+          "pixelWidth": null,
+          "precisionSha256": null,
+          "reason": "webgl_context_unavailable",
+          "renderer": null,
+          "vendor": null
+        },
+        "webrtc": {
+          "available": true,
+          "candidateCount": 2,
+          "ipLiteralCount": 0,
+          "privateIpLiteralCount": 0,
+          "publicIpLiteralCount": 0,
+          "rawCandidateSha256": "3137a4c5a0783ae471b6ffb03f451a7a6bec98e9ea537409029ba88fa615598b",
+          "reason": null,
+          "types": [
+            "host"
+          ]
+        }
+      },
+      "severity": "medium",
+      "status": "warn",
+      "surface": "webgl"
+    }
+  ],
+  "run_id": "detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713",
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.0-alpha.0",
+  "sanitization": {
+    "cookies_storage_redacted": true,
+    "credentials_redacted": true,
+    "ip_redacted": true,
+    "notes": "Raw page text, CDP endpoint, profile paths, screenshots, cookies, storage, and canvas payloads are not committed; evidence stores bounded values and hashes only.",
+    "profiles_redacted": true,
+    "raw_capture_committed": false,
+    "sanitizer_version": "detector-harness-linux-arm64-1",
+    "screenshot_metadata_redacted": true,
+    "tokens_redacted": true
+  },
+  "schema_version": "1.1",
+  "status": "warning",
+  "storage": {
+    "evidence_path": "detectors/evidence/v0.1.0-alpha.0/linux-arm64/pixelscan/detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713.json",
+    "raw_capture_sha256": "90c9692ca737bc007948e479a632bfaf0875efb1ff57af711e4d7218ee5b5134",
+    "sha256": "3573d10f108472ec1ee7e949ba8f5f44c611f211e88bec6c76fb2fff59441a91",
+    "summary_path": "detector-summary.json",
+    "text_sha256": "114dfa795693509f936890c44d512db8233a560342cab8106cf80b12dbfa6749"
+  },
+  "target": {
+    "arch": "arm64",
+    "browser_family": "chromium",
+    "browser_version": "150.0.7871.101",
+    "container": true,
+    "gpu_mode": "xvfb",
+    "host_os": "linux",
+    "locale_profile": "zh-TW",
+    "platform": "linux-arm64",
+    "timezone_profile": "Asia/Taipei"
+  },
+  "tested_at": "2026-07-13T09:30:14Z"
+}
