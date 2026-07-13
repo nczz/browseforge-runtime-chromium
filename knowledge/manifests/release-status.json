@@ -1,5 +1,5 @@
 {
-  "blocker_count": 22,
+  "blocker_count": 26,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -114,6 +114,42 @@
       "detail": "{\"detectors\": [\"sannysoft\"], \"finding\": \"WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.\", \"gap_id\": \"webgl_metadata_hashes_missing\", \"missing_records\": [{\"detector_id\": \"sannysoft\", \"missing\": [\"extensionCount\", \"extensionSha256\", \"parameterSha256\", \"precisionSha256\", \"pixelSha256\"], \"run_id\": \"detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713\"}], \"surface\": \"webgl\"}",
       "severity": "medium",
       "source": "knowledge/manifests/detector-score-comparison.json"
+    },
+    {
+      "blocker_id": "fingerprint-surface:AudioContext backing-array semantics",
+      "detail": "knowledge/manifests/fingerprint-parity-gates.json and patch-best-practice-audit.json record that active audio noise still needs getChannelData object/backing-array mutation semantics to be fixed or proven before release-default use; strict native mode remains the safe policy.",
+      "result": "blocked_getChannelData_semantics_unproven",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "AudioContext backing-array semantics"
+    },
+    {
+      "blocker_id": "fingerprint-surface:CSS hyphenation/text layout parity",
+      "detail": "knowledge/manifests/fingerprint-parity-gates.json records that CSS hyphenation/text layout has no content_shell or Chrome text-layout oracle, no selected Blink hyphenation patch target, and is not fixed by the existing FontFaceSet.check allowlist.",
+      "result": "blocked_missing_text_layout_oracle",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "CSS hyphenation/text layout parity"
+    },
+    {
+      "blocker_id": "fingerprint-surface:OS math/libm parity",
+      "detail": "knowledge/manifests/fingerprint-parity-gates.json records that Math.tanh/libm and CSS trig-equivalent behavior have no committed d8/content_shell oracle, no selected V8/libm patch target, and no detector surface. Cross-OS math parity must not be inferred from current AudioContext or detector evidence.",
+      "result": "blocked_missing_target_platform_math_oracle",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "OS math/libm parity"
+    },
+    {
+      "blocker_id": "fingerprint-surface:WASM/JS numeric parity",
+      "detail": "knowledge/manifests/fingerprint-parity-gates.json records no d8 availability/status, no WASM relaxed-SIMD or NaN-bit oracle for target CPU families, and no WASM/WebAssembly patchset, runtime surface, detector row, or KG surface.",
+      "result": "blocked_missing_wasm_numeric_oracle",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "WASM/JS numeric parity"
     },
     {
       "blocker_id": "fingerprint-surface:cross-platform drift",
@@ -253,12 +289,12 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-13T10:02:18Z",
+  "generated_at": "2026-07-13T14:41:58Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "a010ccc9efe180339b7704e471befe21651c32ecaaf8ee2e3b2b8fe1ecc13957",
     "detector-summary.json": "62e2b76af3c732180d132f4153747a12fb67c5787f8d2dc7609f0e4bb7468964",
     "knowledge/manifests/detector-score-comparison.json": "139ba3340655a40ac570910d4b14dfdd2ff87365b0350cab9b75aec6a6c9b33f",
-    "knowledge/manifests/fingerprint-surface-status.json": "edd7168dc6cf4927b598400e43fd4c0329b4b042a919e3ad5cdf79eb77699fa3",
+    "knowledge/manifests/fingerprint-surface-status.json": "4968628c4423ec7686fe81f7cb8c68acab751cdb60d71818312ba5fcd5f69a9b",
     "knowledge/manifests/native-artifact-preflight.json": "e04a8219c337270b3eb1e9ad54f60281a800ddcd168a748912b1ba5b29deb0f3",
     "knowledge/manifests/proxy-preflight.json": "537c26886126a6fdc8ed5677f90d23e22888e2e5f2e3484f609d4a3b53c99b18",
     "knowledge/manifests/release-gates.json": "c827635553894ce77c26a4ac363c032dac91c8246dd5fa27760a5edbf18a332b",

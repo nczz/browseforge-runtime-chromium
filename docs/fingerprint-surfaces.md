@@ -15,8 +15,11 @@ Chromium-family anti-detect work must treat fingerprinting as a consistency syst
 | Hardware | hardwareConcurrency, deviceMemory, platform hints. | Detector consistency and plausible ranges. |
 | Canvas | Stable, plausible canvas output/noise. | BrowserLeaks/CreepJS canvas hashes. |
 | WebGL | Vendor, renderer, params, extensions, shader precision, pixel output. | All-or-nothing WebGL profile evidence. |
-| Audio | Stable AudioContext output/noise. | BrowserScan/BrowserLeaks audio checks. |
+| Audio | Stable AudioContext output/noise plus native AudioBuffer object/backing-array semantics. | BrowserScan/BrowserLeaks audio checks and local `getChannelData` semantics oracle. |
 | Fonts | Font list and metrics coherent with target OS. | Pixelscan font mismatch checks. |
+| OS math / libm | JavaScript and CSS numeric output coherent with claimed OS/browser engine. | d8/content_shell oracle for exact target-platform output. |
+| CSS hyphenation/text layout | Hyphenation dictionaries, line breaking, glyph fallback, and layout metrics coherent with target OS/font corpus. | content_shell or browser layout oracle for target languages/fonts. |
+| WASM / JS numeric parity | JS typed-array NaN behavior, WASM scalar NaN bits, and relaxed SIMD edge behavior coherent with claimed CPU family. | d8 oracle for target CPU and V8 build. |
 | WebRTC | Local/public IP leak policy and proxy coherence. | BrowserLeaks WebRTC results. |
 | Storage quota | Persistent context should not look incognito unless intentionally configured. | BrowserScan incognito/storage deductions. |
 | Permissions/features | Browser feature inventory should match claimed browser version. | CreepJS missing API checks. |
@@ -25,6 +28,10 @@ Chromium-family anti-detect work must treat fingerprinting as a consistency syst
 ## WebGL rule
 
 Incomplete WebGL spoofing is worse than no override. A release cannot claim WebGL support unless it proves coherence across strings, extension count/list hash, parameters, shader precision formats, and rendered pixel output for the target platform/GPU model.
+
+## Numeric and text-layout parity rule
+
+OS math/libm, CSS hyphenation/text layout, AudioBuffer backing-array semantics, and WASM/JS numeric parity are release-blocking when claimed. They must have a committed local oracle and target-platform evidence before any detector summary or runtime artifact can imply release-grade cross-OS or cross-CPU parity.
 
 ## Evidence states
 

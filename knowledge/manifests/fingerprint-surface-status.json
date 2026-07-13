@@ -46,7 +46,8 @@
     "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json",
     "knowledge/manifests/linux-arm64-package-smoke.json",
     "knowledge/manifests/linux-arm64-browseforge-status-smoke.json",
-    "knowledge/manifests/linux-arm64-runtime-profile-smoke.json"
+    "knowledge/manifests/linux-arm64-runtime-profile-smoke.json",
+    "knowledge/manifests/fingerprint-parity-gates.json"
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
@@ -69,7 +70,8 @@
     "Packaged macOS arm64 headed external-proxy evidence now covers BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft with sanitized Los Angeles proxy metadata; proxy-surface-smoke records transparent pixel [0,0,0,0] and H.264/AAC support. Proxy/IP coherence and macOS proxy matrix are no longer release-blocking for alpha validation.",
     "Linux arm64 package evidence records a real linux/arm64 container build with aarch64 runtime smoke, ARM aarch64 BrowseForge and Chromium binaries, BrowseForge browsers status ready, profile/session launch, REST smoke, MCP initialize smoke, and no Rosetta/Crashpad startup failure patterns.",
     "Linux arm64 detector evidence is committed under detectors/evidence/v0.1.0-alpha.0/linux-arm64 for BrowserLeaks, BrowserLeaks WebRTC, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft. SannySoft passes; BrowserLeaks/BrowserScan/CreepJS/Pixelscan/WebRTC remain warning-level; iphey is blocked by collector Runtime.evaluate failure.",
-    "Linux arm64 Playwright Bind has not been independently exercised in the arm64 container; REST and MCP are proven, but Bind remains an alpha promotion blocker rather than an inferred pass."
+    "Linux arm64 Playwright Bind has not been independently exercised in the arm64 container; REST and MCP are proven, but Bind remains an alpha promotion blocker rather than an inferred pass.",
+    "Math/libm, CSS hyphenation/text layout, WebAudio backing-array semantics, and WASM/JS numeric parity are now explicit policy-gated surfaces in knowledge/manifests/fingerprint-parity-gates.json; they remain release blockers until local oracle probes and target-platform evidence exist."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -227,6 +229,38 @@
       "severity": "high",
       "status": "blocked",
       "surface": "cross-platform drift"
+    },
+    {
+      "evidence": "knowledge/manifests/fingerprint-parity-gates.json records that Math.tanh/libm and CSS trig-equivalent behavior have no committed d8/content_shell oracle, no selected V8/libm patch target, and no detector surface. Cross-OS math parity must not be inferred from current AudioContext or detector evidence.",
+      "release_blocker": true,
+      "result": "blocked_missing_target_platform_math_oracle",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "OS math/libm parity"
+    },
+    {
+      "evidence": "knowledge/manifests/fingerprint-parity-gates.json records that CSS hyphenation/text layout has no content_shell or Chrome text-layout oracle, no selected Blink hyphenation patch target, and is not fixed by the existing FontFaceSet.check allowlist.",
+      "release_blocker": true,
+      "result": "blocked_missing_text_layout_oracle",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "CSS hyphenation/text layout parity"
+    },
+    {
+      "evidence": "knowledge/manifests/fingerprint-parity-gates.json and patch-best-practice-audit.json record that active audio noise still needs getChannelData object/backing-array mutation semantics to be fixed or proven before release-default use; strict native mode remains the safe policy.",
+      "release_blocker": true,
+      "result": "blocked_getChannelData_semantics_unproven",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "AudioContext backing-array semantics"
+    },
+    {
+      "evidence": "knowledge/manifests/fingerprint-parity-gates.json records no d8 availability/status, no WASM relaxed-SIMD or NaN-bit oracle for target CPU families, and no WASM/WebAssembly patchset, runtime surface, detector row, or KG surface.",
+      "release_blocker": true,
+      "result": "blocked_missing_wasm_numeric_oracle",
+      "severity": "high",
+      "status": "blocked",
+      "surface": "WASM/JS numeric parity"
     }
   ],
   "updated_from": [

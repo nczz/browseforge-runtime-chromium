@@ -1,5 +1,5 @@
 {
-  "blocker_count": 25,
+  "blocker_count": 33,
   "deliverables": [
     {
       "blockers": [],
@@ -83,7 +83,11 @@
     {
       "blockers": [
         "release-blocking surface: proxy/IP coherence",
-        "release-blocking surface: cross-platform drift"
+        "release-blocking surface: cross-platform drift",
+        "release-blocking surface: OS math/libm parity",
+        "release-blocking surface: CSS hyphenation/text layout parity",
+        "release-blocking surface: AudioContext backing-array semantics",
+        "release-blocking surface: WASM/JS numeric parity"
       ],
       "deliverable_id": "fingerprint_surface_implementation",
       "evidence": [
@@ -128,6 +132,10 @@
         "detector:coverage-gap:linux-arm64:sannysoft:headed:direct:host",
         "detector:coverage-gap:linux-arm64:sannysoft:headed:proxy:host",
         "score-comparison:gaps:webgl_metadata_hashes_missing",
+        "fingerprint-surface:AudioContext backing-array semantics",
+        "fingerprint-surface:CSS hyphenation/text layout parity",
+        "fingerprint-surface:OS math/libm parity",
+        "fingerprint-surface:WASM/JS numeric parity",
         "fingerprint-surface:cross-platform drift",
         "fingerprint-surface:proxy/IP coherence",
         "native-artifact:linux-arm64:0",
@@ -154,7 +162,7 @@
       "title": "Release-grade source-level anti-detect runtime cutover"
     }
   ],
-  "generated_at": "2026-07-13T10:02:55Z",
+  "generated_at": "2026-07-13T14:42:10Z",
   "objective": "source-level BrowseForge Chromium anti-detect runtime with reproducible source/build baseline, native stealth substrate, source acquisition automation, manifest gates, BrowseForge integration path, and fingerprint surface implementation",
   "overall_ready": false,
   "release_grade_ready": false,

@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     "knowledge/manifests/windows-toolchain-sop.json",
     "knowledge/manifests/chromium-upgrade-strategy.json",
     "knowledge/manifests/patch-best-practice-audit.json",
+    "knowledge/manifests/fingerprint-parity-gates.json",
     "browser/chromium-base.json",
     "browser/stealth/BUILD.gn",
     "browser/stealth/stealth_switches.h",
@@ -86,6 +87,7 @@ REQUIRED_FILES = [
     "scripts/apply_fonts_patch.py",
     "scripts/apply_process_priority_patch.py",
     "scripts/apply_switch_propagation_patch.py",
+    "scripts/fingerprint_parity_gates.py",
     "scripts/detector_harness.py",
     "docker/chromium-build.Dockerfile",
     "graph/schema/runtime-kg.schema.md",
@@ -546,6 +548,61 @@ def validate_surface_status_manifest(surface_status: dict, gate_status: dict[str
     for source_path in surface_status.get("updated_from", []):
         if not (ROOT / source_path).is_file():
             raise SystemExit(f"fingerprint surface status references missing evidence source: {source_path}")
+
+def validate_fingerprint_parity_gates(manifest: dict) -> None:
+    if manifest.get("runtime_id") != "browseforge-chromium":
+        raise SystemExit("fingerprint parity gates runtime_id must be browseforge-chromium")
+    if manifest.get("schema_version") != "1.0":
+        raise SystemExit("fingerprint parity gates schema_version must be 1.0")
+    required_gates = {
+        "os-math-libm-parity": "OS math/libm parity",
+        "css-hyphenation-text-layout-parity": "CSS hyphenation/text layout parity",
+        "webaudio-backing-array-semantics": "AudioContext backing-array semantics",
+        "wasm-js-numeric-parity": "WASM/JS numeric parity",
+    }
+    gates = manifest.get("gates", [])
+    if not isinstance(gates, list) or not gates:
+        raise SystemExit("fingerprint parity gates manifest must contain gates")
+    by_id = {}
+    for gate in gates:
+        if not isinstance(gate, dict):
+            raise SystemExit("fingerprint parity gate entries must be objects")
+        gate_id = gate.get("gate_id")
+        if not isinstance(gate_id, str) or not gate_id:
+            raise SystemExit("fingerprint parity gate missing gate_id")
+        if gate_id in by_id:
+            raise SystemExit(f"duplicate fingerprint parity gate: {gate_id}")
+        by_id[gate_id] = gate
+        required_fields = {
+            "gate_id",
+            "surface",
+            "status",
+            "release_blocker",
+            "risk_level",
+            "decision",
+            "current_coverage",
+            "oracle_status",
+            "probe",
+            "blocked_by",
+        }
+        missing = sorted(required_fields - gate.keys())
+        if missing:
+            raise SystemExit(f"fingerprint parity gate {gate_id} missing fields: {missing}")
+        if gate["status"] not in {"blocked", "accepted", "not_applicable"}:
+            raise SystemExit(f"fingerprint parity gate {gate_id} uses unsupported status {gate['status']!r}")
+        if not isinstance(gate["release_blocker"], bool):
+            raise SystemExit(f"fingerprint parity gate {gate_id} release_blocker must be boolean")
+        if not isinstance(gate["probe"], dict):
+            raise SystemExit(f"fingerprint parity gate {gate_id} probe must be an object")
+        if not isinstance(gate["blocked_by"], list) or not gate["blocked_by"]:
+            raise SystemExit(f"fingerprint parity gate {gate_id} blocked_by must be a non-empty list")
+    missing_required = sorted(set(required_gates) - set(by_id))
+    if missing_required:
+        raise SystemExit(f"fingerprint parity gates missing required gates: {missing_required}")
+    for gate_id, surface in required_gates.items():
+        if by_id[gate_id].get("surface") != surface:
+            raise SystemExit(f"fingerprint parity gate {gate_id} surface drifted")
+
 
 
 def validate_native_proxy_region_validation() -> None:
@@ -1283,6 +1340,8 @@ def main(argv: list[str] | None = None) -> None:
 
     surface_status = load_json("knowledge/manifests/fingerprint-surface-status.json")
     validate_surface_status_manifest(surface_status, gate_status)
+    parity_gates = load_json("knowledge/manifests/fingerprint-parity-gates.json")
+    validate_fingerprint_parity_gates(parity_gates)
 
     detector_summary = load_json("detector-summary.json")
     coverage_gaps = detector_summary.get("coverage_gaps", [])

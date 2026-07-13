@@ -38,6 +38,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - External proxy/IP coherence evidence must include sanitized proxy exit-region and detector geolocation-region fields; local CONNECT proxy routing evidence is accepted only as routing proof.
 - `scripts/validate.py` enforces that `detectors/evidence-schema.json` admits every committed sanitized evidence harness, matrix, and storage shape, including headed Xvfb and routing-only local proxy observations.
 - `scripts/validate.py` also rejects a release-grade fingerprint surface manifest while any `knowledge/manifests/fingerprint-surface-status.json` surface remains a release blocker, and it rejects a passed `live-detector-evidence` gate while those blockers remain.
+- `knowledge/manifests/fingerprint-parity-gates.json` keeps OS math/libm, CSS hyphenation/text layout, AudioBuffer backing-array semantics, and WASM/JS numeric parity blocked until local oracle probes and target-platform evidence exist; detector hash stability alone must not promote these surfaces.
 - Detector regressions block release unless explicitly accepted.
 - `docs/anti-detection-matrix.md` is the operator-facing matrix. Any `not_tested`, `blocked`, or `warn` release risk there must either be resolved or explicitly accepted before release-grade publication.
 

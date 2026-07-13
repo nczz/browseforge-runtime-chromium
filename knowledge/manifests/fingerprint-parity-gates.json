@@ -1,0 +1,98 @@
+{
+  "decision": "Math/libm, CSS hyphenation/text layout, WebAudio backing-array semantics, and WASM/JS numeric parity are explicit non-release-grade surfaces until local oracle probes and target-platform evidence exist. The current fix path is policy-gated; no native Chromium/V8 patch should be claimed for these surfaces from detector summaries alone.",
+  "gates": [
+    {
+      "blocked_by": [
+        "No committed d8 oracle result for target OS/CPU math output",
+        "No selected V8/libm patch target in the Chromium M150 checkout",
+        "No detector or BrowserForge runtime surface currently observes Math.tanh/CSS trig parity"
+      ],
+      "current_coverage": "not_modelled_in_runtime_manifest_or_detector_matrix",
+      "decision": "Do not claim OS math/libm parity for a persona until a d8 oracle captures exact target-platform Math.tanh and CSS trig behavior, and any native patch is paired with detector evidence.",
+      "gate_id": "os-math-libm-parity",
+      "oracle_status": "undefined_target_platform_oracle",
+      "probe": {
+        "candidate_tool": "d8",
+        "command": "python3 scripts/fingerprint_parity_gates.py probe-plan --manifest knowledge/manifests/fingerprint-parity-gates.json",
+        "minimum_oracle": "Exact IEEE-754 outputs for Math.tanh and CSS trig-equivalent values on each claimed target OS/CPU/browser build.",
+        "probe_body": "Evaluate bounded Math.tanh, sin/cos/tan/atan2, and CSS trig-equivalent cases in the selected runtime and compare raw double/serialization output against a target-platform oracle."
+      },
+      "release_blocker": true,
+      "risk_level": "high",
+      "status": "blocked",
+      "surface": "OS math/libm parity"
+    },
+    {
+      "blocked_by": [
+        "No content_shell or Chrome text-layout oracle for target OS language dictionaries",
+        "No Chromium/Blink hyphenation patch target is selected",
+        "Existing font allowlist does not alter line breaking, dictionary selection, glyph fallback, or metrics"
+      ],
+      "current_coverage": "not_modelled_as_distinct_surface; closest_existing_surface_is_fonts",
+      "decision": "Treat CSS hyphenation and text layout as font/text-layout parity risk, not as fixed by FontFaceSet.check allowlists. Do not promote cross-OS text layout parity without a target dictionary and rendered layout oracle.",
+      "gate_id": "css-hyphenation-text-layout-parity",
+      "oracle_status": "undefined_text_layout_oracle",
+      "probe": {
+        "candidate_tool": "content_shell",
+        "command": "python3 scripts/fingerprint_parity_gates.py probe-plan --manifest knowledge/manifests/fingerprint-parity-gates.json",
+        "minimum_oracle": "Per-language hyphenation break positions, line boxes, and glyph metric hashes for claimed target OS/browser/font corpus.",
+        "probe_body": "Render controlled hyphenation samples with lang-specific CSS hyphens:auto, collect break positions and layout metrics, and compare them with target OS/browser oracle data."
+      },
+      "release_blocker": true,
+      "risk_level": "high",
+      "status": "blocked",
+      "surface": "CSS hyphenation/text layout parity"
+    },
+    {
+      "blocked_by": [
+        "Existing audio noise patch changes getChannelData object/backing-array semantics unless proven safe",
+        "No committed local semantics probe compares repeated getChannelData identity and mutation visibility with audio noise enabled",
+        "Patch-best-practice audit requires strict native suppression until semantics are fixed or proven"
+      ],
+      "current_coverage": "audio_detector_metrics_exist_but_getChannelData_semantics_are_not_proven_release_safe",
+      "decision": "Keep strict native mode suppressing active audio noise and do not use AudioContext detector hash stability as proof of native AudioBuffer object/backing-array semantics.",
+      "gate_id": "webaudio-backing-array-semantics",
+      "oracle_status": "probe_defined_without_target_result",
+      "probe": {
+        "candidate_tool": "chrome",
+        "command": "python3 scripts/fingerprint_parity_gates.py probe-plan --manifest knowledge/manifests/fingerprint-parity-gates.json",
+        "minimum_oracle": "With noise enabled and disabled, repeated AudioBuffer.getChannelData calls preserve native object identity expectations and mutation visibility for dense, sparse, and uniform buffers.",
+        "probe_body": "Create AudioBuffer samples, call getChannelData repeatedly, mutate returned arrays, and compare identity/mutation behavior plus copyFromChannel offsets against unmodified Chromium and patched BrowseForge Chromium."
+      },
+      "release_blocker": true,
+      "risk_level": "high",
+      "status": "blocked",
+      "surface": "AudioContext backing-array semantics"
+    },
+    {
+      "blocked_by": [
+        "No d8 availability/status is recorded in source-acquisition metadata",
+        "No V8/WASM relaxed-SIMD or NaN-bit oracle exists for target CPU families",
+        "No WASM/WebAssembly patchset, runtime surface, detector row, or KG surface is present"
+      ],
+      "current_coverage": "not_modelled_in_runtime_manifest_or_detector_matrix",
+      "decision": "Do not claim WASM/JS numeric CPU parity or Apple/x86 identity coherence until d8 probes establish NaN-bit, typed-array, scalar, and relaxed-SIMD behavior against target hardware or an accepted unsupported-persona policy.",
+      "gate_id": "wasm-js-numeric-parity",
+      "oracle_status": "undefined_target_cpu_oracle",
+      "probe": {
+        "candidate_tool": "d8",
+        "command": "python3 scripts/fingerprint_parity_gates.py probe-plan --manifest knowledge/manifests/fingerprint-parity-gates.json",
+        "minimum_oracle": "Raw JS typed-array NaN payload bits, WASM scalar NaN bits, relaxed SIMD lane behavior, and architecture-specific outputs for each claimed CPU family.",
+        "probe_body": "Run d8 mjsunit-style JS/WASM probes for NaN payload canonicalization, quiet/signaling NaN behavior, typed-array round trips, scalar operations, and relaxed-SIMD edge cases."
+      },
+      "release_blocker": true,
+      "risk_level": "high",
+      "status": "blocked",
+      "surface": "WASM/JS numeric parity"
+    }
+  ],
+  "generated_from": [
+    "local://browseforge-runtime-surface-research-map.md",
+    "agent://MathSurfaceMapper",
+    "agent://HyphenSurfaceMapper",
+    "agent://AudioSurfaceMapper",
+    "agent://WasmSurfaceMapper"
+  ],
+  "runtime_id": "browseforge-chromium",
+  "schema_version": "1.0"
+}

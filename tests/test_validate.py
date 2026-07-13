@@ -86,6 +86,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         "knowledge/manifests/objective-audit.json",
         "knowledge/manifests/accept-language-header-smoke.json",
         "knowledge/manifests/source-acquisition.json",
+        "knowledge/manifests/fingerprint-parity-gates.json",
     )
     REQUIRED_GRAPH_FINGERPRINT_SURFACE_IDS = (
         "audio",
@@ -2343,6 +2344,7 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
         )
         self._write_surface_status(root)
         self._write_score_comparison(root)
+        self._write_fingerprint_parity_gates(root)
         self._write_proxy_preflight(root)
         self._write_json(
             root / "knowledge" / "manifests" / "runtime-artifacts.json",
@@ -2928,6 +2930,85 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
                 "comparisons": comparisons,
                 "baseline_gaps": baseline_gaps,
                 "gaps": [] if gaps is None else gaps,
+            },
+        )
+
+    def _write_fingerprint_parity_gates(self, root: Path) -> None:
+        self._write_json(
+            root / "knowledge" / "manifests" / "fingerprint-parity-gates.json",
+            {
+                "runtime_id": "browseforge-chromium",
+                "schema_version": "1.0",
+                "gates": [
+                    {
+                        "gate_id": "os-math-libm-parity",
+                        "surface": "OS math/libm parity",
+                        "status": "blocked",
+                        "release_blocker": True,
+                        "risk_level": "high",
+                        "decision": "Keep OS math/libm parity blocked until target-platform oracle fixtures exist.",
+                        "current_coverage": "not_available_in_test_fixture",
+                        "oracle_status": "undefined_target_platform_oracle",
+                        "probe": {
+                            "candidate_tool": "d8",
+                            "command": "python3 scripts/fingerprint_parity_gates.py probe-plan",
+                            "minimum_oracle": "target-platform Math.tanh/CSS trig fixture",
+                            "probe_body": "run parity probe fixture",
+                        },
+                        "blocked_by": ["target-platform oracle is not committed"],
+                    },
+                    {
+                        "gate_id": "css-hyphenation-text-layout-parity",
+                        "surface": "CSS hyphenation/text layout parity",
+                        "status": "blocked",
+                        "release_blocker": True,
+                        "risk_level": "high",
+                        "decision": "Keep CSS text layout parity blocked until a target font/layout oracle exists.",
+                        "current_coverage": "not_available_in_test_fixture",
+                        "oracle_status": "undefined_target_platform_oracle",
+                        "probe": {
+                            "candidate_tool": "content_shell",
+                            "command": "python3 scripts/fingerprint_parity_gates.py probe-plan",
+                            "minimum_oracle": "target-platform hyphenation/font fixture",
+                            "probe_body": "run parity probe fixture",
+                        },
+                        "blocked_by": ["target-platform oracle is not committed"],
+                    },
+                    {
+                        "gate_id": "webaudio-backing-array-semantics",
+                        "surface": "AudioContext backing-array semantics",
+                        "status": "blocked",
+                        "release_blocker": True,
+                        "risk_level": "high",
+                        "decision": "Keep WebAudio parity blocked until object and backing-array semantics are proven.",
+                        "current_coverage": "not_available_in_test_fixture",
+                        "oracle_status": "probe_defined_without_target_result",
+                        "probe": {
+                            "candidate_tool": "chrome",
+                            "command": "python3 scripts/fingerprint_parity_gates.py probe-plan",
+                            "minimum_oracle": "AudioBuffer getChannelData/copyFromChannel fixture",
+                            "probe_body": "run parity probe fixture",
+                        },
+                        "blocked_by": ["target-platform semantics evidence is not committed"],
+                    },
+                    {
+                        "gate_id": "wasm-js-numeric-parity",
+                        "surface": "WASM/JS numeric parity",
+                        "status": "blocked",
+                        "release_blocker": True,
+                        "risk_level": "high",
+                        "decision": "Keep WASM/JS numeric parity blocked until NaN and SIMD edge behavior is proven.",
+                        "current_coverage": "not_available_in_test_fixture",
+                        "oracle_status": "undefined_target_platform_oracle",
+                        "probe": {
+                            "candidate_tool": "d8",
+                            "command": "python3 scripts/fingerprint_parity_gates.py probe-plan",
+                            "minimum_oracle": "target-platform NaN/SIMD fixture",
+                            "probe_body": "run parity probe fixture",
+                        },
+                        "blocked_by": ["target-platform oracle is not committed"],
+                    },
+                ],
             },
         )
 
