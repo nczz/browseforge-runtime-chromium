@@ -77,6 +77,15 @@
         ]
       },
       "status": "passed"
+    },
+    {
+      "check": "browseforge_playwright_bind_smoke",
+      "observed": {
+        "blocker": "Playwright Bind was not independently exercised in the linux/arm64 container; linux-arm64 remains packaged_pending_smoke_detector and must not be promoted as Bind-passed.",
+        "evidence": "knowledge/manifests/linux-arm64-runtime-profile-smoke.json",
+        "status": "not_exercised"
+      },
+      "status": "warning"
     }
   ],
   "container": {

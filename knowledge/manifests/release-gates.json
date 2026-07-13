@@ -16,7 +16,7 @@
       "status": "passed"
     },
     {
-      "evidence": "python3 -m unittest tests.test_package_runtime covers platform plan support for linux-x64, macos-arm64, macos-x64, and windows-x64; Linux runtime sidecar packaging; macOS .app bundle layout preservation/rejection for arm64 and x64; Windows portable Chromium exe/DLL/pak/bin/locale packaging; checksums; non-placeholder SPDX-2.3-style SBOM metadata; file hashes/sizes; and source/patchset provenance hashes.",
+      "evidence": "python3 -m unittest tests.test_package_runtime tests.test_package_linux_runtime tests.test_chromium_docker tests.test_validate covers platform plan support for linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64; Linux x64 and Linux arm64 runtime sidecar packaging; macOS .app bundle layout preservation/rejection for arm64 and x64; Windows portable Chromium exe/DLL/pak/bin/locale packaging; checksums; non-placeholder SPDX-2.3-style SBOM metadata; file hashes/sizes; source/patchset provenance hashes; and linux-arm64 package smoke contract checks including BrowseForge status/profile, REST, MCP, Playwright Bind warning, and no-Rosetta evidence.",
       "gate_id": "packaging-contract-tests",
       "status": "passed"
     },
@@ -31,7 +31,7 @@
       "status": "passed"
     },
     {
-      "evidence": "All four package contract artifacts exist and have committed checksums/SBOM/provenance metadata: browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip sha256 386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf size 567880267; browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip sha256 828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683 size 405358724; browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip sha256 960c2b7fbcaa86c34b5857361fbcf1ef9a2dcd001806117021fd51b99e71bb25 size 472647619; browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip sha256 dae221b4e96166190287bc88c0671f4654f19e4e9e7b2c5fc3fb2aad4519218b size 235414104. macos-x64 is packaged-only alpha: no launch smoke or detector evidence is claimed.",
+      "evidence": "All five package contract artifacts exist and have committed checksums/SBOM/provenance metadata: browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip sha256 386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf size 567880267; browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip sha256 953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b size 584002023; browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip sha256 828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683 size 405358724; browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip sha256 960c2b7fbcaa86c34b5857361fbcf1ef9a2dcd001806117021fd51b99e71bb25 size 472647619; browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip sha256 dae221b4e96166190287bc88c0671f4654f19e4e9e7b2c5fc3fb2aad4519218b size 235414104. macos-x64 is packaged-only alpha: no launch smoke or detector evidence.",
       "gate_id": "runtime-artifact-produced",
       "status": "passed"
     },
@@ -41,7 +41,7 @@
       "status": "blocked"
     },
     {
-      "evidence": "Primary artifact browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 sha256 386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf size 567880267; each linux-x64, macos-arm64, macos-x64, and windows-x64 release zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, and platform browser payload; dist/checksums.txt includes all four zip SHA-256 entries. macos-x64 metadata is packaged-only alpha and does not claim launch/detector evidence.",
+      "evidence": "Primary artifact browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64 sha256 386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf size 567880267; each linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64 release zip contains artifact-manifest.json, provenance.json, SBOM.json, runtime.manifest.json, wrapper binary, and platform browser payload; dist/checksums.txt includes all five zip SHA-256 entries. linux-arm64 has a real linux/arm64 package with headed Docker smoke evidence but remains packaged_pending_smoke_detector; macos-x64 metadata is packaged-only alpha and does not claim launch/detector evidence.",
       "gate_id": "sbom-provenance-release-assets",
       "status": "passed"
     }

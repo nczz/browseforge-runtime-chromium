@@ -1,5 +1,5 @@
 {
-  "blocker_count": 20,
+  "blocker_count": 22,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -114,6 +114,24 @@
       "detail": "{\"detectors\": [\"sannysoft\"], \"finding\": \"WebGL comparison requires sanitized extension count, extension hash, parameter hash, shader precision hash, and rendered pixel hash for each committed WebGL evidence row.\", \"gap_id\": \"webgl_metadata_hashes_missing\", \"missing_records\": [{\"detector_id\": \"sannysoft\", \"missing\": [\"extensionCount\", \"extensionSha256\", \"parameterSha256\", \"precisionSha256\", \"pixelSha256\"], \"run_id\": \"detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713\"}], \"surface\": \"webgl\"}",
       "severity": "medium",
       "source": "knowledge/manifests/detector-score-comparison.json"
+    },
+    {
+      "blocker_id": "fingerprint-surface:cross-platform drift",
+      "detail": "Linux x64 and macOS arm64 have broader historical detector matrices; Linux arm64 now has real headed Docker direct evidence, but iphey blocked, proxy/native-host gaps, and unexercised Playwright Bind prevent cross-platform promotion.",
+      "result": "blocked_linux_arm64_cross_platform_promotion",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "cross-platform drift"
+    },
+    {
+      "blocker_id": "fingerprint-surface:proxy/IP coherence",
+      "detail": "Linux arm64 proxy/IP coherence remains blocked: iphey headed Docker direct evidence is committed as detector_unreachable after Runtime.evaluate failed, and proxy/native-host matrix rows remain coverage gaps. Existing macOS arm64 headed external-proxy detector evidence remains committed and sanitized.",
+      "result": "blocked_linux_arm64_iphey_and_proxy_matrix",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "blocked",
+      "surface": "proxy/IP coherence"
     },
     {
       "blocker_id": "native-artifact:linux-arm64:0",
@@ -235,15 +253,15 @@
       "status": "unsigned_alpha_dev_artifact"
     }
   ],
-  "generated_at": "2026-07-13T09:46:25Z",
+  "generated_at": "2026-07-13T10:02:18Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "a010ccc9efe180339b7704e471befe21651c32ecaaf8ee2e3b2b8fe1ecc13957",
     "detector-summary.json": "62e2b76af3c732180d132f4153747a12fb67c5787f8d2dc7609f0e4bb7468964",
     "knowledge/manifests/detector-score-comparison.json": "139ba3340655a40ac570910d4b14dfdd2ff87365b0350cab9b75aec6a6c9b33f",
-    "knowledge/manifests/fingerprint-surface-status.json": "fa49885b6fe26ac066e9e68fb7d7f47333db6c3d922af922edd34d81159b2325",
+    "knowledge/manifests/fingerprint-surface-status.json": "edd7168dc6cf4927b598400e43fd4c0329b4b042a919e3ad5cdf79eb77699fa3",
     "knowledge/manifests/native-artifact-preflight.json": "e04a8219c337270b3eb1e9ad54f60281a800ddcd168a748912b1ba5b29deb0f3",
     "knowledge/manifests/proxy-preflight.json": "537c26886126a6fdc8ed5677f90d23e22888e2e5f2e3484f609d4a3b53c99b18",
-    "knowledge/manifests/release-gates.json": "134f131e222ea5c8687eaf5ec039934019675e8900d3212cffc84b2084190459",
+    "knowledge/manifests/release-gates.json": "c827635553894ce77c26a4ac363c032dac91c8246dd5fa27760a5edbf18a332b",
     "knowledge/manifests/signing-policy.json": "ee7dd085d156952746895f3a48bc512c46f4cd022033eb6a26d5365504f138b3",
     "knowledge/manifests/source-acquisition.json": "5fc09eab20aafa39ac500d44a9655b2674192e27669fde33a297dc1e4f6982a1"
   },

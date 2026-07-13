@@ -14,7 +14,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 
 - Every platform artifact has download URL, SHA-256, size, source ref, patchset ID, wrapper version, SBOM path, and provenance path.
 - `build/package_runtime.py` must reject any platform not explicitly listed in `runtime-artifacts.json.supported_package_platforms`; linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64 are supported alpha package platforms by contract.
-- `linux-x64`, `linux-arm64`, `macos-arm64`, `macos-x64`, and `windows-x64` currently have committed SBOM/provenance/checksum metadata. `linux-arm64` remains `packaged_pending_smoke_detector` until BrowseForge runtime smoke and live detector evidence pass; launch and detector evidence must not be inferred from the artifact alone.
+- `linux-x64`, `linux-arm64`, `macos-arm64`, `macos-x64`, and `windows-x64` currently have committed SBOM/provenance/checksum metadata. `linux-arm64` has real BrowseForge status/profile launch, REST, MCP, and headed Docker detector evidence, but remains `packaged_pending_smoke_detector` until iphey collector failure, proxy/native-host detector coverage gaps, and independent Playwright Bind smoke are resolved; launch or detector parity must not be inferred from the artifact alone.
 - Browser binary path matches `contracts/runtime.manifest.json`.
 - `.version` marker behavior is specified.
 - Docker install/seed path is tested.
@@ -80,4 +80,4 @@ Release notes for `v0.1.0-alpha.0` must state:
 - macOS users may need to allow the app manually or run `xattr -dr com.apple.quarantine /path/to/Chromium.app`.
 - Windows users may see SmartScreen/Defender warnings and must self-authorize until Authenticode signing is configured.
 - Linux users must verify the SHA-256 entry in `checksums.txt` before execution.
-- Linux arm64 is an unsigned alpha package built from a real `linux/arm64` container Chromium output; it must remain non-production until BrowseForge smoke and detector evidence pass.
+- Linux arm64 is an unsigned alpha package built from a real `linux/arm64` container Chromium output; it has BrowseForge status/profile launch, REST, MCP, and headed Docker detector evidence, but must remain non-production until iphey, proxy/native-host coverage, and independent Playwright Bind evidence pass.

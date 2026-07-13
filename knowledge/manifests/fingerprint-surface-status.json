@@ -7,7 +7,7 @@
     "accepted",
     "blocked"
   ],
-  "decision": "Allow alpha detector gate to pass: required macOS arm64 headed external-proxy coverage, transparent pixel smoke, and H.264/AAC codec smoke are committed as sanitized evidence; GA/release-grade policy can still require additional Windows native detector validation.",
+  "decision": "Linux arm64 has real package, BrowseForge smoke, REST/MCP smoke, and sanitized headed Docker detector evidence, but release-grade detector status remains blocked by iphey collector failure, proxy/native-host coverage gaps, and unexercised Playwright Bind smoke.",
   "detector_tested": true,
   "evidence_refs": [
     "detectors/evidence/v0.1.0-alpha.0/linux-x64/creepjs/detrun_linux_x64_creepjs_metrics_headed_docker_direct_20260710.json",
@@ -36,7 +36,17 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json",
-    "knowledge/manifests/accept-language-header-smoke.json"
+    "knowledge/manifests/accept-language-header-smoke.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks-webrtc_headed_docker_webrtc_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserscan/detrun_v0.1.0-alpha.0_linux-arm64_browserscan_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/creepjs/detrun_v0.1.0-alpha.0_linux-arm64_creepjs_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/pixelscan/detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json",
+    "knowledge/manifests/linux-arm64-package-smoke.json",
+    "knowledge/manifests/linux-arm64-browseforge-status-smoke.json",
+    "knowledge/manifests/linux-arm64-runtime-profile-smoke.json"
   ],
   "notes": [
     "macOS host BrowserLeaks WebRTC direct evidence records sanitized ICE candidate metadata without committing IP literals; packaged macOS runtime and proxy matrix evidence remain release blockers.",
@@ -56,9 +66,12 @@
     "Source-level Accept-Language header patch scaffold now makes chrome/browser/net/profile_network_context_service.cc prefer --fingerprint-accept-language before the profile intl.accept_languages pref, aligning HTTP Accept-Language with DOM navigator.language/navigator.languages; live detector evidence still requires a rebuilt patched artifact.",
     "Source-level Accept-Language header patch is now exercised by a rebuilt macOS arm64 BrowseForge Chromium artifact; knowledge/manifests/accept-language-header-smoke.json records --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing HTTP Accept-Language en-US,en;q=0.9.",
     "Native persona validation now treats WebRTC proxy_region as sanitized metadata only: internal/stealth/persona.go and browser/stealth/persona_snapshot.cc reject whitespace-padded labels, raw IP literals, URL/credential-like values, and labels longer than 64 bytes while preserving empty optional labels; internal/stealth/persona_test.go covers the Go validator path.",
-    "Packaged macOS arm64 headed external-proxy evidence now covers BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft with sanitized Los Angeles proxy metadata; proxy-surface-smoke records transparent pixel [0,0,0,0] and H.264/AAC support. Proxy/IP coherence and macOS proxy matrix are no longer release-blocking for alpha validation."
+    "Packaged macOS arm64 headed external-proxy evidence now covers BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft with sanitized Los Angeles proxy metadata; proxy-surface-smoke records transparent pixel [0,0,0,0] and H.264/AAC support. Proxy/IP coherence and macOS proxy matrix are no longer release-blocking for alpha validation.",
+    "Linux arm64 package evidence records a real linux/arm64 container build with aarch64 runtime smoke, ARM aarch64 BrowseForge and Chromium binaries, BrowseForge browsers status ready, profile/session launch, REST smoke, MCP initialize smoke, and no Rosetta/Crashpad startup failure patterns.",
+    "Linux arm64 detector evidence is committed under detectors/evidence/v0.1.0-alpha.0/linux-arm64 for BrowserLeaks, BrowserLeaks WebRTC, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft. SannySoft passes; BrowserLeaks/BrowserScan/CreepJS/Pixelscan/WebRTC remain warning-level; iphey is blocked by collector Runtime.evaluate failure.",
+    "Linux arm64 Playwright Bind has not been independently exercised in the arm64 container; REST and MCP are proven, but Bind remains an alpha promotion blocker rather than an inferred pass."
   ],
-  "release_grade": true,
+  "release_grade": false,
   "runtime_id": "browseforge-chromium",
   "schema_version": "1.0",
   "scope": "source_level_linux_headless_detector_smoke_plus_local_dogfood",
@@ -72,7 +85,7 @@
       "surface": "seed identity"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke using fingerprint.user_agent config reported navigator.webdriver=false and configured Chromium UA without HeadlessChrome.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke using fingerprint.user_agent config reported navigator.webdriver=false and configured Chromium UA without HeadlessChrome. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft",
       "severity": "info",
@@ -80,7 +93,7 @@
       "surface": "UA"
     },
     {
-      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke in headless and headed Docker/Xvfb modes, BrowserScan UA-CH smoke in headless and headed Docker/Xvfb modes, iphey UA-CH smoke, and CreepJS UA-CH smoke in headless and headed Docker/Xvfb modes. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101.",
+      "evidence": "Rebuilt packaged Linux runtime passed SannySoft/CDP UA-CH smoke, BrowserLeaks Client Hints page smoke in headless and headed Docker/Xvfb modes, Pixelscan fingerprint-check UA-CH smoke in headless and headed Docker/Xvfb modes, BrowserScan UA-CH smoke in headless and headed Docker/Xvfb modes, iphey UA-CH smoke, and CreepJS UA-CH smoke in headless and headed Docker/Xvfb modes. Observed navigator.userAgentData platform=Linux, platformVersion=6.8.0, architecture=x86, bitness=64, mobile=false, model empty, wow64=false, and fullVersionList containing Chromium 150.0.7871.101. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_multi_detector_uach_with_creepjs_headed",
       "severity": "info",
@@ -88,7 +101,7 @@
       "surface": "Client Hints"
     },
     {
-      "evidence": "SannySoft local dogfood rerun observed MacIntel platform on macOS host; release-grade cross-platform persona coherence remains unproven.",
+      "evidence": "SannySoft local dogfood rerun observed MacIntel platform on macOS host; release-grade cross-platform persona coherence remains unproven. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_dogfood_sannysoft",
       "severity": "info",
@@ -96,7 +109,7 @@
       "surface": "platform"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported Intl timezone Asia/Taipei with wrapper TZ propagation plus renderer switch propagation.",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported Intl timezone Asia/Taipei with wrapper TZ propagation plus renderer switch propagation. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft",
       "severity": "info",
@@ -104,7 +117,7 @@
       "surface": "timezone"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list. Rebuilt macOS arm64 BrowseForge Chromium source-level HTTP Accept-Language header smoke recorded --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing request header en-US,en;q=0.9, proving the native header path follows the Accept-Language switch rather than the locale/profile pref.",
+      "evidence": "Linux packaged SannySoft/CDP smoke reported zh-TW, zh;q=0.9, en;q=0.8 language list. Rebuilt macOS arm64 BrowseForge Chromium source-level HTTP Accept-Language header smoke recorded --fingerprint-locale=zh-TW with --fingerprint-accept-language=en-US producing request header en-US,en;q=0.9, proving the native header path follows the Accept-Language switch rather than the locale/profile pref. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft_plus_macos_source_header_smoke",
       "severity": "info",
@@ -112,7 +125,7 @@
       "surface": "locale"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported screen 1920x1080, available screen 1920x1040, and DPR=1 from configured fingerprint profile.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported screen 1920x1080, available screen 1920x1040, and DPR=1 from configured fingerprint profile. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft",
       "severity": "info",
@@ -120,7 +133,7 @@
       "surface": "screen/window/DPR"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke reported hardwareConcurrency=8 and deviceMemory=8 from configured fingerprint profile. The runtime launcher BuildPlan already emits --fingerprint-device-memory, and cmd/browseforge-runtime-chromium now binds and merges -fingerprint-device-memory so CLI and config paths both reach the native deviceMemory patch; go run launch dry-run emitted --fingerprint-device-memory=8.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke reported hardwareConcurrency=8 and deviceMemory=8 from configured fingerprint profile. The runtime launcher BuildPlan already emits --fingerprint-device-memory, and cmd/browseforge-runtime-chromium now binds and merges -fingerprint-device-memory so CLI and config paths both reach the native deviceMemory patch; go run launch dry-run emitted --fingerprint-device-memory=8. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft_plus_cli_device_memory_binding",
       "severity": "info",
@@ -128,7 +141,7 @@
       "surface": "hardwareConcurrency/deviceMemory"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP collector rendered deterministic Canvas 2D probe hashes across repeated launches, and packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded imageDataSha256/dataUrlSha256 without raw pixel/data URL payloads; proxy and Windows matrix coverage remain tracked separately.",
+      "evidence": "Packaged Linux SannySoft/CDP collector rendered deterministic Canvas 2D probe hashes across repeated launches, and packaged macOS BrowserLeaks Canvas headed direct evidence now records bounded imageDataSha256/dataUrlSha256 without raw pixel/data URL payloads; proxy and Windows matrix coverage remain tracked separately. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_repeat_consistent_plus_macos_packaged_browserleaks_canvas_direct",
       "severity": "info",
@@ -136,7 +149,7 @@
       "surface": "Canvas"
     },
     {
-      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector escapes embedded SDP newlines correctly, and committed Linux BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json records passing Linux direct, Linux proxy, and macOS packaged direct host BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparisons. Packaged macOS BrowserLeaks, BrowserScan, and CreepJS headed direct evidence all record the same sanitized Google Inc. (Apple) / ANGLE Metal Renderer profile, extension profile, parameter hash, shader precision hash, and rendered pixel hash without committing raw parameters, extensions, or pixels. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual WebGL surface.",
+      "evidence": "Linux packaged SannySoft/CDP smoke and BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported the configured Intel Inc. / Intel Iris OpenGL Engine debug vendor/renderer strings. The shared collector escapes embedded SDP newlines correctly, and committed Linux BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft evidence records sanitized extension count, extension hash, bounded parameter hash, shader precision hash, rendered pixel hash, and pixel dimensions. detector-score-comparison.json records passing Linux direct, Linux proxy, and macOS packaged direct host BrowserLeaks-vs-BrowserScan WebGL metadata cross-detector comparisons. Packaged macOS BrowserLeaks, BrowserScan, and CreepJS headed direct evidence all record the same sanitized Google Inc. (Apple) / ANGLE Metal Renderer profile, extension profile, parameter hash, shader precision hash, and rendered pixel hash without committing raw parameters, extensions, or pixels. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual WebGL surface. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_and_macos_packaged_webgl_cross_detector_metadata",
       "severity": "info",
@@ -144,7 +157,7 @@
       "surface": "WebGL vendor/renderer"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. Packaged macOS arm64 BrowserLeaks JavaScript audio evidence records bounded AudioContext summaries, packaged macOS CreepJS evidence records bounded audio metrics under platform-aware macOS arm64 UA-CH classification, and packaged macOS Pixelscan evidence records a bounded AudioContext hash while reporting a consistent fingerprint and no masking detected. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual surface.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke, BrowserLeaks JavaScript Web Audio page headless/headed Docker evidence, Pixelscan headed page-status hash evidence, plus BrowserLeaks/Pixelscan bounded page-context probes render deterministic OfflineAudioContext length 44100 at sampleRate 44100 and record sanitized sum/sumAbs/first-sample summaries. BrowserLeaks JavaScript exposes AudioContext fields but no numeric score; committed headless/headed field comparison passes. Rebuilt patched packaged Linux runtime CreepJS evidence from 20260710 shows freq/gain/sum/time/trap/unique all match across headless/headed Docker/Xvfb runs after dense-signal AudioBuffer noise gating. Packaged macOS arm64 BrowserLeaks JavaScript audio evidence records bounded AudioContext summaries, packaged macOS CreepJS evidence records bounded audio metrics under platform-aware macOS arm64 UA-CH classification, and packaged macOS Pixelscan evidence records a bounded AudioContext hash while reporting a consistent fingerprint and no masking detected. Remaining release risk is tracked under cross-platform drift, proxy/IP coherence, and native artifact blockers rather than this individual surface. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_parity_plus_macos_packaged_browserleaks_creepjs_pixelscan_direct_audio",
       "severity": "info",
@@ -152,7 +165,7 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift. Packaged detector evidence covers font surfaces; BrowseForge runtime CLI now binds repeatable -fingerprint-font values into --fingerprint-fonts-list so config and flag paths both reach the native font list switch when not in strict native mode.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift. Packaged detector evidence covers font surfaces; BrowseForge runtime CLI now binds repeatable -fingerprint-font values into --fingerprint-fonts-list so config and flag paths both reach the native font list switch when not in strict native mode. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_cli_fonts_binding",
       "severity": "info",
@@ -160,7 +173,7 @@
       "surface": "fonts"
     },
     {
-      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed. BrowserLeaks WebRTC now has committed headless and headed Docker/Xvfb sanitized ICE candidate metadata, candidate type labels, public/private IP-literal counts, and a passing headless-vs-headed bounded comparison without committing raw addresses. External proxy/geolocation detector evidence is still required. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records sanitized ICE candidate metadata without committed IP literals.",
+      "evidence": "CreepJS local dogfood smoke after WebRTC prefs/flag showed host connection blocked, foundation/ip unsupported/blocked, and stun connection blocked; no candidate IP literal was committed. BrowserLeaks WebRTC now has committed headless and headed Docker/Xvfb sanitized ICE candidate metadata, candidate type labels, public/private IP-literal counts, and a passing headless-vs-headed bounded comparison without committing raw addresses. External proxy/geolocation detector evidence is still required. Packaged macOS BrowserLeaks headed direct evidence for the built BrowseForge Chromium app now records sanitized ICE candidate metadata without committed IP literals. Linux arm64 BrowserLeaks WebRTC evidence records sanitized ICE metadata without committed IP literals, but proxy-mode parity remains incomplete.",
       "release_blocker": false,
       "result": "pass_browserleaks_webrtc_linux_and_macos_packaged_bounded_metadata",
       "severity": "medium",
@@ -168,7 +181,7 @@
       "surface": "WebRTC"
     },
     {
-      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok. The source-level feature parity patch stabilizes ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, and SerialPortConnected, and WebShare desktop defaults; the shared collector now records bounded Permissions API states for geolocation, notifications, camera, microphone, clipboard, midi, push, payment-handler, idle-detection, window-management, local-fonts, background-sync, persistent-storage, accelerometer, gyroscope, and magnetometer, plus feature-availability booleans for Contacts Manager, Content Index, Network Information, storage buckets, WebBluetooth/WebHID/WebNFC/WebSerial/WebUSB, IdleDetector, Keyboard Lock, local fonts, Presentation API, VirtualKeyboard, and Window Controls Overlay, Web Share, Web Share data without requesting device access. Broader CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete.",
+      "evidence": "SannySoft local dogfood rerun reported Permissions prompt and HEADCHR_PERMISSIONS ok. The source-level feature parity patch stabilizes ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, and SerialPortConnected, and WebShare desktop defaults; the shared collector now records bounded Permissions API states for geolocation, notifications, camera, microphone, clipboard, midi, push, payment-handler, idle-detection, window-management, local-fonts, background-sync, persistent-storage, accelerometer, gyroscope, and magnetometer, plus feature-availability booleans for Contacts Manager, Content Index, Network Information, storage buckets, WebBluetooth/WebHID/WebNFC/WebSerial/WebUSB, IdleDetector, Keyboard Lock, local fonts, Presentation API, VirtualKeyboard, and Window Controls Overlay, Web Share, Web Share data without requesting device access. Broader CreepJS/iphey/BrowserScan release-matrix permissions coverage remains incomplete. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_browserleaks_pixelscan_permissions_features_bounded_extended_collector",
       "severity": "info",
@@ -176,7 +189,7 @@
       "surface": "permissions"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported navigator.storage.estimate quota 8589934592 bytes for configured 8192 MiB storage quota.",
+      "evidence": "Packaged Linux SannySoft/CDP smoke collected by scripts/detector_harness.py reported navigator.storage.estimate quota 8589934592 bytes for configured 8192 MiB storage quota. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_sannysoft",
       "severity": "info",
@@ -184,7 +197,7 @@
       "surface": "storage quota"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs. A macOS arm64 local host headless SannySoft collector recorded navigator.webdriver=false but a HeadlessChrome UA token; a new macOS arm64 local host headed SannySoft collector passed direct coverage with webdriver=false and no HeadlessChrome UA token. macOS evidence remains non-release artifact evidence until a signed BrowseForge macOS Chromium package exists. Rebuilt patched Linux runtime minimal-native-control evidence now records UA without HeadlessChrome and Pixelscan botCheck=\"No automated behavior detected\" under strict/native headless launch; the broader fingerprint verdict remains inconsistent/masking. Pixelscan headed/Xvfb controls now show the same botCheck-clean/inconsistent split, reducing confidence that the residual Pixelscan issue is purely headless/CDP automation. Packaged macOS arm64 SannySoft smoke from the built BrowseForge Chromium app passed direct headed coverage with webdriver=false and no HeadlessChrome UA token.",
+      "evidence": "Packaged Linux SannySoft/CDP, BrowserLeaks, Pixelscan, iphey, BrowserScan, and CreepJS page-context collectors reported navigator.webdriver=false; SannySoft, BrowserLeaks, Pixelscan, BrowserScan, and CreepJS have headed Docker/Xvfb evidence. CreepJS detector metrics reported 0% headless and 0% stealth with 19% like-headless in both headless and headed Docker runs. A macOS arm64 local host headless SannySoft collector recorded navigator.webdriver=false but a HeadlessChrome UA token; a new macOS arm64 local host headed SannySoft collector passed direct coverage with webdriver=false and no HeadlessChrome UA token. macOS evidence remains non-release artifact evidence until a signed BrowseForge macOS Chromium package exists. Rebuilt patched Linux runtime minimal-native-control evidence now records UA without HeadlessChrome and Pixelscan botCheck=\"No automated behavior detected\" under strict/native headless launch; the broader fingerprint verdict remains inconsistent/masking. Pixelscan headed/Xvfb controls now show the same botCheck-clean/inconsistent split, reducing confidence that the residual Pixelscan issue is purely headless/CDP automation. Packaged macOS arm64 SannySoft smoke from the built BrowseForge Chromium app passed direct headed coverage with webdriver=false and no HeadlessChrome UA token. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
       "release_blocker": false,
       "result": "pass_linux_and_packaged_macos_headless_marker_removed",
       "severity": "info",
@@ -192,11 +205,11 @@
       "surface": "automation/headless/CDP"
     },
     {
-      "evidence": "macOS arm64 headed external-proxy detector evidence is committed for BrowserLeaks, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft under detectors/evidence/v0.1.0-alpha.0/macos-arm64/*/*_headed_proxy_host_20260712.json. Each evidence file contains sanitized proxy_exit_region_redacted=us-los-angeles and detector_geolocation_region_redacted=us-los-angeles, raw captures remain uncommitted, and knowledge/manifests/proxy-surface-smoke.json records transparent pixel and codec smoke results.",
-      "release_blocker": false,
-      "result": "pass_macos_external_proxy_matrix_and_surface_smoke",
-      "severity": "info",
-      "status": "detector_tested",
+      "evidence": "Linux arm64 proxy/IP coherence remains blocked: iphey headed Docker direct evidence is committed as detector_unreachable after Runtime.evaluate failed, and proxy/native-host matrix rows remain coverage gaps. Existing macOS arm64 headed external-proxy detector evidence remains committed and sanitized.",
+      "release_blocker": true,
+      "result": "blocked_linux_arm64_iphey_and_proxy_matrix",
+      "severity": "high",
+      "status": "blocked",
       "surface": "proxy/IP coherence"
     },
     {
@@ -208,11 +221,11 @@
       "surface": "profile persistence"
     },
     {
-      "evidence": "Linux x64 Docker direct/proxy evidence and macOS arm64 packaged direct/proxy headed evidence now cover the required detector matrix for alpha validation. Windows native detector evidence remains tracked separately as manual OS validation, not as a cross-platform drift blocker for the macOS proxy fix.",
-      "release_blocker": false,
-      "result": "pass_linux_macos_required_matrix_for_alpha_windows_manual_tracked",
-      "severity": "info",
-      "status": "detector_tested",
+      "evidence": "Linux x64 and macOS arm64 have broader historical detector matrices; Linux arm64 now has real headed Docker direct evidence, but iphey blocked, proxy/native-host gaps, and unexercised Playwright Bind prevent cross-platform promotion.",
+      "release_blocker": true,
+      "result": "blocked_linux_arm64_cross_platform_promotion",
+      "severity": "high",
+      "status": "blocked",
       "surface": "cross-platform drift"
     }
   ],
@@ -259,6 +272,16 @@
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_screen_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/sannysoft/detrun_v0.1.0-alpha.0_macos-arm64_sannysoft_headed_packaged_direct_20260711.json",
     "detectors/evidence/v0.1.0-alpha.0/macos-arm64/pixelscan/detrun_v0.1.0-alpha.0_macos-arm64_pixelscan_webgl_headed_packaged_direct_20260711.json",
-    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json"
+    "detectors/evidence/v0.1.0-alpha.0/macos-arm64/browserleaks/detrun_v0.1.0-alpha.0_macos-arm64_browserleaks_canvas_headed_packaged_direct_20260711.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks-webrtc_headed_docker_webrtc_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserscan/detrun_v0.1.0-alpha.0_linux-arm64_browserscan_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/creepjs/detrun_v0.1.0-alpha.0_linux-arm64_creepjs_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/pixelscan/detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713.json",
+    "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json",
+    "knowledge/manifests/linux-arm64-package-smoke.json",
+    "knowledge/manifests/linux-arm64-browseforge-status-smoke.json",
+    "knowledge/manifests/linux-arm64-runtime-profile-smoke.json"
   ]
 }

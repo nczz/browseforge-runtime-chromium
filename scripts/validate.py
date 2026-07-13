@@ -926,6 +926,12 @@ def validate_package_smoke_manifests(source_acquisition: dict, runtime_artifacts
                 "archive_integrity",
                 "wrapper_metadata_in_linux_arm64_container",
                 "packaged_chrome_devtools_launch_in_linux_arm64_container",
+                "browseforge_browsers_status_ready_in_linux_arm64_container",
+                "browseforge_profile_launch_linux_arm64_container",
+                "browseforge_rest_smoke",
+                "browseforge_mcp_initialize_smoke",
+                "browseforge_playwright_bind_smoke",
+                "no_rosetta_linux_arm64_runtime_smoke",
             },
         ),
         "macos-arm64": (
