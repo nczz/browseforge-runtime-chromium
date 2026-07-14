@@ -138,6 +138,7 @@ func Validate(cfg PersonaConfig) error {
 	require(cfg.Platform.Arch != "", "platform.arch")
 	require(cfg.Platform.Platform != "", "platform.platform")
 	require(cfg.Platform.PlatformCH != "", "platform.platform_ch")
+	require(cfg.Platform.Bitness != "", "platform.bitness")
 	require(cfg.Locale.Timezone != "", "locale.timezone")
 	require(cfg.Locale.Locale != "", "locale.locale")
 	require(cfg.Locale.AcceptLanguage != "", "locale.accept_language")
@@ -159,10 +160,39 @@ func Validate(cfg PersonaConfig) error {
 	if cfg.Screen.AvailWidth > cfg.Screen.Width || cfg.Screen.AvailHeight > cfg.Screen.Height {
 		return errors.New("persona config incoherent; screen available size exceeds screen size")
 	}
+	if !validPlatformIdentity(cfg.Platform) {
+		return errors.New("persona config incoherent; platform identity does not match os/platform/arch/bitness vocabulary")
+	}
 	if cfg.WebRTC.ProxyRegion != "" && !validProxyRegion(cfg.WebRTC.ProxyRegion) {
 		return fmt.Errorf("persona config incoherent; invalid WebRTC proxy region %q", cfg.WebRTC.ProxyRegion)
 	}
 	return nil
+}
+
+func validPlatformIdentity(platform PlatformIdentity) bool {
+	if platform.Bitness != "64" {
+		return false
+	}
+	switch platform.OS {
+	case "windows":
+		return platform.Platform == "Win32" && platform.Arch == "x86" && platform.PlatformCH == "Windows"
+	case "macos":
+		return platform.Platform == "MacIntel" && (platform.Arch == "x86" || platform.Arch == "arm") && platform.PlatformCH == "macOS"
+	case "linux":
+		if platform.PlatformCH != "Linux" {
+			return false
+		}
+		switch platform.Platform {
+		case "Linux x86_64":
+			return platform.Arch == "x86"
+		case "Linux aarch64":
+			return platform.Arch == "arm"
+		default:
+			return false
+		}
+	default:
+		return false
+	}
 }
 
 func validProxyRegion(region string) bool {

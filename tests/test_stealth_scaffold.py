@@ -29,6 +29,15 @@ class StealthScaffoldTests(unittest.TestCase):
         self.assertIn("PersonaError::kIncompletePersona", resolver)
         self.assertIn("PersonaError::kIncoherentPersona", resolver)
 
+    def test_persona_snapshot_platform_coherence_contract_exists(self) -> None:
+        snapshot = (STEALTH / "persona_snapshot.cc").read_text(encoding="utf-8")
+        self.assertIn('platform.bitness != "64"', snapshot)
+        self.assertIn('platform.platform_ch == "Windows"', snapshot)
+        self.assertIn('platform.platform_ch == "macOS"', snapshot)
+        self.assertIn('platform.platform_ch != "Linux"', snapshot)
+        self.assertIn('platform.platform == "Linux x86_64" && platform.arch == "x86"', snapshot)
+        self.assertIn('platform.platform == "Linux aarch64" && platform.arch == "arm"', snapshot)
+
     def test_mojo_interface_is_internal_projection_only(self) -> None:
         mojom = (STEALTH / "public" / "mojom" / "stealth.mojom").read_text(encoding="utf-8")
         self.assertIn("interface BrowseForgeStealthHost", mojom)

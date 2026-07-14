@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Runtime version tag, for example v0.1.0-alpha.0'
+        description: 'Runtime version tag, for example v0.1.2-alpha.0'
         required: true
-        default: 'v0.1.0-alpha.0'
+        default: 'v0.1.2-alpha.0'
 
 permissions:
   contents: write

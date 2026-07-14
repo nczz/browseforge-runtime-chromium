@@ -14,7 +14,7 @@ import (
 const (
 	RuntimeID      = "browseforge-chromium"
 	RuntimeFamily  = "chromium"
-	WrapperVersion = "v0.1.0-alpha.0"
+	WrapperVersion = "v0.1.2-alpha.0"
 )
 
 const maxStorageQuotaMB = int64(1024 * 1024 * 1024)

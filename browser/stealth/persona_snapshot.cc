@@ -43,6 +43,29 @@ bool IsValidProxyRegion(const std::string& region) {
   return true;
 }
 
+bool IsCoherentPlatform(const PlatformIdentity& platform) {
+  if (platform.bitness != "64") {
+    return false;
+  }
+  if (platform.os == "windows") {
+    return platform.platform == "Win32" && platform.arch == "x86" &&
+           platform.platform_ch == "Windows";
+  }
+  if (platform.os == "macos") {
+    return platform.platform == "MacIntel" &&
+           (platform.arch == "x86" || platform.arch == "arm") &&
+           platform.platform_ch == "macOS";
+  }
+  if (platform.os == "linux") {
+    if (platform.platform_ch != "Linux") {
+      return false;
+    }
+    return (platform.platform == "Linux x86_64" && platform.arch == "x86") ||
+           (platform.platform == "Linux aarch64" && platform.arch == "arm");
+  }
+  return false;
+}
+
 }  // namespace
 
 bool PersonaSnapshot::IsComplete() const {
@@ -52,7 +75,8 @@ bool PersonaSnapshot::IsComplete() const {
          !browser.full_version.empty() && !browser.user_agent.empty() &&
          !platform.os.empty() && !platform.arch.empty() &&
          !platform.platform.empty() && !platform.platform_ch.empty() &&
-         !locale.timezone.empty() && !locale.locale.empty() &&
+         !platform.bitness.empty() && !locale.timezone.empty() &&
+         !locale.locale.empty() &&
          !locale.accept_language.empty() && hardware.hardware_concurrency > 0 &&
          hardware.device_memory_gb > 0 && screen.width > 0 &&
          screen.height > 0 && screen.avail_width > 0 && screen.avail_height > 0 &&
@@ -68,13 +92,7 @@ bool PersonaSnapshot::IsCoherent() const {
   if (screen.avail_width > screen.width || screen.avail_height > screen.height) {
     return false;
   }
-  if (platform.os == "windows" && platform.platform != "Win32") {
-    return false;
-  }
-  if (platform.os == "macos" && platform.platform != "MacIntel") {
-    return false;
-  }
-  if (platform.os == "linux" && platform.platform != "Linux x86_64") {
+  if (!IsCoherentPlatform(platform)) {
     return false;
   }
   if (!webrtc.proxy_region.empty() && !IsValidProxyRegion(webrtc.proxy_region)) {
