@@ -955,6 +955,32 @@ def _pixelscan_variant_raw_path(input_dir: Path, variant_id: str) -> Path | None
     return matches[0] if matches else None
 
 
+def pixelscan_screen_summary(screen: dict) -> dict:
+    allowed = (
+        "width",
+        "height",
+        "availWidth",
+        "availHeight",
+        "colorDepth",
+        "pixelDepth",
+        "devicePixelRatio",
+        "innerWidth",
+        "innerHeight",
+        "outerWidth",
+        "outerHeight",
+        "visualViewportWidth",
+        "visualViewportHeight",
+        "screenX",
+        "screenY",
+        "pageXOffset",
+        "pageYOffset",
+        "clientWidth",
+        "clientHeight",
+        "mediaMinInnerWidth",
+    )
+    return {key: screen[key] for key in allowed if isinstance(screen.get(key), (int, float, bool))}
+
+
 def _pixelscan_variant_observation(record: dict) -> dict:
     observed = record.get("observed", {})
     page = observed.get("pixelscanPage") or {}
@@ -971,6 +997,7 @@ def _pixelscan_variant_observation(record: dict) -> dict:
         "canvasHash": page.get("canvasHash"),
         "fontHash": page.get("fontHash"),
         "webglHash": page.get("webglHash"),
+        "screen": pixelscan_screen_summary(observed.get("screen") or {}),
     }
 
 def _pixelscan_variant_summary_row(input_dir: Path, variant: dict) -> dict:
@@ -1805,15 +1832,33 @@ def classify_browserleaks(value: dict, url: str) -> tuple[str, str, str]:
 
 
 
+def classify_pixelscan_screen_payload(value: dict) -> tuple[str | None, str | None, str | None]:
+    screen = value.get("screen") or {}
+    required = {"width", "height", "availWidth", "availHeight", "devicePixelRatio"}
+    missing = sorted(field for field in required if screen.get(field) is None)
+    if missing:
+        return "warning", f"Pixelscan fingerprint check loaded, but sanitized screen/window payload is missing fields: {missing}", "medium"
+    summary = pixelscan_screen_summary(screen)
+    if not summary:
+        return "warning", "Pixelscan fingerprint check loaded, but sanitized screen/window payload is empty.", "medium"
+    return None, f"Pixelscan screen/window payload captured: {summary}", None
+
+
 def classify_pixelscan_client_hints(value: dict) -> tuple[str, str, str]:
     pixelscan = value.get("pixelscanPage") or {}
     if isinstance(pixelscan, dict) and pixelscan.get("available"):
+        screen_status, screen_finding, screen_severity = classify_pixelscan_screen_payload(value)
         verdict = pixelscan.get("verdict")
         fingerprint = str(pixelscan.get("fingerprint") or "")
-        if verdict == "inconsistent" or "masking" in fingerprint.lower():
-            return "warning", "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required.", "medium"
+        fingerprint_lc = fingerprint.lower()
+        masking_detected = "masking" in fingerprint_lc and "no masking" not in fingerprint_lc
+        if verdict == "inconsistent" or masking_detected:
+            suffix = f" {screen_finding}" if screen_finding else ""
+            return "warning", "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required." + suffix, "medium"
+        if screen_status:
+            return screen_status, screen_finding or "Pixelscan screen/window payload missing.", screen_severity or "medium"
         if verdict == "consistent":
-            return "passed", "Pixelscan fingerprint check loaded and reported consistent fingerprint status.", "low"
+            return "passed", "Pixelscan fingerprint check loaded and reported consistent fingerprint status with sanitized screen/window payload.", "low"
     status, finding, severity = classify_browserleaks_client_hints(value)
     return status, finding.replace("BrowserLeaks Client Hints", "Pixelscan fingerprint check"), severity
 
@@ -1885,7 +1930,23 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     height: screen.height,
     availWidth: screen.availWidth,
     availHeight: screen.availHeight,
+    colorDepth: screen.colorDepth,
+    pixelDepth: screen.pixelDepth,
     devicePixelRatio: window.devicePixelRatio,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    outerWidth: window.outerWidth,
+    outerHeight: window.outerHeight,
+    visualViewportWidth: window.visualViewport && window.visualViewport.width,
+    visualViewportHeight: window.visualViewport && window.visualViewport.height,
+    screenX: window.screenX,
+    screenY: window.screenY,
+    pageXOffset: window.pageXOffset,
+    pageYOffset: window.pageYOffset,
+    clientWidth: document.documentElement && document.documentElement.clientWidth,
+    clientHeight: document.documentElement && document.documentElement.clientHeight,
+    mediaMinInnerWidth: window.matchMedia("(min-width: " + (window.innerWidth - 1) + "px)").matches,
+    screenWidthGetter: Object.getOwnPropertyDescriptor(Object.getPrototypeOf(screen), "width").get.toString(),
   };
   const storageEstimate = navigator.storage && navigator.storage.estimate
     ? await navigator.storage.estimate()

@@ -27,6 +27,7 @@ BROWSEFORGE_SWITCHES = [
     "fingerprint-screen-avail-height",
     "fingerprint-screen-avail-width",
     "fingerprint-screen-height",
+    "fingerprint-screen-device-scale-factor",
     "fingerprint-screen-width",
     "fingerprint-storage-quota",
     "fingerprint-timezone",

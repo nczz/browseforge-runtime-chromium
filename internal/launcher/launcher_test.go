@@ -47,16 +47,17 @@ func TestBuildPlanRejectsInvalidWebRTCIP(t *testing.T) {
 	}
 }
 
-func TestBuildPlanAddsNetworkAutomationMitigations(t *testing.T) {
+func TestBuildPlanAddsNetworkMitigations(t *testing.T) {
 	cfg := Config{UserDataDir: t.TempDir()}
 	plan, err := cfg.BuildPlan()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{automationControlledArg, webrtcIPHandlingArg} {
-		if !containsArg(plan.Args, want) {
-			t.Fatalf("missing mitigation arg %q: %v", want, plan.Args)
-		}
+	if !containsArg(plan.Args, webrtcIPHandlingArg) {
+		t.Fatalf("missing WebRTC mitigation arg %q: %v", webrtcIPHandlingArg, plan.Args)
+	}
+	if containsArg(plan.Args, "--disable-blink-features=AutomationControlled") {
+		t.Fatalf("unexpected AutomationControlled disable arg: %v", plan.Args)
 	}
 }
 
@@ -292,17 +293,18 @@ func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
 		Fingerprint: FingerprintConfig{
-			ScreenWidth:       1920,
-			ScreenHeight:      1080,
-			ScreenAvailWidth:  1900,
-			ScreenAvailHeight: 1040,
+			ScreenWidth:             1920,
+			ScreenHeight:            1080,
+			ScreenAvailWidth:        1900,
+			ScreenAvailHeight:       1040,
+			ScreenDeviceScaleFactor: 1.25,
 		},
 	}
 	plan, err := cfg.BuildPlan()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"--fingerprint-screen-width=1920", "--fingerprint-screen-height=1080", "--fingerprint-screen-avail-width=1900", "--fingerprint-screen-avail-height=1040", "--window-size=1920,1080"} {
+	for _, want := range []string{"--fingerprint-screen-width=1920", "--fingerprint-screen-height=1080", "--fingerprint-screen-avail-width=1900", "--fingerprint-screen-avail-height=1040", "--window-position=0,0", "--window-size=1900,1040", "--force-device-scale-factor=1.25", "--fingerprint-screen-device-scale-factor=1.25"} {
 		if !containsArg(plan.Args, want) {
 			t.Fatalf("missing screen arg %q: %v", want, plan.Args)
 		}
@@ -315,6 +317,8 @@ func TestBuildPlanRejectsInvalidScreenFingerprintArgs(t *testing.T) {
 		"height_too_large":      {ScreenHeight: maxScreenDimension + 1},
 		"avail_width_too_large": {ScreenAvailWidth: maxScreenDimension + 1},
 		"avail_height_negative": {ScreenAvailHeight: -1},
+		"scale_negative":        {ScreenDeviceScaleFactor: -1},
+		"scale_too_large":       {ScreenDeviceScaleFactor: maxScreenDeviceScaleFactor + 0.1},
 	} {
 		t.Run(name, func(t *testing.T) {
 			cfg := Config{

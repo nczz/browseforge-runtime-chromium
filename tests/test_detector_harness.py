@@ -643,6 +643,18 @@ class DetectorHarnessTests(unittest.TestCase):
         value = self.browserleaks_client_hints_value()
         value["title"] = "Pixelscan"
         value["url"] = "https://pixelscan.net/fingerprint-check"
+        value["screen"] = {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1040,
+            "devicePixelRatio": 1,
+            "innerWidth": 1490,
+            "innerHeight": 900,
+            "outerWidth": 1512,
+            "outerHeight": 982,
+            "screenWidthGetter": "function get width() { [native code] }",
+        }
         return value
 
     def iphey_client_hints_value(self):
@@ -1591,11 +1603,24 @@ class DetectorHarnessTests(unittest.TestCase):
                 "available": True,
                 "verdict": "inconsistent",
                 "fingerprint": "Masking detected",
-            }
+            },
+            "screen": self.pixelscan_client_hints_value()["screen"],
         })
         self.assertEqual((status, severity), ("warning", "medium"))
         self.assertIn("inconsistent/masking", finding)
 
+
+    def test_classify_pixelscan_page_status_requires_sanitized_screen_payload(self):
+        status, finding, severity = self.harness_module.classify_pixelscan_client_hints({
+            "pixelscanPage": {
+                "available": True,
+                "verdict": "consistent",
+                "fingerprint": "No masking detected",
+            },
+        })
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("screen/window payload", finding)
 
     def test_supported_collectors_includes_iphey(self):
         self.assertEqual(

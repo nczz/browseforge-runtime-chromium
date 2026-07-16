@@ -19,10 +19,9 @@ const (
 
 const maxStorageQuotaMB = int64(1024 * 1024 * 1024)
 const maxScreenDimension = 32768
+const maxScreenDeviceScaleFactor = 8
 const maxHardwareConcurrency = 128
 const maxDeviceMemoryGB = 64
-
-const automationControlledArg = "--disable-blink-features=AutomationControlled"
 
 const webrtcIPHandlingArg = "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
 
@@ -42,37 +41,38 @@ type Config struct {
 }
 
 type FingerprintConfig struct {
-	Seed                uint32   `json:"seed"`
-	Timezone            string   `json:"timezone"`
-	Locale              string   `json:"locale"`
-	AcceptLanguage      string   `json:"accept_language"`
-	Platform            string   `json:"platform"`
-	UserAgent           string   `json:"user_agent"`
-	UAFullVersion       string   `json:"ua_full_version"`
-	UAPlatform          string   `json:"ua_platform"`
-	UAPlatformVersion   string   `json:"ua_platform_version"`
-	UAArchitecture      string   `json:"ua_architecture"`
-	UABitness           string   `json:"ua_bitness"`
-	UAModel             string   `json:"ua_model"`
-	UAMobile            bool     `json:"ua_mobile"`
-	UAWoW64             bool     `json:"ua_wow64"`
-	HardwareConcurrency int      `json:"hardware_concurrency"`
-	DeviceMemoryGB      int      `json:"device_memory_gb"`
-	ScreenWidth         int      `json:"screen_width"`
-	ScreenHeight        int      `json:"screen_height"`
-	ScreenAvailWidth    int      `json:"screen_avail_width"`
-	ScreenAvailHeight   int      `json:"screen_avail_height"`
-	StorageQuotaMB      int      `json:"storage_quota_mb"`
-	PluginsPDF          string   `json:"plugins_pdf"`
-	AudioNoise          int      `json:"audio_noise"`
-	CanvasNoise         int      `json:"canvas_noise"`
-	WebGLVendor         string   `json:"webgl_vendor"`
-	WebGLRenderer       string   `json:"webgl_renderer"`
-	FontsDir            string   `json:"fonts_dir"`
-	Fonts               []string `json:"fonts"`
-	WebRTCIP            string   `json:"webrtc_ip"`
-	NativeConfigPath    string   `json:"native_config_path"`
-	NativeMode          string   `json:"native_mode"`
+	Seed                    uint32   `json:"seed"`
+	Timezone                string   `json:"timezone"`
+	Locale                  string   `json:"locale"`
+	AcceptLanguage          string   `json:"accept_language"`
+	Platform                string   `json:"platform"`
+	UserAgent               string   `json:"user_agent"`
+	UAFullVersion           string   `json:"ua_full_version"`
+	UAPlatform              string   `json:"ua_platform"`
+	UAPlatformVersion       string   `json:"ua_platform_version"`
+	UAArchitecture          string   `json:"ua_architecture"`
+	UABitness               string   `json:"ua_bitness"`
+	UAModel                 string   `json:"ua_model"`
+	UAMobile                bool     `json:"ua_mobile"`
+	UAWoW64                 bool     `json:"ua_wow64"`
+	HardwareConcurrency     int      `json:"hardware_concurrency"`
+	DeviceMemoryGB          int      `json:"device_memory_gb"`
+	ScreenWidth             int      `json:"screen_width"`
+	ScreenHeight            int      `json:"screen_height"`
+	ScreenAvailWidth        int      `json:"screen_avail_width"`
+	ScreenAvailHeight       int      `json:"screen_avail_height"`
+	ScreenDeviceScaleFactor float64  `json:"screen_device_scale_factor"`
+	StorageQuotaMB          int      `json:"storage_quota_mb"`
+	PluginsPDF              string   `json:"plugins_pdf"`
+	AudioNoise              int      `json:"audio_noise"`
+	CanvasNoise             int      `json:"canvas_noise"`
+	WebGLVendor             string   `json:"webgl_vendor"`
+	WebGLRenderer           string   `json:"webgl_renderer"`
+	FontsDir                string   `json:"fonts_dir"`
+	Fonts                   []string `json:"fonts"`
+	WebRTCIP                string   `json:"webrtc_ip"`
+	NativeConfigPath        string   `json:"native_config_path"`
+	NativeMode              string   `json:"native_mode"`
 }
 
 type ProxyConfig struct {
@@ -107,6 +107,7 @@ var managedArgPrefixes = []string{
 	"--enable-automation",
 	"--disable-blink-features",
 	"--force-webrtc-ip-handling-policy",
+	"--force-device-scale-factor",
 	"--webrtc-ip-handling-policy",
 	stealthConfigArg,
 	stealthModeArg,
@@ -151,6 +152,9 @@ func (c Config) Validate(requireBinary bool) error {
 		c.Fingerprint.ScreenAvailWidth < 0 || c.Fingerprint.ScreenAvailHeight < 0 {
 		return errors.New("fingerprint numeric values must be >= 0")
 	}
+	if c.Fingerprint.ScreenDeviceScaleFactor < 0 {
+		return errors.New("fingerprint.screen_device_scale_factor must be >= 0")
+	}
 	if err := validateHardwareValue(c.Fingerprint.HardwareConcurrency, "fingerprint.hardware_concurrency", maxHardwareConcurrency); err != nil {
 		return err
 	}
@@ -168,6 +172,9 @@ func (c Config) Validate(requireBinary bool) error {
 	}
 	if err := validateScreenDimension(c.Fingerprint.ScreenAvailHeight, "fingerprint.screen_avail_height"); err != nil {
 		return err
+	}
+	if c.Fingerprint.ScreenDeviceScaleFactor > maxScreenDeviceScaleFactor {
+		return fmt.Errorf("fingerprint.screen_device_scale_factor must be <= %d", maxScreenDeviceScaleFactor)
 	}
 	if err := validateTimezone(c.Fingerprint.Timezone); err != nil {
 		return err
@@ -413,7 +420,7 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 			env["BROWSEFORGE_INTL_LOCALE"] = c.Fingerprint.Locale
 		}
 	}
-	args := []string{"--no-first-run", "--test-type", automationControlledArg, webrtcIPHandlingArg, "--user-data-dir=" + userDataDir}
+	args := []string{"--no-first-run", "--test-type", webrtcIPHandlingArg, "--user-data-dir=" + userDataDir}
 	if c.RemoteDebugging.Address != "" {
 		args = append(args, "--remote-debugging-address="+c.RemoteDebugging.Address)
 	}
@@ -475,14 +482,26 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	if c.Fingerprint.ScreenHeight > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-height=%d", c.Fingerprint.ScreenHeight))
 	}
-	if c.Fingerprint.ScreenWidth > 0 && c.Fingerprint.ScreenHeight > 0 {
-		args = append(args, fmt.Sprintf("--window-size=%d,%d", c.Fingerprint.ScreenWidth, c.Fingerprint.ScreenHeight))
-	}
 	if c.Fingerprint.ScreenAvailWidth > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-avail-width=%d", c.Fingerprint.ScreenAvailWidth))
 	}
 	if c.Fingerprint.ScreenAvailHeight > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-avail-height=%d", c.Fingerprint.ScreenAvailHeight))
+	}
+	windowWidth := c.Fingerprint.ScreenAvailWidth
+	if windowWidth <= 0 {
+		windowWidth = c.Fingerprint.ScreenWidth
+	}
+	windowHeight := c.Fingerprint.ScreenAvailHeight
+	if windowHeight <= 0 {
+		windowHeight = c.Fingerprint.ScreenHeight
+	}
+	if windowWidth > 0 && windowHeight > 0 {
+		args = append(args, "--window-position=0,0", fmt.Sprintf("--window-size=%d,%d", windowWidth, windowHeight))
+	}
+	if c.Fingerprint.ScreenDeviceScaleFactor > 0 {
+		dpr := fmt.Sprintf("%g", c.Fingerprint.ScreenDeviceScaleFactor)
+		args = append(args, "--force-device-scale-factor="+dpr, "--fingerprint-screen-device-scale-factor="+dpr)
 	}
 	if c.Fingerprint.StorageQuotaMB > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-storage-quota=%d", c.Fingerprint.StorageQuotaMB))
