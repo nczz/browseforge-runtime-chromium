@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "commit": "7f7f0b2a070055eee0878b8d883ae02373498de4",
-    "indexed_at": "2026-07-16T10:37:49Z",
+    "commit": "ee48f0821a2ceb07872eb809ec97fad9ab8c16d7",
+    "indexed_at": "2026-07-16T11:44:39Z",
     "project": "Users-chun-Projects-browseforge-runtime-chromium",
     "nodes": 11291,
-    "edges": 18609,
+    "edges": 18640,
     "original_size": 25624576,
-    "compressed_size": 2503755,
+    "compressed_size": 2505043,
     "compression_level": 3
 }
