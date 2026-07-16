@@ -67,6 +67,11 @@ PATCH_CHECKS = [
         "script": "scripts/apply_locale_patch.py",
     },
     {
+        "patch_id": "surface-intl-default-locale-native-override",
+        "surface": "intl_locale",
+        "script": "scripts/apply_intl_locale_patch.py",
+    },
+    {
         "patch_id": "surface-accept-language-header-native-override",
         "surface": "locale_header",
         "script": "scripts/apply_accept_language_header_patch.py",

@@ -132,6 +132,9 @@ func TestBuildPlanAddsLocaleFingerprintArgs(t *testing.T) {
 			t.Fatalf("missing locale arg %q: %v", want, plan.Args)
 		}
 	}
+	if plan.Env["BROWSEFORGE_INTL_LOCALE"] != "zh-TW" {
+		t.Fatalf("missing Intl locale env: %v", plan.Env)
+	}
 }
 
 func TestBuildPlanRejectsInvalidLocaleFingerprintArgs(t *testing.T) {
@@ -299,7 +302,7 @@ func TestBuildPlanAddsScreenFingerprintArgs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"--fingerprint-screen-width=1920", "--fingerprint-screen-height=1080", "--fingerprint-screen-avail-width=1900", "--fingerprint-screen-avail-height=1040"} {
+	for _, want := range []string{"--fingerprint-screen-width=1920", "--fingerprint-screen-height=1080", "--fingerprint-screen-avail-width=1900", "--fingerprint-screen-avail-height=1040", "--window-size=1920,1080"} {
 		if !containsArg(plan.Args, want) {
 			t.Fatalf("missing screen arg %q: %v", want, plan.Args)
 		}

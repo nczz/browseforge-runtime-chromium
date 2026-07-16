@@ -28,6 +28,12 @@ class StealthScaffoldTests(unittest.TestCase):
         self.assertIn("bool PersonaSnapshot::IsCoherent()", snapshot)
         self.assertIn("PersonaError::kIncompletePersona", resolver)
         self.assertIn("PersonaError::kIncoherentPersona", resolver)
+        self.assertIn("!locale.timezone.empty()", snapshot)
+        self.assertIn("!locale.locale.empty()", snapshot)
+        self.assertIn("!locale.accept_language.empty()", snapshot)
+        self.assertIn("screen.avail_width > screen.width", snapshot)
+        self.assertIn("screen.avail_height > screen.height", snapshot)
+        self.assertIn("IsRawIPv4Address(region)", snapshot)
 
     def test_persona_snapshot_platform_coherence_contract_exists(self) -> None:
         snapshot = (STEALTH / "persona_snapshot.cc").read_text(encoding="utf-8")

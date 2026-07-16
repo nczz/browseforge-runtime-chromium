@@ -1,78 +1,77 @@
 {
+  "fast_release_ready": true,
   "generated_at": "2026-07-11T20:30:00Z",
   "policies": [
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-      "decision": "Unsigned dev artifact is acceptable only for alpha validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing requires an explicit signing policy update.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
+      "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/SBOM.json"
       ],
       "platform": "linux-x64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "unsigned-dev-artifact",
-      "status": "unsigned_alpha_dev_artifact"
+      "sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 567882160
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
-      "decision": "Unsigned Linux arm64 alpha artifact is acceptable only for alpha validation with committed SHA-256, SBOM, and provenance metadata; it remains non-production until BrowseForge smoke and detector evidence pass, and release-grade publishing requires an explicit signing policy update.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64",
+      "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/SBOM.json"
       ],
       "platform": "linux-arm64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "unsigned-dev-artifact",
-      "status": "unsigned_alpha_dev_artifact_pending_smoke_detector"
+      "sha256": "b355b3f22bfadc8865d3ee055b8da2b6f8cbdd2b86d2ac0a55506e547d5badbb",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 584005591
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
-      "decision": "Unsigned macOS arm64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Developer ID signing and notarization policy update.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64",
+      "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
-        "knowledge/manifests/native-artifact-preflight.json"
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/SBOM.json"
       ],
       "platform": "macos-arm64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "unsigned-dev-artifact",
-      "status": "unsigned_alpha_dev_artifact"
+      "sha256": "48e4a5adbc8609b14d406dfedf3f41515b9870b04ad902b22661a8cbee5ab55a",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 405361213
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
-      "decision": "Unsigned macOS x64 alpha artifact is acceptable only as a packaged-only release asset with committed SHA-256, SBOM, and provenance metadata; launch smoke and detector evidence are intentionally absent, and release-grade publishing still requires Developer ID signing and notarization policy update.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
+      "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/SBOM.json",
-        "knowledge/manifests/native-artifact-preflight.json"
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/SBOM.json"
       ],
       "platform": "macos-x64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "unsigned-dev-artifact",
-      "status": "unsigned_packaged_only_alpha_dev_artifact"
+      "sha256": "317cc483388c9401fed680b7d2920c3a5423757fcc0ea9642bc0193e6bf6a75d",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 472648461
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
-      "decision": "Unsigned Windows x64 alpha artifact is acceptable only for local validation with committed SHA-256, SBOM, and provenance metadata; release-grade publishing still requires Authenticode/code-signing policy update.",
+      "decision": "Deferred by fastest-path policy; Windows Chromium source compile not required for GHCR linux multi-arch validation.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
-        "knowledge/manifests/native-artifact-preflight.json"
+        "user decision: fastest path, no rigorous Windows source build"
       ],
       "platform": "windows-x64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "unsigned-dev-artifact",
-      "status": "unsigned_alpha_dev_artifact"
+      "signature": "not_packaged_fast_path"
     }
   ],
   "release_grade_ready": false,

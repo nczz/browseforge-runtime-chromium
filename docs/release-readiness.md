@@ -9,6 +9,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - Wrapper entrypoint is documented and tested.
 - Managed launch flags are collision-protected.
 - Profile directory policy is deterministic and rollback-safe.
+- Intl default locale must be covered separately from `navigator.language`: patched builds read `BROWSEFORGE_INTL_LOCALE`, and BrowseForge must pass matching context locale/env values at launch.
 
 ## Artifact gates
 
@@ -18,6 +19,7 @@ A runtime release is ready for BrowseForge integration only after the source, ar
 - Browser binary path matches `contracts/runtime.manifest.json`.
 - `.version` marker behavior is specified.
 - Docker install/seed path is tested.
+- Docker GPU mode must be documented in release notes: software GL is the portable default, while native GPU mode requires explicit passthrough evidence.
 
 ## BrowseForge gates
 

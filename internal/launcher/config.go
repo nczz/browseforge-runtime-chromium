@@ -14,7 +14,7 @@ import (
 const (
 	RuntimeID      = "browseforge-chromium"
 	RuntimeFamily  = "chromium"
-	WrapperVersion = "v0.1.2-alpha.0"
+	WrapperVersion = "v0.1.3-alpha.0"
 )
 
 const maxStorageQuotaMB = int64(1024 * 1024 * 1024)
@@ -405,6 +405,14 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 			env["TZ"] = c.Fingerprint.Timezone
 		}
 	}
+	if c.Fingerprint.Locale != "" {
+		if env == nil {
+			env = map[string]string{}
+		}
+		if _, exists := env["BROWSEFORGE_INTL_LOCALE"]; !exists {
+			env["BROWSEFORGE_INTL_LOCALE"] = c.Fingerprint.Locale
+		}
+	}
 	args := []string{"--no-first-run", "--test-type", automationControlledArg, webrtcIPHandlingArg, "--user-data-dir=" + userDataDir}
 	if c.RemoteDebugging.Address != "" {
 		args = append(args, "--remote-debugging-address="+c.RemoteDebugging.Address)
@@ -466,6 +474,9 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 	}
 	if c.Fingerprint.ScreenHeight > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-height=%d", c.Fingerprint.ScreenHeight))
+	}
+	if c.Fingerprint.ScreenWidth > 0 && c.Fingerprint.ScreenHeight > 0 {
+		args = append(args, fmt.Sprintf("--window-size=%d,%d", c.Fingerprint.ScreenWidth, c.Fingerprint.ScreenHeight))
 	}
 	if c.Fingerprint.ScreenAvailWidth > 0 {
 		args = append(args, fmt.Sprintf("--fingerprint-screen-avail-width=%d", c.Fingerprint.ScreenAvailWidth))

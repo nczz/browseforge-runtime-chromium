@@ -1,153 +1,138 @@
 {
-  "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
-  "artifact_size_bytes": 567880267,
+  "artifact_sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
+  "artifact_size_bytes": 567882160,
   "artifacts": [
     {
       "arch": "x64",
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
       "browseforge_compatibility": {
         "min_version": "v2.0.0",
         "profile_field": "runtime_id"
       },
-      "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
+      "browser_binary_sha256": "9049e3c74980adbf3d245471ab68d989afe07c20d06c46e0f52b6ab87fee133b",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-11T02:35:12.188585+00:00",
-      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "created_at": "2026-07-14T21:55:47.636739+00:00",
+      "download_url": "GitHub Release asset pending publication",
       "os": "linux",
-      "patchset_id": "surface-switch-propagation-native-audit",
+      "patchset_id": "surface-intl-default-locale-native-override",
       "platform": "linux-x64",
-      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/provenance.json",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/provenance.json",
       "release_channel": "alpha",
       "runtime_id": "browseforge-chromium",
-      "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64/SBOM.json",
-      "sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
-      "signature": "unsigned-dev-artifact",
-      "size_bytes": 567880267,
+      "runtime_version": "v0.1.3-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/SBOM.json",
+      "sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 567882160,
+      "smoke_evidence": [
+        "knowledge/manifests/linux-package-smoke.json"
+      ],
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "4311dc8bd80bdcb35d8d8df5083afc4b3ce1aa4e6cdff58ac8e1fbeb016a5b42",
-      "wrapper_version": "v0.1.0-alpha.0"
+      "wrapper_binary_sha256": "831a173994e3600bf127ee3add5851a57ee2e5d193f0b8eab5d290618fae76bf",
+      "wrapper_version": "v0.1.3-alpha.0"
     },
     {
       "arch": "arm64",
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64",
       "browseforge_compatibility": {
         "min_version": "v2.0.0",
         "profile_field": "runtime_id"
       },
-      "browser_binary_sha256": "3dea60505e7bac078ddaace923032328bd695ed3fb440e5e7c7a0f843ab60171",
+      "browser_binary_sha256": "bbd80a7b955a3bc9e4fecd71765842af434b1712ffbe448c32c62e52ef56cedb",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-13T08:49:26.194157+00:00",
-      "detector_evidence": [
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks-webrtc_headed_docker_webrtc_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserleaks/detrun_v0.1.0-alpha.0_linux-arm64_browserleaks_headed_docker_direct_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/browserscan/detrun_v0.1.0-alpha.0_linux-arm64_browserscan_headed_docker_direct_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/creepjs/detrun_v0.1.0-alpha.0_linux-arm64_creepjs_headed_docker_direct_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/iphey/detrun_v0.1.0-alpha.0_linux-arm64_iphey_headed_docker_direct_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/pixelscan/detrun_v0.1.0-alpha.0_linux-arm64_pixelscan_headed_docker_direct_20260713.json",
-        "detectors/evidence/v0.1.0-alpha.0/linux-arm64/sannysoft/detrun_v0.1.0-alpha.0_linux-arm64_sannysoft_headed_docker_direct_20260713.json"
-      ],
-      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "created_at": "2026-07-14T10:34:33.741975+00:00",
+      "download_url": "GitHub Release asset pending publication",
       "os": "linux",
-      "patchset_id": "surface-switch-propagation-native-audit",
+      "patchset_id": "surface-intl-default-locale-native-override",
       "platform": "linux-arm64",
-      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/provenance.json",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/provenance.json",
       "release_channel": "alpha",
       "runtime_id": "browseforge-chromium",
-      "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64/SBOM.json",
-      "sha256": "953857690fe9c56f0410592ba0fb16b2141cd9fbdbabec203015fa7a606f752b",
-      "signature": "unsigned-dev-artifact",
-      "size_bytes": 584002023,
+      "runtime_version": "v0.1.3-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/SBOM.json",
+      "sha256": "b355b3f22bfadc8865d3ee055b8da2b6f8cbdd2b86d2ac0a55506e547d5badbb",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 584005591,
       "smoke_evidence": [
         "knowledge/manifests/linux-arm64-package-smoke.json"
       ],
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "status": "packaged_pending_smoke_detector",
-      "wrapper_binary_sha256": "e80c90a807e6cabba0a858f6551ebb86fe87095b08c47babdb16f4d689b431a5",
-      "wrapper_version": "v0.1.0-alpha.0"
+      "wrapper_binary_sha256": "f4e1c99dceaa5f32ff9c69d54e0ba9f816f6265c050b77a334f0d29ff75a1e71",
+      "wrapper_version": "v0.1.3-alpha.0"
     },
     {
       "arch": "arm64",
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64",
       "browseforge_compatibility": {
         "min_version": "v2.0.0",
         "profile_field": "runtime_id"
       },
       "browser_binary_sha256": "d266d8e7b5678ab74da84c373d54994796e476fafb435c6315e0c61be359fc32",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-12T12:00:00Z",
-      "download_url": "GitHub Release asset or GHCR artifact pending publication",
+      "created_at": "2026-07-15T18:58:04.161777+00:00",
+      "download_url": "GitHub Release asset pending publication",
       "os": "macos",
-      "patchset_id": "surface-switch-propagation-native-audit",
+      "patchset_id": "surface-intl-default-locale-native-override",
       "platform": "macos-arm64",
-      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/provenance.json",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/provenance.json",
       "release_channel": "alpha",
       "runtime_id": "browseforge-chromium",
-      "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-arm64/SBOM.json",
-      "sha256": "828896101ce9454507277855397d8b9f1f0bc3cb0c7ce3f07f2ddf41cdf3e683",
-      "signature": "unsigned-dev-artifact",
-      "size_bytes": 405358724,
+      "runtime_version": "v0.1.3-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/SBOM.json",
+      "sha256": "48e4a5adbc8609b14d406dfedf3f41515b9870b04ad902b22661a8cbee5ab55a",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 405361213,
+      "smoke_evidence": [
+        "knowledge/manifests/macos-package-smoke.json"
+      ],
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "f1f6851461e5237cbca58202570243f33abe9b51fda5ef52b77ee4c94a735a98",
-      "wrapper_version": "v0.1.0-alpha.0"
+      "wrapper_binary_sha256": "081b9afd3980ada13be2cafe0df58a18f3de991ce87f17ebf98551c38b4b0f6a",
+      "wrapper_version": "v0.1.3-alpha.0"
     },
     {
       "arch": "x64",
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
       "browseforge_compatibility": {
         "min_version": "v2.0.0",
         "profile_field": "runtime_id"
       },
       "browser_binary_sha256": "a4779c8a3d2d3d0eeadc2b77b7ee8dc04d35f5e415e67e0f2a8c83b49db228c2",
       "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-12T15:23:57.384237+00:00",
+      "created_at": "2026-07-15T18:58:04.099561+00:00",
       "download_url": "GitHub Release asset pending publication",
       "os": "macos",
-      "patchset_id": "surface-switch-propagation-native-audit",
+      "patchset_id": "surface-intl-default-locale-native-override",
       "platform": "macos-x64",
-      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/provenance.json",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/provenance.json",
       "release_channel": "alpha",
       "runtime_id": "browseforge-chromium",
-      "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64/SBOM.json",
-      "sha256": "960c2b7fbcaa86c34b5857361fbcf1ef9a2dcd001806117021fd51b99e71bb25",
-      "signature": "unsigned-dev-artifact",
-      "size_bytes": 472647619,
+      "runtime_version": "v0.1.3-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/SBOM.json",
+      "sha256": "317cc483388c9401fed680b7d2920c3a5423757fcc0ea9642bc0193e6bf6a75d",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 472648461,
       "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "19c36adb0820a0841d011349799c7bb73680c3989ae1bc35b5b87450632a687e",
-      "wrapper_version": "v0.1.0-alpha.0"
-    },
-    {
-      "arch": "x64",
-      "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
-      "browseforge_compatibility": {
-        "min_version": "v2.0.0",
-        "profile_field": "runtime_id"
-      },
-      "browser_binary_sha256": "393178534a837eaed482d486d967f8403addc24db819bd014743b6aa62bd4c4b",
-      "browser_version": "150.0.7871.101",
-      "created_at": "2026-07-11T19:36:35.867143+00:00",
-      "download_url": "GitHub Release asset or GHCR artifact pending publication",
-      "os": "windows",
-      "patchset_id": "surface-switch-propagation-native-audit",
-      "platform": "windows-x64",
-      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/provenance.json",
-      "release_channel": "alpha",
-      "runtime_id": "browseforge-chromium",
-      "runtime_version": "v0.1.0-alpha.0",
-      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64/SBOM.json",
-      "sha256": "dae221b4e96166190287bc88c0671f4654f19e4e9e7b2c5fc3fb2aad4519218b",
-      "signature": "unsigned-dev-artifact",
-      "size_bytes": 235414104,
-      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
-      "wrapper_binary_sha256": "94953008abd1f831a122a0150a0fcc3e44ed2fe23a7bc923bebb9f21bc29cd1d",
-      "wrapper_version": "v0.1.0-alpha.0"
+      "status": "packaged_only_untested_fast_release",
+      "wrapper_binary_sha256": "7889341d740cd2f1232fff03dfeda6c4ee42107d323930facc8ddd3bfd4d053e",
+      "wrapper_version": "v0.1.3-alpha.0"
     }
   ],
-  "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
-  "detector_smoke_evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
+  "browser_binary_sha256": "9049e3c74980adbf3d245471ab68d989afe07c20d06c46e0f52b6ab87fee133b",
+  "detector_smoke_evidence": "deferred_fast_release_smoke_only",
+  "fast_release_policy": {
+    "reason": "User requested fastest path rather than rigorous full native matrix.",
+    "required_smoke": [
+      "archive integrity",
+      "metadata consistency",
+      "GHCR linux/amd64 status",
+      "GHCR linux/arm64 status"
+    ],
+    "selected_at": "2026-07-16T00:45:40Z",
+    "skipped": [
+      "windows-x64 full Chromium source compile",
+      "full detector matrix"
+    ]
+  },
   "linux_arm64_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-arm64",
     "browser_binary_sha256": "3dea60505e7bac078ddaace923032328bd695ed3fb440e5e7c7a0f843ab60171",
@@ -211,9 +196,11 @@
     "linux-x64",
     "linux-arm64",
     "macos-arm64",
-    "macos-x64",
-    "windows-x64"
+    "macos-x64"
   ],
+  "unsupported_package_platforms": {
+    "windows-x64": "deferred: fastest release path skips slow Windows Chromium source compile"
+  },
   "windows_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
     "reason": "Windows alpha package refreshed after runtime manifest packaged-platform contract update.",

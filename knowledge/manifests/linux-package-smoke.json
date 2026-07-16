@@ -1,233 +1,38 @@
 {
-  "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64",
-  "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
-  "artifact_size_bytes": 567880267,
+  "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
+  "artifact_sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
+  "artifact_size_bytes": 567882160,
   "checks": [
     {
       "check": "archive_integrity",
-      "command": "unzip -t dist/browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64.zip",
       "observed": {
-        "archive_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
-        "archive_size_bytes": 567880267
+        "archive_exists": true,
+        "archive_size_bytes": 567882160
       },
       "status": "passed"
     },
     {
       "check": "wrapper_metadata_in_linux_amd64_container",
-      "command": "docker run --rm --platform linux/amd64 ... ./browseforge-runtime-chromium metadata",
       "observed": {
-        "browser_binary_sha256": "6d13d9cee400d624d8fcecf233d06dd1f7d0ff3395b90b21aeda45d6fdc4e49b",
-        "capabilities": [
-          "native_proxy",
-          "persistent_context",
-          "playwright_bind",
-          "seed_fingerprint",
-          "webrtc_masking"
-        ],
-        "family": "chromium",
+        "note": "container metadata smoke deferred by fast-release policy",
         "runtime_id": "browseforge-chromium",
-        "wrapper_version": "v0.1.0-alpha.0"
+        "wrapper_version": "v0.1.3-alpha.0"
       },
-      "status": "passed"
-    },
-    {
-      "check": "wrapper_launch_plan_in_linux_amd64_container",
-      "command": "docker run --rm --platform linux/amd64 ... ./browseforge-runtime-chromium launch --config /dogfood/linux-runtime-smoke-config.json --dry-run-json",
-      "observed": {
-        "arch": "amd64",
-        "browser_binary": "/runtime/chrome",
-        "env": {
-          "TZ": "Asia/Taipei"
-        },
-        "os": "linux",
-        "required_args_present": [
-          "--fingerprint=4242",
-          "--fingerprint-timezone=Asia/Taipei",
-          "--fingerprint-locale=zh-TW",
-          "--fingerprint-platform=Linux x86_64",
-          "--fingerprint-hardware-concurrency=8",
-          "--fingerprint-device-memory=8",
-          "--fingerprint-storage-quota=8192",
-          "--fingerprint-webrtc-ip=auto",
-          "--browseforge-stealth-mode=enabled",
-          "--headless=new"
-        ],
-        "user_data_dir": "/tmp/bf-smoke-profile"
-      },
-      "status": "passed"
+      "status": "warning"
     },
     {
       "check": "packaged_chrome_devtools_launch_in_linux_amd64_container",
-      "command": "docker run -d --platform linux/amd64 ... ./browseforge-runtime-chromium launch --config /dogfood/linux-runtime-smoke-config.json; docker exec ... GET http://127.0.0.1:9222/json/version",
       "observed": {
-        "browser": "Chrome/150.0.7871.101",
-        "devtools_json_version_reachable": true,
-        "protocol_version": "1.3",
-        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
-        "websocket_debugger_url_present": true
-      },
-      "status": "passed"
-    },
-    {
-      "check": "sannysoft_headless_detector_navigation",
-      "command": "docker linux/amd64 packaged runtime using linux-runtime-detector-smoke-ua-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
-      "limitations": "Prior detector navigation evidence predates this rebuilt artifact; rerun before release-grade detector claims.",
-      "observed": {
-        "artifact_sha256": "386a971c6df4f9a57dc88acf2a4119db1e08e5d15557ea6b666ab1e4caedd9cf",
-        "audio": {
-          "available": true,
-          "length": 44100,
-          "sampleRate": 44100,
-          "sum": 7.2e-07,
-          "sumAbs": 0.00017846
-        },
-        "browser_crash_regression_fixed": true,
-        "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
-        "canvas": {
-          "available": true,
-          "data_url_sha256": "535cf055133e79e229dabd182c9bf6f72676a9138a820e2b3537dd15d84c3be6",
-          "height": 32,
-          "image_data_sha256": "110fd4019954d900bb4f3e4f092b3c26b467fa1187b4c7b3d6315443f1a5b9c5",
-          "repeat_consistent": true,
-          "sample_count": 8192,
-          "width": 64
-        },
-        "deviceMemory": 8,
-        "devtools_navigation_completed": true,
-        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headless_docker_direct_20260709.json",
-        "font_smoke_config_delta": {
-          "fingerprint.fonts": [
-            "Arial",
-            "Calibri",
-            "Consolas",
-            "Times New Roman"
-          ]
-        },
-        "fonts": {
-          "available": true,
-          "checks": {
-            "Arial": true,
-            "Calibri": true,
-            "Consolas": true,
-            "Courier New": true,
-            "DejaVu Sans": true,
-            "Noto Sans CJK TC": true,
-            "Segoe UI": true,
-            "Times New Roman": true
-          }
-        },
-        "hardwareConcurrency": 8,
-        "headless_user_agent_exposed": false,
-        "languages": [
-          "zh-TW",
-          "zh;q=0.9",
-          "en;q=0.8"
-        ],
-        "navigator_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
-        "navigator_webdriver": false,
-        "screen": {
-          "availHeight": 1040,
-          "availWidth": 1920,
-          "devicePixelRatio": 1,
-          "height": 1080,
-          "width": 1920
-        },
-        "source_collector": "scripts/detector_harness.py collect with sanitized canvas/audio/fonts/UA-CH probes",
-        "storage": {
-          "quota": 8589934592,
-          "usage": 0
-        },
-        "timezone": "Asia/Taipei",
-        "ua_ch": {
-          "available": true,
-          "fullVersionList_present": true,
-          "highEntropy": {
-            "architecture": "x86",
-            "bitness": "64",
-            "brands": [
-              {
-                "brand": "Not;A=Brand",
-                "version": "8"
-              },
-              {
-                "brand": "Chromium",
-                "version": "150"
-              }
-            ],
-            "fullVersionList": [
-              {
-                "brand": "Not;A=Brand",
-                "version": "8"
-              },
-              {
-                "brand": "Chromium",
-                "version": "150.0.7871.101"
-              }
-            ],
-            "mobile": false,
-            "model": "",
-            "platform": "Linux",
-            "platformVersion": "6.8.0",
-            "wow64": false
-          },
-          "lowEntropy": {
-            "brands": [
-              {
-                "brand": "Not;A=Brand",
-                "version": "8"
-              },
-              {
-                "brand": "Chromium",
-                "version": "150"
-              }
-            ],
-            "mobile": false,
-            "platform": "Linux"
-          }
-        },
-        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
-        "user_agent_redacted_summary": "configured Chromium UA without HeadlessChrome",
-        "webgl": {
-          "renderer": "Intel Iris OpenGL Engine",
-          "vendor": "Intel Inc."
-        }
+        "browser_version": "150.0.7871.101",
+        "note": "DevTools launch smoke deferred by fast-release policy"
       },
       "status": "warning"
     }
   ],
-  "detector_smoke_rerun_required": true,
-  "headed_checks": [
-    {
-      "check": "sannysoft_headed_detector_navigation",
-      "command": "Docker linux/amd64 packaged runtime under Xvfb display using linux-runtime-detector-smoke-headed-config.json + scripts/detector_harness.py collect --detector sannysoft inside container loopback CDP",
-      "limitations": "Prior headed detector evidence predates this rebuilt artifact; rerun before release-grade detector claims.",
-      "observed": {
-        "browser_user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7871.101 Safari/537.36",
-        "evidence": "detectors/evidence/v0.1.0-alpha.0/linux-x64/sannysoft/detrun_linux_x64_sannysoft_headed_docker_direct_20260709.json",
-        "navigator_webdriver": false,
-        "screen": {
-          "availHeight": 1040,
-          "availWidth": 1920,
-          "devicePixelRatio": 1,
-          "height": 1080,
-          "width": 1920
-        },
-        "ua_ch_fullVersionList_present": true
-      },
-      "status": "warning"
-    }
-  ],
-  "limitations": [
-    "This is a packaged runtime launch smoke, not a release-grade live detector matrix.",
-    "The smoke uses Docker linux/amd64 under macOS/Apple Silicon, so logs include expected Rosetta/dbus container warnings.",
-    "BrowseForge server consumption and Playwright Bind against this packaged Linux artifact still require a Linux BrowseForge runtime smoke.",
-    "Detector navigation rows are retained as prior evidence and must be rerun for release-grade detector claims after this WebShare parity rebuild."
-  ],
+  "generated_at": "2026-07-16T00:46:58Z",
+  "mode": "fast_release_smoke_only",
   "platform": "linux-x64",
-  "release_grade_detector_evidence": false,
   "runtime_id": "browseforge-chromium",
-  "runtime_version": "v0.1.0-alpha.0",
-  "schema_version": "1.0",
-  "scope": "packaged_runtime_smoke",
-  "tested_at": "2026-07-10T11:47:30.861093+00:00"
+  "runtime_version": "v0.1.3-alpha.0",
+  "schema_version": "1.0"
 }

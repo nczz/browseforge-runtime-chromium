@@ -18,10 +18,10 @@ RELEASE_STATUS_SCRIPT = ROOT / "scripts" / "release_status.py"
 OBJECTIVE_AUDIT_SCRIPT = ROOT / "scripts" / "objective_audit.py"
 GRAPH_PATH = ROOT / "generated" / "kg" / "runtime.graph.jsonl"
 RUNTIME_ARTIFACTS_MANIFEST = ROOT / "knowledge" / "manifests" / "runtime-artifacts.json"
-LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-linux-x64"
+LINUX_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64"
 LINUX_ARTIFACT_NODE_ID = f"RuntimeArtifact:{LINUX_ARTIFACT_ID}"
 LINUX_PLATFORM_NODE_ID = "Platform:linux-x64"
-MACOS_X64_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.0-alpha.0-macos-x64"
+MACOS_X64_ARTIFACT_ID = "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64"
 MACOS_X64_ARTIFACT_NODE_ID = f"RuntimeArtifact:{MACOS_X64_ARTIFACT_ID}"
 MACOS_X64_PLATFORM_NODE_ID = "Platform:macos-x64"
 def write_native_proxy_region_validation_sources(
@@ -387,14 +387,14 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             manifest = json.load(fh)
 
         supported_package_platforms = manifest.get("supported_package_platforms")
-        self.assertEqual(["linux-x64", "linux-arm64", "macos-arm64", "macos-x64", "windows-x64"], supported_package_platforms)
+        self.assertEqual(["linux-x64", "linux-arm64", "macos-arm64", "macos-x64"], supported_package_platforms)
         supported_platforms = set(supported_package_platforms)
 
         unsupported = manifest.get("unsupported_package_platforms", {})
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
         unsupported_platforms = set(unsupported)
-        self.assertEqual(set(), unsupported_platforms)
+        self.assertEqual({"windows-x64"}, unsupported_platforms)
         self.assertIn("macos-x64", supported_platforms)
         self.assertNotIn("macos-x64", unsupported_platforms)
         self.assertTrue(supported_platforms.isdisjoint(unsupported_platforms))

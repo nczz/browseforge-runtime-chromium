@@ -25,7 +25,7 @@ def default_workdir() -> Path:
 
 
 DEFAULT_WORKDIR = default_workdir()
-RUNTIME_VERSION = "v0.1.2-alpha.0"
+RUNTIME_VERSION = "v0.1.3-alpha.0"
 SUPPORTED_NATIVE_PLATFORMS = {"macos-arm64", "macos-x64", "windows-x64"}
 WINDOWS_TOOLCHAIN_BASE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL"
 WINDOWS_TOOLCHAIN_ENABLE_ENV = "DEPOT_TOOLS_WIN_TOOLCHAIN"
@@ -155,6 +155,14 @@ def windows_cross_compile_env() -> str:
     )
 
 
+def latest_patchset_id() -> str:
+    manifest = load_json(ROOT / "knowledge" / "manifests" / "patchset.json")
+    patchsets = manifest.get("patchsets", [])
+    if not patchsets:
+        return "unpatched"
+    return str(patchsets[-1]["patchset_id"])
+
+
 def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str | None = None, jobs: int = DEFAULT_JOBS) -> NativeBuildPlan:
     required_host, default_out, gn_args, output_rel = platform_contract(platform_id)
     selected_out = out_dir or default_out
@@ -182,7 +190,9 @@ def build_plan(platform_id: str, workdir: Path = DEFAULT_WORKDIR, out_dir: str |
         "--browser-version",
         "150.0.7871.101",
         "--patchset-id",
-        "surface-switch-propagation-native-audit",
+        latest_patchset_id(),
+        "--wrapper-version",
+        RUNTIME_VERSION,
         "--release-channel",
         "alpha",
         "--source-acquisition-manifest",
