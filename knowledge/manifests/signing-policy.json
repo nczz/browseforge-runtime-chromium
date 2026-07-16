@@ -63,15 +63,19 @@
       "size_bytes": 472648461
     },
     {
-      "decision": "Deferred by fastest-path policy; Windows Chromium source compile not required for GHCR linux multi-arch validation.",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
+      "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "user decision: fastest path, no rigorous Windows source build"
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/SBOM.json"
       ],
       "platform": "windows-x64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "signature": "not_packaged_fast_path"
+      "sha256": "5c76a7a18f61eb1506cf684bd730306a37a2765fbe27554505ae151d4a5ac648",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 236084981
     }
   ],
   "release_grade_ready": false,

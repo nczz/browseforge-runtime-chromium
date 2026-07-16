@@ -2,7 +2,7 @@
   "chromium_base": {
     "artifact_rebuild_reasons": [],
     "artifact_rebuild_required": false,
-    "artifact_rebuild_status": "fast_release_reused_packaged_artifacts_skipped_windows_source_compile",
+    "artifact_rebuild_status": "fast_release_all_supported_platform_artifacts_packaged",
     "audio_patch_status": "applied_to_external_checkout",
     "base_commit": "51b83660c3609f271ccbbd65785bf7e50a21312d",
     "base_ref": "refs/tags/150.0.7871.101",
@@ -38,7 +38,7 @@
     },
     "deps_sha256": "c84ef7d5adbf14fc8bc4527844baf7b77dc9df8a2e317289147f61768ae867ac",
     "deps_snapshot_status": "synced_selected_ref_with_macos_host_deps",
-    "fast_release_note": "User requested fastest path; Windows native Chromium source compile and full detector matrix are deferred.",
+    "fast_release_note": "Fast path includes native linux-x64, linux-arm64, macos-arm64, macos-x64, and windows-x64 packages; full detector matrix remains deferred.",
     "feature_parity_patch_detail": "ContactsManager, ContactsManagerExtraProperties, ContentIndex, NetInfoDownlinkMax, SerialPortConnected, and WebShare are patched to desktop-stable runtime feature defaults so permissions/feature inventory probes align with a modern desktop Chrome persona without requesting device access or invoking share UI.",
     "feature_parity_patch_status": "applied_to_external_checkout_with_contacts_content_index_netinfo_serial_port_connected_webshare",
     "fonts_patch_status": "applied_to_external_checkout",
@@ -286,7 +286,19 @@
     "user_agent_patch_status": "rebuilt_linux_artifact_full_version_list_verified",
     "webdriver_patch_status": "applied_to_external_checkout",
     "webgl_patch_status": "applied_to_external_checkout",
-    "webrtc_patch_status": "applied_to_external_checkout"
+    "webrtc_patch_status": "applied_to_external_checkout",
+    "windows_x64_artifact": {
+      "archive": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip",
+      "archive_sha256": "5c76a7a18f61eb1506cf684bd730306a37a2765fbe27554505ae151d4a5ac648",
+      "archive_size_bytes": 236084981,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/artifact-manifest.json",
+      "browser_binary_sha256": "393178534a837eaed482d486d967f8403addc24db819bd014743b6aa62bd4c4b",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/provenance.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/SBOM.json",
+      "status": "packaged_only_untested_fast_release",
+      "wrapper_binary_sha256": "d3b8d2d753f0baa08697f0805ae6953f94149a03c1da54c70f3b103937747333"
+    }
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",
   "local_dogfood_binary": {

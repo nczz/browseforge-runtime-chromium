@@ -387,14 +387,14 @@ class ValidateRuntimeGraphTests(unittest.TestCase):
             manifest = json.load(fh)
 
         supported_package_platforms = manifest.get("supported_package_platforms")
-        self.assertEqual(["linux-x64", "linux-arm64", "macos-arm64", "macos-x64"], supported_package_platforms)
+        self.assertEqual(["linux-x64", "linux-arm64", "macos-arm64", "macos-x64", "windows-x64"], supported_package_platforms)
         supported_platforms = set(supported_package_platforms)
 
         unsupported = manifest.get("unsupported_package_platforms", {})
         self.assertIsInstance(unsupported, dict)
         assert isinstance(unsupported, dict)
         unsupported_platforms = set(unsupported)
-        self.assertEqual({"windows-x64"}, unsupported_platforms)
+        self.assertEqual(set(), unsupported_platforms)
         self.assertIn("macos-x64", supported_platforms)
         self.assertNotIn("macos-x64", unsupported_platforms)
         self.assertTrue(supported_platforms.isdisjoint(unsupported_platforms))

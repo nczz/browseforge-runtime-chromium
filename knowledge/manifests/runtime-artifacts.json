@@ -115,21 +115,47 @@
       "status": "packaged_only_untested_fast_release",
       "wrapper_binary_sha256": "7889341d740cd2f1232fff03dfeda6c4ee42107d323930facc8ddd3bfd4d053e",
       "wrapper_version": "v0.1.3-alpha.0"
+    },
+    {
+      "arch": "x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
+      "browseforge_compatibility": {
+        "min_version": "v2.0.0",
+        "profile_field": "runtime_id"
+      },
+      "browser_binary_sha256": "393178534a837eaed482d486d967f8403addc24db819bd014743b6aa62bd4c4b",
+      "browser_version": "150.0.7871.101",
+      "created_at": "2026-07-16T10:31:28.416534+00:00",
+      "download_url": "GitHub Release asset pending publication",
+      "os": "windows",
+      "patchset_id": "surface-intl-default-locale-native-override",
+      "platform": "windows-x64",
+      "provenance_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/provenance.json",
+      "release_channel": "alpha",
+      "runtime_id": "browseforge-chromium",
+      "runtime_version": "v0.1.3-alpha.0",
+      "sbom_path": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/SBOM.json",
+      "sha256": "5c76a7a18f61eb1506cf684bd730306a37a2765fbe27554505ae151d4a5ac648",
+      "signature": "unsigned-alpha-artifact",
+      "size_bytes": 236084981,
+      "source_ref": "51b83660c3609f271ccbbd65785bf7e50a21312d",
+      "status": "packaged_only_untested_fast_release",
+      "wrapper_binary_sha256": "d3b8d2d753f0baa08697f0805ae6953f94149a03c1da54c70f3b103937747333",
+      "wrapper_version": "v0.1.3-alpha.0"
     }
   ],
   "browser_binary_sha256": "9049e3c74980adbf3d245471ab68d989afe07c20d06c46e0f52b6ab87fee133b",
   "detector_smoke_evidence": "deferred_fast_release_smoke_only",
   "fast_release_policy": {
-    "reason": "User requested fastest path rather than rigorous full native matrix.",
+    "reason": "User requested fastest path while preserving native package artifacts for every supported platform.",
     "required_smoke": [
       "archive integrity",
       "metadata consistency",
       "GHCR linux/amd64 status",
       "GHCR linux/arm64 status"
     ],
-    "selected_at": "2026-07-16T00:45:40Z",
+    "selected_at": "2026-07-16T10:32:55Z",
     "skipped": [
-      "windows-x64 full Chromium source compile",
       "full detector matrix"
     ]
   },
@@ -196,11 +222,10 @@
     "linux-x64",
     "linux-arm64",
     "macos-arm64",
-    "macos-x64"
+    "macos-x64",
+    "windows-x64"
   ],
-  "unsupported_package_platforms": {
-    "windows-x64": "deferred: fastest release path skips slow Windows Chromium source compile"
-  },
+  "unsupported_package_platforms": {},
   "windows_artifact_refresh": {
     "artifact_id": "browseforge-runtime-chromium-v0.1.0-alpha.0-windows-x64",
     "reason": "Windows alpha package refreshed after runtime manifest packaged-platform contract update.",
