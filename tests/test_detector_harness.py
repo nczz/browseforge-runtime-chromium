@@ -800,6 +800,17 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertEqual((status, severity), ("warning", "high"))
         self.assertIn("SwiftShader", finding)
 
+    def test_classify_browserleaks_webgl_allows_swiftshader_in_docker_software_context(self):
+        value = self.browserleaks_webgl_value()
+        value["webgl"]["vendor"] = "Google Inc. (Google)"
+        value["webgl"]["renderer"] = "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        value["runtimeContext"] = {"dockerGpuMode": "software"}
+
+        status, finding, severity = self.harness_module.classify_browserleaks(value, "https://browserleaks.com/webgl")
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("expected for Docker software GPU mode", finding)
+
 
     def test_classify_browserleaks_dispatches_webrtc_page_without_claiming_release_pass(self):
         status, finding, severity = self.harness_module.classify_browserleaks(
@@ -1081,7 +1092,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1131,7 +1142,7 @@ class DetectorHarnessTests(unittest.TestCase):
                             return {"targetId": "target-1"}, []
                         if method == "Target.attachToTarget":
                             return {"sessionId": "session-1"}, []
-                        if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                        if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                             return {}, []
                         if method == "Runtime.evaluate":
                             self.evaluate_timeout = timeout
@@ -1176,7 +1187,7 @@ class DetectorHarnessTests(unittest.TestCase):
                             return {"targetId": "target-1"}, []
                         if method == "Target.attachToTarget":
                             return {"sessionId": "session-1"}, []
-                        if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                        if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                             return {}, []
                         if method == "Runtime.evaluate":
                             self.evaluate_timeout = timeout
@@ -1210,7 +1221,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1251,7 +1262,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1293,7 +1304,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1374,7 +1385,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1456,7 +1467,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1497,7 +1508,7 @@ class DetectorHarnessTests(unittest.TestCase):
                     return {"targetId": "target-1"}, []
                 if method == "Target.attachToTarget":
                     return {"sessionId": "session-1"}, []
-                if method in {"Page.enable", "Runtime.enable", "Page.navigate", "Target.closeTarget"}:
+                if method in {"Page.enable", "Runtime.enable", "Network.enable", "Page.navigate", "Target.closeTarget"}:
                     return {}, []
                 if method == "Runtime.evaluate":
                     return {"result": {"value": json.loads(json.dumps(self.page_value))}}, []
@@ -1622,6 +1633,65 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertEqual((status, severity), ("warning", "medium"))
         self.assertIn("screen/window payload", finding)
 
+    def test_summarize_network_events_keeps_only_safe_header_contract(self):
+        summary = self.harness_module.summarize_network_events([
+            {
+                "method": "Network.requestWillBeSent",
+                "params": {
+                    "requestId": "doc-1",
+                    "type": "Document",
+                    "request": {
+                        "headers": {
+                            "User-Agent": "Mozilla/5.0 BrowseForge",
+                            "Accept-Language": "zh-TW,zh;q=0.9",
+                            "Cookie": "secret=value",
+                            "Sec-CH-UA-Platform": "\"Linux\"",
+                        }
+                    },
+                },
+            }
+        ])
+
+        self.assertTrue(summary["available"])
+        self.assertEqual(summary["document"]["user-agent"], "Mozilla/5.0 BrowseForge")
+        self.assertEqual(summary["document"]["accept-language"], "zh-TW,zh;q=0.9")
+        self.assertNotIn("cookie", summary["selectedHeaderNames"])
+        self.assertRegex(summary["selectedHeadersSha256"], r"^[0-9a-f]{64}$")
+
+    def test_pixelscan_payload_summary_redacts_raw_sensitive_values(self):
+        summary = self.harness_module.summarize_pixelscan_fingerprint_payload({
+            "available": True,
+            "payload": {
+                "ip": "192.0.2.10",
+                "screen": {"width": 1920, "height": 1080},
+                "token": "ghp_" + "a" * 36,
+            },
+        })
+
+        self.assertTrue(summary["available"])
+        self.assertIn("$.payload.screen.width", summary["keyPaths"])
+        self.assertEqual(summary["boundedScalars"]["$.payload.screen.width"], 1920)
+        self.assertNotIn("192.0.2.10", json.dumps(summary))
+        self.assertNotIn("ghp_", json.dumps(summary))
+
+    def test_pixelscan_classifier_reports_surface_diagnostics(self):
+        value = self.pixelscan_client_hints_value()
+        value["pixelscanPage"] = {
+            "available": True,
+            "verdict": "inconsistent",
+            "fingerprint": "Masking detected",
+        }
+        value["languages"] = ["zh-TW", "zh"]
+        value["webgl"] = {"available": False, "reason": "webgl_context_unavailable"}
+        value["networkHeaders"] = {"document": {"accept-language": "en-US,en", "user-agent": value["ua"]}}
+        value["surfaceDiagnostics"] = self.harness_module.collect_surface_diagnostics(value)
+
+        status, finding, severity = self.harness_module.classify_pixelscan_client_hints(value)
+
+        self.assertEqual((status, severity), ("warning", "medium"))
+        self.assertIn("WEBGL_UNAVAILABLE", finding)
+        self.assertIn("HEADER_JS_LANGUAGE_MISMATCH", finding)
+
     def test_supported_collectors_includes_iphey(self):
         self.assertEqual(
             self.harness_module.SUPPORTED_COLLECTORS.get("iphey"),
@@ -1653,6 +1723,8 @@ class DetectorHarnessTests(unittest.TestCase):
             expr,
             r"Promise\.race\s*\(\s*\[[\s\S]*(ctx\.startRendering\(\)[\s\S]*setTimeout|setTimeout[\s\S]*ctx\.startRendering\(\))[\s\S]*\]\s*\)",
         )
+        self.assertIn("bufferSemantics", expr)
+        self.assertIn("copyFromChannelVisible", expr)
 
     def test_collect_page_expression_records_permission_feature_surface(self):
         expr = self.collect_page_expression()
@@ -1681,8 +1753,7 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("['sampleRate', 'Sample Rate']", expr)
         self.assertIn("const audioContext = (() => {", expr)
         self.assertIn("ctx.createAnalyser()", expr)
-        self.assertIn("observedFieldCount", expr)
-        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, fonts", expr)
+        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, pixelscanFingerprintRaw, fonts", expr)
 
     def test_collect_page_expression_records_pixelscan_page_fields(self):
         expr = self.collect_page_expression()
@@ -1690,7 +1761,10 @@ class DetectorHarnessTests(unittest.TestCase):
         self.assertIn("location.hostname.includes('pixelscan.net')", expr)
         self.assertIn("Your Browser Fingerprint is inconsistent", expr)
         self.assertIn("valueAfter('AudioContext Hash')", expr)
-        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, fonts", expr)
+        self.assertIn("const pixelscanFingerprintRaw = await (async () => {", expr)
+        self.assertIn("root.Fptc || window.Fptc", expr)
+        self.assertIn("instance.getFingerprints", expr)
+        self.assertIn("audio, browserleaksAudioPage, pixelscanPage, pixelscanFingerprintRaw, fonts", expr)
 
     def test_collect_rejects_unsupported_detector_before_cdp_connection(self):
         unsupported_detector = "unknown-detector"

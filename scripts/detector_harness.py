@@ -31,6 +31,155 @@ def _bounded_redacted_value(value: str, *, limit: int = 80) -> str:
     normalized = " ".join(value.split())
     return redact_sensitive_text(normalized[:limit])
 
+REQUEST_HEADER_ALLOWLIST = {
+    "accept-language",
+    "sec-ch-ua",
+    "sec-ch-ua-arch",
+    "sec-ch-ua-bitness",
+    "sec-ch-ua-full-version",
+    "sec-ch-ua-full-version-list",
+    "sec-ch-ua-mobile",
+    "sec-ch-ua-model",
+    "sec-ch-ua-platform",
+    "sec-ch-ua-platform-version",
+    "user-agent",
+}
+
+def _sha256_json(value) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()
+
+def _selected_request_headers(headers: dict | None) -> dict[str, str]:
+    if not isinstance(headers, dict):
+        return {}
+    selected: dict[str, str] = {}
+    for name, value in headers.items():
+        key = str(name).lower()
+        if key in REQUEST_HEADER_ALLOWLIST:
+            selected[key] = _bounded_redacted_value(str(value), limit=200)
+    return selected
+
+def summarize_network_events(events: list[dict]) -> dict:
+    by_request: dict[str, dict[str, str]] = {}
+    document_request_ids: set[str] = set()
+    for event in events:
+        if event.get("method") not in {"Network.requestWillBeSent", "Network.requestWillBeSentExtraInfo"}:
+            continue
+        params = event.get("params") or {}
+        request_id = str(params.get("requestId") or "")
+        if not request_id:
+            continue
+        headers = _selected_request_headers((params.get("request") or {}).get("headers") or params.get("headers"))
+        if not headers:
+            continue
+        by_request.setdefault(request_id, {}).update(headers)
+        if params.get("type") == "Document" or params.get("resourceType") == "Document":
+            document_request_ids.add(request_id)
+    selected_names = sorted({name for headers in by_request.values() for name in headers})
+    document_headers: dict[str, str] = {}
+    for request_id in sorted(document_request_ids):
+        document_headers.update(by_request.get(request_id) or {})
+    return {
+        "available": bool(by_request),
+        "observedRequestCount": len(by_request),
+        "document": document_headers,
+        "selectedHeaderNames": selected_names,
+        "selectedHeadersSha256": _sha256_json(by_request) if by_request else None,
+    }
+
+def summarize_pixelscan_fingerprint_payload(payload) -> dict:
+    if payload is None:
+        return {"available": False, "reason": "payload_unavailable"}
+    key_paths: list[str] = []
+    types: dict[str, str] = {}
+    scalar_sha256: dict[str, str] = {}
+    bounded_scalars: dict[str, object] = {}
+
+    def visit(value, path: str, depth: int) -> None:
+        if len(key_paths) >= 240:
+            return
+        key = path or "$"
+        key_paths.append(key)
+        if value is None:
+            types[key] = "null"
+            return
+        if isinstance(value, bool):
+            types[key] = "bool"
+            bounded_scalars[key] = value
+            scalar_sha256[key] = hashlib.sha256(str(value).encode()).hexdigest()
+            return
+        if isinstance(value, (int, float)):
+            types[key] = "number"
+            bounded_scalars[key] = value
+            scalar_sha256[key] = hashlib.sha256(str(value).encode()).hexdigest()
+            return
+        if isinstance(value, str):
+            types[key] = "string"
+            redacted = _bounded_redacted_value(value, limit=120)
+            scalar_sha256[key] = hashlib.sha256(redacted.encode()).hexdigest()
+            if redacted and len(redacted) <= 80:
+                bounded_scalars[key] = redacted
+            return
+        if isinstance(value, list):
+            types[key] = "array"
+            if depth >= 6:
+                return
+            for index, item in enumerate(value[:30]):
+                visit(item, f"{key}[{index}]", depth + 1)
+            return
+        if isinstance(value, dict):
+            types[key] = "object"
+            if depth >= 6:
+                return
+            for child_key in sorted(value)[:80]:
+                visit(value[child_key], f"{key}.{child_key}", depth + 1)
+            return
+        types[key] = type(value).__name__
+
+    visit(payload, "", 0)
+    return {
+        "available": True,
+        "pathCount": len(key_paths),
+        "keyPaths": key_paths,
+        "types": types,
+        "scalarSha256": scalar_sha256,
+        "boundedScalars": bounded_scalars,
+        "payloadSha256": _sha256_json(payload),
+    }
+
+def collect_surface_diagnostics(value: dict) -> list[str]:
+    diagnostics: list[str] = []
+    webgl = value.get("webgl") or {}
+    if isinstance(webgl, dict) and webgl.get("available") is False:
+        diagnostics.append("WEBGL_UNAVAILABLE")
+    pixelscan_payload = value.get("pixelscanFingerprint") or {}
+    if isinstance(pixelscan_payload, dict) and pixelscan_payload.get("available"):
+        diagnostics.append("PIXELSCAN_FINGERPRINT_PAYLOAD_CAPTURED")
+    network = value.get("networkHeaders") or {}
+    document_headers = network.get("document") if isinstance(network, dict) else {}
+    if isinstance(document_headers, dict):
+        accept_language = document_headers.get("accept-language", "")
+        languages = value.get("languages") or []
+        if accept_language and languages and isinstance(languages, list):
+            first_language = str(languages[0])
+            if first_language and not accept_language.lower().startswith(first_language.lower()):
+                diagnostics.append("HEADER_JS_LANGUAGE_MISMATCH")
+        ua = value.get("ua")
+        if ua and document_headers.get("user-agent") and document_headers["user-agent"] != ua:
+            diagnostics.append("HEADER_JS_UA_MISMATCH")
+    screen = value.get("screen") or {}
+    if isinstance(screen, dict):
+        if screen.get("visualViewportWidth") and screen.get("innerWidth") and abs(float(screen["visualViewportWidth"]) - float(screen["innerWidth"])) > 1:
+            diagnostics.append("SCREEN_VISUAL_VIEWPORT_WIDTH_MISMATCH")
+        if screen.get("visualViewportHeight") and screen.get("innerHeight") and float(screen["visualViewportHeight"]) > float(screen["innerHeight"]) + 1:
+            diagnostics.append("SCREEN_VISUAL_VIEWPORT_HEIGHT_MISMATCH")
+        if screen.get("mediaMinInnerWidth") is not True:
+            diagnostics.append("SCREEN_MEDIA_QUERY_MISMATCH")
+    audio = value.get("audio") or {}
+    semantics = audio.get("bufferSemantics") if isinstance(audio, dict) else {}
+    if isinstance(semantics, dict) and semantics.get("available") and not semantics.get("sameObject"):
+        diagnostics.append("AUDIO_BUFFER_SEMANTICS_OBJECT_MISMATCH")
+    return sorted(set(diagnostics))
+
 def _extract_percent(pattern: str, text: str) -> float | None:
     match = re.search(pattern, text, re.IGNORECASE)
     return float(match.group(1)) if match else None
@@ -1769,7 +1918,10 @@ def classify_browserleaks_webgl_probe(value: dict) -> tuple[str, str, str]:
     renderer = str(webgl.get("renderer", ""))
     vendor = str(webgl.get("vendor", ""))
     if "SwiftShader" in renderer or "Google Inc. (Google)" in vendor:
-        return "warning", "BrowserLeaks WebGL bounded probe still exposes SwiftShader/Google software rendering; configured vendor/renderer evidence is required.", "high"
+        runtime_context = value.get("runtimeContext") or {}
+        if runtime_context.get("dockerGpuMode") == "software":
+            return "warning", "BrowserLeaks WebGL bounded probe exposes SwiftShader/Google software rendering as expected for Docker software GPU mode; extension, parameter, shader precision, and rendered-pixel coherence evidence is still required.", "medium"
+        return "warning", "BrowserLeaks WebGL bounded probe exposes SwiftShader/Google software rendering outside an explicit Docker software GPU context; configured vendor/renderer evidence is required.", "high"
     metadata_missing = sorted(field for field in WEBGL_REQUIRED_METADATA_FIELDS if webgl.get(field) is None)
     if metadata_missing:
         return "warning", f"BrowserLeaks WebGL page reported vendor/renderer strings, but sanitized WebGL metadata is missing fields: {metadata_missing}; release-grade WebGL coherence remains required.", "medium"
@@ -1853,8 +2005,10 @@ def classify_pixelscan_client_hints(value: dict) -> tuple[str, str, str]:
         fingerprint_lc = fingerprint.lower()
         masking_detected = "masking" in fingerprint_lc and "no masking" not in fingerprint_lc
         if verdict == "inconsistent" or masking_detected:
+            diagnostics = value.get("surfaceDiagnostics") or []
+            diagnostics_suffix = f" Diagnostics: {', '.join(diagnostics)}." if diagnostics else ""
             suffix = f" {screen_finding}" if screen_finding else ""
-            return "warning", "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required." + suffix, "medium"
+            return "warning", "Pixelscan fingerprint check loaded and reported inconsistent/masking fingerprint status; release-grade score baseline remains required." + diagnostics_suffix + suffix, "medium"
         if screen_status:
             return screen_status, screen_finding or "Pixelscan screen/window payload missing.", screen_severity or "medium"
         if verdict == "consistent":
@@ -1883,9 +2037,10 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     session_id = attached["sessionId"]
     cdp.call("Page.enable", session_id=session_id)
     cdp.call("Runtime.enable", session_id=session_id)
+    cdp.call("Network.enable", session_id=session_id)
     started = time.time()
-    cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=navigate_timeout)
-    cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
+    _, navigate_events = cdp.call("Page.navigate", {"url": url}, session_id=session_id, timeout=navigate_timeout)
+    load_events = cdp.events_until(lambda msg: msg.get("sessionId") == session_id and msg.get("method") == "Page.loadEventFired", timeout=45)
     time.sleep(wait_seconds)
     expr = """
 (async () => {
@@ -1973,6 +2128,26 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         new Promise((_, reject) => setTimeout(() => reject({name: 'offline_audio_context_timeout'}), 3000)),
       ]);
       const data = buffer.getChannelData(0);
+      const bufferSemantics = (() => {
+        try {
+          const again = buffer.getChannelData(0);
+          const before = data[0];
+          const mutated = before + 0.000001;
+          data[0] = mutated;
+          const after = buffer.getChannelData(0)[0];
+          const copied = new Float32Array(1);
+          buffer.copyFromChannel(copied, 0, 0);
+          data[0] = before;
+          return {
+            available: true,
+            sameObject: data === again,
+            mutationVisible: Object.is(after, mutated),
+            copyFromChannelVisible: Object.is(copied[0], mutated),
+          };
+        } catch (err) {
+          return {available: false, reason: String(err && err.name || err)};
+        }
+      })();
       let sum = 0;
       let sumAbs = 0;
       for (let i = 0; i < data.length; i += 128) {
@@ -1986,6 +2161,7 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
         sum: Number(sum.toFixed(8)),
         sumAbs: Number(sumAbs.toFixed(8)),
         firstSamples: Array.from(data.slice(0, 8)).map((v) => Number(v.toFixed(8))),
+        bufferSemantics,
       };
     } catch (err) {
       return {available: false, reason: String(err && err.name || err)};
@@ -2083,6 +2259,25 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       audioContextHash: valueAfter('AudioContext Hash'),
       webglHash: valueAfter('WebGL Hash'),
     };
+  })();
+  const pixelscanFingerprintRaw = await (async () => {
+    if (!location.hostname.includes('pixelscan.net')) return null;
+    try {
+      const root = window.top || window;
+      const factory = root.Fptc || window.Fptc;
+      if (typeof factory !== 'function') return {available: false, reason: 'fptc_unavailable'};
+      const instance = factory.call(root);
+      if (!instance || typeof instance.getFingerprints !== 'function') {
+        return {available: false, reason: 'get_fingerprints_unavailable'};
+      }
+      const payload = await Promise.race([
+        Promise.resolve(instance.getFingerprints()),
+        new Promise((_, reject) => setTimeout(() => reject({name: 'pixelscan_fingerprint_timeout'}), 3000)),
+      ]);
+      return {available: true, payload};
+    } catch (err) {
+      return {available: false, reason: String(err && err.name || err)};
+    }
   })();
 
   const fonts = await (async () => {
@@ -2396,11 +2591,11 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
       return {available: false, reason: String(err && err.name || err)};
     }
   })();
-  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, pixelscanPage, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
+  return {title, url: location.href, text, ua, uaData, webdriver, platform, languages, hardwareConcurrency: hw, deviceMemory: dm, timezone: tz, screen: screenData, storage: storageEstimate, audio, browserleaksAudioPage, pixelscanPage, pixelscanFingerprintRaw, fonts, canvas: canvasProbe, features, webgl: gl, webrtc};
 })()
 """
     evaluate_timeout = max(60 if detector_id == "iphey" else 30, wait_seconds + 20)
-    result, _ = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=evaluate_timeout)
+    result, evaluate_events = cdp.call("Runtime.evaluate", {"expression": expr, "returnByValue": True, "awaitPromise": True}, session_id=session_id, timeout=evaluate_timeout)
     value = result.get("result", {}).get("value", {})
     elapsed = round(time.time() - started, 2)
     cdp.call("Target.closeTarget", {"targetId": target_id}, timeout=5)
@@ -2409,6 +2604,15 @@ def collect_page(cdp: CDPClient, detector_id: str, name: str, url: str, *, wait_
     if isinstance(canvas, dict) and isinstance(canvas.get("dataUrlSha256Input"), str):
         data_url = canvas.pop("dataUrlSha256Input")
         canvas["dataUrlSha256"] = hashlib.sha256(data_url.encode()).hexdigest()
+    value["networkHeaders"] = summarize_network_events([*navigate_events, *load_events, *evaluate_events])
+    value["runtimeContext"] = {
+        "dockerGpuMode": os.getenv("BROWSEFORGE_DOCKER_GPU_MODE", ""),
+        "libglAlwaysSoftware": os.getenv("LIBGL_ALWAYS_SOFTWARE", ""),
+    }
+    pixelscan_payload = value.pop("pixelscanFingerprintRaw", None)
+    if pixelscan_payload is not None:
+        value["pixelscanFingerprint"] = summarize_pixelscan_fingerprint_payload(pixelscan_payload)
+    value["surfaceDiagnostics"] = collect_surface_diagnostics(value)
     if detector_id == "creepjs":
         metrics = extract_creepjs_metrics(text)
         if metrics:
