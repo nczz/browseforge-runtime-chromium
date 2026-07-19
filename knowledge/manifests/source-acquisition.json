@@ -12,7 +12,7 @@
       "dev_build_ninja_exists": true,
       "dev_gn_args_exists": true,
       "linux_arm64_docker_build_ninja_exists": true,
-      "linux_arm64_docker_chrome_exists": false,
+      "linux_arm64_docker_chrome_exists": true,
       "linux_arm64_docker_gn_args_exists": true,
       "linux_docker_build_ninja_exists": true,
       "linux_docker_chrome_exists": true,
@@ -60,17 +60,17 @@
       "xcodebuild_version": "Xcode 26.6 Build version 17F113"
     },
     "linux_arm64_artifact": {
-      "archive": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip",
-      "archive_sha256": "b355b3f22bfadc8865d3ee055b8da2b6f8cbdd2b86d2ac0a55506e547d5badbb",
-      "archive_size_bytes": 584005591,
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64",
-      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/artifact-manifest.json",
-      "browser_binary_sha256": "bbd80a7b955a3bc9e4fecd71765842af434b1712ffbe448c32c62e52ef56cedb",
-      "provenance": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/provenance.json",
-      "sbom": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/SBOM.json",
+      "archive": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip",
+      "archive_sha256": "b1e156be65388d258a6c91e15d022ef98ad00156cb2a02b04a4ba8e2c47f433c",
+      "archive_size_bytes": 584021589,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64/artifact-manifest.json",
+      "browser_binary_sha256": "8002f018d2a70f07da51099ee84aca48059220aac729a86689e619fca0b15d7b",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64/provenance.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-arm64-package-smoke.json",
       "status": "packaged_fast_release",
-      "wrapper_binary_sha256": "f4e1c99dceaa5f32ff9c69d54e0ba9f816f6265c050b77a334f0d29ff75a1e71"
+      "wrapper_binary_sha256": "352e3b69131998d3887ac6356e44284c77522331b0d8cd9fa888b41ab07e3260"
     },
     "linux_arm64_build_path": {
       "artifact_status": "packaged_pending_smoke_detector",
@@ -123,17 +123,17 @@
       "status": "linux_runtime_assets_restored_from_previous_package_then_repackaged_with_seed_identity_manifest_surface"
     },
     "linux_x64_artifact": {
-      "archive": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip",
-      "archive_sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
-      "archive_size_bytes": 567882160,
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
-      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/artifact-manifest.json",
-      "browser_binary_sha256": "9049e3c74980adbf3d245471ab68d989afe07c20d06c46e0f52b6ab87fee133b",
-      "provenance": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/provenance.json",
-      "sbom": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/SBOM.json",
+      "archive": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip",
+      "archive_sha256": "c5556c83b312ab5249dd48c636406962c9d9e1c43438d63b2f5791360b3597fa",
+      "archive_size_bytes": 570025355,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64/artifact-manifest.json",
+      "browser_binary_sha256": "bd4d8bbbc7d54e09d5ad2d4a29fd3fff88b8e283c2d0ffffb1ad239e643ceffc",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64/provenance.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64/SBOM.json",
       "smoke_evidence": "knowledge/manifests/linux-package-smoke.json",
       "status": "packaged_fast_release",
-      "wrapper_binary_sha256": "831a173994e3600bf127ee3add5851a57ee2e5d193f0b8eab5d290618fae76bf"
+      "wrapper_binary_sha256": "034a8745daff39a0b4a33fd42ac36c58b7466e9e372602a6854c66e8a4ecaba8"
     },
     "local_paths_checked": [
       {
@@ -174,16 +174,16 @@
     },
     "macos_host_preflight_status": "native_toolchain_ready_build_output_and_package_present",
     "macos_x64_artifact": {
-      "archive": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip",
-      "archive_sha256": "317cc483388c9401fed680b7d2920c3a5423757fcc0ea9642bc0193e6bf6a75d",
-      "archive_size_bytes": 472648461,
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
-      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/artifact-manifest.json",
+      "archive": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip",
+      "archive_sha256": "dab7137390dd3e6c094c08b0b3a410a05702bae60ff315f8c244b4b651bd39d6",
+      "archive_size_bytes": 472649690,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64/artifact-manifest.json",
       "browser_binary_sha256": "a4779c8a3d2d3d0eeadc2b77b7ee8dc04d35f5e415e67e0f2a8c83b49db228c2",
-      "provenance": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/provenance.json",
-      "sbom": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/SBOM.json",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64/provenance.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64/SBOM.json",
       "status": "packaged_only_untested_fast_release",
-      "wrapper_binary_sha256": "7889341d740cd2f1232fff03dfeda6c4ee42107d323930facc8ddd3bfd4d053e"
+      "wrapper_binary_sha256": "5954159d763852c8f7e9a8d86a468ddd6e64be202749fd0a2b66e1832d397a24"
     },
     "missing_prerequisites": [
       "macOS x64 build/package artifact"
@@ -288,16 +288,16 @@
     "webgl_patch_status": "applied_to_external_checkout",
     "webrtc_patch_status": "applied_to_external_checkout",
     "windows_x64_artifact": {
-      "archive": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip",
-      "archive_sha256": "5c76a7a18f61eb1506cf684bd730306a37a2765fbe27554505ae151d4a5ac648",
-      "archive_size_bytes": 236084981,
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
-      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/artifact-manifest.json",
+      "archive": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip",
+      "archive_sha256": "037eae794c1767e0520f82488e2a93a770e2390e09664d4ab0bc9788bc668ca9",
+      "archive_size_bytes": 236086114,
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64",
+      "artifact_manifest": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64/artifact-manifest.json",
       "browser_binary_sha256": "393178534a837eaed482d486d967f8403addc24db819bd014743b6aa62bd4c4b",
-      "provenance": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/provenance.json",
-      "sbom": "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/SBOM.json",
+      "provenance": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64/provenance.json",
+      "sbom": "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64/SBOM.json",
       "status": "packaged_only_untested_fast_release",
-      "wrapper_binary_sha256": "d3b8d2d753f0baa08697f0805ae6953f94149a03c1da54c70f3b103937747333"
+      "wrapper_binary_sha256": "68239cf402dfee479ddc17ecbdbb5d68fa9c6e0e35d09a49d3eededf70496b4b"
     }
   },
   "decision": "Proceed with release-grade validation of the source-level BrowseForge Chromium runtime; live SannySoft Linux headless smoke passes configured UA, webdriver, locale/timezone, hardware, and WebGL values, but BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS/SannySoft headed matrix remains required.",

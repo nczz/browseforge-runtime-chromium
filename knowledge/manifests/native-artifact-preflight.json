@@ -1,11 +1,26 @@
 {
-  "generated_at": "2026-07-16T10:33:19Z",
+  "generated_at": "2026-07-19T22:27:19Z",
   "platforms": [
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip",
+        "knowledge/manifests/linux-arm64-package-smoke.json",
+        "deferred_fast_release_smoke_only"
+      ],
+      "missing_prerequisites": [
+        "packaged linux-arm64 detector evidence"
+      ],
+      "platform": "linux-arm64",
+      "ready": false,
+      "status": "missing_linux_artifact_evidence"
+    },
+    {
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64",
+      "evidence": [
+        "knowledge/manifests/runtime-artifacts.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip",
         "knowledge/manifests/linux-package-smoke.json",
         "deferred_fast_release_smoke_only"
       ],
@@ -17,29 +32,16 @@
       "status": "missing_linux_artifact_evidence"
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64",
-      "evidence": [
-        "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip",
-        "knowledge/manifests/linux-arm64-package-smoke.json",
-        "deferred_fast_release_smoke_only"
-      ],
-      "missing_prerequisites": [
-        "release-grade linux-arm64 detector evidence"
-      ],
-      "platform": "linux-arm64",
-      "ready": false,
-      "status": "packaged_pending_smoke_detector"
-    },
-    {
       "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, xcodebuild_ok=True"
+        "python3 scripts/chromium_native.py check --platform macos-arm64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=True, xcodebuild_ok=True"
       ],
-      "missing_prerequisites": [],
+      "missing_prerequisites": [
+        "BrowseForge Chromium .app bundle built from refs/tags/150.0.7871.101"
+      ],
       "next_commands": [
         "python3 scripts/chromium_native.py plan --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
         "python3 scripts/chromium_native.py check --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium",
@@ -51,10 +53,10 @@
         "python3 scripts/chromium_native.py package --platform macos-arm64 --workdir /Users/chun/Projects/browser-source/browseforge-chromium --execute"
       ],
       "platform": "macos-arm64",
-      "ready": true,
-      "status": "packaged_detector_tested",
+      "ready": false,
+      "status": "missing_native_release_artifact",
       "status_snapshot": {
-        "app_bundle_exists": true,
+        "app_bundle_exists": false,
         "build_ninja_exists": true,
         "chromium_deps_exists": true,
         "chromium_src_dir": "/Users/chun/Projects/browser-source/browseforge-chromium/src",
@@ -65,7 +67,7 @@
         "host_supported": true,
         "native_toolchain_ready": true,
         "out_args_exists": true,
-        "output_binary_exists": true,
+        "output_binary_exists": false,
         "package_zip_exists": true,
         "required_host_os": "darwin",
         "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium",
@@ -74,12 +76,12 @@
       }
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform macos-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True"
+        "python3 scripts/chromium_native.py check --platform macos-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=True"
       ],
       "missing_prerequisites": [],
       "next_commands": [
@@ -106,19 +108,19 @@
         "host_supported": true,
         "native_toolchain_ready": true,
         "out_args_exists": true,
-        "output_binary_exists": true,
+        "output_binary_exists": false,
         "package_zip_exists": true,
         "required_host_os": "darwin",
         "workdir": "/Users/chun/Projects/browser-source/browseforge-chromium"
       }
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64",
       "evidence": [
         "knowledge/manifests/platform-matrix.json",
         "contracts/browseforge-integration.contract.json",
         "knowledge/manifests/signing-policy.json",
-        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=True, package_zip_exists=True, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True, verification_mode=manual_windows_os",
+        "python3 scripts/chromium_native.py check --platform windows-x64: host_supported=True, native_toolchain_ready=True, build_ninja_exists=True, output_binary_exists=False, package_zip_exists=True, host_support_mode=darwin_windows_cross_compile, windows_toolchain_zip_exists=True, gclient_target_os_win=True, portable_layout_exists=True, verification_mode=manual_windows_os",
         "Windows compile/runtime verification is delegated to manual validation on a Windows OS host; local wine/qemu execution is not required for this preflight."
       ],
       "missing_prerequisites": [],
@@ -150,7 +152,7 @@
         "manual_windows_os_validation_required": true,
         "native_toolchain_ready": true,
         "out_args_exists": true,
-        "output_binary_exists": true,
+        "output_binary_exists": false,
         "package_zip_exists": true,
         "portable_layout_exists": true,
         "required_host_os": "windows",

@@ -354,33 +354,34 @@ def generated_at_utc() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def linux_preflight_entry(root: Path, runtime_artifacts: dict[str, object]) -> dict[str, object]:
+def linux_preflight_entry(root: Path, runtime_artifacts: dict[str, object], platform_id: str) -> dict[str, object]:
     artifacts = runtime_artifacts.get("artifacts", [])
-    artifact = next((item for item in artifacts if isinstance(item, dict) and item.get("platform") == "linux-x64"), None)
+    artifact = next((item for item in artifacts if isinstance(item, dict) and item.get("platform") == platform_id), None)
+    smoke_rel = "knowledge/manifests/linux-arm64-package-smoke.json" if platform_id == "linux-arm64" else "knowledge/manifests/linux-package-smoke.json"
     evidence = ["knowledge/manifests/runtime-artifacts.json"]
     missing: list[str] = []
     artifact_id = None
     if artifact is None:
-        missing.append("committed linux-x64 runtime artifact manifest entry")
+        missing.append(f"committed {platform_id} runtime artifact manifest entry")
     else:
         artifact_id = str(artifact.get("artifact_id"))
         archive = root / "dist" / f"{artifact_id}.zip"
         evidence.append(f"dist/{artifact_id}.zip")
         if not archive.is_file():
             missing.append(f"dist/{artifact_id}.zip")
-    linux_smoke = root / "knowledge" / "manifests" / "linux-package-smoke.json"
+    linux_smoke = root / smoke_rel
     if linux_smoke.is_file():
-        evidence.append("knowledge/manifests/linux-package-smoke.json")
+        evidence.append(smoke_rel)
     else:
-        missing.append("knowledge/manifests/linux-package-smoke.json")
+        missing.append(smoke_rel)
     detector_smoke = runtime_artifacts.get("detector_smoke_evidence")
     if isinstance(detector_smoke, str) and detector_smoke:
         evidence.append(detector_smoke)
         if not (root / detector_smoke).is_file():
-            missing.append("packaged linux-x64 detector evidence")
+            missing.append(f"packaged {platform_id} detector evidence")
     entry: dict[str, object] = {
         "evidence": evidence,
-        "platform": "linux-x64",
+        "platform": platform_id,
         "ready": not missing,
         "status": "packaged_detector_tested" if not missing else "missing_linux_artifact_evidence",
         "missing_prerequisites": missing,
@@ -519,8 +520,8 @@ def native_artifact_preflight_manifest(root: Path, workdir: Path, generated_at: 
     runtime_artifacts = load_json(root / "knowledge" / "manifests" / "runtime-artifacts.json")
     supported = list(runtime_artifacts.get("supported_package_platforms", []))
     entries = []
-    if "linux-x64" in supported:
-        entries.append(linux_preflight_entry(root, runtime_artifacts))
+    for platform_id in sorted(platform for platform in supported if platform.startswith("linux-")):
+        entries.append(linux_preflight_entry(root, runtime_artifacts, platform_id))
     for platform_id in sorted(set(SUPPORTED_NATIVE_PLATFORMS).intersection(supported)):
         entries.append(native_preflight_entry(platform_id, check(build_plan(platform_id, workdir, None, jobs))))
     return {

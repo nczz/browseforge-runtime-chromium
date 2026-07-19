@@ -3,30 +3,30 @@
   "generated_at": "2026-07-11T20:30:00Z",
   "policies": [
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64",
       "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-x64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-x64/SBOM.json"
       ],
       "platform": "linux-x64",
-      "release_channel": "alpha",
+      "release_channel": "dev",
       "release_grade_allowed": false,
       "sha256": "7bd4e4456df8f626e48f18ce482ad19aade0a4d6782e282c86bf5979c45ba42b",
       "signature": "unsigned-alpha-artifact",
       "size_bytes": 567882160
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64",
       "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-linux-arm64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-linux-arm64/SBOM.json"
       ],
       "platform": "linux-arm64",
-      "release_channel": "alpha",
+      "release_channel": "dev",
       "release_grade_allowed": false,
       "sha256": "b355b3f22bfadc8865d3ee055b8da2b6f8cbdd2b86d2ac0a55506e547d5badbb",
       "signature": "unsigned-alpha-artifact",
@@ -48,12 +48,12 @@
       "size_bytes": 405375407
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64",
       "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-x64/SBOM.json"
       ],
       "platform": "macos-x64",
       "release_channel": "alpha",
@@ -63,12 +63,12 @@
       "size_bytes": 472648461
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64",
       "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-windows-x64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-windows-x64/SBOM.json"
       ],
       "platform": "windows-x64",
       "release_channel": "alpha",
