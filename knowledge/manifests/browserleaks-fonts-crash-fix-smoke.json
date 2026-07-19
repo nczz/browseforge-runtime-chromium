@@ -1,0 +1,56 @@
+{
+  "runtime_id": "browseforge-chromium",
+  "runtime_version": "v0.1.3-alpha.0",
+  "platform": "macos-arm64",
+  "runtime_archive_sha256": "fcf03d4c1ce597658336c50f8edad06924cbb22943b2770e6dc2b843ce862a61",
+  "created_at": "2026-07-19T08:00:00Z",
+  "purpose": "Verify BrowserLeaks Fonts no longer crashes the packaged macOS arm64 BrowseForge Chromium runtime after sanitizing the invalid Hiragino Sans W0 CSS family.",
+  "fix_summary": {
+    "blocked_crash_trigger": "Hiragino Sans W0 CSS font-family",
+    "source_changes": [
+      "third_party/blink/renderer/core/css/css_font_family_value.cc sanitizes Hiragino Sans W0 to sans-serif before CSS font-family value caching",
+      "third_party/blink/renderer/core/css/css_font_selector.cc avoids CSSSegmentedFontFace lookup for the invalid synthetic family when the fingerprint font list switch is active",
+      "third_party/blink/renderer/core/css/font_face_set.cc keeps the explicit fingerprint-fonts-list allowlist behavior for document.fonts.check()"
+    ]
+  },
+  "smoke_results": [
+    {
+      "surface": "browserleaks-fonts",
+      "url": "https://browserleaks.com/fonts",
+      "title": "Font Fingerprinting - BrowserLeaks",
+      "eval_status": 200,
+      "alive_status": 200,
+      "webdriver": false,
+      "body_length": 1232,
+      "result": "passed_no_renderer_crash"
+    },
+    {
+      "surface": "sannysoft",
+      "url": "https://bot.sannysoft.com/",
+      "title": "Antibot",
+      "eval_status": 200,
+      "alive_status": 200,
+      "webdriver": false,
+      "body_length": 15229,
+      "result": "passed_no_renderer_crash"
+    },
+    {
+      "surface": "pixelscan",
+      "url": "https://pixelscan.net/fingerprint-check",
+      "title": "Check browser fingerprinting with Pixelscan 🔎Analyze your digital trail",
+      "eval_status": 200,
+      "alive_status": 200,
+      "webdriver": false,
+      "body_length": 11390,
+      "result": "passed_no_renderer_crash"
+    }
+  ],
+  "local_artifacts": [
+    "/tmp/browseforge-detector-matrix-final.json"
+  ],
+  "release_grade": false,
+  "remaining_blockers": [
+    "This is a headed macOS arm64 smoke matrix, not a full detector-grade recertification across all surfaces and platforms.",
+    "Linux arm64 detector and Playwright Bind parity gates remain governed by existing release blockers."
+  ]
+}

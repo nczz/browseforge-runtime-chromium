@@ -52,6 +52,57 @@ bool FontFaceSet::check(const String& font_string,
 }  // namespace blink
 '''
 
+CSS_FONT_SELECTOR_FIXTURE = '''#include "third_party/blink/renderer/core/css/css_font_selector.h"
+
+#include "build/build_config.h"
+
+namespace blink {
+
+namespace {
+
+void ExistingHelper() {}
+
+}  // namespace
+
+const FontData* CSSFontSelector::GetFontData(
+    const FontDescription& font_description,
+    const FontFamily& font_family) {
+  const auto& family_name = font_family.FamilyName();
+  Document& document = GetTreeScope()->GetDocument();
+  if (!font_family.FamilyIsGeneric()) {
+    if (CSSSegmentedFontFace* face =
+            font_face_cache_->Get(request_description, family_name)) {
+      return face->GetFontData(request_description);
+    }
+  }
+  return nullptr;
+}
+
+}  // namespace blink
+'''
+
+CSS_FONT_FAMILY_VALUE_FIXTURE = '''#include "third_party/blink/renderer/core/css/css_font_family_value.h"
+
+namespace blink {
+
+CSSFontFamilyValue* CSSFontFamilyValue::Create(
+    const AtomicString& family_name) {
+  if (family_name.IsNull()) {
+    return MakeGarbageCollected<CSSFontFamilyValue>(family_name);
+  }
+  CSSValuePool::FontFamilyValueCache::AddResult entry =
+      CssValuePool().GetFontFamilyCacheEntry(family_name);
+  if (!entry.stored_value->value) {
+    entry.stored_value->value =
+        MakeGarbageCollected<CSSFontFamilyValue>(family_name);
+  }
+  return entry.stored_value->value.Get();
+}
+
+}  // namespace blink
+'''
+
+
 
 class ApplyFontsPatchTests(unittest.TestCase):
     def test_patches_font_face_set_check(self) -> None:
@@ -73,6 +124,16 @@ class ApplyFontsPatchTests(unittest.TestCase):
         self.assertIn('case BrowseForgeFontAllowlistDecision::kDenied:', patched)
         self.assertIn('return false;', patched)
         self.assertIn('case BrowseForgeFontAllowlistDecision::kNoAllowlist:', patched)
+        selector = apply_fonts_patch.patch_css_font_selector(CSS_FONT_SELECTOR_FIXTURE)
+        self.assertIn('BrowseForgeCSSFontFamilyBlocked', selector)
+        self.assertIn('!font_family.FamilyIsGeneric()', selector)
+        self.assertIn('"Hiragino Sans W0"', selector)
+        self.assertIn('#include <unordered_set>', selector)
+        self.assertIn('#include "base/command_line.h"', selector)
+        family_value = apply_fonts_patch.patch_css_font_family_value(CSS_FONT_FAMILY_VALUE_FIXTURE)
+        self.assertIn('BrowseForgeSanitizeFontFamilyName', family_value)
+        self.assertIn('"Hiragino Sans W0"', family_value)
+        self.assertIn('sanitized_family_name', family_value)
         self.assertIn('break;', patched)
         self.assertIn('return BrowseForgeFontAllowlistDecision::kDenied;', patched)
 
@@ -111,15 +172,25 @@ class ApplyFontsPatchTests(unittest.TestCase):
             src = Path(td) / "src"
             (src / ".git").mkdir(parents=True)
             font_path = src / apply_fonts_patch.FONT_FACE_SET_CC
-            font_path.parent.mkdir(parents=True)
+            selector_path = src / apply_fonts_patch.CSS_FONT_SELECTOR_CC
+            family_value_path = src / apply_fonts_patch.CSS_FONT_FAMILY_VALUE_CC
+            font_path.parent.mkdir(parents=True, exist_ok=True)
+            selector_path.parent.mkdir(parents=True, exist_ok=True)
+            family_value_path.parent.mkdir(parents=True, exist_ok=True)
             font_path.write_text(FONT_FACE_SET_FIXTURE, encoding="utf-8")
+            selector_path.write_text(CSS_FONT_SELECTOR_FIXTURE, encoding="utf-8")
+            family_value_path.write_text(CSS_FONT_FAMILY_VALUE_FIXTURE, encoding="utf-8")
 
             changed = apply_fonts_patch.apply_patch(src)
 
-            self.assertEqual([apply_fonts_patch.FONT_FACE_SET_CC], changed)
+            self.assertEqual([apply_fonts_patch.FONT_FACE_SET_CC, apply_fonts_patch.CSS_FONT_SELECTOR_CC, apply_fonts_patch.CSS_FONT_FAMILY_VALUE_CC], changed)
             content = font_path.read_text(encoding="utf-8")
+            selector = selector_path.read_text(encoding="utf-8")
+            family_value = family_value_path.read_text(encoding="utf-8")
             self.assertIn('fingerprint-fonts-list', content)
             self.assertIn('BrowseForgeFontFamilyAllowlistDecision(font_string)', content)
+            self.assertIn('BrowseForgeCSSFontFamilyBlocked', selector)
+            self.assertIn('BrowseForgeSanitizeFontFamilyName', family_value)
 
 
 if __name__ == "__main__":

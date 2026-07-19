@@ -6,6 +6,8 @@ from pathlib import Path
 
 DEFAULT_CHROMIUM_SRC = Path("/Users/chun/Projects/browser-source/browseforge-chromium/src")
 FONT_FACE_SET_CC = Path("third_party/blink/renderer/core/css/font_face_set.cc")
+CSS_FONT_SELECTOR_CC = Path("third_party/blink/renderer/core/css/css_font_selector.cc")
+CSS_FONT_FAMILY_VALUE_CC = Path("third_party/blink/renderer/core/css/css_font_family_value.cc")
 
 UNORDERED_SET_INCLUDE = '#include <unordered_set>\n'
 COMMAND_LINE_INCLUDE = '#include "base/command_line.h"\n'
@@ -502,11 +504,82 @@ LEGACY_PATCHED_CHECK_PREFIX = '''  const Font* font = ResolveFontStyle(font_stri
 '''
 
 
+CSS_FONT_SELECTOR_INCLUDE_ANCHOR = '#include "third_party/blink/renderer/core/css/css_font_selector.h"\n\n'
+CSS_FONT_SELECTOR_INCLUDES = '#include <unordered_set>\n\n#include "base/command_line.h"\n'
+CSS_FONT_SELECTOR_NAMESPACE_ANCHOR = 'namespace {\n\n'
+CSS_FONT_SELECTOR_HELPER = '''bool BrowseForgeCSSFontFamilyBlocked(const AtomicString& family_name) {
+  if (family_name.empty()) {
+    return false;
+  }
+  if (family_name != AtomicString("Hiragino Sans W0")) {
+    return false;
+  }
+  const std::string fonts = base::CommandLine::ForCurrentProcess()
+                                ->GetSwitchValueASCII("fingerprint-fonts-list");
+  if (fonts.empty()) {
+    return false;
+  }
+  // BrowserLeaks' macOS dictionary includes this invalid synthetic Hiragino
+  // weight family. Treat it as unavailable before platform font matching; the
+  // real configured family remains "Hiragino Sans".
+  return true;
+}
+
+'''
+ORIGINAL_GET_FONT_DATA_PREFIX = '''const FontData* CSSFontSelector::GetFontData(
+    const FontDescription& font_description,
+    const FontFamily& font_family) {
+  const auto& family_name = font_family.FamilyName();
+  Document& document = GetTreeScope()->GetDocument();
+'''
+PATCHED_GET_FONT_DATA_PREFIX = ORIGINAL_GET_FONT_DATA_PREFIX
+ORIGINAL_SEGMENTED_FONT_FACE_CHECK = '''  if (!font_family.FamilyIsGeneric()) {
+'''
+PATCHED_SEGMENTED_FONT_FACE_CHECK = '''  if (!font_family.FamilyIsGeneric() &&
+      !BrowseForgeCSSFontFamilyBlocked(family_name)) {
+'''
+CSS_FONT_FAMILY_VALUE_ANCHOR = 'namespace blink {\n\n'
+CSS_FONT_FAMILY_VALUE_HELPER = '''namespace {
+
+const AtomicString& BrowseForgeSanitizeFontFamilyName(
+    const AtomicString& family_name) {
+  static const AtomicString* fallback = new AtomicString("sans-serif");
+  if (family_name == AtomicString("Hiragino Sans W0")) {
+    return *fallback;
+  }
+  return family_name;
+}
+
+}  // namespace
+
+'''
+ORIGINAL_FONT_FAMILY_VALUE_CACHE = '''  CSSValuePool::FontFamilyValueCache::AddResult entry =
+      CssValuePool().GetFontFamilyCacheEntry(family_name);
+  if (!entry.stored_value->value) {
+    entry.stored_value->value =
+        MakeGarbageCollected<CSSFontFamilyValue>(family_name);
+  }
+'''
+PATCHED_FONT_FAMILY_VALUE_CACHE = '''  const AtomicString& sanitized_family_name =
+      BrowseForgeSanitizeFontFamilyName(family_name);
+  CSSValuePool::FontFamilyValueCache::AddResult entry =
+      CssValuePool().GetFontFamilyCacheEntry(sanitized_family_name);
+  if (!entry.stored_value->value) {
+    entry.stored_value->value =
+        MakeGarbageCollected<CSSFontFamilyValue>(sanitized_family_name);
+  }
+'''
+
+
 def validate_chromium_src(src: Path) -> None:
     if not (src / ".git").exists():
         raise SystemExit(f"Chromium source checkout is not ready: {src}")
     if not (src / FONT_FACE_SET_CC).is_file():
         raise SystemExit(f"Chromium FontFaceSet source file is missing: {src / FONT_FACE_SET_CC}")
+    if not (src / CSS_FONT_SELECTOR_CC).is_file():
+        raise SystemExit(f"Chromium CSSFontSelector source file is missing: {src / CSS_FONT_SELECTOR_CC}")
+    if not (src / CSS_FONT_FAMILY_VALUE_CC).is_file():
+        raise SystemExit(f"Chromium CSSFontFamilyValue source file is missing: {src / CSS_FONT_FAMILY_VALUE_CC}")
 
 
 def ensure_include(text: str) -> str:
@@ -544,6 +617,50 @@ def patch_font_face_set(text: str) -> str:
     return patched.replace(ORIGINAL_CHECK_PREFIX, PATCHED_CHECK_PREFIX, 1)
 
 
+def patch_css_font_selector(text: str) -> str:
+    patched = text
+    if CSS_FONT_SELECTOR_INCLUDES not in patched:
+        if CSS_FONT_SELECTOR_INCLUDE_ANCHOR not in patched:
+            raise SystemExit("css_font_selector.cc include anchor not found")
+        patched = patched.replace(
+            CSS_FONT_SELECTOR_INCLUDE_ANCHOR,
+            CSS_FONT_SELECTOR_INCLUDE_ANCHOR + CSS_FONT_SELECTOR_INCLUDES,
+            1,
+        )
+    if CSS_FONT_SELECTOR_HELPER not in patched:
+        if CSS_FONT_SELECTOR_NAMESPACE_ANCHOR not in patched:
+            raise SystemExit("css_font_selector.cc namespace anchor not found")
+        patched = patched.replace(
+            CSS_FONT_SELECTOR_NAMESPACE_ANCHOR,
+            CSS_FONT_SELECTOR_NAMESPACE_ANCHOR + CSS_FONT_SELECTOR_HELPER,
+            1,
+        )
+    if ORIGINAL_GET_FONT_DATA_PREFIX not in patched:
+        raise SystemExit("CSSFontSelector::GetFontData implementation anchor not found")
+    if PATCHED_SEGMENTED_FONT_FACE_CHECK in patched:
+        return patched
+    if ORIGINAL_SEGMENTED_FONT_FACE_CHECK not in patched:
+        raise SystemExit("CSSFontSelector segmented font face anchor not found")
+    return patched.replace(ORIGINAL_SEGMENTED_FONT_FACE_CHECK, PATCHED_SEGMENTED_FONT_FACE_CHECK, 1)
+
+def patch_css_font_family_value(text: str) -> str:
+    patched = text
+    if CSS_FONT_FAMILY_VALUE_HELPER not in patched:
+        if CSS_FONT_FAMILY_VALUE_ANCHOR not in patched:
+            raise SystemExit("css_font_family_value.cc namespace anchor not found")
+        patched = patched.replace(
+            CSS_FONT_FAMILY_VALUE_ANCHOR,
+            CSS_FONT_FAMILY_VALUE_ANCHOR + CSS_FONT_FAMILY_VALUE_HELPER,
+            1,
+        )
+    if PATCHED_FONT_FAMILY_VALUE_CACHE in patched:
+        return patched
+    if ORIGINAL_FONT_FAMILY_VALUE_CACHE not in patched:
+        raise SystemExit("CSSFontFamilyValue::Create cache anchor not found")
+    return patched.replace(ORIGINAL_FONT_FAMILY_VALUE_CACHE, PATCHED_FONT_FAMILY_VALUE_CACHE, 1)
+
+
+
 def write_if_changed(path: Path, content: str) -> bool:
     original = path.read_text(encoding="utf-8")
     if content == original:
@@ -554,9 +671,13 @@ def write_if_changed(path: Path, content: str) -> bool:
 
 def apply_patch(src: Path) -> list[Path]:
     validate_chromium_src(src)
-    path = src / FONT_FACE_SET_CC
-    write_if_changed(path, patch_font_face_set(path.read_text(encoding="utf-8")))
-    return [FONT_FACE_SET_CC]
+    font_face_path = src / FONT_FACE_SET_CC
+    css_selector_path = src / CSS_FONT_SELECTOR_CC
+    css_family_value_path = src / CSS_FONT_FAMILY_VALUE_CC
+    write_if_changed(font_face_path, patch_font_face_set(font_face_path.read_text(encoding="utf-8")))
+    write_if_changed(css_selector_path, patch_css_font_selector(css_selector_path.read_text(encoding="utf-8")))
+    write_if_changed(css_family_value_path, patch_css_font_family_value(css_family_value_path.read_text(encoding="utf-8")))
+    return [FONT_FACE_SET_CC, CSS_FONT_SELECTOR_CC, CSS_FONT_FAMILY_VALUE_CC]
 
 
 def main() -> None:
@@ -569,7 +690,9 @@ def main() -> None:
     validate_chromium_src(src)
     if args.check:
         patch_font_face_set((src / FONT_FACE_SET_CC).read_text(encoding="utf-8"))
+        patch_css_font_selector((src / CSS_FONT_SELECTOR_CC).read_text(encoding="utf-8"))
         print(f"ready: {src / FONT_FACE_SET_CC}")
+        print(f"ready: {src / CSS_FONT_SELECTOR_CC}")
         return
     for path in apply_patch(src):
         print(path.as_posix())
