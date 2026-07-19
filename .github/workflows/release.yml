@@ -25,6 +25,16 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Download pre-staged release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          if ! gh release download "${RUNTIME_VERSION}" --repo "${GITHUB_REPOSITORY}" --dir dist --clobber; then
+            echo "No pre-staged release assets found for ${RUNTIME_VERSION}; expecting dist/ to be populated by an earlier packaging step."
+          fi
+
       - name: Validate repository contracts
         run: python3 scripts/validate.py
 
