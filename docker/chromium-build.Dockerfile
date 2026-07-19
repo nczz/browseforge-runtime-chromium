@@ -11,6 +11,7 @@ RUN apt-get update \
         lsb-release \
         python3 \
         python3-pkg-resources \
+        ninja-build \
         sudo \
         xz-utils \
     && rm -rf /var/lib/apt/lists/*

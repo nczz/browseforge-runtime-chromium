@@ -680,13 +680,13 @@
         "internal/launcher/launcher_test.go",
         "chromium/src/third_party/blink/renderer/core/css/font_face_set.cc"
       ],
-      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence. Strict native mode suppresses --fingerprint-fonts-dir and --fingerprint-fonts-list emission, because strict mode must prefer installed native font corpus behavior over FontFaceSet allowlist masking until metric and glyph parity are proven.",
+      "notes": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() parses the accepted CSS font shorthand, including numeric and keyword font-size forms, then returns true for matching family names and false for non-listed families. The launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires rebuilt artifacts and live font evidence. Strict native mode keeps the explicit font corpus switches until a real native font corpus consumer exists, but this remains an active-spoof risk until font metrics and glyph parity are proven.",
       "patchset_id": "surface-font-face-set-native-list-override",
       "risk_level": "high",
       "surface": "fonts",
       "symbols_touched": [
         "blink::FontFaceSet::check",
-        "BrowseForgeFontFamilyAllowed",
+        "BrowseForgeFontFamilyAllowlistDecision",
         "launcher.FingerprintConfig.Fonts",
         "launcher.validateFonts",
         "launcher.strictNativeMode"
@@ -727,6 +727,34 @@
         "python3 scripts/chromium_source.py check"
       ],
       "title": "BrowseForge Linux process-priority failure warning for Chromium M150",
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "detectors_addressed": [
+        "iphey",
+        "browserleaks",
+        "creepjs"
+      ],
+      "files_touched": [
+        "scripts/apply_style_resolver_patch.py",
+        "tests/test_apply_style_resolver_patch.py",
+        "chromium/src/third_party/blink/renderer/core/css/resolver/style_resolver.cc"
+      ],
+      "notes": "When DCHECK builds hit a base computed style optimization mismatch during animation style recalc, log the mismatch and keep the freshly recomputed no-cache style instead of aborting. This is a debug/runtime stability recovery for detector pages such as IPhey that trigger style_resolver.cc DCHECKs; it does not claim a detector fingerprint pass until a rebuilt Chromium artifact is smoke-tested.",
+      "patchset_id": "surface-style-resolver-dcheck-recovery",
+      "risk_level": "medium",
+      "surface": "style_resolver",
+      "symbols_touched": [
+        "blink::StyleResolver::ApplyBaseStyle",
+        "ComputeBaseComputedStyleDiff",
+        "MaybeResetCascade"
+      ],
+      "tests": [
+        "python3 -m unittest tests.test_apply_style_resolver_patch",
+        "python3 scripts/apply_style_resolver_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "title": "BrowseForge style resolver DCHECK recovery for Chromium M150",
       "upstream_status": "applied_to_external_checkout_not_release_built"
     },
     {

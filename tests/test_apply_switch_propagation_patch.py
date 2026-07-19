@@ -65,6 +65,22 @@ class ApplySwitchPropagationPatchTests(unittest.TestCase):
         patched_twice = apply_switch_propagation_patch.patch_switch_propagation(patched_once)
         self.assertEqual(patched_once, patched_twice)
 
+    def test_repairs_duplicate_browseforge_switch_blocks(self) -> None:
+        patched_once = apply_switch_propagation_patch.patch_switch_propagation(RENDER_HOST_FIXTURE)
+        duplicate = patched_once.replace(
+            '      "fingerprint-hardware-concurrency",\n',
+            '      "fingerprint-hardware-concurrency",\n'
+            '      "browseforge-stealth-mode",\n'
+            '      "fingerprint-timezone",\n',
+            1,
+        )
+
+        patched = apply_switch_propagation_patch.patch_switch_propagation(duplicate)
+
+        self.assertEqual(1, patched.count('"browseforge-stealth-mode"'))
+        self.assertEqual(1, patched.count('"fingerprint-timezone"'))
+        self.assertEqual(1, patched.count('"fingerprint-fonts-list"'))
+
     def test_apply_patch_updates_external_checkout_shape(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "src"

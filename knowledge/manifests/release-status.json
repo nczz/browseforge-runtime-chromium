@@ -1,5 +1,5 @@
 {
-  "blocker_count": 26,
+  "blocker_count": 27,
   "blockers": [
     {
       "blocker_id": "browseforge-integration:0",
@@ -161,6 +161,15 @@
       "surface": "cross-platform drift"
     },
     {
+      "blocker_id": "fingerprint-surface:fonts",
+      "detail": "Packaged detector evidence covers bounded font probes, but live Pixelscan evidence still shows broad host/native font inventory risk. The source-level FontFaceSet patch now constrains document.fonts.check() to the explicit --fingerprint-fonts-list corpus when configured, parses accepted CSS shorthands with numeric or keyword font-size forms, returns false for non-listed families, and falls back to native behavior only when no list is supplied. Launcher strict native mode keeps the explicit font corpus switches because browser/stealth native persona structs do not yet consume font families. Host glyph/raster metrics, CSS text layout, local-font APIs, and cross-OS corpus parity remain release-blocking risks.",
+      "result": "warn_explicit_font_allowlist_enforced_but_metrics_unproven",
+      "severity": "high",
+      "source": "knowledge/manifests/fingerprint-surface-status.json",
+      "status": "detector_tested",
+      "surface": "fonts"
+    },
+    {
       "blocker_id": "fingerprint-surface:proxy/IP coherence",
       "detail": "Linux arm64 proxy/IP coherence remains blocked: iphey headed Docker direct evidence is committed as detector_unreachable after Runtime.evaluate failed, and proxy/native-host matrix rows remain coverage gaps. Existing macOS arm64 headed external-proxy detector evidence remains committed and sanitized.",
       "result": "blocked_linux_arm64_iphey_and_proxy_matrix",
@@ -279,17 +288,17 @@
       "source": "knowledge/manifests/signing-policy.json"
     }
   ],
-  "generated_at": "2026-07-16T10:35:39Z",
+  "generated_at": "2026-07-19T03:46:38Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "a010ccc9efe180339b7704e471befe21651c32ecaaf8ee2e3b2b8fe1ecc13957",
     "detector-summary.json": "62e2b76af3c732180d132f4153747a12fb67c5787f8d2dc7609f0e4bb7468964",
     "knowledge/manifests/detector-score-comparison.json": "139ba3340655a40ac570910d4b14dfdd2ff87365b0350cab9b75aec6a6c9b33f",
-    "knowledge/manifests/fingerprint-surface-status.json": "4968628c4423ec7686fe81f7cb8c68acab751cdb60d71818312ba5fcd5f69a9b",
+    "knowledge/manifests/fingerprint-surface-status.json": "1d3c912c84f791bf12f8c8e9ccb360f781742c7ee636533fcbcc46d2bf9fa6d6",
     "knowledge/manifests/native-artifact-preflight.json": "1bbf415aeffbf04c6b68f8af5e64969e82b6a9e51dd995547ff7cbdb8eb10b89",
     "knowledge/manifests/proxy-preflight.json": "537c26886126a6fdc8ed5677f90d23e22888e2e5f2e3484f609d4a3b53c99b18",
     "knowledge/manifests/release-gates.json": "ce11248730823534f5d400c9038f72227597ba575eb3f24dfbdf8f2055c09779",
     "knowledge/manifests/signing-policy.json": "909a86d547664ae26b14833416b091748dc509ad1d582b283772620e38d43268",
-    "knowledge/manifests/source-acquisition.json": "1efb06cfd478f949314c513595a3b7877a7339dcc4e5ba96578ee4962fbcb3fe"
+    "knowledge/manifests/source-acquisition.json": "f70017acfaa9377a37bece649d1d9755dcdc05073e3314ce6b61bfcf1b613670"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",

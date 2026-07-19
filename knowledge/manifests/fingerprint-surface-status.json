@@ -71,7 +71,8 @@
     "Linux arm64 package evidence records a real linux/arm64 container build with aarch64 runtime smoke, ARM aarch64 BrowseForge and Chromium binaries, BrowseForge browsers status ready, profile/session launch, REST smoke, MCP initialize smoke, and no Rosetta/Crashpad startup failure patterns.",
     "Linux arm64 detector evidence is committed under detectors/evidence/v0.1.0-alpha.0/linux-arm64 for BrowserLeaks, BrowserLeaks WebRTC, BrowserScan, CreepJS, iphey, Pixelscan, and SannySoft. SannySoft passes; BrowserLeaks/BrowserScan/CreepJS/Pixelscan/WebRTC remain warning-level; iphey is blocked by collector Runtime.evaluate failure.",
     "Linux arm64 Playwright Bind has not been independently exercised in the arm64 container; REST and MCP are proven, but Bind remains an alpha promotion blocker rather than an inferred pass.",
-    "Math/libm, CSS hyphenation/text layout, WebAudio backing-array semantics, and WASM/JS numeric parity are now explicit policy-gated surfaces in knowledge/manifests/fingerprint-parity-gates.json; they remain release blockers until local oracle probes and target-platform evidence exist."
+    "Math/libm, CSS hyphenation/text layout, WebAudio backing-array semantics, and WASM/JS numeric parity are now explicit policy-gated surfaces in knowledge/manifests/fingerprint-parity-gates.json; they remain release blockers until local oracle probes and target-platform evidence exist.",
+    "FontFaceSet.check now treats --fingerprint-fonts-list as an explicit allowlist: accepted CSS font shorthands with numeric or keyword font-size forms can return true for configured families, non-listed families return false, and absent lists retain native Chromium behavior. Launcher strict native mode keeps --fingerprint-fonts-list/--fingerprint-fonts-dir because the native persona scaffold does not yet consume font families; host glyph/raster metrics and local-font surfaces remain release blockers."
   ],
   "release_grade": false,
   "runtime_id": "browseforge-chromium",
@@ -167,10 +168,10 @@
       "surface": "AudioContext"
     },
     {
-      "evidence": "Packaged Linux SannySoft/CDP smoke plus BrowserLeaks/Pixelscan/iphey/BrowserScan/CreepJS page-context collectors reported document.fonts.check availability for sampled desktop font families. BrowserLeaks Fonts headless and headed Docker/Xvfb page evidence plus CreepJS page context record bounded font metric rows plus aggregate glyph and metrics SHA-256 values; detector-score-comparison.json reports matching BrowserLeaks headless/headed sampled font list, candidate count, glyph SHA, and metrics SHA, matching BrowserLeaks/CreepJS sampled font list/candidate count/glyph SHA with differing metric SHA, and passing Pixelscan headless-vs-headed font availability comparison. Packaged macOS BrowserLeaks, CreepJS, and Pixelscan headed direct evidence now records bounded native font metrics/availability and detector-score-comparison.json has no native_headed_font_corpus_parity_missing baseline gap. External proxy and Windows matrix evidence remain tracked separately under proxy/IP coherence and cross-platform drift. Packaged detector evidence covers font surfaces; BrowseForge runtime CLI now binds repeatable -fingerprint-font values into --fingerprint-fonts-list so config and flag paths both reach the native font list switch when not in strict native mode. Linux arm64 headed Docker direct detector evidence is committed and treated as warning-level alpha evidence unless a detector-specific pass is recorded.",
-      "release_blocker": false,
-      "result": "pass_cli_fonts_binding",
-      "severity": "info",
+      "evidence": "Packaged detector evidence covers bounded font probes, but live Pixelscan evidence still shows broad host/native font inventory risk. The source-level FontFaceSet patch now constrains document.fonts.check() to the explicit --fingerprint-fonts-list corpus when configured, parses accepted CSS shorthands with numeric or keyword font-size forms, returns false for non-listed families, and falls back to native behavior only when no list is supplied. Launcher strict native mode keeps the explicit font corpus switches because browser/stealth native persona structs do not yet consume font families. Host glyph/raster metrics, CSS text layout, local-font APIs, and cross-OS corpus parity remain release-blocking risks.",
+      "release_blocker": true,
+      "result": "warn_explicit_font_allowlist_enforced_but_metrics_unproven",
+      "severity": "high",
       "status": "detector_tested",
       "surface": "fonts"
     },

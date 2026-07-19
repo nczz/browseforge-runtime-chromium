@@ -53,6 +53,15 @@ class ChromiumNativePlanTests(unittest.TestCase):
             (depot_tools / tool).write_text("#!/bin/sh\n", encoding="utf-8")
         return src, depot_tools
 
+    def _write_patchset_manifest_fixture(self, runtime_root: Path) -> None:
+        manifests = runtime_root / "knowledge" / "manifests"
+        manifests.mkdir(parents=True, exist_ok=True)
+        (manifests / "patchset.json").write_text(
+            json.dumps({"patchsets": [{"patchset_id": "test-patchset"}]}),
+            encoding="utf-8",
+        )
+
+
     def _macos_check_status(self, workdir: Path, runtime_root: Path) -> dict:
         stdout = io.StringIO()
         argv = [
@@ -65,6 +74,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
             "--out-dir",
             "out/TestMacArm64",
         ]
+        self._write_patchset_manifest_fixture(runtime_root)
         with (
             mock.patch.object(chromium_native, "ROOT", runtime_root),
             mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
@@ -111,7 +121,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 self.assertEqual(platform_id, package_command[package_command.index("--platform") + 1])
                 self.assertEqual(platform_id, payload["commands"]["package"][package_command.index("--platform") + 1])
                 self.assertEqual(str(ROOT / "dist"), package_command[package_command.index("--output-dir") + 1])
-                self.assertEqual("surface-switch-propagation-native-audit", package_command[package_command.index("--patchset-id") + 1])
+                self.assertEqual(chromium_native.latest_patchset_id(), package_command[package_command.index("--patchset-id") + 1])
                 self.assertEqual("alpha", package_command[package_command.index("--release-channel") + 1])
 
     def test_macos_x64_plan_uses_darwin_amd64_wrapper(self) -> None:
@@ -250,8 +260,10 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "--out-dir",
                 "out/TestMacArm64",
             ]
+            runtime_root = tmp_path / "runtime"
+            self._write_patchset_manifest_fixture(runtime_root)
             with (
-                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
                 mock.patch.object(sys, "argv", argv),
                 mock.patch.object(chromium_native.shutil, "which", return_value=None),
                 mock.patch("sys.stdout", stdout),
@@ -365,9 +377,11 @@ class ChromiumNativePlanTests(unittest.TestCase):
                     "out/TestMacArm64",
                     "--execute",
                 ]
+                runtime_root = tmp_path / "runtime"
+                self._write_patchset_manifest_fixture(runtime_root)
                 with (
                     mock.patch.object(sys, "argv", argv),
-                    mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                    mock.patch.object(chromium_native, "ROOT", runtime_root),
                     mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
                     mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
                     mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
@@ -407,9 +421,11 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "out/TestMacArm64",
                 "--execute",
             ]
+            runtime_root = tmp_path / "runtime"
+            self._write_patchset_manifest_fixture(runtime_root)
             with (
                 mock.patch.object(sys, "argv", argv),
-                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
                 mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
                 mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
                 mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
@@ -449,9 +465,11 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "out/TestMacArm64",
                 "--execute",
             ]
+            runtime_root = tmp_path / "runtime"
+            self._write_patchset_manifest_fixture(runtime_root)
             with (
                 mock.patch.object(sys, "argv", argv),
-                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
                 mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
                 mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
                 mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
@@ -490,9 +508,11 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "out/TestMacArm64",
                 "--execute",
             ]
+            runtime_root = tmp_path / "runtime"
+            self._write_patchset_manifest_fixture(runtime_root)
             with (
                 mock.patch.object(sys, "argv", argv),
-                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
                 mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
                 mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
                 mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
@@ -532,9 +552,11 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 "out/TestMacArm64",
                 "--execute",
             ]
+            runtime_root = tmp_path / "runtime"
+            self._write_patchset_manifest_fixture(runtime_root)
             with (
                 mock.patch.object(sys, "argv", argv),
-                mock.patch.object(chromium_native, "ROOT", tmp_path / "runtime"),
+                mock.patch.object(chromium_native, "ROOT", runtime_root),
                 mock.patch.object(chromium_native, "host_os_name", return_value="darwin"),
                 mock.patch.object(chromium_native.shutil, "which", side_effect=lambda name: "/usr/bin/xcodebuild" if name == "xcodebuild" else None),
                 mock.patch.object(chromium_native.subprocess, "run", side_effect=fake_run) as xcodebuild_run,
@@ -677,6 +699,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
             )
             workdir = tmp_path / "chromium"
             self._write_native_checkout_fixtures(workdir)
+            self._write_patchset_manifest_fixture(runtime_root)
             stdout = io.StringIO()
             argv = [
                 "chromium_native.py",
@@ -770,6 +793,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 json.dumps({"supported_package_platforms": ["macos-x64"], "artifacts": []}),
                 encoding="utf-8",
             )
+            self._write_patchset_manifest_fixture(runtime_root)
             workdir = tmp_path / "chromium"
             self._write_native_checkout_fixtures(workdir)
             stdout = io.StringIO()
@@ -821,6 +845,7 @@ class ChromiumNativePlanTests(unittest.TestCase):
                 json.dumps({"supported_package_platforms": ["linux-x64", "macos-arm64", "macos-x64", "windows-x64"], "artifacts": []}),
                 encoding="utf-8",
             )
+            self._write_patchset_manifest_fixture(runtime_root)
             output = tmp_path / "native-artifact-preflight.json"
             argv = [
                 "chromium_native.py",

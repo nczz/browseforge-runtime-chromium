@@ -65,7 +65,7 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn("bf-test:deps", build_chrome)
         self.assertIn(f"{workdir}:/work/chromium", build_chrome)
         self.assertEqual("/work/chromium/src", build_chrome[build_chrome.index("-w") + 1])
-        self.assertEqual(["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j4 -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
+        self.assertEqual(["bash", "-lc", "if ! command -v /usr/bin/ninja >/dev/null 2>&1; then apt-get update && apt-get install -y --no-install-recommends ninja-build; fi; if [ ! -x buildtools/linux64/gn ]; then echo 'missing Chromium Linux GN at buildtools/linux64/gn; run scripts/chromium_docker.py sync-linux-deps --runtime-platform linux-x64 --execute before build-chrome' >&2; exit 1; fi; /usr/bin/ninja -j4 -C out/BrowseForgeLinuxDocker chrome"], build_chrome[-3:])
         self.assertEqual(4, payload["jobs"])
 
     def test_plan_supports_linux_arm64_runtime_platform(self) -> None:
@@ -91,6 +91,7 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertEqual("out/BrowseForgeLinuxArm64Docker", payload["out_dir"])
         self.assertEqual(str(workdir / "src" / "out" / "BrowseForgeLinuxArm64Docker" / "chrome"), payload["output_binary"])
         self.assertIn('target_cpu="arm64"', payload["gn_args"])
+        self.assertIn("use_siso=false", payload["gn_args"])
         self.assertIn("linux/arm64", payload["commands"]["build-image"])
         self.assertIn("linux/arm64", payload["commands"]["gn-gen"])
         self.assertIn("libglib2.0-0:amd64", payload["commands"]["install-linux-deps"][-1])
@@ -129,7 +130,11 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertEqual(8, payload["jobs"])
         self.assertEqual(
-            ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && autoninja -j8 -C out/BrowseForgeLinuxDocker chrome"],
+            [
+                "bash",
+                "-lc",
+                "if ! command -v /usr/bin/ninja >/dev/null 2>&1; then apt-get update && apt-get install -y --no-install-recommends ninja-build; fi; if [ ! -x buildtools/linux64/gn ]; then echo 'missing Chromium Linux GN at buildtools/linux64/gn; run scripts/chromium_docker.py sync-linux-deps --runtime-platform linux-x64 --execute before build-chrome' >&2; exit 1; fi; /usr/bin/ninja -j8 -C out/BrowseForgeLinuxDocker chrome",
+            ],
             payload["commands"]["build-chrome"][-3:],
         )
 
@@ -211,6 +216,9 @@ class ChromiumDockerPlanTests(unittest.TestCase):
         self.assertIn('target_os="linux"', plan.gn_args)
         self.assertIn('target_cpu="x64"', plan.gn_args)
         self.assertIn("proprietary_codecs=true", plan.gn_args)
+        self.assertIn("buildtools/linux64/gn", plan.commands["build-chrome"][-1])
+        self.assertIn("use_siso=false", plan.gn_args)
+        self.assertIn("/usr/bin/ninja", plan.commands["build-chrome"][-1])
         self.assertIn('ffmpeg_branding="Chrome"', plan.gn_args)
 
     def test_check_reports_source_and_dockerfile_state(self) -> None:

@@ -16,7 +16,7 @@
   "global_findings": [
     "The strongest current practices are native source-level changes, explicit command-line switches, launcher-side validation, upstream fallback when disabled, and detector evidence gates.",
     "The weakest practices are inherently partial spoof surfaces: WebRTC DOM candidate rewriting, WebGL string-only masking, FontFaceSet.check allowlists, and runtime-enabled feature flips without full backend behavior evidence.",
-    "Strict native mode suppression for canvas/audio/WebGL/fonts is a good guardrail because coherent native behavior is often safer than partial synthetic spoofing.",
+    "Strict native mode suppression for canvas/audio/WebGL is a good guardrail because coherent native behavior is often safer than partial synthetic spoofing; font allowlists remain an explicit release blocker until backed by real corpus metrics and glyph evidence.",
     "Exact text-anchor patch scripts are acceptable for a pinned Chromium ref because they fail closed and have tests; for repeated Chromium upgrades they must be paired with semantic upstream symbol review and detector recertification.",
     "No high-risk patch should be promoted from source-compatible to release-grade without a rebuilt artifact, live detector evidence, and cross-surface coherence checks.",
     "Browser-side UA-CH request metadata remains the highest identity-surface gap; DOM uaData evidence cannot stand in for Sec-CH-UA-* header evidence.",
@@ -634,11 +634,11 @@
     },
     {
       "best_practice_verdict": "risky_as_active_spoof",
-      "claim_policy": "strict_suppressed_until_real_font_corpus_and_metrics",
-      "method_summary": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() returns true for matching family names; the launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires a patched Chromium artifact and live font evidence. Strict native mode suppresses --fingerprint-fonts-dir and --fingerprint-fonts-list emission, because strict mode ",
+      "claim_policy": "active_spoof_blocked_until_real_font_corpus_and_metrics",
+      "method_summary": "When --fingerprint-fonts-list contains a pipe-delimited printable ASCII font family allowlist, FontFaceSet.check() parses the accepted CSS font shorthand, including numeric and keyword font-size forms, then returns true for matching family names and false for non-listed families. The launcher rejects empty entries, pipe separators, non-printable/non-ASCII names, entries above 128 bytes, or encoded lists above 8192 bytes before command-plan emission. This targets detector font availability probes such as document.fonts.check() and does not claim metric coherence, glyph raster parity, or actual font file installation; release detector pass still requires rebuilt artifacts and live font evidence. Strict native mode currently keeps the explicit font corpus switches until a real native font corpus consumer exists, but this remains an active-spoof risk until font metrics and glyph parity are proven.",
       "patchset_id": "surface-font-face-set-native-list-override",
       "rationale": "FontFaceSet.check allowlist covers availability probes but not glyph rasterization, metrics, fallback, or actual installed font files.",
-      "recommendation": "Prefer installed per-OS font corpus plus glyph/metrics validation; keep allowlist-only FontFaceSet.check spoofing strict-suppressed.",
+      "recommendation": "Prefer installed per-OS font corpus plus glyph/metrics validation; keep the explicit allowlist treated as release-blocking active spoofing until parity evidence exists.",
       "required_evidence": [
         "python3 -m unittest tests.test_apply_fonts_patch",
         "python3 scripts/apply_fonts_patch.py --check",
@@ -655,7 +655,7 @@
       ],
       "upgrade_watch_symbols": [
         "blink::FontFaceSet::check",
-        "BrowseForgeFontFamilyAllowed",
+        "BrowseForgeFontFamilyAllowlistDecision",
         "launcher.FingerprintConfig.Fonts",
         "launcher.validateFonts",
         "launcher.strictNativeMode"
@@ -683,6 +683,31 @@
       "upgrade_watch_symbols": [
         "base::Process::SetPriority",
         "PLOG(WARNING)"
+      ],
+      "upstream_status": "applied_to_external_checkout_not_release_built"
+    },
+    {
+      "best_practice_verdict": "strong_non_fingerprint",
+      "claim_policy": "stability_only_until_rebuilt_detector_evidence",
+      "method_summary": "When DCHECK-enabled Chromium hits a base computed style optimization mismatch during animation style recalc, log the mismatch and keep the freshly recomputed no-cache style instead of aborting the renderer. This mirrors a safer debug-build behavior for detector collection and does not claim detector correctness until a rebuilt artifact is smoke-tested.",
+      "patchset_id": "surface-style-resolver-dcheck-recovery",
+      "rationale": "IPhey triggered a style_resolver.cc DCHECK in the animation base computed style optimization even when BrowseForge launch switches and native mode were removed. Returning the recomputed style in DCHECK builds avoids a detector-run crash without adding a spoofing surface or disabling CSS animation APIs wholesale.",
+      "recommendation": "Keep this scoped to DCHECK/runtime stability, validate anchors after every Chromium upgrade, and require rebuilt IPhey evidence before removing the blocker.",
+      "required_evidence": [
+        "python3 -m unittest tests.test_apply_style_resolver_patch",
+        "python3 scripts/apply_style_resolver_patch.py --check",
+        "python3 scripts/chromium_source.py check"
+      ],
+      "review_group": "framework_upgrade",
+      "risk_level": "medium",
+      "surface": "style_resolver",
+      "upgrade_watch_files": [
+        "chromium/src/third_party/blink/renderer/core/css/resolver/style_resolver.cc"
+      ],
+      "upgrade_watch_symbols": [
+        "blink::StyleResolver::ApplyBaseStyle",
+        "ComputeBaseComputedStyleDiff",
+        "MaybeResetCascade"
       ],
       "upstream_status": "applied_to_external_checkout_not_release_built"
     },

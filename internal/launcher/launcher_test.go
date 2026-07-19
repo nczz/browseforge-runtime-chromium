@@ -466,7 +466,7 @@ func TestBuildPlanAddsWebGLFingerprintArgs(t *testing.T) {
 	}
 }
 
-func TestBuildPlanStrictNativeModeSuppressesHighRiskSpoofArgs(t *testing.T) {
+func TestBuildPlanStrictNativeModeSuppressesHighRiskSpoofArgsButKeepsFontCorpus(t *testing.T) {
 	cfg := Config{
 		UserDataDir: t.TempDir(),
 		Fingerprint: FingerprintConfig{
@@ -489,16 +489,23 @@ func TestBuildPlanStrictNativeModeSuppressesHighRiskSpoofArgs(t *testing.T) {
 		"--fingerprint-canvas-noise=23",
 		"--fingerprint-webgl-vendor=Google Inc. (NVIDIA)",
 		"--fingerprint-webgl-renderer=ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)",
-		"--fingerprint-fonts-list=Segoe UI|Calibri",
 	} {
 		if containsArg(plan.Args, blocked) {
-			t.Fatalf("strict native mode must suppress incoherent spoof arg %q: %v", blocked, plan.Args)
+			t.Fatalf("strict native mode must suppress high-risk spoof arg %q: %v", blocked, plan.Args)
 		}
 	}
+	if !containsArg(plan.Args, "--fingerprint-fonts-list=Segoe UI|Calibri") {
+		t.Fatalf("strict native mode must keep explicit font corpus until native font consumer exists: %v", plan.Args)
+	}
+	hasFontsDir := false
 	for _, arg := range plan.Args {
 		if strings.HasPrefix(arg, "--fingerprint-fonts-dir=") {
-			t.Fatalf("strict native mode must suppress fonts dir arg %q: %v", arg, plan.Args)
+			hasFontsDir = true
+			break
 		}
+	}
+	if !hasFontsDir {
+		t.Fatalf("strict native mode must keep explicit fonts dir until native font consumer exists: %v", plan.Args)
 	}
 	if !containsArg(plan.Args, stealthModeArg+"=strict") {
 		t.Fatalf("missing strict native mode arg: %v", plan.Args)

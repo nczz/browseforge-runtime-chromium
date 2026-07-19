@@ -522,16 +522,16 @@ func (c Config) BuildPlan() (CommandPlan, error) {
 		if c.Fingerprint.WebGLRenderer != "" {
 			args = append(args, "--fingerprint-webgl-renderer="+c.Fingerprint.WebGLRenderer)
 		}
-		if c.Fingerprint.FontsDir != "" {
-			fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)
-			if err != nil {
-				return CommandPlan{}, fmt.Errorf("resolve fingerprint fonts dir: %w", err)
-			}
-			args = append(args, "--fingerprint-fonts-dir="+fontsDir)
+	}
+	if c.Fingerprint.FontsDir != "" {
+		fontsDir, err := filepath.Abs(c.Fingerprint.FontsDir)
+		if err != nil {
+			return CommandPlan{}, fmt.Errorf("resolve fingerprint fonts dir: %w", err)
 		}
-		if len(c.Fingerprint.Fonts) > 0 {
-			args = append(args, "--fingerprint-fonts-list="+strings.Join(c.Fingerprint.Fonts, "|"))
-		}
+		args = append(args, "--fingerprint-fonts-dir="+fontsDir)
+	}
+	if len(c.Fingerprint.Fonts) > 0 {
+		args = append(args, "--fingerprint-fonts-list="+strings.Join(c.Fingerprint.Fonts, "|"))
 	}
 	webrtcIP := c.Fingerprint.WebRTCIP
 	if c.Proxy.Server != "" {

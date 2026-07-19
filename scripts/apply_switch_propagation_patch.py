@@ -51,6 +51,36 @@ BROWSEFORGE_SWITCH_BLOCK = (
     "      // allowlist.\n"
     + "".join(f'      "{switch}",\n' for switch in BROWSEFORGE_SWITCHES)
 )
+BROWSEFORGE_SWITCH_SET = set(BROWSEFORGE_SWITCHES)
+BROWSEFORGE_BLOCK_COMMENT_LINES = {
+    line.strip()
+    for line in BROWSEFORGE_SWITCH_BLOCK.splitlines()
+    if line.strip().startswith("//")
+}
+
+
+def browseforge_switch_name(line: str) -> str | None:
+    stripped = line.strip()
+    if not stripped.startswith('"'):
+        return None
+    end = stripped.find('"', 1)
+    if end == -1:
+        return None
+    name = stripped[1:end]
+    return name if name in BROWSEFORGE_SWITCH_SET else None
+
+
+def is_browseforge_block_line(line: str) -> bool:
+    stripped = line.strip()
+    return stripped in BROWSEFORGE_BLOCK_COMMENT_LINES or browseforge_switch_name(line) is not None
+
+
+def strip_leading_browseforge_switch_block(text: str) -> str:
+    lines = text.splitlines(keepends=True)
+    first_non_browseforge = 0
+    while first_non_browseforge < len(lines) and is_browseforge_block_line(lines[first_non_browseforge]):
+        first_non_browseforge += 1
+    return "".join(lines[first_non_browseforge:])
 
 
 def validate_chromium_src(src: Path) -> None:
@@ -65,11 +95,11 @@ def missing_browseforge_switches(text: str) -> list[str]:
 
 
 def patch_switch_propagation(text: str) -> str:
-    if not missing_browseforge_switches(text):
-        return text
     if ANCHOR not in text:
         raise SystemExit("RenderProcessHostImpl renderer switch allowlist anchor not found")
-    return text.replace(ANCHOR, ANCHOR + BROWSEFORGE_SWITCH_BLOCK, 1)
+    before, after = text.split(ANCHOR, 1)
+    patched = before + ANCHOR + BROWSEFORGE_SWITCH_BLOCK + strip_leading_browseforge_switch_block(after)
+    return patched
 
 
 def apply_patch(src: Path) -> list[Path]:

@@ -169,6 +169,7 @@ def build_plan(
             "symbol_level=1",
             "is_component_build=false",
             "use_remoteexec=false",
+            "use_siso=false",
             "proprietary_codecs=true",
             'ffmpeg_branding="Chrome"',
         ]
@@ -185,6 +186,14 @@ def build_plan(
         + f" bash -lc {shlex.quote(container_install_command)}; "
         + f"docker commit {deps_container} {deps_image}; "
         + f"docker rm {deps_container}"
+    )
+    ninja_build_command = (
+        "if ! command -v /usr/bin/ninja >/dev/null 2>&1; then "
+        "apt-get update && apt-get install -y --no-install-recommends ninja-build; "
+        "fi; "
+        "if [ ! -x buildtools/linux64/gn ]; then echo 'missing Chromium Linux GN at buildtools/linux64/gn; run scripts/chromium_docker.py sync-linux-deps --runtime-platform "
+        f"{runtime_platform} --execute before build-chrome' >&2; exit 1; fi; "
+        f"/usr/bin/ninja -j{jobs} -C {out_dir} chrome"
     )
     return DockerPlan(
         image=image,
@@ -206,7 +215,7 @@ def build_plan(
             "install-linux-deps": ["bash", "-lc", install_script],
             "run-hooks": deps_run + ["bash", "-lc", "/opt/depot_tools/ensure_bootstrap && cd /work/chromium && gclient runhooks"],
             "gn-gen": deps_run + ["bash", "-lc", f"./buildtools/linux64/gn gen {out_dir} --args='{gn_args}'"],
-            "build-chrome": deps_run + ["bash", "-lc", f"/opt/depot_tools/ensure_bootstrap && autoninja -j{jobs} -C {out_dir} chrome"],
+            "build-chrome": deps_run + ["bash", "-lc", ninja_build_command],
         },
     )
 

@@ -127,6 +127,11 @@ PATCH_CHECKS = [
         "script": "scripts/apply_process_priority_patch.py",
     },
     {
+        "patch_id": "surface-style-resolver-dcheck-recovery",
+        "surface": "style_resolver",
+        "script": "scripts/apply_style_resolver_patch.py",
+    },
+    {
         "patch_id": "surface-switch-propagation-native-audit",
         "surface": "switch_propagation",
         "script": "scripts/apply_switch_propagation_patch.py",
