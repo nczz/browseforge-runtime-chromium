@@ -256,8 +256,8 @@
       "detail": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64/SBOM.json"
       ],
       "platform": "macos-arm64",
       "severity": "high",
@@ -288,17 +288,17 @@
       "source": "knowledge/manifests/signing-policy.json"
     }
   ],
-  "generated_at": "2026-07-19T08:01:48Z",
+  "generated_at": "2026-07-19T08:22:50Z",
   "input_sha256": {
     "contracts/browseforge-integration.contract.json": "a010ccc9efe180339b7704e471befe21651c32ecaaf8ee2e3b2b8fe1ecc13957",
     "detector-summary.json": "62e2b76af3c732180d132f4153747a12fb67c5787f8d2dc7609f0e4bb7468964",
     "knowledge/manifests/detector-score-comparison.json": "139ba3340655a40ac570910d4b14dfdd2ff87365b0350cab9b75aec6a6c9b33f",
-    "knowledge/manifests/fingerprint-surface-status.json": "1eb47ccf908ea981555537b8c996441e733f95fc41aa3a8dddffce725065a72c",
-    "knowledge/manifests/native-artifact-preflight.json": "1bbf415aeffbf04c6b68f8af5e64969e82b6a9e51dd995547ff7cbdb8eb10b89",
+    "knowledge/manifests/fingerprint-surface-status.json": "36d8c42c20087949780db958467a98d5e32bb8f2ab6e8623ebfbb59a01f667f2",
+    "knowledge/manifests/native-artifact-preflight.json": "ec29875f937511c3c1a6cb9465948a4fd6b164fbba2c995a9b733e73958d43fd",
     "knowledge/manifests/proxy-preflight.json": "537c26886126a6fdc8ed5677f90d23e22888e2e5f2e3484f609d4a3b53c99b18",
-    "knowledge/manifests/release-gates.json": "ce11248730823534f5d400c9038f72227597ba575eb3f24dfbdf8f2055c09779",
-    "knowledge/manifests/signing-policy.json": "909a86d547664ae26b14833416b091748dc509ad1d582b283772620e38d43268",
-    "knowledge/manifests/source-acquisition.json": "f70017acfaa9377a37bece649d1d9755dcdc05073e3314ce6b61bfcf1b613670"
+    "knowledge/manifests/release-gates.json": "80e0e078531921899e78d5389e11e95ea942d3732c56d5ce30d5bbfaefdb17cd",
+    "knowledge/manifests/signing-policy.json": "73b80889181e05aa8d8325e957c2ae7f58a951c548542008cf58ed8b55fb23ec",
+    "knowledge/manifests/source-acquisition.json": "20ef61a5d7f2106c5ec1409ebf818046aafe3aa5e64cff6bc464d7285349abc8"
   },
   "inputs": [
     "knowledge/manifests/release-gates.json",

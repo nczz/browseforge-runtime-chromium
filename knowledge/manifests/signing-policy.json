@@ -33,19 +33,19 @@
       "size_bytes": 584005591
     },
     {
-      "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64",
+      "artifact_id": "browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64",
       "decision": "Unsigned alpha artifact accepted for fastest-path GHCR/runtime validation; release-grade signing deferred.",
       "evidence": [
         "knowledge/manifests/runtime-artifacts.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/provenance.json",
-        "dist/browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.3-alpha.0-macos-arm64/SBOM.json"
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64/provenance.json",
+        "dist/browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64.zip:browseforge-runtime-chromium-v0.1.6-alpha.0-macos-arm64/SBOM.json"
       ],
       "platform": "macos-arm64",
       "release_channel": "alpha",
       "release_grade_allowed": false,
-      "sha256": "48e4a5adbc8609b14d406dfedf3f41515b9870b04ad902b22661a8cbee5ab55a",
+      "sha256": "21a3a5363c86bfff31676584dbbc293414b6a1da4b504ea82bd9ccc165959a85",
       "signature": "unsigned-alpha-artifact",
-      "size_bytes": 405361213
+      "size_bytes": 405375407
     },
     {
       "artifact_id": "browseforge-runtime-chromium-v0.1.3-alpha.0-macos-x64",
