@@ -26,12 +26,16 @@ jobs:
           python-version: '3.x'
 
       - name: Download pre-staged release assets
+        id: release_assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p dist
-          if ! gh release download "${RUNTIME_VERSION}" --repo "${GITHUB_REPOSITORY}" --dir dist --clobber; then
+          if gh release download "${RUNTIME_VERSION}" --repo "${GITHUB_REPOSITORY}" --dir dist --clobber; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
             echo "No pre-staged release assets found for ${RUNTIME_VERSION}; expecting dist/ to be populated by an earlier packaging step."
           fi
 
@@ -67,6 +71,7 @@ jobs:
           (cd dist && sha256sum -c checksums.txt)
 
       - name: Upload release assets
+        if: steps.release_assets.outputs.found != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RUNTIME_VERSION }}
